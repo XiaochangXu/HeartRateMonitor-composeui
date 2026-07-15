@@ -1,0 +1,12 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="960"
+    android:viewportHeight="960">
+    <!-- 源自 .tubiao/水平位置.svg (Material Symbols: horizontal_distribute) -->
+    <group android:translateY="960">
+        <path
+            android:fillColor="#1F1F1F"
+            android:pathData="M720,-320 560,-480l160,-160 56,56 -63,64h167v80H713l63,64 -56,56ZM440,-160v-640h80v640h-80ZM240,-320l-56,-56 63,-64H80v-80h167l-63,-64 56,-56 160,160 -160,160Z" />
+    </group>
+</vector>

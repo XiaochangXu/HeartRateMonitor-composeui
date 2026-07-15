@@ -1,0 +1,12 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="960"
+    android:viewportHeight="960">
+    <!-- 源自 .tubiao/使用白色文字.svg (Material Symbols: text_fields) -->
+    <group android:translateY="960">
+        <path
+            android:fillColor="#1F1F1F"
+            android:pathData="M80,0v-160h800V0H80Zm140,-280 210,-560h100l210,560h-96l-50,-144H368l-52,144h-96Zm176,-224h168l-82,-232h-4l-82,232Z" />
+    </group>
+</vector>

@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">心率监控器</string>
+    <string name="server_settings">服务器设置</string>
+    <string name="enable_server">启用服务器</string>
+    <string name="server_port">服务器端口</string>
+    <string name="server_status">服务器状态</string>
+    <string name="webhook_settings">Webhook 设置</string>
+</resources>
