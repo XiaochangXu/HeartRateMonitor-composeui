@@ -1,0 +1,671 @@
+﻿package com.github.heartratemonitor_compose.ui.alarm
+
+import android.content.Context
+import android.content.Intent
+import android.content.SharedPreferences
+import android.hardware.Sensor
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
+import android.hardware.SensorManager
+import androidx.compose.animation.core.*
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.github.heartratemonitor_compose.R
+import com.github.heartratemonitor_compose.service.HeartRateAlarmService
+import com.github.heartratemonitor_compose.service.posture.PostureCalibration
+import com.github.heartratemonitor_compose.service.posture.PostureDetector
+import com.github.heartratemonitor_compose.service.posture.PostureType
+
+private const val HIGH_THRESHOLD_MIN = 80
+private const val LOW_THRESHOLD_MIN = 30
+private const val DURATION_MIN = 5
+private const val REPEAT_INTERVAL_MIN = 1
+private const val CALIBRATION_DURATION_SECONDS = 10
+private const val CLASSIFY_INTERVAL_MS = 200L
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun HeartRateAlarmScreen(
+    sharedPreferences: SharedPreferences,
+    onNavigateBack: () -> Unit
+) {
+    val context = LocalContext.current
+    val postureDetector = remember { PostureDetector() }
+
+    // 校准状态
+    val calibration = remember {
+        PostureCalibration.fromJson(sharedPreferences.getString("posture_calibration_data", null))
+    }
+    var currentCalibration by remember { mutableStateOf(calibration) }
+    var isCalibrating by remember { mutableStateOf(false) }
+    var calibrationBuffer by remember { mutableStateOf(listOf<FloatArray>()) }
+    var calibrationProgress by remember { mutableIntStateOf(0) }
+    var calibratingPostureName by remember { mutableStateOf("") }
+
+    // 姿态显示
+    var currentPosture by remember { mutableStateOf(PostureType.UNKNOWN) }
+
+    // 预警设置
+    var alarmEnabled by remember { mutableStateOf(sharedPreferences.getBoolean("heart_rate_alarm_enabled", false)) }
+    var highThreshold by remember { mutableIntStateOf(sharedPreferences.getInt("heart_rate_alarm_high_threshold", 100)) }
+    var lowThreshold by remember { mutableIntStateOf(sharedPreferences.getInt("heart_rate_alarm_low_threshold", 50)) }
+    var durationSeconds by remember { mutableIntStateOf(sharedPreferences.getInt("heart_rate_alarm_duration_seconds", 10)) }
+    var repeatEnabled by remember { mutableStateOf(sharedPreferences.getBoolean("heart_rate_alarm_repeat_enabled", false)) }
+    var repeatInterval by remember { mutableIntStateOf(sharedPreferences.getInt("heart_rate_alarm_repeat_interval_minutes", 5)) }
+
+    // 弹出动画
+    val popAnim = remember { Animatable(0.7f) }
+    LaunchedEffect(currentPosture) {
+        popAnim.snapTo(0.7f)
+        popAnim.animateTo(1f, animationSpec = tween(200, easing = FastOutSlowInEasing))
+    }
+
+    // 运动弹跳动画
+    val infiniteTransition = rememberInfiniteTransition(label = "bounce")
+    val bounceOffset by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = -20f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(400, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "bounce"
+    )
+
+    // 传感器注册 + 姿态分类
+    DisposableEffect(context) {
+        val sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
+        val accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
+        postureDetector.setCalibration(currentCalibration)
+
+        val sensorListener = object : SensorEventListener {
+            override fun onSensorChanged(event: SensorEvent) {
+                postureDetector.onSensorSample(event.values[0], event.values[1], event.values[2])
+                if (isCalibrating) {
+                    calibrationBuffer = calibrationBuffer + floatArrayOf(event.values[0], event.values[1], event.values[2])
+                }
+            }
+            override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
+        }
+        sensorManager.registerListener(sensorListener, accelerometer, SensorManager.SENSOR_DELAY_GAME)
+
+        val classifyHandler = android.os.Handler(android.os.Looper.getMainLooper())
+        val classifyRunnable = object : Runnable {
+            override fun run() {
+                currentPosture = postureDetector.classify()
+                classifyHandler.postDelayed(this, CLASSIFY_INTERVAL_MS)
+            }
+        }
+        classifyHandler.post(classifyRunnable)
+
+        onDispose {
+            sensorManager.unregisterListener(sensorListener)
+            classifyHandler.removeCallbacks(classifyRunnable)
+        }
+    }
+
+    // 校准倒计时
+    LaunchedEffect(isCalibrating) {
+        if (isCalibrating) {
+            calibrationProgress = 0
+            calibrationBuffer = emptyList()
+            for (i in 1..CALIBRATION_DURATION_SECONDS) {
+                kotlinx.coroutines.delay(1000L)
+                calibrationProgress = i
+            }
+            isCalibrating = false
+            finishCalibration(sharedPreferences, currentCalibration, calibratingPostureName, calibrationBuffer) { newCal ->
+                currentCalibration = newCal
+                postureDetector.setCalibration(newCal)
+            }
+        }
+    }
+
+    Scaffold(
+        contentWindowInsets = WindowInsets.navigationBars,
+        topBar = {
+            TopAppBar(
+                title = { Text("心率预警") },
+                navigationIcon = {
+                    IconButton(onClick = onNavigateBack) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "返回")
+                    }
+                }
+            )
+        }
+    ) { padding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+                .verticalScroll(rememberScrollState())
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            // 1. 姿态展示卡片
+            PostureCard(
+                posture = currentPosture,
+                scale = popAnim.value,
+                bounceOffset = if (currentPosture == PostureType.EXERCISE) bounceOffset else 0f
+            )
+
+            // 2. 姿态校准区
+            CalibrationCard(
+                calibration = currentCalibration,
+                isCalibrating = isCalibrating,
+                calibratingPostureName = calibratingPostureName,
+                calibrationProgress = calibrationProgress,
+                onCalibrateSitting = {
+                    calibratingPostureName = "静坐"
+                    isCalibrating = true
+                },
+                onCalibrateStanding = {
+                    calibratingPostureName = "站立"
+                    isCalibrating = true
+                },
+                onClearCalibration = {
+                    sharedPreferences.edit().remove("posture_calibration_data").apply()
+                    currentCalibration = null
+                    postureDetector.setCalibration(null)
+                }
+            )
+
+            // 3. 预警设置区
+            AlarmSettingsCard(
+                sharedPreferences = sharedPreferences,
+                alarmEnabled = alarmEnabled,
+                onAlarmEnabledChange = { enabled ->
+                    alarmEnabled = enabled
+                    sharedPreferences.edit().putBoolean("heart_rate_alarm_enabled", enabled).apply()
+                    val intent = Intent(context, HeartRateAlarmService::class.java)
+                    if (enabled) context.startService(intent) else context.stopService(intent)
+                },
+                highThreshold = highThreshold,
+                onHighThresholdChange = { value ->
+                    highThreshold = value
+                    sharedPreferences.edit().putInt("heart_rate_alarm_high_threshold", value).apply()
+                },
+                lowThreshold = lowThreshold,
+                onLowThresholdChange = { value ->
+                    lowThreshold = value
+                    sharedPreferences.edit().putInt("heart_rate_alarm_low_threshold", value).apply()
+                },
+                durationSeconds = durationSeconds,
+                onDurationChange = { value ->
+                    durationSeconds = value
+                    sharedPreferences.edit().putInt("heart_rate_alarm_duration_seconds", value).apply()
+                },
+                repeatEnabled = repeatEnabled,
+                onRepeatEnabledChange = { enabled ->
+                    repeatEnabled = enabled
+                    sharedPreferences.edit().putBoolean("heart_rate_alarm_repeat_enabled", enabled).apply()
+                },
+                repeatInterval = repeatInterval,
+                onRepeatIntervalChange = { value ->
+                    repeatInterval = value
+                    sharedPreferences.edit().putInt("heart_rate_alarm_repeat_interval_minutes", value).apply()
+                }
+            )
+        }
+    }
+}
+
+// ────────────────── 姿态展示卡片 ──────────────────
+
+@Composable
+private fun PostureCard(
+    posture: PostureType,
+    scale: Float,
+    bounceOffset: Float
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = posture.emoji,
+                fontSize = 64.sp,
+                modifier = Modifier
+                    .scale(scale)
+                    .offset(y = bounceOffset.dp)
+            )
+            Spacer(Modifier.height(8.dp))
+            Text(
+                text = posture.label,
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Normal
+            )
+            Spacer(Modifier.height(16.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                PostureIndicator("静坐", PostureType.SITTING.emoji, posture == PostureType.SITTING)
+                PostureIndicator("站立", PostureType.STANDING.emoji, posture == PostureType.STANDING)
+                PostureIndicator("运动", PostureType.EXERCISE.emoji, posture == PostureType.EXERCISE)
+            }
+        }
+    }
+}
+
+@Composable
+private fun PostureIndicator(label: String, emoji: String, isActive: Boolean) {
+    val alphaValue = if (isActive) 1f else 0.3f
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(
+            text = emoji,
+            fontSize = 24.sp,
+            modifier = Modifier.alpha(alphaValue)
+        )
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.alpha(alphaValue)
+        )
+    }
+}
+
+// ────────────────── 姿态校准卡片 ──────────────────
+
+@Composable
+private fun CalibrationCard(
+    calibration: PostureCalibration?,
+    isCalibrating: Boolean,
+    calibratingPostureName: String,
+    calibrationProgress: Int,
+    onCalibrateSitting: () -> Unit,
+    onCalibrateStanding: () -> Unit,
+    onClearCalibration: () -> Unit
+) {
+    val sitStatus = if (calibration?.sittingSamples?.isNotEmpty() == true)
+        "已校准 ✓（${calibration.sittingSamples.size} 个样本）" else "未校准"
+    val standStatus = if (calibration?.standingSamples?.isNotEmpty() == true)
+        "已校准 ✓（${calibration.standingSamples.size} 个样本）" else "未校准"
+
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(
+                text = "姿态校准",
+                style = MaterialTheme.typography.titleSmall,
+                color = MaterialTheme.colorScheme.primary
+            )
+            Spacer(Modifier.height(12.dp))
+
+            if (isCalibrating) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(
+                        text = "正在校准${calibratingPostureName}…",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                    Spacer(Modifier.height(8.dp))
+                    LinearProgressIndicator(
+                        progress = { calibrationProgress.toFloat() / CALIBRATION_DURATION_SECONDS },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    Spacer(Modifier.height(4.dp))
+                    Text(
+                        text = "剩余 ${CALIBRATION_DURATION_SECONDS - calibrationProgress} 秒",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            } else {
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    OutlinedButton(onClick = onCalibrateSitting, modifier = Modifier.weight(1f)) {
+                        Text("校准静坐")
+                    }
+                    OutlinedButton(onClick = onCalibrateStanding, modifier = Modifier.weight(1f)) {
+                        Text("校准站立")
+                    }
+                }
+                Spacer(Modifier.height(8.dp))
+                Text(
+                    text = "静坐：$sitStatus\n站立：$standStatus",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                if (calibration?.isComplete() == true) {
+                    Spacer(Modifier.height(8.dp))
+                    TextButton(onClick = onClearCalibration) {
+                        Text("清除校准", color = MaterialTheme.colorScheme.error)
+                    }
+                }
+            }
+        }
+    }
+}
+
+// ────────────────── 预警设置卡片 ──────────────────
+
+@Composable
+private fun AlarmSettingsCard(
+    sharedPreferences: SharedPreferences,
+    alarmEnabled: Boolean,
+    onAlarmEnabledChange: (Boolean) -> Unit,
+    highThreshold: Int,
+    onHighThresholdChange: (Int) -> Unit,
+    lowThreshold: Int,
+    onLowThresholdChange: (Int) -> Unit,
+    durationSeconds: Int,
+    onDurationChange: (Int) -> Unit,
+    repeatEnabled: Boolean,
+    onRepeatEnabledChange: (Boolean) -> Unit,
+    repeatInterval: Int,
+    onRepeatIntervalChange: (Int) -> Unit
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Text(
+            text = "预警设置",
+            style = MaterialTheme.typography.titleSmall,
+            color = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.padding(bottom = 8.dp)
+        )
+
+        // 启用开关
+        AlarmElevatedItemCard {
+            AlarmSwitch(
+                checked = alarmEnabled,
+                onCheckedChange = onAlarmEnabledChange,
+                title = "启用心率预警",
+                leadingIcon = painterResource(R.drawable.ic_enable_alarm)
+            )
+        }
+
+        // 超过阈值
+        AlarmElevatedItemCard {
+            AlarmDragSlider(
+                label = "超过",
+                value = highThreshold,
+                onValueChange = onHighThresholdChange,
+                range = HIGH_THRESHOLD_MIN..180,
+                suffix = " BPM",
+                leadingIcon = painterResource(R.drawable.ic_trending_up)
+            )
+        }
+
+        // 低于阈值
+        AlarmElevatedItemCard {
+            AlarmDragSlider(
+                label = "低于",
+                value = lowThreshold,
+                onValueChange = onLowThresholdChange,
+                range = LOW_THRESHOLD_MIN..80,
+                suffix = " BPM",
+                leadingIcon = painterResource(R.drawable.ic_trending_down)
+            )
+        }
+
+        // 持续时长
+        AlarmElevatedItemCard {
+            AlarmDragSlider(
+                label = "持续",
+                value = durationSeconds,
+                onValueChange = onDurationChange,
+                range = DURATION_MIN..60,
+                suffix = " 秒",
+                leadingIcon = painterResource(R.drawable.ic_hourglass)
+            )
+        }
+
+        // 重复报警开关
+        AlarmElevatedItemCard {
+            AlarmSwitch(
+                checked = repeatEnabled,
+                onCheckedChange = onRepeatEnabledChange,
+                title = "重复报警",
+                leadingIcon = painterResource(R.drawable.ic_repeat_alarm)
+            )
+        }
+
+        if (repeatEnabled) {
+            AlarmElevatedItemCard {
+                AlarmDragSlider(
+                    label = "报警间隔",
+                    value = repeatInterval,
+                    onValueChange = onRepeatIntervalChange,
+                    range = REPEAT_INTERVAL_MIN..30,
+                    suffix = " 分钟",
+                    leadingIcon = painterResource(R.drawable.ic_alarm_interval)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun AlarmElevatedItemCard(
+    onClick: (() -> Unit)? = null,
+    content: @Composable () -> Unit
+) {
+    Card(
+        modifier = if (onClick != null) {
+            Modifier.fillMaxWidth().clickable(onClick = onClick)
+        } else {
+            Modifier.fillMaxWidth()
+        },
+        shape = RoundedCornerShape(16.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .heightIn(min = 56.dp)
+                .padding(horizontal = 16.dp, vertical = 8.dp),
+            verticalArrangement = Arrangement.Center
+        ) {
+            content()
+        }
+    }
+}
+
+// ────────────────── M3 Expressive 开关组件 ──────────────────
+
+@Composable
+private fun AlarmSwitch(
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
+    title: String,
+    leadingIcon: Painter? = null
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        // MD3 列表项 Leading Icon：24dp + 16dp 间距
+        if (leadingIcon != null) {
+            Icon(
+                painter = leadingIcon,
+                contentDescription = null,
+                modifier = Modifier.size(24.dp),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Spacer(Modifier.width(16.dp))
+        }
+        Text(
+            text = title,
+            style = MaterialTheme.typography.bodyLarge,
+            fontWeight = FontWeight.Normal,
+            color = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier.weight(1f)
+        )
+        Switch(
+            checked = checked,
+            onCheckedChange = onCheckedChange
+        )
+    }
+}
+
+// ────────────────── M3 Expressive 拖拽滑块组件 ──────────────────
+
+@Composable
+private fun AlarmDragSlider(
+    label: String,
+    value: Int,
+    onValueChange: (Int) -> Unit,
+    range: IntRange,
+    suffix: String = "",
+    enabled: Boolean = true,
+    leadingIcon: Painter? = null
+) {
+    var internalValue by remember(value) { mutableFloatStateOf(value.toFloat()) }
+    var isDragging by remember { mutableStateOf(false) }
+    var sliderSize by remember { mutableStateOf(IntSize.Zero) }
+
+    val fraction = if (range.last > range.first)
+        (internalValue - range.first) / (range.last - range.first) else 0f
+
+    Column(modifier = Modifier.padding(vertical = 2.dp)) {
+        // MD3 列表项 Leading Icon：24dp + 16dp 间距
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.padding(bottom = 2.dp)
+        ) {
+            if (leadingIcon != null) {
+                Icon(
+                    painter = leadingIcon,
+                    contentDescription = null,
+                    modifier = Modifier.size(24.dp),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Spacer(Modifier.width(16.dp))
+            }
+            Text(
+                text = label,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(44.dp)
+                .onGloballyPositioned { sliderSize = it.size }
+        ) {
+            // 拖拽时浮现在手柄上方的数值气泡
+            if (isDragging && sliderSize.width > 0) {
+                val density = LocalDensity.current
+                val thumbCenterX = with(density) {
+                    val trackStart = 16.dp.toPx()
+                    val trackWidth = sliderSize.width.toFloat() - 32.dp.toPx()
+                    trackStart + trackWidth * fraction
+                }
+                Surface(
+                    modifier = Modifier
+                        .offset(
+                            x = with(density) { thumbCenterX.toDp() } - 22.dp,
+                            y = (-12).dp
+                        ),
+                    shape = RoundedCornerShape(8.dp),
+                    color = MaterialTheme.colorScheme.primary,
+                    shadowElevation = 4.dp
+                ) {
+                    Text(
+                        text = "${internalValue.toInt()}$suffix",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onPrimary,
+                        fontWeight = FontWeight.Normal,
+                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
+                    )
+                }
+            }
+
+            Slider(
+                modifier = Modifier.align(Alignment.BottomCenter),
+                value = internalValue,
+                onValueChange = {
+                    internalValue = it
+                    isDragging = true
+                    onValueChange(it.toInt())
+                },
+                onValueChangeFinished = { isDragging = false },
+                valueRange = range.first.toFloat()..range.last.toFloat(),
+                steps = 0,
+                enabled = enabled,
+                colors = SliderDefaults.colors(
+                    thumbColor = MaterialTheme.colorScheme.primary,
+                    activeTrackColor = MaterialTheme.colorScheme.primary,
+                    inactiveTrackColor = MaterialTheme.colorScheme.surfaceVariant,
+                    disabledThumbColor = MaterialTheme.colorScheme.outline,
+                    disabledActiveTrackColor = MaterialTheme.colorScheme.outline,
+                    disabledInactiveTrackColor = MaterialTheme.colorScheme.surfaceVariant
+                )
+            )
+        }
+    }
+}
+
+private fun finishCalibration(
+    prefs: SharedPreferences,
+    currentCalibration: PostureCalibration?,
+    postureName: String,
+    samples: List<FloatArray>,
+    onUpdated: (PostureCalibration) -> Unit
+) {
+    if (samples.isEmpty()) return
+    val isSitting = postureName == "静坐"
+
+    val n = samples.size
+    val meanX = samples.map { it[0] }.average().toFloat()
+    val meanY = samples.map { it[1] }.average().toFloat()
+    val meanZ = samples.map { it[2] }.average().toFloat()
+    val magnitudes = samples.map { kotlin.math.sqrt(it[0] * it[0] + it[1] * it[1] + it[2] * it[2]) }
+    val stdMag = kotlin.math.sqrt(magnitudes.map { (it - magnitudes.average()) * (it - magnitudes.average()) }.average()).toFloat()
+
+    val features = com.github.heartratemonitor_compose.service.posture.PostureFeatures(meanX, meanY, meanZ, stdMag, n)
+    val existing = currentCalibration
+    val sitSamples = existing?.sittingSamples ?: emptyList()
+    val standSamples = existing?.standingSamples ?: emptyList()
+    val updated = if (isSitting) {
+        PostureCalibration(
+            sittingSamples = sitSamples + features,
+            standingSamples = standSamples,
+            motionThreshold = existing?.motionThreshold ?: 1.5f,
+            calibratedAt = System.currentTimeMillis()
+        )
+    } else {
+        PostureCalibration(
+            sittingSamples = sitSamples,
+            standingSamples = standSamples + features,
+            motionThreshold = existing?.motionThreshold ?: 1.5f,
+            calibratedAt = System.currentTimeMillis()
+        )
+    }
+    prefs.edit().putString("posture_calibration_data", updated.toJson()).apply()
+    onUpdated(updated)
+}

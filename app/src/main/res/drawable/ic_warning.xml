@@ -1,0 +1,12 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="960"
+    android:viewportHeight="960">
+    <!-- 源自 Material Symbols: warning_24dp_1F1F1F_FILL0_wght400_GRAD0_opsz24.svg -->
+    <group android:translateY="960">
+        <path
+            android:fillColor="#1F1F1F"
+            android:pathData="m40,-120 440,-760 440,760H40Zm138,-80h604L480,-720 178,-200Zm330.5,-51.5Q520,-263 520,-280t-11.5,-28.5Q497,-320 480,-320t-28.5,11.5Q440,-297 440,-280t11.5,28.5Q463,-240 480,-240t28.5,-11.5ZM440,-360h80v-200h-80v200Zm40,-100Z" />
+    </group>
+</vector>
