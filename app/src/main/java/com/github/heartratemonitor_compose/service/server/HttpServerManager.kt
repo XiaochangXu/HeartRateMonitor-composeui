@@ -1,8 +1,4 @@
-<<<<<<< HEAD
 package com.github.heartratemonitor_compose.service.server
-=======
-﻿package com.github.heartratemonitor_compose.service.server
->>>>>>> 5411686d21345985822abde01a9f90c414e63b61
 
 import android.util.Log
 import fi.iki.elonen.NanoHTTPD
@@ -41,23 +37,16 @@ class HttpServerManager(
     private inner class HttpServer : NanoHTTPD(port) {
         override fun serve(session: IHTTPSession?): Response {
             // 鉴权：若配置了 token，则校验 ?token= 或 Authorization: Bearer
-<<<<<<< HEAD
             // 使用 MessageDigest.isEqual 进行恒定时间比较，防止时序攻击
-=======
->>>>>>> 5411686d21345985822abde01a9f90c414e63b61
             if (authToken.isNotEmpty()) {
                 val queryToken = session?.parameters?.get("token")?.firstOrNull()
                 val bearerToken = session?.headers?.get("authorization")
                     ?.removePrefix("Bearer ")?.trim()
-<<<<<<< HEAD
                 val queryMatch = queryToken != null &&
                     java.security.MessageDigest.isEqual(queryToken.toByteArray(), authToken.toByteArray())
                 val bearerMatch = bearerToken != null &&
                     java.security.MessageDigest.isEqual(bearerToken.toByteArray(), authToken.toByteArray())
                 if (!queryMatch && !bearerMatch) {
-=======
-                if (queryToken != authToken && bearerToken != authToken) {
->>>>>>> 5411686d21345985822abde01a9f90c414e63b61
                     return newFixedLengthResponse(Response.Status.UNAUTHORIZED, MIME_PLAINTEXT, "Unauthorized")
                 }
             }

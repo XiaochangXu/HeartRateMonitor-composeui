@@ -1,8 +1,4 @@
-<<<<<<< HEAD
 package com.github.heartratemonitor_compose.service
-=======
-﻿package com.github.heartratemonitor_compose.service
->>>>>>> 5411686d21345985822abde01a9f90c414e63b61
 
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -243,11 +239,7 @@ class FairMemoryReceiver private constructor() : IBinder.DeathRecipient {
         notifyId: Int,
         callback: IBinder
     ) {
-<<<<<<< HEAD
         // 确保 binder 关联了 DeathRecipient（每次都更新为当前 callback）
-=======
-        // 确保 binder 关联了 DeathRecipient
->>>>>>> 5411686d21345985822abde01a9f90c414e63b61
         if (!checkRemote(callback)) {
             Log.w(TAG, "无法关联 callback IBinder")
             return
@@ -267,24 +259,15 @@ class FairMemoryReceiver private constructor() : IBinder.DeathRecipient {
             }
         }
 
-<<<<<<< HEAD
         // 回调系统，通知处理完成（使用当前广播的 callback，而非缓存值）
         val extra = Bundle().apply {
             putString("reply", "HeartRateMonitor: $action processed")
         }
         reply(callback, notifyType, notifyId, RESULT_SUCCESS, extra)
-=======
-        // 回调系统，通知处理完成
-        val extra = Bundle().apply {
-            putString("reply", "HeartRateMonitor: $action processed")
-        }
-        reply(notifyType, notifyId, RESULT_SUCCESS, extra)
->>>>>>> 5411686d21345985822abde01a9f90c414e63b61
     }
 
     /**
      * 关联 callback IBinder 并注册 DeathRecipient。
-<<<<<<< HEAD
      * 若 callback 与已缓存的不同，先解除旧绑定再关联新的，确保死亡监控指向正确对象。
      */
     private fun checkRemote(callback: IBinder): Boolean {
@@ -310,21 +293,6 @@ class FairMemoryReceiver private constructor() : IBinder.DeathRecipient {
                 remoteBinder = null
                 false
             }
-=======
-     */
-    private fun checkRemote(callback: IBinder): Boolean {
-        synchronized(this) {
-            if (remoteBinder == null) {
-                try {
-                    remoteBinder = callback
-                    callback.linkToDeath(this, 0)
-                } catch (e: RemoteException) {
-                    remoteBinder = null
-                    return false
-                }
-            }
-            return true
->>>>>>> 5411686d21345985822abde01a9f90c414e63b61
         }
     }
 
@@ -332,14 +300,8 @@ class FairMemoryReceiver private constructor() : IBinder.DeathRecipient {
      * 通过 Binder 回调系统，返回处理结果。
      * 必须在收到广播后 3 秒内完成。
      */
-<<<<<<< HEAD
     private fun reply(callback: IBinder, notifyType: Int, notifyId: Int, result: Int, extra: Bundle?) {
         synchronized(this) {
-=======
-    private fun reply(notifyType: Int, notifyId: Int, result: Int, extra: Bundle?) {
-        synchronized(this) {
-            val remote = remoteBinder ?: return
->>>>>>> 5411686d21345985822abde01a9f90c414e63b61
             val data = Parcel.obtain()
             try {
                 data.writeInt(notifyType)
@@ -347,11 +309,7 @@ class FairMemoryReceiver private constructor() : IBinder.DeathRecipient {
                 data.writeInt(result)
                 data.writeBundle(extra ?: Bundle())
                 // FLAG_ONEWAY：单向调用，无需读取返回值；移除原 readException()（ONEWAY 下 reply 为空）
-<<<<<<< HEAD
                 callback.transact(TRANSACTION_EXCEPTION_REPLY, data, null, IBinder.FLAG_ONEWAY)
-=======
-                remote.transact(TRANSACTION_EXCEPTION_REPLY, data, null, IBinder.FLAG_ONEWAY)
->>>>>>> 5411686d21345985822abde01a9f90c414e63b61
                 Log.i(TAG, "已回调系统: result=$result")
             } catch (e: Exception) {
                 Log.e(TAG, "回调系统失败", e)

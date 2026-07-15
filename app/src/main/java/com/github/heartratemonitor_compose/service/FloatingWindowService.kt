@@ -1,8 +1,4 @@
-<<<<<<< HEAD
 package com.github.heartratemonitor_compose.service
-=======
-﻿package com.github.heartratemonitor_compose.service
->>>>>>> 5411686d21345985822abde01a9f90c414e63b61
 
 import android.annotation.SuppressLint
 import android.app.NotificationChannel
@@ -269,7 +265,6 @@ class FloatingWindowService : Service() {
                     }
                     // 触摸穿透开启后不处理拖动
                     if (!isTouchThroughEnabled) {
-<<<<<<< HEAD
                         // 边界检查：限制窗口至少 25% 可见，避免被拖出屏幕无法拖回
                         val dm = resources.displayMetrics
                         val w = touchContainer.width.coerceAtLeast(1)
@@ -282,10 +277,6 @@ class FloatingWindowService : Service() {
                         val maxY = dm.heightPixels - minVisibleH
                         layoutParams.x = (initialX + dx.toInt()).coerceIn(minX, maxX)
                         layoutParams.y = (initialY + dy.toInt()).coerceIn(minY, maxY)
-=======
-                        layoutParams.x = initialX + dx.toInt()
-                        layoutParams.y = initialY + dy.toInt()
->>>>>>> 5411686d21345985822abde01a9f90c414e63b61
                         if (isWindowShown) windowManager.updateViewLayout(touchContainer, layoutParams)
                     }
                     true

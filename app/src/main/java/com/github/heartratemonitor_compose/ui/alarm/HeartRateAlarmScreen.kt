@@ -1,4 +1,4 @@
-﻿package com.github.heartratemonitor_compose.ui.alarm
+package com.github.heartratemonitor_compose.ui.alarm
 
 import android.content.Context
 import android.content.Intent
@@ -37,7 +37,9 @@ import com.github.heartratemonitor_compose.service.posture.PostureDetector
 import com.github.heartratemonitor_compose.service.posture.PostureType
 
 private const val HIGH_THRESHOLD_MIN = 80
+private const val HIGH_THRESHOLD_MAX = 180
 private const val LOW_THRESHOLD_MIN = 30
+private const val LOW_THRESHOLD_MAX = 80
 private const val DURATION_MIN = 5
 private const val REPEAT_INTERVAL_MIN = 1
 private const val CALIBRATION_DURATION_SECONDS = 10
@@ -67,11 +69,21 @@ fun HeartRateAlarmScreen(
 
     // 预警设置
     var alarmEnabled by remember { mutableStateOf(sharedPreferences.getBoolean("heart_rate_alarm_enabled", false)) }
+    var excludePostureDetection by remember { mutableStateOf(sharedPreferences.getBoolean("heart_rate_alarm_exclude_posture_detection", false)) }
     var highThreshold by remember { mutableIntStateOf(sharedPreferences.getInt("heart_rate_alarm_high_threshold", 100)) }
     var lowThreshold by remember { mutableIntStateOf(sharedPreferences.getInt("heart_rate_alarm_low_threshold", 50)) }
     var durationSeconds by remember { mutableIntStateOf(sharedPreferences.getInt("heart_rate_alarm_duration_seconds", 10)) }
     var repeatEnabled by remember { mutableStateOf(sharedPreferences.getBoolean("heart_rate_alarm_repeat_enabled", false)) }
     var repeatInterval by remember { mutableIntStateOf(sharedPreferences.getInt("heart_rate_alarm_repeat_interval_minutes", 5)) }
+
+    // 阈值互相约束：高阈值至少比低阈值大 1，修正历史无效值
+    LaunchedEffect(Unit) {
+        if (highThreshold <= lowThreshold) {
+            val newHigh = lowThreshold + 1
+            highThreshold = newHigh
+            sharedPreferences.edit().putInt("heart_rate_alarm_high_threshold", newHigh).apply()
+        }
+    }
 
     // 弹出动画
     val popAnim = remember { Animatable(0.7f) }
@@ -92,35 +104,41 @@ fun HeartRateAlarmScreen(
         label = "bounce"
     )
 
-    // 传感器注册 + 姿态分类
-    DisposableEffect(context) {
-        val sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
-        val accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
-        postureDetector.setCalibration(currentCalibration)
+    // 传感器注册 + 姿态分类（排除姿态检测时跳过）
+    DisposableEffect(context, excludePostureDetection) {
+        if (excludePostureDetection) {
+            // 排除姿态检测：不注册传感器，姿态显示置为未检测
+            currentPosture = PostureType.UNKNOWN
+            onDispose { }
+        } else {
+            val sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
+            val accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
+            postureDetector.setCalibration(currentCalibration)
 
-        val sensorListener = object : SensorEventListener {
-            override fun onSensorChanged(event: SensorEvent) {
-                postureDetector.onSensorSample(event.values[0], event.values[1], event.values[2])
-                if (isCalibrating) {
-                    calibrationBuffer = calibrationBuffer + floatArrayOf(event.values[0], event.values[1], event.values[2])
+            val sensorListener = object : SensorEventListener {
+                override fun onSensorChanged(event: SensorEvent) {
+                    postureDetector.onSensorSample(event.values[0], event.values[1], event.values[2])
+                    if (isCalibrating) {
+                        calibrationBuffer = calibrationBuffer + floatArrayOf(event.values[0], event.values[1], event.values[2])
+                    }
+                }
+                override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
+            }
+            sensorManager.registerListener(sensorListener, accelerometer, SensorManager.SENSOR_DELAY_GAME)
+
+            val classifyHandler = android.os.Handler(android.os.Looper.getMainLooper())
+            val classifyRunnable = object : Runnable {
+                override fun run() {
+                    currentPosture = postureDetector.classify()
+                    classifyHandler.postDelayed(this, CLASSIFY_INTERVAL_MS)
                 }
             }
-            override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
-        }
-        sensorManager.registerListener(sensorListener, accelerometer, SensorManager.SENSOR_DELAY_GAME)
+            classifyHandler.post(classifyRunnable)
 
-        val classifyHandler = android.os.Handler(android.os.Looper.getMainLooper())
-        val classifyRunnable = object : Runnable {
-            override fun run() {
-                currentPosture = postureDetector.classify()
-                classifyHandler.postDelayed(this, CLASSIFY_INTERVAL_MS)
+            onDispose {
+                sensorManager.unregisterListener(sensorListener)
+                classifyHandler.removeCallbacks(classifyRunnable)
             }
-        }
-        classifyHandler.post(classifyRunnable)
-
-        onDispose {
-            sensorManager.unregisterListener(sensorListener)
-            classifyHandler.removeCallbacks(classifyRunnable)
         }
     }
 
@@ -162,33 +180,37 @@ fun HeartRateAlarmScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // 1. 姿态展示卡片
-            PostureCard(
-                posture = currentPosture,
-                scale = popAnim.value,
-                bounceOffset = if (currentPosture == PostureType.EXERCISE) bounceOffset else 0f
-            )
+            // 1. 姿态展示卡片（排除姿态检测时隐藏）
+            if (!excludePostureDetection) {
+                PostureCard(
+                    posture = currentPosture,
+                    scale = popAnim.value,
+                    bounceOffset = if (currentPosture == PostureType.EXERCISE) bounceOffset else 0f
+                )
+            }
 
-            // 2. 姿态校准区
-            CalibrationCard(
-                calibration = currentCalibration,
-                isCalibrating = isCalibrating,
-                calibratingPostureName = calibratingPostureName,
-                calibrationProgress = calibrationProgress,
-                onCalibrateSitting = {
-                    calibratingPostureName = "静坐"
-                    isCalibrating = true
-                },
-                onCalibrateStanding = {
-                    calibratingPostureName = "站立"
-                    isCalibrating = true
-                },
-                onClearCalibration = {
-                    sharedPreferences.edit().remove("posture_calibration_data").apply()
-                    currentCalibration = null
-                    postureDetector.setCalibration(null)
-                }
-            )
+            // 2. 姿态校准区（排除姿态检测时隐藏）
+            if (!excludePostureDetection) {
+                CalibrationCard(
+                    calibration = currentCalibration,
+                    isCalibrating = isCalibrating,
+                    calibratingPostureName = calibratingPostureName,
+                    calibrationProgress = calibrationProgress,
+                    onCalibrateSitting = {
+                        calibratingPostureName = "静坐"
+                        isCalibrating = true
+                    },
+                    onCalibrateStanding = {
+                        calibratingPostureName = "站立"
+                        isCalibrating = true
+                    },
+                    onClearCalibration = {
+                        sharedPreferences.edit().remove("posture_calibration_data").apply()
+                        currentCalibration = null
+                        postureDetector.setCalibration(null)
+                    }
+                )
+            }
 
             // 3. 预警设置区
             AlarmSettingsCard(
@@ -200,15 +222,27 @@ fun HeartRateAlarmScreen(
                     val intent = Intent(context, HeartRateAlarmService::class.java)
                     if (enabled) context.startService(intent) else context.stopService(intent)
                 },
+                excludePostureDetection = excludePostureDetection,
+                onExcludePostureDetectionChange = { enabled ->
+                    excludePostureDetection = enabled
+                    sharedPreferences.edit().putBoolean("heart_rate_alarm_exclude_posture_detection", enabled).apply()
+                    // 开启排除时中断正在进行的校准
+                    if (enabled) {
+                        isCalibrating = false
+                        calibrationBuffer = emptyList()
+                    }
+                },
                 highThreshold = highThreshold,
                 onHighThresholdChange = { value ->
-                    highThreshold = value
-                    sharedPreferences.edit().putInt("heart_rate_alarm_high_threshold", value).apply()
+                    val clamped = maxOf(value, lowThreshold + 1)
+                    highThreshold = clamped
+                    sharedPreferences.edit().putInt("heart_rate_alarm_high_threshold", clamped).apply()
                 },
                 lowThreshold = lowThreshold,
                 onLowThresholdChange = { value ->
-                    lowThreshold = value
-                    sharedPreferences.edit().putInt("heart_rate_alarm_low_threshold", value).apply()
+                    val clamped = minOf(value, highThreshold - 1)
+                    lowThreshold = clamped
+                    sharedPreferences.edit().putInt("heart_rate_alarm_low_threshold", clamped).apply()
                 },
                 durationSeconds = durationSeconds,
                 onDurationChange = { value ->
@@ -314,8 +348,8 @@ private fun CalibrationCard(
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(
@@ -376,6 +410,8 @@ private fun AlarmSettingsCard(
     sharedPreferences: SharedPreferences,
     alarmEnabled: Boolean,
     onAlarmEnabledChange: (Boolean) -> Unit,
+    excludePostureDetection: Boolean,
+    onExcludePostureDetectionChange: (Boolean) -> Unit,
     highThreshold: Int,
     onHighThresholdChange: (Int) -> Unit,
     lowThreshold: Int,
@@ -405,25 +441,35 @@ private fun AlarmSettingsCard(
             )
         }
 
-        // 超过阈值
+        // 排除姿态检测开关（位于启用心率预警下方）
+        AlarmElevatedItemCard {
+            AlarmSwitch(
+                checked = excludePostureDetection,
+                onCheckedChange = onExcludePostureDetectionChange,
+                title = "排除姿态检测",
+                leadingIcon = painterResource(R.drawable.ic_hide_source)
+            )
+        }
+
+        // 超过阈值（动态下限：至少比低阈值大 1）
         AlarmElevatedItemCard {
             AlarmDragSlider(
                 label = "超过",
                 value = highThreshold,
                 onValueChange = onHighThresholdChange,
-                range = HIGH_THRESHOLD_MIN..180,
+                range = maxOf(HIGH_THRESHOLD_MIN, lowThreshold + 1)..HIGH_THRESHOLD_MAX,
                 suffix = " BPM",
                 leadingIcon = painterResource(R.drawable.ic_trending_up)
             )
         }
 
-        // 低于阈值
+        // 低于阈值（动态上限：至多比高阈值小 1）
         AlarmElevatedItemCard {
             AlarmDragSlider(
                 label = "低于",
                 value = lowThreshold,
                 onValueChange = onLowThresholdChange,
-                range = LOW_THRESHOLD_MIN..80,
+                range = LOW_THRESHOLD_MIN..minOf(LOW_THRESHOLD_MAX, highThreshold - 1),
                 suffix = " BPM",
                 leadingIcon = painterResource(R.drawable.ic_trending_down)
             )

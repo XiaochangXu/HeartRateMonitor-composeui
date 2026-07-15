@@ -1,8 +1,4 @@
-<<<<<<< HEAD
 package com.github.heartratemonitor_compose.service
-=======
-﻿package com.github.heartratemonitor_compose.service
->>>>>>> 5411686d21345985822abde01a9f90c414e63b61
 
 import android.app.Notification
 import android.app.NotificationChannel
@@ -71,6 +67,10 @@ class HeartRateAlarmService : Service() {
     private var isResidentForeground = false
     private var alarmMachine: AlarmStateMachine? = null
 
+    /** 是否排除姿态检测：开启后不注册加速度传感器，心率预警在任意姿态下均可触发 */
+    private var excludePostureDetection = false
+    private var isSensorRegistered = false
+
     private val classifyHandler = Handler(Looper.getMainLooper())
     private val serviceScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
 
@@ -93,9 +93,34 @@ class HeartRateAlarmService : Service() {
         createNotificationChannels()
         ensureResidentForeground()
         startAndBindBleService()
-        registerAccelerometer()
-        classifyHandler.post(classifyRunnable)
+        // 读取"排除姿态检测"开关：开启后跳过传感器注册与姿态分类，预警在任意姿态下均可触发
+        excludePostureDetection = sharedPreferences.getBoolean("heart_rate_alarm_exclude_posture_detection", false)
+        applyPostureDetectionState()
         sharedPreferences.registerOnSharedPreferenceChangeListener(settingsListener)
+    }
+
+    /**
+     * 根据 excludePostureDetection 标志启用或停用姿态检测。
+     * - 排除时：注销传感器、停止分类任务，将姿态置为静坐（视为静止）使预警状态机正常判定
+     * - 未排除时：注册加速度传感器并启动周期分类
+     */
+    private fun applyPostureDetectionState() {
+        if (excludePostureDetection) {
+            classifyHandler.removeCallbacks(classifyRunnable)
+            if (isSensorRegistered) {
+                sensorManager.unregisterListener(sensorListener)
+                isSensorRegistered = false
+            }
+            // 视为静止姿态，确保预警不因姿态被跳过
+            _posture.value = PostureType.SITTING
+        } else {
+            if (!isSensorRegistered) {
+                registerAccelerometer()
+                isSensorRegistered = true
+            }
+            classifyHandler.removeCallbacks(classifyRunnable)
+            classifyHandler.post(classifyRunnable)
+        }
     }
 
     /**
@@ -138,7 +163,10 @@ class HeartRateAlarmService : Service() {
     override fun onDestroy() {
         super.onDestroy()
         classifyHandler.removeCallbacks(classifyRunnable)
-        sensorManager.unregisterListener(sensorListener)
+        if (isSensorRegistered) {
+            sensorManager.unregisterListener(sensorListener)
+            isSensorRegistered = false
+        }
         if (isBleBound) {
             try {
                 unbindService(bleServiceConnection)
@@ -180,7 +208,12 @@ class HeartRateAlarmService : Service() {
             bleService?.heartRate?.collect { rate ->
                 // 蓝牙断开时心率为 0，忽略以避免误触发低限报警
                 if (rate <= 0) return@collect
-                val currentPosture = postureDetector.currentStablePosture()
+                // 排除姿态检测时视为静止姿态，否则使用姿态分类结果
+                val currentPosture = if (excludePostureDetection) {
+                    PostureType.SITTING
+                } else {
+                    postureDetector.currentStablePosture()
+                }
                 alarmMachine?.onHeartRate(rate, currentPosture)
             }
         }
@@ -230,15 +263,12 @@ class HeartRateAlarmService : Service() {
         private var lastAlarmTime = 0L
 
         fun onHeartRate(rate: Int, posture: PostureType, now: Long = System.currentTimeMillis()) {
-<<<<<<< HEAD
             // 阈值倒置校验：highThreshold 必须 > lowThreshold，否则配置无效，跳过检测
             if (highThreshold <= lowThreshold) {
                 highBreachStart = 0L
                 lowBreachStart = 0L
                 return
             }
-=======
->>>>>>> 5411686d21345985822abde01a9f90c414e63b61
             // 冷却期内不判定
             if (lastAlarmTime > 0 && now - lastAlarmTime < cooldownMs) {
                 highBreachStart = 0L
@@ -378,6 +408,10 @@ class HeartRateAlarmService : Service() {
             "heart_rate_alarm_duration_seconds",
             "heart_rate_alarm_repeat_enabled",
             "heart_rate_alarm_repeat_interval_minutes" -> reloadAlarmConfig()
+            "heart_rate_alarm_exclude_posture_detection" -> {
+                excludePostureDetection = sharedPreferences.getBoolean("heart_rate_alarm_exclude_posture_detection", false)
+                applyPostureDetectionState()
+            }
             "posture_calibration_data" -> {
                 postureDetector.setCalibration(
                     PostureCalibration.fromJson(
