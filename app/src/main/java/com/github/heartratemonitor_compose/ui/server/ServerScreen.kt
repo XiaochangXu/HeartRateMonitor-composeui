@@ -1,14 +1,7 @@
-<<<<<<< HEAD
 package com.github.heartratemonitor_compose.ui.server
 
 import android.content.Context.CONNECTIVITY_SERVICE
 import android.net.ConnectivityManager
-=======
-﻿package com.github.heartratemonitor_compose.ui.server
-
-import android.content.Context.WIFI_SERVICE
-import android.net.wifi.WifiManager
->>>>>>> 5411686d21345985822abde01a9f90c414e63b61
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -45,7 +38,6 @@ fun ServerScreen(
     val context = LocalContext.current
     val ipAddress by remember {
         derivedStateOf {
-<<<<<<< HEAD
             try {
                 // 使用 ConnectivityManager 替代已弃用的 WifiManager.connectionInfo
                 val cm = context.applicationContext.getSystemService(CONNECTIVITY_SERVICE) as? ConnectivityManager
@@ -58,10 +50,6 @@ fun ServerScreen(
             } catch (e: SecurityException) {
                 "未连接网络"
             }
-=======
-            val wifiManager = context.applicationContext.getSystemService(WIFI_SERVICE) as WifiManager
-            android.text.format.Formatter.formatIpAddress(wifiManager.connectionInfo.ipAddress)
->>>>>>> 5411686d21345985822abde01a9f90c414e63b61
         }
     }
 

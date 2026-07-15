@@ -1,8 +1,4 @@
-<<<<<<< HEAD
 package com.github.heartratemonitor_compose.data.db
-=======
-﻿package com.github.heartratemonitor_compose.data.db
->>>>>>> 5411686d21345985822abde01a9f90c414e63b61
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
@@ -14,7 +10,6 @@ data class HeartRateSession(
     val deviceName: String,
     val startTime: Long,
     var endTime: Long? = null
-<<<<<<< HEAD
 )
 
 /**
@@ -29,6 +24,4 @@ data class SessionStats(
     val minHeartRate: Int?,
     val firstTimestamp: Long?,
     val lastTimestamp: Long?
-=======
->>>>>>> 5411686d21345985822abde01a9f90c414e63b61
 )

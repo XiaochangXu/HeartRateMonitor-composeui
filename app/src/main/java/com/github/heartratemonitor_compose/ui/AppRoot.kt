@@ -1,16 +1,9 @@
-<<<<<<< HEAD
 package com.github.heartratemonitor_compose.ui
 
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ActivityInfo
-=======
-﻿package com.github.heartratemonitor_compose.ui
-
-import android.content.Context
-import android.content.Intent
->>>>>>> 5411686d21345985822abde01a9f90c414e63b61
 import android.graphics.RenderEffect
 import android.graphics.Shader
 import android.os.Build
@@ -40,18 +33,12 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.RowScope
-<<<<<<< HEAD
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
-=======
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
->>>>>>> 5411686d21345985822abde01a9f90c414e63b61
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -62,10 +49,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-<<<<<<< HEAD
 import androidx.compose.runtime.DisposableEffect
-=======
->>>>>>> 5411686d21345985822abde01a9f90c414e63b61
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -83,10 +67,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import kotlin.math.roundToInt
-<<<<<<< HEAD
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-=======
->>>>>>> 5411686d21345985822abde01a9f90c414e63b61
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.github.heartratemonitor_compose.R
 import com.github.heartratemonitor_compose.data.db.AppDatabase
@@ -94,11 +75,8 @@ import com.github.heartratemonitor_compose.ui.alarm.HeartRateAlarmScreen
 import com.github.heartratemonitor_compose.ui.favorite.FavoriteDevicesScreen
 import com.github.heartratemonitor_compose.ui.history.ChartScreen
 import com.github.heartratemonitor_compose.ui.history.HistoryScreen
-<<<<<<< HEAD
 import com.github.heartratemonitor_compose.ui.main.AppStatus
 import com.github.heartratemonitor_compose.ui.main.FullScreenHeartRate
-=======
->>>>>>> 5411686d21345985822abde01a9f90c414e63b61
 import com.github.heartratemonitor_compose.ui.main.HomeScreen
 import com.github.heartratemonitor_compose.ui.main.MainViewModel
 import com.github.heartratemonitor_compose.ui.server.ServerScreen
@@ -121,11 +99,7 @@ import com.github.heartratemonitor_compose.ui.webhook.WebhookScreen
 // 新动画从「当前进度」继续，无跳变。
 private const val TAB_SLIDE_DURATION = 200
 private const val SECONDARY_SLIDE_DURATION = 300
-<<<<<<< HEAD
 private const val NAV_BAR_HEIGHT = 64
-=======
-private const val NAV_BAR_HEIGHT = 80
->>>>>>> 5411686d21345985822abde01a9f90c414e63b61
 private const val NAV_ITEM_DURATION = 200
 // MD3 NavigationBar 胶囊指示器尺寸规范
 private val NAV_INDICATOR_WIDTH = 64.dp
@@ -206,7 +180,6 @@ fun AppRoot(
     // 与 MainActivity.onServiceConnected 中 ViewModelProvider(this) 获取的是同一实例。
     val mainViewModel: MainViewModel = viewModel()
 
-<<<<<<< HEAD
     // ── 全屏心率模式 ──
     // 状态提升到 AppRoot：FullScreenHeartRate 需覆盖在 NavigationBar 之上，
     // 必须由 AppRoot 统一管理，在全屏时隐藏 NavigationBar。
@@ -232,8 +205,6 @@ fun AppRoot(
         }
     }
 
-=======
->>>>>>> 5411686d21345985822abde01a9f90c414e63b61
     // ── 状态管理（三层 overlay）──
     // currentTab：当前 Tab 页（Home/Settings），驱动底层 AnimatedContent。
     //   进入二级页面时 currentTab 不变 → 底层不重组 → 原页面纹丝不动。
@@ -289,12 +260,9 @@ fun AppRoot(
     // 二级页面按返回键 pop；Tab 页让系统处理（退出应用）
     BackHandler(enabled = secondaryStack.isNotEmpty()) { popBack() }
 
-<<<<<<< HEAD
     // 系统手势条/导航栏 inset：内容与底部 NavigationBar 都需避开此区域
     val navBarBottomInset = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
 
-=======
->>>>>>> 5411686d21345985822abde01a9f90c414e63b61
     Box(modifier = Modifier.fillMaxSize()) {
         // ── 底层：两个 Tab 页常驻 + offset 平移动画 ──
         // 不再用 AnimatedContent：避免每次 Tab 切换重新组合整个页面
@@ -307,11 +275,7 @@ fun AppRoot(
         BoxWithConstraints(
             modifier = Modifier
                 .fillMaxSize()
-<<<<<<< HEAD
                 .padding(bottom = NAV_BAR_HEIGHT.dp + navBarBottomInset)
-=======
-                .padding(bottom = NAV_BAR_HEIGHT.dp)
->>>>>>> 5411686d21345985822abde01a9f90c414e63b61
                 .graphicsLayer {
                     val progress = secondaryProgress.value
                     // 原背景跟随二级页面上移而上抬（视差），轻微缩放增强景深
@@ -351,12 +315,8 @@ fun AppRoot(
                 HomeScreen(
                     viewModel = mainViewModel,
                     onOpenHistory = { navigate(Screen.History) },
-<<<<<<< HEAD
                     onToggleFloatingWindow = onToggleFloatingWindow,
                     onEnterFullScreen = { isFullScreenMode = true }
-=======
-                    onToggleFloatingWindow = onToggleFloatingWindow
->>>>>>> 5411686d21345985822abde01a9f90c414e63b61
                 )
             }
 
@@ -387,7 +347,6 @@ fun AppRoot(
         // ── 中层：NavigationBar 浮动 overlay（覆盖在 Tab 页内容底部）──
         // 不在 Scaffold bottomBar 中，显隐不影响内容区域尺寸。
         // 二级页面进入时被顶层覆盖，无需 AnimatedVisibility。
-<<<<<<< HEAD
         // 全屏心率模式时隐藏 NavigationBar。
         // 沉浸式：容器延伸到屏幕底部（外层不加 navigationBarsPadding），
         // 高度 = NAV_BAR_HEIGHT + 系统导航栏 inset；M3 默认 windowInsets 把内容上推 inset，
@@ -415,25 +374,6 @@ fun AppRoot(
                     )
                 }
             }
-=======
-        NavigationBar(
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .height(NAV_BAR_HEIGHT.dp)
-        ) {
-            AnimatedNavItem(
-                selected = currentTab is Screen.Home,
-                onClick = { navigate(Screen.Home) },
-                iconRes = R.drawable.ic_home_symbol,
-                label = "首页"
-            )
-            AnimatedNavItem(
-                selected = currentTab is Screen.Settings,
-                onClick = { navigate(Screen.Settings) },
-                iconRes = R.drawable.ic_settings_symbol,
-                label = "设置"
-            )
->>>>>>> 5411686d21345985822abde01a9f90c414e63b61
         }
 
         // ── 顶层：二级页面（GPU 合成 translationY 滑动 + Crossfade 内容切换）──
@@ -497,7 +437,6 @@ fun AppRoot(
                 }
             }
         }
-<<<<<<< HEAD
 
         // ── 最顶层：全屏心率模式覆盖层 ──
         // 渲染在 NavigationBar 和二级页面之上，纯黑背景覆盖一切，
@@ -508,8 +447,6 @@ fun AppRoot(
                 onExit = { isFullScreenMode = false }
             )
         }
-=======
->>>>>>> 5411686d21345985822abde01a9f90c414e63b61
     }
 }
 
@@ -524,15 +461,10 @@ fun AppRoot(
  * 营造从中心向两侧展开的视觉效果。文字 AnimatedVisibility 同步展开作为次要反馈。
  *
  * 在 [NavigationBar] 的 RowScope 内用 weight(1f) 平分宽度，fillMaxHeight 撑满
-<<<<<<< HEAD
  * 容器高度（NAV_BAR_HEIGHT + 系统导航栏 inset）。M3 NavigationBar 默认 windowInsets
  * 把 Row 内容上推 inset，因此 fillMaxHeight 实际可用空间 = NAV_BAR_HEIGHT，居中不受影响。
  * 点击用 indication = null 的 clickable，不显示长方形 ripple 覆盖，
  * 由胶囊指示器 + 文字展开动画作为选中反馈。
-=======
- * 80dp 容器高度。点击用 indication = null 的 clickable，不显示长方形 ripple 覆盖，
- * 由胶囊指示器 + 文字展开动画作为选中反馈。NavigationBar 容器自动处理 navigationBars inset。
->>>>>>> 5411686d21345985822abde01a9f90c414e63b61
  */
 @Composable
 private fun RowScope.AnimatedNavItem(

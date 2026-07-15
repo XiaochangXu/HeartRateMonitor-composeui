@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 package com.github.heartratemonitor_compose.ui.main
 
 import android.content.Context
@@ -19,27 +18,12 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
-=======
-﻿package com.github.heartratemonitor_compose.ui.main
-
-import android.content.Context
-import android.content.SharedPreferences
-import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.tween
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
->>>>>>> 5411686d21345985822abde01a9f90c414e63b61
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
-<<<<<<< HEAD
 import androidx.compose.foundation.layout.fillMaxHeight
-=======
->>>>>>> 5411686d21345985822abde01a9f90c414e63b61
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -54,20 +38,14 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bluetooth
 import androidx.compose.material.icons.filled.BluetoothDisabled
-<<<<<<< HEAD
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Fullscreen
-=======
->>>>>>> 5411686d21345985822abde01a9f90c414e63b61
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.SignalCellularAlt
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.StarBorder
-<<<<<<< HEAD
 import androidx.compose.material3.AlertDialog
-=======
->>>>>>> 5411686d21345985822abde01a9f90c414e63b61
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -80,10 +58,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-<<<<<<< HEAD
 import androidx.compose.material3.TextButton
-=======
->>>>>>> 5411686d21345985822abde01a9f90c414e63b61
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -96,7 +71,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-<<<<<<< HEAD
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.Offset
@@ -111,14 +85,6 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-=======
-import androidx.compose.ui.draw.scale
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color as ComposeColor
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
->>>>>>> 5411686d21345985822abde01a9f90c414e63b61
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -126,13 +92,10 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.github.heartratemonitor_compose.R
 import com.juul.kable.Advertisement
-<<<<<<< HEAD
 import kotlin.math.abs
 import kotlin.math.min
 import kotlin.math.sin
 import kotlin.math.PI
-=======
->>>>>>> 5411686d21345985822abde01a9f90c414e63b61
 import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
 import com.patrykandpatrick.vico.compose.cartesian.layer.LineCartesianLayer
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLine
@@ -163,12 +126,8 @@ import com.patrykandpatrick.vico.compose.common.Fill
 fun HomeScreen(
     viewModel: MainViewModel,
     onOpenHistory: () -> Unit,
-<<<<<<< HEAD
     onToggleFloatingWindow: () -> Unit,
     onEnterFullScreen: () -> Unit
-=======
-    onToggleFloatingWindow: () -> Unit
->>>>>>> 5411686d21345985822abde01a9f90c414e63b61
 ) {
     val context = LocalContext.current
     val sharedPreferences = remember {
@@ -182,10 +141,7 @@ fun HomeScreen(
     val appStatus by viewModel.appStatus.collectAsStateWithLifecycle()
     val scanResults by viewModel.scanResults.collectAsStateWithLifecycle()
     val newChartEntries by viewModel.newChartEntries.collectAsStateWithLifecycle()
-<<<<<<< HEAD
     val favoriteDeviceId by viewModel.favoriteDeviceId.collectAsStateWithLifecycle()
-=======
->>>>>>> 5411686d21345985822abde01a9f90c414e63b61
 
     // 读取本地设置（每次重组读最新）
     var isHistoryEnabled by remember { mutableStateOf(sharedPreferences.getBoolean("history_recording_enabled", false)) }
@@ -193,12 +149,9 @@ fun HomeScreen(
     var isAnimationEnabled by remember { mutableStateOf(sharedPreferences.getBoolean("heartbeat_animation_enabled", true)) }
     var floatingWindowEnabled by remember { mutableStateOf(sharedPreferences.getBoolean("floating_window_enabled", false)) }
 
-<<<<<<< HEAD
     // 首次搜索提示弹窗（只弹出一次）
     var showSearchTipDialog by remember { mutableStateOf(false) }
 
-=======
->>>>>>> 5411686d21345985822abde01a9f90c414e63b61
     // 监听 SharedPreferences 变化（悬浮窗/历史/速度/动画开关可能从设置页修改）
     DisposableEffect(Unit) {
         val listener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
@@ -250,7 +203,6 @@ fun HomeScreen(
                     }
                     // 扫描按钮
                     IconButton(
-<<<<<<< HEAD
                         onClick = {
                             // 首次点击时弹出提示
                             if (!sharedPreferences.getBoolean("search_tip_shown", false)) {
@@ -259,9 +211,6 @@ fun HomeScreen(
                                 viewModel.startScan()
                             }
                         },
-=======
-                        onClick = { viewModel.startScan() },
->>>>>>> 5411686d21345985822abde01a9f90c414e63b61
                         enabled = appStatus == AppStatus.DISCONNECTED
                     ) {
                         Icon(
@@ -286,7 +235,6 @@ fun HomeScreen(
             appStatus = appStatus,
             scanResults = scanResults,
             newChartEntries = newChartEntries,
-<<<<<<< HEAD
             favoriteDeviceId = favoriteDeviceId,
             isConnected = isConnected,
             isHistoryEnabled = isHistoryEnabled,
@@ -315,12 +263,6 @@ fun HomeScreen(
                     showSearchTipDialog = false
                 }) { Text("取消") }
             }
-=======
-            isConnected = isConnected,
-            isHistoryEnabled = isHistoryEnabled,
-            isSpeedEnabled = isSpeedEnabled,
-            isAnimationEnabled = isAnimationEnabled
->>>>>>> 5411686d21345985822abde01a9f90c414e63b61
         )
     }
 }
@@ -335,7 +277,6 @@ private fun HomeContent(
     appStatus: AppStatus,
     scanResults: List<Advertisement>,
     newChartEntries: List<HeartRatePoint>?,
-<<<<<<< HEAD
     favoriteDeviceId: String?,
     isConnected: Boolean,
     isHistoryEnabled: Boolean,
@@ -351,13 +292,6 @@ private fun HomeContent(
         )
     }
 
-=======
-    isConnected: Boolean,
-    isHistoryEnabled: Boolean,
-    isSpeedEnabled: Boolean,
-    isAnimationEnabled: Boolean
-) {
->>>>>>> 5411686d21345985822abde01a9f90c414e63b61
     LazyColumn(
         modifier = modifier,
         contentPadding = PaddingValues(16.dp),
@@ -407,23 +341,12 @@ private fun HomeContent(
             }
 
             items(
-<<<<<<< HEAD
                 items = sortedScanResults,
-=======
-                items = scanResults.sortedWith(
-                    compareByDescending<Advertisement> { viewModel.isDeviceFavorite(it.identifier) }
-                        .thenByDescending { it.rssi }
-                ),
->>>>>>> 5411686d21345985822abde01a9f90c414e63b61
                 key = { it.identifier }
             ) { advertisement ->
                 DeviceItem(
                     advertisement = advertisement,
-<<<<<<< HEAD
                     isFavorite = advertisement.identifier == favoriteDeviceId,
-=======
-                    isFavorite = viewModel.isDeviceFavorite(advertisement.identifier),
->>>>>>> 5411686d21345985822abde01a9f90c414e63b61
                     onDeviceClick = { viewModel.connectToDevice(advertisement.identifier) },
                     onFavoriteClick = {
                         viewModel.toggleFavoriteDevice(advertisement)
@@ -432,7 +355,6 @@ private fun HomeContent(
             }
         }
 
-<<<<<<< HEAD
         // 全屏模式按钮 + 断开连接按钮（已连接时）
         if (isConnected) {
             item {
@@ -466,11 +388,6 @@ private fun HomeContent(
             }
 
             item {
-=======
-        // 断开连接按钮（已连接时）
-        if (isConnected) {
-            item {
->>>>>>> 5411686d21345985822abde01a9f90c414e63b61
                 Button(
                     onClick = { viewModel.disconnectDevice() },
                     modifier = Modifier.fillMaxWidth(),
@@ -507,7 +424,6 @@ private fun HeartRateCard(
     val isConnected = appStatus == AppStatus.CONNECTED
 
     // 渐变背景（对应原 drawable background_heart_rate_connected/disconnected，angle=135）
-<<<<<<< HEAD
     // 用 remember 缓存，避免每次心率更新重组都新建 List 和 Brush 对象
     val gradientBrush = remember(isConnected) {
         val colors = if (isConnected) {
@@ -520,12 +436,6 @@ private fun HeartRateCard(
             start = androidx.compose.ui.geometry.Offset(0f, Float.POSITIVE_INFINITY),
             end = androidx.compose.ui.geometry.Offset(Float.POSITIVE_INFINITY, 0f)
         )
-=======
-    val gradientColors = if (isConnected) {
-        listOf(ComposeColor(0xFFFCA5A5), ComposeColor(0xFFF87171))
-    } else {
-        listOf(ComposeColor(0xFFD4D4D8), ComposeColor(0xFFA1A1AA))
->>>>>>> 5411686d21345985822abde01a9f90c414e63b61
     }
 
     // 心跳动画：bpm > 30 且开启动画且已连接时缩放
@@ -552,17 +462,7 @@ private fun HeartRateCard(
         color = ComposeColor.Transparent
     ) {
         Box(
-<<<<<<< HEAD
             modifier = Modifier.background(gradientBrush)
-=======
-            modifier = Modifier.background(
-                Brush.linearGradient(
-                    colors = gradientColors,
-                    start = androidx.compose.ui.geometry.Offset(0f, Float.POSITIVE_INFINITY),
-                    end = androidx.compose.ui.geometry.Offset(Float.POSITIVE_INFINITY, 0f)
-                )
-            )
->>>>>>> 5411686d21345985822abde01a9f90c414e63b61
         ) {
             // 背景心形 emoji（半透明）
             Text(
@@ -709,7 +609,6 @@ private fun RealtimeChart(
     // 浮点误差磨成 0 触发 Vico "x-values are too precise" 异常；整数毫秒 GCD 永不归零。
     LaunchedEffect(history.size, appStatus) {
         if (appStatus == AppStatus.CONNECTED && history.isNotEmpty()) {
-<<<<<<< HEAD
             // 事务外先拷贝数据：runTransaction 是 suspend，若在事务内读 history，
             // 挂起期间 chartDataPoints 可能被新到达的心率修改，导致 ConcurrentModificationException
             val xValues = history.map { (it.timeOffsetSec * 1000).toLong().toDouble() }
@@ -717,14 +616,6 @@ private fun RealtimeChart(
             modelProducer.runTransaction {
                 lineSeries {
                     series(x = xValues, y = yValues)
-=======
-            modelProducer.runTransaction {
-                lineSeries {
-                    series(
-                        x = history.map { (it.timeOffsetSec * 1000).toLong().toDouble() },
-                        y = history.map { it.heartRate.toDouble() }
-                    )
->>>>>>> 5411686d21345985822abde01a9f90c414e63b61
                 }
             }
         }
@@ -739,7 +630,6 @@ private fun RealtimeChart(
         val windowStart = lastPoint.timeOffsetSec - 300f
         // history 按 timeOffsetSec 单调递增，用 indexOfFirst 定位起点 + subList 视图，避免 filter 每次分配新列表
         val startIndex = history.indexOfFirst { it.timeOffsetSec >= windowStart }
-<<<<<<< HEAD
         // 事务外拷贝可视窗口数据，避免 subList 视图在 runTransaction 挂起期间被并发修改
         val visible = if (startIndex >= 0) history.subList(startIndex, history.size).toList() else emptyList()
         // history 已由 ViewModel 的 appendPoint 写入本批 points,无需再追加
@@ -749,17 +639,6 @@ private fun RealtimeChart(
             modelProducer.runTransaction {
                 lineSeries {
                     series(x = xValues, y = yValues)
-=======
-        val visible = if (startIndex >= 0) history.subList(startIndex, history.size) else emptyList()
-        // history 已由 ViewModel 的 appendPoint 写入本批 points,无需再追加
-        if (visible.isNotEmpty()) {
-            modelProducer.runTransaction {
-                lineSeries {
-                    series(
-                        x = visible.map { (it.timeOffsetSec * 1000).toLong().toDouble() },
-                        y = visible.map { it.heartRate.toDouble() }
-                    )
->>>>>>> 5411686d21345985822abde01a9f90c414e63b61
                 }
             }
         }
@@ -777,19 +656,11 @@ private fun RealtimeChart(
     // 心率红主色,ECG 风格
     val lineColor = ComposeColor(0xFFE53935)
 
-<<<<<<< HEAD
     // 圆角卡片容器包裹心率图表，使用主题色适配深色/浅色模式，与 SpeedCard 视觉风格保持一致
     Surface(
         modifier = modifier,
         shape = RoundedCornerShape(16.dp),
         color = MaterialTheme.colorScheme.surfaceContainerLow
-=======
-    // 纯白色圆角卡片容器包裹心率图表，与 SpeedCard 等卡片视觉风格保持一致
-    Surface(
-        modifier = modifier,
-        shape = RoundedCornerShape(16.dp),
-        color = ComposeColor.White
->>>>>>> 5411686d21345985822abde01a9f90c414e63b61
     ) {
         CartesianChartHost(
             chart = rememberCartesianChart(
@@ -950,7 +821,6 @@ private fun DeviceItem(
         }
     }
 }
-<<<<<<< HEAD
 
 /**
  * 全屏心率模式覆盖层。
@@ -1202,5 +1072,3 @@ private fun ecgWaveformValue(phase: Float, amplitude: Float): Float {
         else -> 0f
     }
 }
-=======
->>>>>>> 5411686d21345985822abde01a9f90c414e63b61

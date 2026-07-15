@@ -1,8 +1,4 @@
-<<<<<<< HEAD
 package com.github.heartratemonitor_compose.service
-=======
-﻿package com.github.heartratemonitor_compose.service
->>>>>>> 5411686d21345985822abde01a9f90c414e63b61
 
 import android.app.Notification
 import android.app.NotificationChannel
@@ -230,15 +226,12 @@ class HeartRateAlarmService : Service() {
         private var lastAlarmTime = 0L
 
         fun onHeartRate(rate: Int, posture: PostureType, now: Long = System.currentTimeMillis()) {
-<<<<<<< HEAD
             // 阈值倒置校验：highThreshold 必须 > lowThreshold，否则配置无效，跳过检测
             if (highThreshold <= lowThreshold) {
                 highBreachStart = 0L
                 lowBreachStart = 0L
                 return
             }
-=======
->>>>>>> 5411686d21345985822abde01a9f90c414e63b61
             // 冷却期内不判定
             if (lastAlarmTime > 0 && now - lastAlarmTime < cooldownMs) {
                 highBreachStart = 0L

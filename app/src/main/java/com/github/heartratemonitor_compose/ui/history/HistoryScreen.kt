@@ -1,8 +1,4 @@
-<<<<<<< HEAD
 package com.github.heartratemonitor_compose.ui.history
-=======
-﻿package com.github.heartratemonitor_compose.ui.history
->>>>>>> 5411686d21345985822abde01a9f90c414e63b61
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.Canvas
@@ -19,10 +15,7 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-<<<<<<< HEAD
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-=======
->>>>>>> 5411686d21345985822abde01a9f90c414e63b61
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -59,11 +52,7 @@ fun HistoryScreen(
     onNavigateToChart: (Long) -> Unit
 ) {
     val context = LocalContext.current
-<<<<<<< HEAD
     val sessions by db.heartRateDao().getAllSessions().collectAsStateWithLifecycle(initialValue = emptyList())
-=======
-    val sessions by db.heartRateDao().getAllSessions().collectAsState(initial = emptyList())
->>>>>>> 5411686d21345985822abde01a9f90c414e63b61
     val scope = rememberCoroutineScope()
 
     var isMultiSelectMode by remember { mutableStateOf(false) }
@@ -72,7 +61,6 @@ fun HistoryScreen(
     var previewDataMap by remember { mutableStateOf(mapOf<Long, SessionPreviewData>()) }
 
     // 异步加载每个会话的预览数据
-<<<<<<< HEAD
     // 优化：用 getAllSessionStats() 批量获取统计信息（1 次查询替代 N 次），
     // 仅对有数据的 session 查询轻量采样数据用于迷你图表。
     LaunchedEffect(sessions) {
@@ -100,29 +88,6 @@ fun HistoryScreen(
                 maxHeartRate = stats.maxHeartRate ?: 0,
                 heartRateSamples = samples
             )
-=======
-    LaunchedEffect(sessions) {
-        val previewMap = mutableMapOf<Long, SessionPreviewData>()
-        for (session in sessions) {
-            val records = db.heartRateDao().getRecordsForSession(session.id)
-            if (records.isNotEmpty()) {
-                val heartRates = records.map { it.heartRate }
-                val avg = heartRates.average()
-                val min = heartRates.min()
-                val max = heartRates.max()
-                // 最多采样 50 个点用于迷你图表
-                val step = maxOf(1, records.size / 50)
-                val samples = records.filterIndexed { index, _ -> index % step == 0 }
-                    .map { it.heartRate }
-                previewMap[session.id] = SessionPreviewData(
-                    recordCount = records.size,
-                    avgHeartRate = avg,
-                    minHeartRate = min,
-                    maxHeartRate = max,
-                    heartRateSamples = samples
-                )
-            }
->>>>>>> 5411686d21345985822abde01a9f90c414e63b61
         }
         previewDataMap = previewMap
     }

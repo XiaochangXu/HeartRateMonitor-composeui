@@ -1,15 +1,7 @@
-<<<<<<< HEAD
 package com.github.heartratemonitor_compose.data.db
 
 import androidx.room.Dao
 import androidx.room.Insert
-=======
-﻿package com.github.heartratemonitor_compose.data.db
-
-import androidx.room.Dao
-import androidx.room.Insert
-import androidx.room.OnConflictStrategy
->>>>>>> 5411686d21345985822abde01a9f90c414e63b61
 import androidx.room.Query
 import androidx.room.Transaction
 import kotlinx.coroutines.flow.Flow
@@ -25,7 +17,6 @@ interface HeartRateDao {
     @Insert
     suspend fun insertRecord(record: HeartRateRecord)
 
-<<<<<<< HEAD
     /**
      * 批量插入心率记录。使用 ABORT（默认）策略：
      * 若外键约束失败（如 session 已被删除），抛出 SQLiteConstraintException，
@@ -33,9 +24,6 @@ interface HeartRateDao {
      * 单条记录的主键冲突（重复时间戳）不会发生，因为主键自增。
      */
     @Insert
-=======
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
->>>>>>> 5411686d21345985822abde01a9f90c414e63b61
     suspend fun insertRecords(records: List<HeartRateRecord>)
 
     @Query("SELECT * FROM heart_rate_sessions ORDER BY startTime DESC")
@@ -44,15 +32,12 @@ interface HeartRateDao {
     @Query("SELECT * FROM heart_rate_records WHERE sessionId = :sessionId ORDER BY timestamp ASC")
     suspend fun getRecordsForSession(sessionId: Long): List<HeartRateRecord>
 
-<<<<<<< HEAD
     /**
      * 轻量查询：仅返回指定会话的心率值列表（不含 id/sessionId/timestamp），用于迷你图表采样。
      */
     @Query("SELECT heartRate FROM heart_rate_records WHERE sessionId = :sessionId ORDER BY timestamp ASC")
     suspend fun getHeartRatesForSession(sessionId: Long): List<Int>
 
-=======
->>>>>>> 5411686d21345985822abde01a9f90c414e63b61
     @Query("DELETE FROM heart_rate_sessions WHERE id IN (:sessionIds)")
     suspend fun deleteSessionsByIds(sessionIds: List<Long>)
 
@@ -66,7 +51,6 @@ interface HeartRateDao {
     // 新增：查询某个会话的最后一条记录时间
     @Query("SELECT MAX(timestamp) FROM heart_rate_records WHERE sessionId = :sessionId")
     suspend fun getLastRecordTimestampForSession(sessionId: Long): Long?
-<<<<<<< HEAD
 
     /**
      * 批量查询所有会话的统计信息（记录数、平均/最大/最小心率、首末时间戳）。
@@ -84,6 +68,4 @@ interface HeartRateDao {
         GROUP BY sessionId
     """)
     suspend fun getAllSessionStats(): List<SessionStats>
-=======
->>>>>>> 5411686d21345985822abde01a9f90c414e63b61
 }
