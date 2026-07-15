@@ -16,5 +16,4 @@ local.properties
 *.keystore
 
 .DS_Store
-README.md
 git推送命令.txt

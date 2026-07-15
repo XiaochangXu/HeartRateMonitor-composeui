@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 package com.github.heartratemonitor_compose.ui.main
+=======
+﻿package com.github.heartratemonitor_compose.ui.main
+>>>>>>> 5411686d21345985822abde01a9f90c414e63b61
 
 import android.Manifest
 import android.app.Activity
@@ -13,7 +17,10 @@ import android.os.Bundle
 import android.os.IBinder
 import android.provider.Settings
 import android.widget.Toast
+<<<<<<< HEAD
 import androidx.activity.SystemBarStyle
+=======
+>>>>>>> 5411686d21345985822abde01a9f90c414e63b61
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.fragment.app.FragmentActivity
@@ -68,13 +75,19 @@ class MainActivity : FragmentActivity() {
 
     // ─────────── Service Bindings ───────────
     private var bleService: BleService? = null
+<<<<<<< HEAD
     private var isBleServiceBound = false
+=======
+>>>>>>> 5411686d21345985822abde01a9f90c414e63b61
 
     private val bleServiceConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
             val binder = service as BleService.LocalBinder
             bleService = binder.getService()
+<<<<<<< HEAD
             isBleServiceBound = true
+=======
+>>>>>>> 5411686d21345985822abde01a9f90c414e63b61
             // 主页 ViewModel 通过 viewModel() 自行拿 BleService 引用，此处仅做 service 通知
             // 直接通知 ViewModel：通过 androidx.lifecycle ViewModelProvider 拿到
             val viewModel = androidx.lifecycle.ViewModelProvider(this@MainActivity)[MainViewModel::class.java]
@@ -85,7 +98,10 @@ class MainActivity : FragmentActivity() {
 
         override fun onServiceDisconnected(name: ComponentName?) {
             bleService = null
+<<<<<<< HEAD
             isBleServiceBound = false
+=======
+>>>>>>> 5411686d21345985822abde01a9f90c414e63b61
         }
     }
 
@@ -136,6 +152,7 @@ class MainActivity : FragmentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+<<<<<<< HEAD
         // 显式传入透明 scrim：默认 SystemBarStyle.auto 使用 90%白/50%黑遮罩，
         // 三大金刚键模式下系统会在导航按钮区域叠该遮罩，覆盖 NavigationBar 背景色导致无法沉浸。
         // 透明 scrim 让系统不叠遮罩，由 NavigationBar 的 surfaceContainer 背景提供对比度；
@@ -157,6 +174,9 @@ class MainActivity : FragmentActivity() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             window.isNavigationBarContrastEnforced = false
         }
+=======
+        enableEdgeToEdge()
+>>>>>>> 5411686d21345985822abde01a9f90c414e63b61
 
         sharedPreferences = getSharedPreferences("app_settings", Context.MODE_PRIVATE)
         db = AppDatabase.getDatabase(this)
@@ -220,10 +240,14 @@ class MainActivity : FragmentActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
+<<<<<<< HEAD
         if (isBleServiceBound) {
             unbindService(bleServiceConnection)
             isBleServiceBound = false
         }
+=======
+        unbindService(bleServiceConnection)
+>>>>>>> 5411686d21345985822abde01a9f90c414e63b61
         if (isFloatingServiceBound) {
             unbindService(floatingServiceConnection)
         }

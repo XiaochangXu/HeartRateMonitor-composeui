@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 package com.github.heartratemonitor_compose.ui.main
+=======
+﻿package com.github.heartratemonitor_compose.ui.main
+>>>>>>> 5411686d21345985822abde01a9f90c414e63b61
 
 import android.app.Application
 import android.os.Handler
@@ -58,10 +62,13 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val _appStatus = MutableStateFlow(AppStatus.DISCONNECTED)
     val appStatus: StateFlow<AppStatus> = _appStatus.asStateFlow()
 
+<<<<<<< HEAD
     // --- Favorite device (cached StateFlow，避免每次重组读 SharedPreferences) ---
     private val _favoriteDeviceId = MutableStateFlow<String?>(null)
     val favoriteDeviceId: StateFlow<String?> = _favoriteDeviceId.asStateFlow()
 
+=======
+>>>>>>> 5411686d21345985822abde01a9f90c414e63b61
     // --- Chart State Management ---
     private var chartStartTime = 0L
     private val chartDataPoints = ArrayDeque<HeartRatePoint>()
@@ -82,9 +89,12 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     val chartHistory: List<HeartRatePoint> get() = chartDataPoints
 
     init {
+<<<<<<< HEAD
         // 初始化收藏设备缓存（仅读一次 SharedPreferences）
         _favoriteDeviceId.value = sharedPrefs.getString("favorite_device_id", null)
 
+=======
+>>>>>>> 5411686d21345985822abde01a9f90c414e63b61
         // 注册公平运行内存监听器，在 TRIM/KILL 时释放内存
         FairMemoryReceiver.getInstance().setMemoryListener(object : FairMemoryReceiver.MemoryListener {
             override fun onTrimMemory(notifyType: Int) {
@@ -305,11 +315,16 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     // --- Favorite device logic ---
     fun isDeviceFavorite(identifier: String): Boolean {
+<<<<<<< HEAD
         return _favoriteDeviceId.value == identifier
+=======
+        return sharedPrefs.getString("favorite_device_id", null) == identifier
+>>>>>>> 5411686d21345985822abde01a9f90c414e63b61
     }
 
     fun toggleFavoriteDevice(ad: Advertisement) {
         val id = ad.identifier
+<<<<<<< HEAD
         val currentFavorite = _favoriteDeviceId.value
         val newFavorite = if (currentFavorite == id) null else id
         sharedPrefs.edit {
@@ -317,6 +332,14 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
         // 同步更新 StateFlow，UI 侧自动重组
         _favoriteDeviceId.value = newFavorite
+=======
+        val currentFavorite = sharedPrefs.getString("favorite_device_id", null)
+        val newFavorite = if (currentFavorite == id) null else id
+        // 修复：使用 KTX edit 扩展函数替代 edit()...apply()
+        sharedPrefs.edit {
+            putString("favorite_device_id", newFavorite)
+        }
+>>>>>>> 5411686d21345985822abde01a9f90c414e63b61
         // 收藏时同步记录到历史列表（Room REPLACE 策略自动去重，更新时间戳排到最前）
         if (newFavorite != null) {
             addToFavoriteHistory(id, ad.name ?: "未知设备")

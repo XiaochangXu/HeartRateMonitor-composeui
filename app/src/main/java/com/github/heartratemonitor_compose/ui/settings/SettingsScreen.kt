@@ -740,6 +740,7 @@ private fun StatusBarSection(
             )
         }
 
+<<<<<<< HEAD
         // 文字颜色：黑/白预设，点击切换 status_bar_white_text
         SettingsItemCard {
             Column {
@@ -784,12 +785,33 @@ private fun StatusBarSection(
                         }
                     )
                 }
+=======
+        // 文字颜色
+        SettingsItemCard {
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_text_color),
+                    contentDescription = null,
+                    modifier = Modifier.size(24.dp),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Spacer(Modifier.width(16.dp))
+                Text(
+                    text = "文字颜色",
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = FontWeight.Normal,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+>>>>>>> 5411686d21345985822abde01a9f90c414e63b61
             }
         }
 
         // 自动识别屏幕颜色
         SettingsItemCard {
             var autoChecked by remember { mutableStateOf(prefs.getBoolean("status_bar_auto_color", false)) }
+<<<<<<< HEAD
             // 监听 sharedPrefs 变化：MediaProjection 授权结果由 MainActivity 异步写入，
             // 不监听会导致开关状态与实际启用状态不一致。
             DisposableEffect(Unit) {
@@ -801,6 +823,8 @@ private fun StatusBarSection(
                 prefs.registerOnSharedPreferenceChangeListener(listener)
                 onDispose { prefs.unregisterOnSharedPreferenceChangeListener(listener) }
             }
+=======
+>>>>>>> 5411686d21345985822abde01a9f90c414e63b61
 
             Row(
                 modifier = Modifier.fillMaxWidth(),

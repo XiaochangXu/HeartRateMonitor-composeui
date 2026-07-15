@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 plugins {
+=======
+﻿plugins {
+>>>>>>> 5411686d21345985822abde01a9f90c414e63b61
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ksp)
@@ -20,6 +24,7 @@ android {
         applicationId = "com.github.heartratemonitor_compose"
         minSdk = 27
         targetSdk = 37
+<<<<<<< HEAD
         versionCode = 15
         versionName = "2.1"
 
@@ -30,6 +35,17 @@ android {
         ndk {
             abiFilters += "arm64-v8a"
             abiFilters += "x86_64"
+=======
+        versionCode = 10
+        versionName = "2.0"
+
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        // 仅编译 arm64-v8a，移除 32 位（armeabi-v7a）和 x86/x86_64 兼容
+        // 现代设备（minSdk 27）几乎全部为 arm64-v8a，可显著减小 APK 体积
+        ndk {
+            abiFilters += "arm64-v8a"
+>>>>>>> 5411686d21345985822abde01a9f90c414e63b61
         }
     }
 

@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 package com.github.heartratemonitor_compose.service
+=======
+﻿package com.github.heartratemonitor_compose.service
+>>>>>>> 5411686d21345985822abde01a9f90c414e63b61
 
 import android.Manifest
 import android.app.NotificationChannel
@@ -37,7 +41,10 @@ import com.juul.kable.State
 import com.juul.kable.peripheral
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
+<<<<<<< HEAD
 import kotlin.coroutines.coroutineContext
+=======
+>>>>>>> 5411686d21345985822abde01a9f90c414e63b61
 import org.json.JSONObject
 import java.util.concurrent.CancellationException
 import java.util.concurrent.atomic.AtomicBoolean
@@ -86,11 +93,15 @@ class BleService : Service() {
     @Volatile private var isManuallyDisconnected = false
     private val isScanning = AtomicBoolean(false)
     private var lastConnectedDeviceId: String? = null
+<<<<<<< HEAD
     @Volatile private var currentSessionId: Long? = null
     @Volatile private var lastConnectedDeviceName: String = "未知设备"
 
     // --- 自动重连退避 ---
     private var autoReconnectAttempt = 0
+=======
+    private var currentSessionId: Long? = null
+>>>>>>> 5411686d21345985822abde01a9f90c414e63b61
 
     // --- 批量插入缓冲 ---
     private val pendingRecords = mutableListOf<HeartRateRecord>()
@@ -102,18 +113,24 @@ class BleService : Service() {
         private const val BATCH_FLUSH_INTERVAL_MS = 5000L
         /** onDestroy 中刷新的超时时间（毫秒），超时后放弃未写入记录以避免 ANR */
         private const val DESTROY_FLUSH_TIMEOUT_MS = 1500L
+<<<<<<< HEAD
         /** 自动重连最大尝试次数，超过后停止并等待用户手动操作 */
         private const val MAX_AUTO_RECONNECT_ATTEMPTS = 5
         /** 自动重连基础退避（毫秒），实际退避 = base * 2^(attempt-1)，上限 60s */
         private const val AUTO_RECONNECT_BASE_DELAY_MS = 1000L
         private const val AUTO_RECONNECT_MAX_DELAY_MS = 60_000L
+=======
+>>>>>>> 5411686d21345985822abde01a9f90c414e63b61
     }
 
     // --- 服务器端口跟踪（用于检测端口变更并重启） ---
     private var currentHttpPort: Int = -1
     private var currentWebSocketPort: Int = -1
+<<<<<<< HEAD
     private var currentHttpAuthToken: String = ""
     private var currentWebSocketAuthToken: String = ""
+=======
+>>>>>>> 5411686d21345985822abde01a9f90c414e63b61
 
     // --- WebSocket 广播节流 ---
     @Volatile private var lastBroadcastTime = 0L
@@ -291,7 +308,10 @@ class BleService : Service() {
     fun connectToDevice(identifier: String) {
         stopAllBleActivities()
         isManuallyDisconnected = false
+<<<<<<< HEAD
         autoReconnectAttempt = 0  // 手动连接时重置重试计数
+=======
+>>>>>>> 5411686d21345985822abde01a9f90c414e63b61
 
         connectionJob = serviceScope.launch {
             var peripheral: Peripheral? = null
@@ -345,17 +365,25 @@ class BleService : Service() {
             }
             is State.Connected -> {
                 val deviceName = peripheral.name ?: "未知设备"
+<<<<<<< HEAD
                 lastConnectedDeviceName = deviceName
                 _bleState.value = BleState.Connected("已连接到 $deviceName")
                 autoReconnectAttempt = 0  // 连接成功，重置重试计数
+=======
+                _bleState.value = BleState.Connected("已连接到 $deviceName")
+>>>>>>> 5411686d21345985822abde01a9f90c414e63b61
                 webhookManager.triggerWebhooks(WebhookTrigger.CONNECTED, speed = _speed.value)
 
                 // 先确保 session 写入完成（await），再启动心率监听，避免早期数据因 currentSessionId 为 null 而丢失
                 startHistorySession(deviceName)
                 broadcastWebSocketState()
 
+<<<<<<< HEAD
                 // 作为 connectionJob 的子协程启动：断开连接时随 connectionJob 取消，避免泄漏
                 CoroutineScope(coroutineContext).launch { observeHeartRateData(peripheral) }
+=======
+                serviceScope.launch { observeHeartRateData(peripheral) }
+>>>>>>> 5411686d21345985822abde01a9f90c414e63b61
             }
             is State.Disconnecting -> _bleState.value = BleState.Disconnected("正在断开...")
             is State.Disconnected -> {
@@ -412,6 +440,7 @@ class BleService : Service() {
 
     private suspend fun checkAutoReconnect() {
         val autoReconnectEnabled = sharedPreferences.getBoolean("auto_reconnect_enabled", true)
+<<<<<<< HEAD
         if (!autoReconnectEnabled || isManuallyDisconnected || lastConnectedDeviceId == null) return
 
         autoReconnectAttempt++
@@ -427,15 +456,28 @@ class BleService : Service() {
         delay(delayMs)
         _bleState.value = BleState.AutoReconnecting
         startAutoConnectScan(lastConnectedDeviceId!!)
+=======
+        if (autoReconnectEnabled && !isManuallyDisconnected && lastConnectedDeviceId != null) {
+            delay(1000)
+            _bleState.value = BleState.AutoReconnecting
+            startAutoConnectScan(lastConnectedDeviceId!!)
+        }
+>>>>>>> 5411686d21345985822abde01a9f90c414e63b61
     }
 
     private suspend fun observeHeartRateData(peripheral: Peripheral) {
         try {
+<<<<<<< HEAD
+=======
+            // [Fix]: Default value changed to false
+            val isHistoryEnabled = sharedPreferences.getBoolean("history_recording_enabled", false)
+>>>>>>> 5411686d21345985822abde01a9f90c414e63b61
             bleManager.observeHeartRate(peripheral).collect { measurement ->
                 _heartRate.value = measurement.bpm
                 _heartRateMeasurement.value = measurement
                 webhookManager.triggerWebhooks(WebhookTrigger.HEART_RATE_UPDATED, measurement.bpm, _speed.value)
 
+<<<<<<< HEAD
                 // 实时读取历史记录开关，支持连接中途切换
                 val isHistoryEnabled = sharedPreferences.getBoolean("history_recording_enabled", false)
                 if (isHistoryEnabled) {
@@ -445,6 +487,9 @@ class BleService : Service() {
                         currentSessionId = db.heartRateDao().insertSession(session)
                         startRecordFlushLoop()
                     }
+=======
+                if (isHistoryEnabled && currentSessionId != null) {
+>>>>>>> 5411686d21345985822abde01a9f90c414e63b61
                     val record = HeartRateRecord(sessionId = currentSessionId!!, timestamp = System.currentTimeMillis(), heartRate = measurement.bpm)
                     synchronized(pendingRecordsLock) {
                         pendingRecords.add(record)
@@ -550,19 +595,30 @@ class BleService : Service() {
         val authToken = sharedPreferences.getString("server_access_token", "") ?: ""
         if (isEnabled) {
             val port = sharedPreferences.getInt("http_server_port", 8000)
+<<<<<<< HEAD
             // 端口或 token 变更、首次启动时（重新）创建服务器
             if (httpServerManager == null || currentHttpPort != port || currentHttpAuthToken != authToken) {
+=======
+            // 端口变更或首次启动时（重新）创建服务器
+            if (httpServerManager == null || currentHttpPort != port) {
+>>>>>>> 5411686d21345985822abde01a9f90c414e63b61
                 httpServerManager?.stop()
                 httpServerManager = HttpServerManager(port, authToken, _heartRate, _speed, ::isDeviceConnected) { _bleState.value.message }
                 httpServerManager?.start()
                 currentHttpPort = port
+<<<<<<< HEAD
                 currentHttpAuthToken = authToken
+=======
+>>>>>>> 5411686d21345985822abde01a9f90c414e63b61
             }
         } else {
             httpServerManager?.stop()
             httpServerManager = null
             currentHttpPort = -1
+<<<<<<< HEAD
             currentHttpAuthToken = ""
+=======
+>>>>>>> 5411686d21345985822abde01a9f90c414e63b61
         }
     }
 
@@ -571,19 +627,30 @@ class BleService : Service() {
         val authToken = sharedPreferences.getString("server_access_token", "") ?: ""
         if (isEnabled) {
             val port = sharedPreferences.getInt("websocket_server_port", 8001)
+<<<<<<< HEAD
             // 端口或 token 变更、首次启动时（重新）创建服务器
             if (webSocketServerManager == null || currentWebSocketPort != port || currentWebSocketAuthToken != authToken) {
+=======
+            // 端口变更或首次启动时（重新）创建服务器
+            if (webSocketServerManager == null || currentWebSocketPort != port) {
+>>>>>>> 5411686d21345985822abde01a9f90c414e63b61
                 webSocketServerManager?.stop()
                 webSocketServerManager = WebSocketServerManager(port, authToken, webSocketStateFlow)
                 webSocketServerManager?.start()
                 currentWebSocketPort = port
+<<<<<<< HEAD
                 currentWebSocketAuthToken = authToken
+=======
+>>>>>>> 5411686d21345985822abde01a9f90c414e63b61
             }
         } else {
             webSocketServerManager?.stop()
             webSocketServerManager = null
             currentWebSocketPort = -1
+<<<<<<< HEAD
             currentWebSocketAuthToken = ""
+=======
+>>>>>>> 5411686d21345985822abde01a9f90c414e63b61
         }
         broadcastWebSocketState()
     }
@@ -597,6 +664,7 @@ class BleService : Service() {
 
     override fun onDestroy() {
         super.onDestroy()
+<<<<<<< HEAD
         // 刷新未写入的批量心率记录：用独立 daemon 线程异步执行，
         // 避免 runBlocking 阻塞主线程导致 ANR。Room 的 suspend 函数使用内部 dispatcher，不依赖 serviceScope。
         recordFlushJob?.cancel()
@@ -610,6 +678,16 @@ class BleService : Service() {
             isDaemon = true
             name = "BleService-FlushOnDestroy"
             start()
+=======
+        // 刷新未写入的批量心率记录（带超时保护，避免长时间阻塞主线程导致 ANR）
+        recordFlushJob?.cancel()
+        runBlocking {
+            withTimeoutOrNull(DESTROY_FLUSH_TIMEOUT_MS) {
+                withContext(Dispatchers.IO) {
+                    flushPendingRecords()
+                }
+            }
+>>>>>>> 5411686d21345985822abde01a9f90c414e63b61
         }
         serviceScope.cancel()
         locationManager?.removeUpdates(locationListener)
