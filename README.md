@@ -5,7 +5,7 @@
 ![UI](https://img.shields.io/badge/UI-Jetpack%20Compose-orange)
 ![Material](https://img.shields.io/badge/Material-3%20Expressive-purple)
 
-> 基于 BLE（蓝牙低功耗）技术的 Android 心率监测应用，采用 **单 Activity + 100% Jetpack Compose** 架构，遵循 **Material 3 Expressive** 设计规范。
+> 基于 BLE（蓝牙低功耗）技术的 Android 心率监测应用，采用 **单 Activity** 架构，遵循 **Material 3** 设计规范。
 
 > 本项目基于 [ccc007ccc/HeartRateMonitorMobile](https://github.com/ccc007ccc/HeartRateMonitorMobile) 大幅度重构修改而来，在此感谢原作者的开源贡献。
 
@@ -50,7 +50,7 @@
 
 ### 🎨 UI / 设计规范
 
-#### Material 3 Expressive 主题
+#### Material 3  主题
 - 采用 M3 Expressive 不对称圆角形状（4/8/16/24/28dp）
 - 完整的 Surface Container 色调层级（`surfaceContainerLowest` → `surfaceContainerHighest`）
 - Android 12+ 动态取色（Monet）由 Compose `dynamicLightColorScheme` / `dynamicDarkColorScheme` 接管，不再依赖 Material Components 的 `DynamicColors` overlay
