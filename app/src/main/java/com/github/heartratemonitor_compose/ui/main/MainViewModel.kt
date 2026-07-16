@@ -1,6 +1,7 @@
 package com.github.heartratemonitor_compose.ui.main
 
 import android.app.Application
+import android.content.SharedPreferences
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
@@ -81,9 +82,18 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     val chartHistory: List<HeartRatePoint> get() = chartDataPoints
 
+    private val prefsListener = SharedPreferences.OnSharedPreferenceChangeListener { prefs, key ->
+        if (key == "favorite_device_id") {
+            _favoriteDeviceId.value = prefs.getString("favorite_device_id", null)
+        }
+    }
+
     init {
-        // 初始化收藏设备缓存（仅读一次 SharedPreferences）
+        // 初始化收藏设备缓存
         _favoriteDeviceId.value = sharedPrefs.getString("favorite_device_id", null)
+
+        // 监听 SharedPreferences 变化（来自 FavoriteDevicesScreen 等外部修改），同步 StateFlow
+        sharedPrefs.registerOnSharedPreferenceChangeListener(prefsListener)
 
         // 注册公平运行内存监听器，在 TRIM/KILL 时释放内存
         FairMemoryReceiver.getInstance().setMemoryListener(object : FairMemoryReceiver.MemoryListener {
@@ -311,15 +321,38 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     fun toggleFavoriteDevice(ad: Advertisement) {
         val id = ad.identifier
         val currentFavorite = _favoriteDeviceId.value
-        val newFavorite = if (currentFavorite == id) null else id
-        sharedPrefs.edit {
-            putString("favorite_device_id", newFavorite)
-        }
-        // 同步更新 StateFlow，UI 侧自动重组
-        _favoriteDeviceId.value = newFavorite
-        // 收藏时同步记录到历史列表（Room REPLACE 策略自动去重，更新时间戳排到最前）
-        if (newFavorite != null) {
+        if (currentFavorite == id) {
+            // 取消收藏：删除 Room 记录，并从剩余收藏中恢复最近的一个
+            viewModelScope.launch {
+                favoriteDeviceDao.deleteById(id)
+                // 从 Room 中查找剩余收藏中最近的一个，恢复为当前收藏设备
+                val remaining = favoriteDeviceDao.getAllRaw()
+                val latestFavorite = remaining.firstOrNull()
+                if (latestFavorite != null) {
+                    sharedPrefs.edit {
+                        putString("favorite_device_id", latestFavorite.id)
+                    }
+                    _favoriteDeviceId.value = latestFavorite.id
+                } else {
+                    sharedPrefs.edit {
+                        putString("favorite_device_id", null)
+                    }
+                    _favoriteDeviceId.value = null
+                }
+            }
+        } else {
+            // 收藏设备（替换旧收藏）
+            sharedPrefs.edit {
+                putString("favorite_device_id", id)
+            }
+            _favoriteDeviceId.value = id
             addToFavoriteHistory(id, ad.name ?: "未知设备")
+            // 删除旧收藏的 Room 记录，确保设置页收藏列表实时同步
+            if (currentFavorite != null) {
+                viewModelScope.launch {
+                    favoriteDeviceDao.deleteById(currentFavorite)
+                }
+            }
         }
     }
 
@@ -340,6 +373,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     override fun onCleared() {
         super.onCleared()
+        sharedPrefs.unregisterOnSharedPreferenceChangeListener(prefsListener)
         FairMemoryReceiver.getInstance().setMemoryListener(null)
         serviceDataJob?.cancel()
         bleServiceRef = null

@@ -1,4 +1,4 @@
-﻿package com.github.heartratemonitor_compose.data.db
+package com.github.heartratemonitor_compose.data.db
 
 import androidx.room.Dao
 import androidx.room.Insert
@@ -10,6 +10,9 @@ import kotlinx.coroutines.flow.Flow
 interface FavoriteDeviceDao {
     @Query("SELECT * FROM favorite_devices ORDER BY timestamp DESC")
     fun getAll(): Flow<List<FavoriteDeviceEntity>>
+
+    @Query("SELECT * FROM favorite_devices ORDER BY timestamp DESC")
+    suspend fun getAllRaw(): List<FavoriteDeviceEntity>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(device: FavoriteDeviceEntity)
