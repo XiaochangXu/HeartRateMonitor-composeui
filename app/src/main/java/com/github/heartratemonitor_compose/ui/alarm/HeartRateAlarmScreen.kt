@@ -160,7 +160,7 @@ fun HeartRateAlarmScreen(
     }
 
     Scaffold(
-        contentWindowInsets = WindowInsets.navigationBars,
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
         topBar = {
             TopAppBar(
                 title = { Text("心率预警") },
@@ -175,7 +175,7 @@ fun HeartRateAlarmScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding)
+                .padding(top = padding.calculateTopPadding())
                 .verticalScroll(rememberScrollState())
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -260,6 +260,8 @@ fun HeartRateAlarmScreen(
                     sharedPreferences.edit().putInt("heart_rate_alarm_repeat_interval_minutes", value).apply()
                 }
             )
+            // 底部留出系统导航栏空间，避免内容被手势条遮挡
+            Spacer(Modifier.height(16.dp + WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()))
         }
     }
 }
@@ -274,8 +276,8 @@ private fun PostureCard(
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Column(
@@ -347,15 +349,15 @@ private fun CalibrationCard(
 
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
+        shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(
                 text = "姿态校准",
-                style = MaterialTheme.typography.titleSmall,
-                color = MaterialTheme.colorScheme.primary
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Spacer(Modifier.height(12.dp))
 
@@ -423,120 +425,150 @@ private fun AlarmSettingsCard(
     repeatInterval: Int,
     onRepeatIntervalChange: (Int) -> Unit
 ) {
-    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+    Column {
         Text(
             text = "预警设置",
-            style = MaterialTheme.typography.titleSmall,
-            color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.padding(bottom = 8.dp)
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(bottom = 12.dp)
         )
 
-        // 启用开关
-        AlarmElevatedItemCard {
-            AlarmSwitch(
-                checked = alarmEnabled,
-                onCheckedChange = onAlarmEnabledChange,
-                title = "启用心率预警",
-                leadingIcon = painterResource(R.drawable.ic_enable_alarm)
-            )
-        }
-
-        // 排除姿态检测开关（位于启用心率预警下方）
-        AlarmElevatedItemCard {
-            AlarmSwitch(
-                checked = excludePostureDetection,
-                onCheckedChange = onExcludePostureDetectionChange,
-                title = "排除姿态检测",
-                leadingIcon = painterResource(R.drawable.ic_hide_source)
-            )
-        }
-
-        // 超过阈值（动态下限：至少比低阈值大 1）
-        AlarmElevatedItemCard {
-            AlarmDragSlider(
-                label = "超过",
-                value = highThreshold,
-                onValueChange = onHighThresholdChange,
-                range = maxOf(HIGH_THRESHOLD_MIN, lowThreshold + 1)..HIGH_THRESHOLD_MAX,
-                suffix = " BPM",
-                leadingIcon = painterResource(R.drawable.ic_trending_up)
-            )
-        }
-
-        // 低于阈值（动态上限：至多比高阈值小 1）
-        AlarmElevatedItemCard {
-            AlarmDragSlider(
-                label = "低于",
-                value = lowThreshold,
-                onValueChange = onLowThresholdChange,
-                range = LOW_THRESHOLD_MIN..minOf(LOW_THRESHOLD_MAX, highThreshold - 1),
-                suffix = " BPM",
-                leadingIcon = painterResource(R.drawable.ic_trending_down)
-            )
-        }
-
-        // 持续时长
-        AlarmElevatedItemCard {
-            AlarmDragSlider(
-                label = "持续",
-                value = durationSeconds,
-                onValueChange = onDurationChange,
-                range = DURATION_MIN..60,
-                suffix = " 秒",
-                leadingIcon = painterResource(R.drawable.ic_hourglass)
-            )
-        }
-
-        // 重复报警开关
-        AlarmElevatedItemCard {
-            AlarmSwitch(
-                checked = repeatEnabled,
-                onCheckedChange = onRepeatEnabledChange,
-                title = "重复报警",
-                leadingIcon = painterResource(R.drawable.ic_repeat_alarm)
-            )
-        }
-
-        if (repeatEnabled) {
-            AlarmElevatedItemCard {
-                AlarmDragSlider(
-                    label = "报警间隔",
-                    value = repeatInterval,
-                    onValueChange = onRepeatIntervalChange,
-                    range = REPEAT_INTERVAL_MIN..30,
-                    suffix = " 分钟",
-                    leadingIcon = painterResource(R.drawable.ic_alarm_interval)
+        AlarmGroupCard {
+            // 启用开关
+            AlarmItem {
+                AlarmSwitch(
+                    checked = alarmEnabled,
+                    onCheckedChange = onAlarmEnabledChange,
+                    title = "启用心率预警",
+                    leadingIcon = painterResource(R.drawable.ic_enable_alarm)
                 )
+            }
+
+            AlarmDivider()
+            // 排除姿态检测开关（位于启用心率预警下方）
+            AlarmItem {
+                AlarmSwitch(
+                    checked = excludePostureDetection,
+                    onCheckedChange = onExcludePostureDetectionChange,
+                    title = "排除姿态检测",
+                    leadingIcon = painterResource(R.drawable.ic_hide_source)
+                )
+            }
+
+            AlarmDivider()
+            // 超过阈值（动态下限：至少比低阈值大 1）
+            AlarmItem {
+                AlarmDragSlider(
+                    label = "超过",
+                    value = highThreshold,
+                    onValueChange = onHighThresholdChange,
+                    range = maxOf(HIGH_THRESHOLD_MIN, lowThreshold + 1)..HIGH_THRESHOLD_MAX,
+                    suffix = " BPM",
+                    leadingIcon = painterResource(R.drawable.ic_trending_up)
+                )
+            }
+
+            AlarmDivider()
+            // 低于阈值（动态上限：至多比高阈值小 1）
+            AlarmItem {
+                AlarmDragSlider(
+                    label = "低于",
+                    value = lowThreshold,
+                    onValueChange = onLowThresholdChange,
+                    range = LOW_THRESHOLD_MIN..minOf(LOW_THRESHOLD_MAX, highThreshold - 1),
+                    suffix = " BPM",
+                    leadingIcon = painterResource(R.drawable.ic_trending_down)
+                )
+            }
+
+            AlarmDivider()
+            // 持续时长
+            AlarmItem {
+                AlarmDragSlider(
+                    label = "持续",
+                    value = durationSeconds,
+                    onValueChange = onDurationChange,
+                    range = DURATION_MIN..60,
+                    suffix = " 秒",
+                    leadingIcon = painterResource(R.drawable.ic_hourglass)
+                )
+            }
+
+            AlarmDivider()
+            // 重复报警开关
+            AlarmItem {
+                AlarmSwitch(
+                    checked = repeatEnabled,
+                    onCheckedChange = onRepeatEnabledChange,
+                    title = "重复报警",
+                    leadingIcon = painterResource(R.drawable.ic_repeat_alarm)
+                )
+            }
+
+            if (repeatEnabled) {
+                AlarmDivider()
+                AlarmItem {
+                    AlarmDragSlider(
+                        label = "报警间隔",
+                        value = repeatInterval,
+                        onValueChange = onRepeatIntervalChange,
+                        range = REPEAT_INTERVAL_MIN..30,
+                        suffix = " 分钟",
+                        leadingIcon = painterResource(R.drawable.ic_alarm_interval)
+                    )
+                }
             }
         }
     }
 }
 
+/**
+ * 分组卡片容器：用一张圆角卡片包裹同组的多个设置项，
+ * 项之间用 [AlarmDivider] 分隔。与设置页风格统一为 Material 3 grouped list。
+ */
 @Composable
-private fun AlarmElevatedItemCard(
+private fun AlarmGroupCard(
+    content: @Composable ColumnScope.() -> Unit
+) {
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(20.dp),
+        color = MaterialTheme.colorScheme.surfaceContainerHigh,
+        contentColor = MaterialTheme.colorScheme.onSurface
+    ) {
+        Column(content = content)
+    }
+}
+
+/**
+ * 分组卡片内的单个设置项行（不再包裹独立 Card）。
+ * - [onClick] 非空时整行可点击，ripple 覆盖整行（含圆角由外层 Surface clip）。
+ * - 最小高度 56dp，与 MD3 列表规范一致。
+ */
+@Composable
+private fun AlarmItem(
     onClick: (() -> Unit)? = null,
     content: @Composable () -> Unit
 ) {
-    Card(
-        modifier = if (onClick != null) {
-            Modifier.fillMaxWidth().clickable(onClick = onClick)
-        } else {
-            Modifier.fillMaxWidth()
-        },
-        shape = RoundedCornerShape(16.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh)
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .heightIn(min = 56.dp)
+            .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        verticalArrangement = Arrangement.Center
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .heightIn(min = 56.dp)
-                .padding(horizontal = 16.dp, vertical = 8.dp),
-            verticalArrangement = Arrangement.Center
-        ) {
-            content()
-        }
+        content()
     }
+}
+
+/** 分组卡片内项之间的分隔线。左右留 16dp 与行内容对齐。 */
+@Composable
+private fun AlarmDivider() {
+    HorizontalDivider(
+        color = MaterialTheme.colorScheme.outlineVariant,
+        modifier = Modifier.padding(horizontal = 16.dp)
+    )
 }
 
 // ────────────────── M3 Expressive 开关组件 ──────────────────

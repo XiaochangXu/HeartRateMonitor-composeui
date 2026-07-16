@@ -23,9 +23,11 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
@@ -33,8 +35,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bluetooth
 import androidx.compose.material.icons.filled.BluetoothDisabled
@@ -42,7 +45,6 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Fullscreen
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.SignalCellularAlt
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.StarBorder
 import androidx.compose.material3.AlertDialog
@@ -52,6 +54,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -119,14 +122,13 @@ import com.patrykandpatrick.vico.compose.common.Fill
  * 内部实时图表用 Vico [CartesianChartHost]（阶段 4 已从 AndroidView{LineChart} 迁移）。
  *
  * @param onOpenHistory 跳转历史页（仍是独立 Activity，阶段6后改 nav route）
- * @param onToggleFloatingWindow 切换悬浮窗开关（包含权限检查，由 Activity 处理）
+ * @param onEnterFullScreen 进入全屏心率模式
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     viewModel: MainViewModel,
     onOpenHistory: () -> Unit,
-    onToggleFloatingWindow: () -> Unit,
     onEnterFullScreen: () -> Unit
 ) {
     val context = LocalContext.current
@@ -147,7 +149,6 @@ fun HomeScreen(
     var isHistoryEnabled by remember { mutableStateOf(sharedPreferences.getBoolean("history_recording_enabled", false)) }
     var isSpeedEnabled by remember { mutableStateOf(sharedPreferences.getBoolean("speed_display_enabled", false)) }
     var isAnimationEnabled by remember { mutableStateOf(sharedPreferences.getBoolean("heartbeat_animation_enabled", true)) }
-    var floatingWindowEnabled by remember { mutableStateOf(sharedPreferences.getBoolean("floating_window_enabled", false)) }
 
     // 首次搜索提示弹窗（只弹出一次）
     var showSearchTipDialog by remember { mutableStateOf(false) }
@@ -159,7 +160,6 @@ fun HomeScreen(
                 "history_recording_enabled" -> isHistoryEnabled = sharedPreferences.getBoolean("history_recording_enabled", false)
                 "speed_display_enabled" -> isSpeedEnabled = sharedPreferences.getBoolean("speed_display_enabled", false)
                 "heartbeat_animation_enabled" -> isAnimationEnabled = sharedPreferences.getBoolean("heartbeat_animation_enabled", true)
-                "floating_window_enabled" -> floatingWindowEnabled = sharedPreferences.getBoolean("floating_window_enabled", false)
             }
         }
         sharedPreferences.registerOnSharedPreferenceChangeListener(listener)
@@ -181,18 +181,6 @@ fun HomeScreen(
                     )
                 },
                 actions = {
-                    // 悬浮窗开关
-                    IconButton(onClick = onToggleFloatingWindow) {
-                        Icon(
-                            painter = painterResource(
-                                if (floatingWindowEnabled) R.drawable.ic_floating_window_on
-                                else R.drawable.ic_floating_window_off
-                            ),
-                            contentDescription = "切换悬浮窗",
-                            tint = if (floatingWindowEnabled) MaterialTheme.colorScheme.primary
-                                   else MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
                     // 历史按钮
                     IconButton(onClick = onOpenHistory) {
                         Icon(
@@ -227,7 +215,8 @@ fun HomeScreen(
         HomeContent(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding),
+                // 仅应用顶部 padding（TopAppBar 高度），底部不应用 padding 让内容延伸到屏幕底部
+                .padding(top = padding.calculateTopPadding()),
             viewModel = viewModel,
             heartRate = heartRate,
             speed = speed,
@@ -292,9 +281,16 @@ private fun HomeContent(
         )
     }
 
+    // 内容延伸到屏幕底部（iOS 风格），底部 contentPadding 留出胶囊+系统导航栏空间
+    val navBarInset = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
     LazyColumn(
         modifier = modifier,
-        contentPadding = PaddingValues(16.dp),
+        contentPadding = PaddingValues(
+            start = 16.dp,
+            end = 16.dp,
+            top = 16.dp,
+            bottom = 16.dp + 64.dp + 8.dp + navBarInset // 胶囊高度+边距+系统导航栏
+        ),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         // 顶部卡片行：心率卡 + 速度卡
@@ -330,28 +326,62 @@ private fun HomeContent(
             }
         }
 
-        // 设备列表标题（未连接时）
+        // 可用设备卡片容器（未连接时）：圆角卡片包裹整个设备列表，支持上下滑动选择蓝牙设备
         if (!isConnected) {
             item {
-                Text(
-                    text = "可用设备",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-            }
+                Surface(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(max = 400.dp),
+                    shape = RoundedCornerShape(20.dp),
+                    color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                    contentColor = MaterialTheme.colorScheme.onSurface
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .verticalScroll(rememberScrollState())
+                    ) {
+                        // 标题
+                        Text(
+                            text = "可用设备",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp)
+                        )
+                        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
-            items(
-                items = sortedScanResults,
-                key = { it.identifier }
-            ) { advertisement ->
-                DeviceItem(
-                    advertisement = advertisement,
-                    isFavorite = advertisement.identifier == favoriteDeviceId,
-                    onDeviceClick = { viewModel.connectToDevice(advertisement.identifier) },
-                    onFavoriteClick = {
-                        viewModel.toggleFavoriteDevice(advertisement)
+                        if (sortedScanResults.isEmpty()) {
+                            // 空状态：暂无设备
+                            Text(
+                                text = "暂无可用设备，请点击右上角搜索",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 16.dp, vertical = 24.dp)
+                            )
+                        } else {
+                            sortedScanResults.forEachIndexed { index, advertisement ->
+                                DeviceItem(
+                                    advertisement = advertisement,
+                                    isFavorite = advertisement.identifier == favoriteDeviceId,
+                                    onDeviceClick = { viewModel.connectToDevice(advertisement.identifier) },
+                                    onFavoriteClick = {
+                                        viewModel.toggleFavoriteDevice(advertisement)
+                                    }
+                                )
+                                if (index < sortedScanResults.lastIndex) {
+                                    HorizontalDivider(
+                                        color = MaterialTheme.colorScheme.outlineVariant,
+                                        modifier = Modifier.padding(horizontal = 16.dp)
+                                    )
+                                }
+                            }
+                        }
                     }
-                )
+                }
             }
         }
 
@@ -536,7 +566,7 @@ private fun HeartRateCard(
  * 速度卡片：遵循 Material 3 规范。
  * - 容器使用 MD3 [Card] 组件 (Filled 变体,0dp 阴影,保持与 HeartRateCard 平齐)
  * - 形状/排版均使用 MaterialTheme 令牌 (shapes.extraLarge、typography.*)
- * - 容器色 surfaceContainerLow,onSurfaceVariant 作为辅助文本色,符合 M3 色调层级
+ * - 容器色 surfaceContainer,onSurfaceVariant 作为辅助文本色,符合 M3 色调层级
  */
 @Composable
 private fun SpeedCard(
@@ -547,7 +577,7 @@ private fun SpeedCard(
         modifier = modifier.height(150.dp),
         shape = MaterialTheme.shapes.extraLarge,
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
             contentColor = MaterialTheme.colorScheme.onSurface
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
@@ -660,7 +690,7 @@ private fun RealtimeChart(
     Surface(
         modifier = modifier,
         shape = RoundedCornerShape(16.dp),
-        color = MaterialTheme.colorScheme.surfaceContainerLow
+        color = MaterialTheme.colorScheme.surfaceContainerHigh
     ) {
         CartesianChartHost(
             chart = rememberCartesianChart(
@@ -732,92 +762,67 @@ private fun DeviceItem(
     val mediumColor = ComposeColor(0xFFF59E0B)
     val weakColor = ComposeColor(0xFFB00020)   // red_error
 
-    // 强信号用 Material Icons；中弱信号用自定义 1/2 格 drawable（Material Icons 无对应）
-    val signalIconVector: androidx.compose.ui.graphics.vector.ImageVector?
-    val signalIconDrawableRes: Int?
+    // 信号强度统一使用 WiFi 信号图标，通过颜色区分强/中/弱
     val signalTint: ComposeColor
     val rssiColor: ComposeColor
     when {
         rssi > -65 -> {
-            signalIconVector = Icons.Filled.SignalCellularAlt
-            signalIconDrawableRes = null
             signalTint = strongColor
             rssiColor = strongColor
         }
         rssi > -80 -> {
-            signalIconVector = null
-            signalIconDrawableRes = R.drawable.ic_signal_cellular_alt_2_bar
             signalTint = mediumColor
             rssiColor = mediumColor
         }
         else -> {
-            signalIconVector = null
-            signalIconDrawableRes = R.drawable.ic_signal_cellular_alt_1_bar
             signalTint = weakColor
             rssiColor = weakColor
         }
     }
 
-    Surface(
+    Row(
         modifier = Modifier
             .fillMaxWidth()
-            .heightIn(min = 80.dp),
-        shape = RoundedCornerShape(16.dp),
-        color = MaterialTheme.colorScheme.surface,
-        border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
-        onClick = onDeviceClick
+            .heightIn(min = 72.dp)
+            .clickable { onDeviceClick() }
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = advertisement.name ?: "Unknown Device",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-                Spacer(Modifier.height(4.dp))
-                Text(
-                    text = advertisement.identifier,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-            if (signalIconVector != null) {
-                Icon(
-                    imageVector = signalIconVector,
-                    contentDescription = null,
-                    tint = signalTint,
-                    modifier = Modifier.size(20.dp)
-                )
-            } else if (signalIconDrawableRes != null) {
-                Icon(
-                    painter = painterResource(signalIconDrawableRes),
-                    contentDescription = null,
-                    tint = signalTint,
-                    modifier = Modifier.size(20.dp)
-                )
-            }
-            Spacer(Modifier.width(8.dp))
+        Column(modifier = Modifier.weight(1f)) {
             Text(
-                text = "${rssi}dBm",
-                style = MaterialTheme.typography.labelSmall,
-                color = rssiColor
+                text = advertisement.name ?: "Unknown Device",
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
-            Spacer(Modifier.width(8.dp))
-            IconButton(onClick = onFavoriteClick) {
-                Icon(
-                    imageVector = if (isFavorite) Icons.Filled.Star
-                                   else Icons.Filled.StarBorder,
-                    contentDescription = "收藏",
-                    tint = MaterialTheme.colorScheme.primary
-                )
-            }
+            Spacer(Modifier.height(4.dp))
+            Text(
+                text = advertisement.identifier,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+        Icon(
+            painter = painterResource(R.drawable.ic_signal_wifi),
+            contentDescription = null,
+            tint = signalTint,
+            modifier = Modifier.size(20.dp)
+        )
+        Spacer(Modifier.width(8.dp))
+        Text(
+            text = "${rssi}dBm",
+            style = MaterialTheme.typography.labelSmall,
+            color = rssiColor
+        )
+        Spacer(Modifier.width(8.dp))
+        IconButton(onClick = onFavoriteClick) {
+            Icon(
+                imageVector = if (isFavorite) Icons.Filled.Star
+                               else Icons.Filled.StarBorder,
+                contentDescription = "收藏",
+                tint = MaterialTheme.colorScheme.primary
+            )
         }
     }
 }

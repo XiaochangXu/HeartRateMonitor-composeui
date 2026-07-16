@@ -35,6 +35,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import com.github.heartratemonitor_compose.R
+import kotlinx.coroutines.launch
 import kotlin.math.atan2
 import kotlin.math.cos
 import kotlin.math.sin
@@ -84,7 +85,8 @@ fun SettingsScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding)
+                // 仅应用顶部 padding（TopAppBar 高度），底部不应用 padding 让内容延伸到屏幕底部
+                .padding(top = padding.calculateTopPadding())
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 16.dp),
             verticalArrangement = Arrangement.spacedBy(0.dp)
@@ -105,7 +107,8 @@ fun SettingsScreen(
             )
             Spacer(Modifier.height(24.dp))
             AboutSection(sharedPreferences, onNavigate, onOpenExternal)
-            Spacer(Modifier.height(32.dp))
+            // 内容延伸到屏幕底部（iOS 风格），末尾留出胶囊+系统导航栏空间
+            Spacer(Modifier.height(64.dp + 8.dp + WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()))
         }
     }
 
@@ -146,47 +149,53 @@ private fun SectionTitle(title: String) {
     )
 }
 
+/**
+ * 分组卡片容器：用一张圆角卡片包裹同组的多个设置项，
+ * 项之间用 [SettingsDivider] 分隔。统一为 Material 3 grouped list 风格。
+ */
 @Composable
-private fun SettingsItemCard(
+private fun SettingsGroupCard(
+    content: @Composable ColumnScope.() -> Unit
+) {
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(20.dp),
+        color = MaterialTheme.colorScheme.surfaceContainerHigh,
+        contentColor = MaterialTheme.colorScheme.onSurface
+    ) {
+        Column(content = content)
+    }
+}
+
+/**
+ * 分组卡片内的单个设置项行（不再包裹独立 Card）。
+ * - [onClick] 非空时整行可点击，ripple 覆盖整行（含圆角由外层 Surface clip）。
+ * - 最小高度 56dp，与 MD3 列表规范一致。
+ */
+@Composable
+private fun SettingsItem(
     onClick: (() -> Unit)? = null,
     content: @Composable () -> Unit
 ) {
-    val shape = RoundedCornerShape(16.dp)
-    val elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
-    val colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh)
-
-    // 用 Card(onClick) 重载（而非 modifier.clickable）：该重载把 ripple 关联到 shape，
-    // ripple 被正确 clip 到圆角内，不会溢出到圆角外侧的矩形角落。
-    val columnContent: @Composable ColumnScope.() -> Unit = {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .heightIn(min = 56.dp)
-                .padding(horizontal = 16.dp, vertical = 8.dp),
-            verticalArrangement = Arrangement.Center
-        ) {
-            content()
-        }
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .heightIn(min = 56.dp)
+            .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        verticalArrangement = Arrangement.Center
+    ) {
+        content()
     }
+}
 
-    if (onClick != null) {
-        Card(
-            onClick = onClick,
-            modifier = Modifier.fillMaxWidth(),
-            shape = shape,
-            elevation = elevation,
-            colors = colors,
-            content = columnContent
-        )
-    } else {
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            shape = shape,
-            elevation = elevation,
-            colors = colors,
-            content = columnContent
-        )
-    }
+/** 分组卡片内项之间的分隔线。左右留 16dp 与行内容对齐。 */
+@Composable
+private fun SettingsDivider() {
+    HorizontalDivider(
+        color = MaterialTheme.colorScheme.outlineVariant,
+        modifier = Modifier.padding(horizontal = 16.dp)
+    )
 }
 
 @Composable
@@ -242,7 +251,7 @@ private fun SettingsLink(
     leadingIcon: Painter? = null
 ) {
     // 纯展示组件：不在此处处理点击。
-    // 点击由外层 SettingsItemCard(onClick = ...) 承担，使 ripple 覆盖整个圆角卡片
+    // 点击由外层 SettingsItem(onClick = ...) 承担，使 ripple 覆盖整行
     // （含水平 16dp 边距与圆角处），而非仅覆盖被 Column padding 包裹的 Row 中间区域。
     Row(
         modifier = Modifier
@@ -416,9 +425,9 @@ private fun GeneralSection(
     val showSpeedDialog = remember { mutableStateOf(false) }
 
     SectionTitle("常规")
-    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+    SettingsGroupCard {
         // 记录历史数据
-        SettingsItemCard {
+        SettingsItem {
             SettingsSwitch(
                 checked = isHistoryEnabled,
                 onCheckedChange = { checked ->
@@ -452,8 +461,9 @@ private fun GeneralSection(
             )
         }
 
+        SettingsDivider()
         // 心跳动画效果
-        SettingsItemCard {
+        SettingsItem {
             SettingsSwitch(
                 checked = isAnimationEnabled,
                 onCheckedChange = {
@@ -465,8 +475,9 @@ private fun GeneralSection(
             )
         }
 
+        SettingsDivider()
         // 显示时速
-        SettingsItemCard {
+        SettingsItem {
             SettingsSwitch(
                 checked = isSpeedEnabled,
                 onCheckedChange = { checked ->
@@ -501,8 +512,9 @@ private fun GeneralSection(
             )
         }
 
+        SettingsDivider()
         // 退出应用隐藏后台
-        SettingsItemCard {
+        SettingsItem {
             SettingsSwitch(
                 checked = isHideFromRecents,
                 onCheckedChange = {
@@ -515,13 +527,15 @@ private fun GeneralSection(
             )
         }
 
+        SettingsDivider()
         // 收藏设备
-        SettingsItemCard(onClick = { onNavigate("favorite") }) {
+        SettingsItem(onClick = { onNavigate("favorite") }) {
             SettingsLink(title = "收藏设备", leadingIcon = painterResource(R.drawable.ic_star))
         }
 
+        SettingsDivider()
         // 心率预警
-        SettingsItemCard(onClick = { onNavigate("alarm") }) {
+        SettingsItem(onClick = { onNavigate("alarm") }) {
             SettingsLink(title = "心率预警", leadingIcon = painterResource(R.drawable.ic_warning))
         }
     }
@@ -533,8 +547,8 @@ private fun BluetoothSection(prefs: SharedPreferences) {
     var isAutoReconnectEnabled by remember { mutableStateOf(prefs.getBoolean("auto_reconnect_enabled", true)) }
 
     SectionTitle("蓝牙")
-    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        SettingsItemCard {
+    SettingsGroupCard {
+        SettingsItem {
             SettingsSwitch(
                 checked = isAutoConnectEnabled,
                 onCheckedChange = {
@@ -546,7 +560,8 @@ private fun BluetoothSection(prefs: SharedPreferences) {
             )
         }
 
-        SettingsItemCard {
+        SettingsDivider()
+        SettingsItem {
             SettingsSwitch(
                 checked = isAutoReconnectEnabled,
                 onCheckedChange = {
@@ -567,12 +582,13 @@ private fun IntegrationSection(
     onRequestMediaProjection: (Intent) -> Unit
 ) {
     SectionTitle("集成 & 外部访问")
-    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        SettingsItemCard(onClick = { onNavigate("server") }) {
+    SettingsGroupCard {
+        SettingsItem(onClick = { onNavigate("server") }) {
             SettingsLink(title = "HTTP & WebSocket 服务器", leadingIcon = painterResource(R.drawable.ic_http_websocket))
         }
 
-        SettingsItemCard(onClick = { onNavigate("webhook") }) {
+        SettingsDivider()
+        SettingsItem(onClick = { onNavigate("webhook") }) {
             SettingsLink(title = "Webhook 设置", leadingIcon = painterResource(R.drawable.ic_webhook))
         }
     }
@@ -585,9 +601,9 @@ private fun StatusBarSection(
 ) {
     val context = LocalContext.current
     SectionTitle("状态栏常驻")
-    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+    SettingsGroupCard {
         // 状态栏常驻心率
-        SettingsItemCard {
+        SettingsItem {
             var residentChecked by remember { mutableStateOf(prefs.getBoolean("status_bar_resident_enabled", false)) }
 
             Row(
@@ -678,8 +694,9 @@ private fun StatusBarSection(
             }
         }
 
+        SettingsDivider()
         // 显示 'bpm' 单位
-        SettingsItemCard {
+        SettingsItem {
             var isBpmTextEnabled by remember { mutableStateOf(prefs.getBoolean("status_bar_bpm_text_enabled", true)) }
             SettingsSwitch(
                 checked = isBpmTextEnabled,
@@ -692,8 +709,9 @@ private fun StatusBarSection(
             )
         }
 
+        SettingsDivider()
         // 水平位置
-        SettingsItemCard {
+        SettingsItem {
             DragSlider(
                 label = "水平位置",
                 value = prefs.getInt("status_bar_x_position", 0),
@@ -704,8 +722,9 @@ private fun StatusBarSection(
             )
         }
 
+        SettingsDivider()
         // 垂直微调
-        SettingsItemCard {
+        SettingsItem {
             DragSlider(
                 label = "垂直微调",
                 value = prefs.getInt("status_bar_y_offset", 10),
@@ -716,8 +735,9 @@ private fun StatusBarSection(
             )
         }
 
+        SettingsDivider()
         // 整体大小
-        SettingsItemCard {
+        SettingsItem {
             DragSlider(
                 label = "整体大小",
                 value = prefs.getInt("status_bar_size", 100),
@@ -728,8 +748,9 @@ private fun StatusBarSection(
             )
         }
 
+        SettingsDivider()
         // 文字粗细
-        SettingsItemCard {
+        SettingsItem {
             DragSlider(
                 label = "文字粗细",
                 value = prefs.getInt("status_bar_text_thickness", 0),
@@ -740,8 +761,9 @@ private fun StatusBarSection(
             )
         }
 
+        SettingsDivider()
         // 文字颜色：黑/白预设，点击切换 status_bar_white_text
-        SettingsItemCard {
+        SettingsItem {
             Column {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -787,8 +809,9 @@ private fun StatusBarSection(
             }
         }
 
+        SettingsDivider()
         // 自动识别屏幕颜色
-        SettingsItemCard {
+        SettingsItem {
             var autoChecked by remember { mutableStateOf(prefs.getBoolean("status_bar_auto_color", false)) }
             // 监听 sharedPrefs 变化：MediaProjection 授权结果由 MainActivity 异步写入，
             // 不监听会导致开关状态与实际启用状态不一致。
@@ -872,8 +895,9 @@ private fun StatusBarSection(
             }
         }
 
+        SettingsDivider()
         // 使用白色文字
-        SettingsItemCard {
+        SettingsItem {
             var whiteChecked by remember { mutableStateOf(prefs.getBoolean("status_bar_white_text", false)) }
 
             Row(
@@ -939,9 +963,9 @@ private fun FloatingWindowSection(
     onShowColorPicker: (prefKey: String, title: String, defaultColor: Int) -> Unit
 ) {
     SectionTitle("悬浮窗样式")
-    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+    SettingsGroupCard {
         // 说明
-        SettingsItemCard {
+        SettingsItem {
             Text(
                 text = "长按悬浮窗开启触摸穿透，开启后触摸直接传递给下方应用，不影响手机其他操作。再次长按悬浮窗或点击通知栏按钮关闭。",
                 style = MaterialTheme.typography.bodySmall,
@@ -949,8 +973,9 @@ private fun FloatingWindowSection(
             )
         }
 
+        SettingsDivider()
         // 显示 'bpm' 文字
-        SettingsItemCard {
+        SettingsItem {
             var isBpmTextEnabled by remember { mutableStateOf(prefs.getBoolean("bpm_text_enabled", true)) }
             SettingsSwitch(
                 checked = isBpmTextEnabled,
@@ -963,8 +988,9 @@ private fun FloatingWindowSection(
             )
         }
 
+        SettingsDivider()
         // 显示心形图标
-        SettingsItemCard {
+        SettingsItem {
             var isHeartIconEnabled by remember { mutableStateOf(prefs.getBoolean("heart_icon_enabled", true)) }
             SettingsSwitch(
                 checked = isHeartIconEnabled,
@@ -977,8 +1003,9 @@ private fun FloatingWindowSection(
             )
         }
 
+        SettingsDivider()
         // 整体大小
-        SettingsItemCard {
+        SettingsItem {
             DragSlider(
                 label = "整体大小",
                 value = prefs.getInt("floating_size", 100),
@@ -989,8 +1016,9 @@ private fun FloatingWindowSection(
             )
         }
 
+        SettingsDivider()
         // 图标大小
-        SettingsItemCard {
+        SettingsItem {
             DragSlider(
                 label = "图标大小",
                 value = prefs.getInt("floating_icon_size", 100),
@@ -1001,8 +1029,9 @@ private fun FloatingWindowSection(
             )
         }
 
+        SettingsDivider()
         // 圆角半径
-        SettingsItemCard {
+        SettingsItem {
             DragSlider(
                 label = "圆角半径",
                 value = prefs.getInt("floating_corner_radius", 50),
@@ -1013,8 +1042,9 @@ private fun FloatingWindowSection(
             )
         }
 
+        SettingsDivider()
         // 背景不透明度
-        SettingsItemCard {
+        SettingsItem {
             DragSlider(
                 label = "背景不透明度",
                 value = prefs.getInt("floating_bg_alpha", 80),
@@ -1025,8 +1055,9 @@ private fun FloatingWindowSection(
             )
         }
 
+        SettingsDivider()
         // 边框不透明度
-        SettingsItemCard {
+        SettingsItem {
             DragSlider(
                 label = "边框不透明度",
                 value = prefs.getInt("floating_border_alpha", 100),
@@ -1037,8 +1068,9 @@ private fun FloatingWindowSection(
             )
         }
 
+        SettingsDivider()
         // 颜色选择
-        SettingsItemCard {
+        SettingsItem {
             Column {
                 // 标题行:Leading Icon + 标题文字
                 Row(
@@ -1090,10 +1122,30 @@ private fun AboutSection(
     onOpenExternal: (Intent) -> Unit
 ) {
     val aboutContext = LocalContext.current
+    val scope = rememberCoroutineScope()
+
+    // 当前版本号（去除 'v' 前缀，用于与 GitHub Release tag 对比）
+    val currentVersion = remember {
+        try {
+            val raw = aboutContext.packageManager
+                .getPackageInfo(aboutContext.packageName, 0).versionName
+            if (raw != null) raw.removePrefix("v").removePrefix("V") else "未知"
+        } catch (e: Exception) {
+            "未知"
+        }
+    }
+
+    // 检查更新状态：null=未触发；Checking=检查中；Result=已返回结果
+    var updateState by remember { mutableStateOf<Any?>(null) }
+    // 更新提示弹窗：UpdateChecker.Result.UpdateAvailable 时显示
+    var updateDialog by remember { mutableStateOf<UpdateChecker.Result.UpdateAvailable?>(null) }
+    // 错误/已是最新版提示弹窗
+    var messageDialog by remember { mutableStateOf<String?>(null) }
+
     SectionTitle("关于")
-    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+    SettingsGroupCard {
         // 版本
-        SettingsItemCard {
+        SettingsItem {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
@@ -1111,28 +1163,55 @@ private fun AboutSection(
                     color = MaterialTheme.colorScheme.onSurface
                 )
                 Spacer(Modifier.width(8.dp))
-                val versionName = remember {
-                    try {
-                        aboutContext.packageManager.getPackageInfo(aboutContext.packageName, 0).versionName ?: "未知"
-                    } catch (e: Exception) {
-                        "未知"
-                    }
-                }
                 Text(
-                    text = versionName,
+                    text = currentVersion,
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
         }
 
+        SettingsDivider()
+        // 检查更新（GitHub Release）
+        SettingsItem(
+            onClick = {
+                if (updateState is UpdateChecker.Result.UpdateAvailable) {
+                    // 已经知道有更新，直接打开弹窗
+                    updateDialog = updateState as UpdateChecker.Result.UpdateAvailable
+                } else {
+                    // 发起新的检查
+                    updateState = UpdateChecker.Result.Error("正在检查...") // 占位，避免重复点击
+                    scope.launch {
+                        val result = UpdateChecker.check(currentVersion)
+                        updateState = result
+                        when (result) {
+                            is UpdateChecker.Result.UpdateAvailable -> updateDialog = result
+                            is UpdateChecker.Result.UpToDate ->
+                                messageDialog = "当前已是最新版本（v${result.currentVersion}）"
+                            is UpdateChecker.Result.Error ->
+                                messageDialog = result.message
+                        }
+                    }
+                }
+            }
+        ) {
+            SettingsLink(
+                title = if (updateState is UpdateChecker.Result.Error &&
+                            (updateState as UpdateChecker.Result.Error).message == "正在检查...")
+                            "正在检查..." else "检查更新",
+                leadingIcon = painterResource(R.drawable.ic_check_update)
+            )
+        }
+
+        SettingsDivider()
         // 公平运行内存
-        SettingsItemCard(onClick = { onNavigate("fair_memory") }) {
+        SettingsItem(onClick = { onNavigate("fair_memory") }) {
             SettingsLink(title = "公平运行内存", leadingIcon = painterResource(R.drawable.ic_fair_memory))
         }
 
+        SettingsDivider()
         // GitHub
-        SettingsItemCard(
+        SettingsItem(
             onClick = {
                 val intent = android.content.Intent(
                     android.content.Intent.ACTION_VIEW,
@@ -1144,6 +1223,72 @@ private fun AboutSection(
         ) {
             SettingsLink(title = "访问 GitHub 仓库", leadingIcon = painterResource(R.drawable.ic_github_repo))
         }
+    }
+
+    // ── 发现新版本弹窗 ──
+    // 左下角"确认"关闭弹窗；右下角"跳转更新"打开 GitHub Release 页
+    updateDialog?.let { info ->
+        AlertDialog(
+            onDismissRequest = { updateDialog = null },
+            title = { Text("发现新版本 v${info.newVersion}") },
+            text = {
+                Column {
+                    Text(
+                        text = "当前版本：v$currentVersion",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(Modifier.height(12.dp))
+                    if (info.releaseNotes.isNotEmpty()) {
+                        Text(
+                            text = "更新内容：",
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.Medium
+                        )
+                        Spacer(Modifier.height(4.dp))
+                        Text(
+                            text = info.releaseNotes,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    } else {
+                        Text(
+                            text = "暂无更新日志",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            },
+            // 左下角：确认（关闭弹窗）
+            confirmButton = {
+                TextButton(onClick = { updateDialog = null }) { Text("确认") }
+            },
+            // 右下角：跳转更新（打开 GitHub Release 页）
+            dismissButton = {
+                TextButton(onClick = {
+                    updateDialog = null
+                    val intent = Intent(
+                        Intent.ACTION_VIEW,
+                        android.net.Uri.parse(info.htmlUrl)
+                    )
+                    com.github.heartratemonitor_compose.ui.main.MainActivity.suppressHideForExternalLaunch = true
+                    onOpenExternal(intent)
+                }) { Text("跳转更新") }
+            }
+        )
+    }
+
+    // ── 通用消息弹窗（已是最新版 / 错误）──
+    messageDialog?.let { msg ->
+        AlertDialog(
+            onDismissRequest = { messageDialog = null },
+            title = { Text("检查更新") },
+            text = { Text(msg) },
+            confirmButton = {
+                TextButton(onClick = { messageDialog = null }) { Text("确认") }
+            }
+        )
     }
 }
 

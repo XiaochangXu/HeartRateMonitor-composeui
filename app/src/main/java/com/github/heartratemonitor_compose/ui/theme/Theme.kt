@@ -1,4 +1,4 @@
-﻿package com.github.heartratemonitor_compose.ui.theme
+package com.github.heartratemonitor_compose.ui.theme
 
 import android.app.Activity
 import android.content.Context
@@ -33,6 +33,7 @@ private val ExpressLightColorScheme = lightColorScheme(
     onSurface = ExpressOnSurfaceLight,
     surfaceVariant = ExpressSurfaceVariantLight,
     onSurfaceVariant = ExpressOnSurfaceVariantLight,
+    surfaceDim = ExpressSurfaceDimLight,
     surfaceContainerLowest = ExpressSurfaceContainerLowestLight,
     surfaceContainerLow = ExpressSurfaceContainerLowLight,
     surfaceContainer = ExpressSurfaceContainerLight,
@@ -58,6 +59,7 @@ private val ExpressDarkColorScheme = darkColorScheme(
     onSurface = ExpressOnSurfaceDark,
     surfaceVariant = ExpressSurfaceVariantDark,
     onSurfaceVariant = ExpressOnSurfaceVariantDark,
+    surfaceDim = ExpressSurfaceDimDark,
     surfaceContainerLowest = ExpressSurfaceContainerLowestDark,
     surfaceContainerLow = ExpressSurfaceContainerLowDark,
     surfaceContainer = ExpressSurfaceContainerDark,

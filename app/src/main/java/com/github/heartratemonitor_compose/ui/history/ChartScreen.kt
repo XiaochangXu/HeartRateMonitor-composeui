@@ -1,8 +1,9 @@
-﻿package com.github.heartratemonitor_compose.ui.history
+package com.github.heartratemonitor_compose.ui.history
 
 import android.content.pm.ActivityInfo
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
@@ -112,7 +113,7 @@ fun ChartScreen(
     }
 
     Scaffold(
-        contentWindowInsets = WindowInsets.navigationBars,
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
         topBar = {
             TopAppBar(
                 title = { Text("心率详情") },
@@ -146,7 +147,7 @@ fun ChartScreen(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding)
+                .padding(top = padding.calculateTopPadding())
         ) {
             if (records.isEmpty()) {
                 Text(
@@ -163,6 +164,7 @@ fun ChartScreen(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(16.dp)
+                        .padding(bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding())
                 )
             }
         }
