@@ -322,7 +322,7 @@ class HeartRateAlarmService : Service() {
 
     private fun triggerAlarm(rate: Int, isHigh: Boolean, posture: PostureType, threshold: Int) {
         val direction = if (isHigh) "超过高限" else "低于低限"
-        val body = "心率 ${rate} BPM ${direction} ${threshold}（${posture.label}状态），请关注"
+        val body = "心率 ${rate} BPM ${direction} ${threshold}（${getString(posture.labelRes)}状态），请关注"
         showAlarmNotification(body)
         vibrate()
     }

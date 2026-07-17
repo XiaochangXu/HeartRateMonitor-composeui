@@ -2,6 +2,7 @@
 
 import android.content.Context
 import android.util.Log
+import com.github.heartratemonitor_compose.R
 import com.github.heartratemonitor_compose.data.Webhook
 import com.github.heartratemonitor_compose.data.WebhookTrigger
 import kotlinx.coroutines.CoroutineScope
@@ -21,9 +22,9 @@ import java.net.HttpURLConnection
 import java.net.URL
 import java.util.Locale
 
-// 修复：移除 'private val'，使 context 仅作为构造参数，不作为属性
 class WebhookManager(context: Context) {
 
+    private val appContext = context.applicationContext
     private val webhookFile = File(context.filesDir, "config_webhook.json")
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     private val githubUrl = "https://raw.githubusercontent.com/ccc007ccc/HeartRateMonitor/main/config_webhook.json"
@@ -110,7 +111,7 @@ class WebhookManager(context: Context) {
                         connection.setRequestProperty(key, headersJson.getString(key))
                     }
                 } catch (e: JSONException) {
-                    return@withContext "发送失败: Headers不是有效的JSON格式: ${e.message}"
+                    return@withContext appContext.getString(R.string.webhook_send_failed_headers, e.message)
                 }
                 if(connection.getRequestProperty("Content-Type") == null){
                     connection.setRequestProperty("Content-Type", "application/json")
@@ -141,19 +142,23 @@ class WebhookManager(context: Context) {
                     }
                 } ?: ""
 
-                val responseTitle = if (isTest) "Webhook 测试响应" else "Webhook 已发送"
+                val responseTitle = if (isTest) appContext.getString(R.string.webhook_test_response) else appContext.getString(R.string.webhook_sent)
+                val nameLabel = appContext.getString(R.string.webhook_resp_name)
+                val triggerLabel = appContext.getString(R.string.webhook_resp_trigger)
+                val statusLabel = appContext.getString(R.string.webhook_resp_status)
+                val bodyLabel = appContext.getString(R.string.webhook_resp_body)
                 """
                 --- $responseTitle ---
-                名称: ${webhook.name}
-                触发于: ${trigger.name}
-                状态码: $responseCode $responseMessage
-                响应体:
+                $nameLabel: ${webhook.name}
+                $triggerLabel: ${trigger.name}
+                $statusLabel: $responseCode $responseMessage
+                $bodyLabel:
                 $responseBody
                 ----------------------
                 """.trimIndent()
 
             } catch (e: Exception) {
-                "发送时发生未知错误: ${e.message}"
+                appContext.getString(R.string.webhook_send_error, e.message)
             } finally {
                 connection?.disconnect()
             }
@@ -192,11 +197,11 @@ class WebhookManager(context: Context) {
                 refreshCache()
 
                 withContext(Dispatchers.Main) {
-                    onComplete(true, "同步成功！已从GitHub获取最新的官方预设。")
+                    onComplete(true, appContext.getString(R.string.webhook_sync_success))
                 }
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
-                    onComplete(false, "同步过程中发生错误: ${e.message}")
+                    onComplete(false, appContext.getString(R.string.webhook_sync_error, e.message))
                 }
             }
         }

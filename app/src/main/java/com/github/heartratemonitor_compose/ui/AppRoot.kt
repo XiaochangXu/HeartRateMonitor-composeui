@@ -74,6 +74,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
@@ -490,14 +491,14 @@ fun AppRoot(
                             selected = currentTab is Screen.Home,
                             onClick = { navigate(Screen.Home) },
                             iconRes = R.drawable.ic_home_symbol,
-                            label = "首页",
+                            label = stringResource(R.string.nav_home),
                             modifier = Modifier.weight(1f)
                         )
                         CapsuleNavItem(
                             selected = currentTab is Screen.Settings,
                             onClick = { navigate(Screen.Settings) },
                             iconRes = R.drawable.ic_settings_symbol,
-                            label = "设置",
+                            label = stringResource(R.string.nav_settings),
                             modifier = Modifier.weight(1f)
                         )
                     }
@@ -519,7 +520,7 @@ fun AppRoot(
                                 if (floatingWindowEnabled) R.drawable.ic_floating_window_on
                                 else R.drawable.ic_floating_window_off
                             ),
-                            contentDescription = "切换悬浮窗",
+                            contentDescription = stringResource(R.string.cd_toggle_floating_window),
                             tint = if (floatingWindowEnabled) MaterialTheme.colorScheme.onPrimary
                                    else MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.size(24.dp)

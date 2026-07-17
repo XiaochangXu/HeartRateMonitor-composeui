@@ -17,6 +17,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -46,9 +47,9 @@ fun ServerScreen(
                 val ip = linkProperties?.linkAddresses
                     ?.firstOrNull { it.address is java.net.Inet4Address }
                     ?.address?.hostAddress
-                ip ?: "未连接网络"
+                ip ?: context.getString(R.string.not_connected_network)
             } catch (e: SecurityException) {
-                "未连接网络"
+                context.getString(R.string.not_connected_network)
             }
         }
     }
@@ -64,10 +65,10 @@ fun ServerScreen(
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         topBar = {
             TopAppBar(
-                title = { Text("服务器设置") },
+                title = { Text(stringResource(R.string.server_settings)) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.AutoMirrored.Default.ArrowBack, "返回")
+                        Icon(Icons.AutoMirrored.Default.ArrowBack, stringResource(R.string.cd_back))
                     }
                 }
             )
@@ -81,33 +82,33 @@ fun ServerScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
-            SectionTitle("HTTP 服务器 (被动拉取)")
+            SectionTitle(stringResource(R.string.http_server_passive))
             ServerCard(
                 enabled = httpEnabled,
                 onEnabledChange = { httpEnabled = it },
                 port = httpPort,
                 onPortChange = { httpPort = it },
-                portHint = "HTTP 端口",
+                portHint = stringResource(R.string.http_port_hint),
                 portDefault = 8000,
                 ipAddress = ipAddress,
                 scheme = "http",
                 leadingIcon = painterResource(R.drawable.ic_enable_http_server)
             )
 
-            SectionTitle("WebSocket 服务器 (主动推送)")
+            SectionTitle(stringResource(R.string.websocket_server_active))
             ServerCard(
                 enabled = wsEnabled,
                 onEnabledChange = { wsEnabled = it },
                 port = wsPort,
                 onPortChange = { wsPort = it },
-                portHint = "WebSocket 端口",
+                portHint = stringResource(R.string.websocket_port_hint),
                 portDefault = 8001,
                 ipAddress = ipAddress,
                 scheme = "ws",
                 leadingIcon = painterResource(R.drawable.ic_enable_websocket_server)
             )
 
-            SectionTitle("服务器状态")
+            SectionTitle(stringResource(R.string.server_status))
             ServerStatusCard(
                 httpEnabled = httpEnabled,
                 httpPort = httpPort.toIntOrNull() ?: 8000,
@@ -133,6 +134,7 @@ private fun ServerCard(
     scheme: String,
     leadingIcon: Painter
 ) {
+    val context = LocalContext.current
     val containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
 
     Card(
@@ -157,7 +159,7 @@ private fun ServerCard(
                 )
                 Spacer(Modifier.width(16.dp))
                 Text(
-                    text = "启用 ${if (scheme == "http") "HTTP" else "WebSocket"} 服务器",
+                    text = context.getString(R.string.enable_server_format, if (scheme == "http") "HTTP" else "WebSocket"),
                     style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.Normal,
                     color = MaterialTheme.colorScheme.onSurface,
@@ -196,7 +198,7 @@ private fun ServerCard(
 
             if (enabled) {
                 Text(
-                    text = "访问地址: $scheme://$ipAddress:${if (port.toIntOrNull() != null) port else portDefault}",
+                    text = context.getString(R.string.access_url_format, scheme, ipAddress, if (port.toIntOrNull() != null) port else portDefault.toString()),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -213,6 +215,7 @@ private fun ServerStatusCard(
     wsPort: Int,
     ipAddress: String
 ) {
+    val context = LocalContext.current
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
@@ -233,16 +236,16 @@ private fun ServerStatusCard(
                 )
                 Spacer(Modifier.width(16.dp))
                 Text(
-                    text = if (httpEnabled) "HTTP 服务器已启用" else "HTTP 服务器已禁用",
+                    text = if (httpEnabled) stringResource(R.string.http_enabled_status) else stringResource(R.string.http_disabled_status),
                     style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.Normal
                 )
             }
             if (httpEnabled) {
                 Text(
-                    text = "访问地址: http://$ipAddress:$httpPort/heartrate",
+                    text = context.getString(R.string.http_access_url, ipAddress, httpPort),
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.padding(top = 8.dp, start = 40.dp)
                 )
             }
@@ -262,14 +265,14 @@ private fun ServerStatusCard(
                 )
                 Spacer(Modifier.width(16.dp))
                 Text(
-                    text = if (wsEnabled) "WebSocket 服务器已启用" else "WebSocket 服务器已禁用",
+                    text = if (wsEnabled) stringResource(R.string.ws_enabled_status) else stringResource(R.string.ws_disabled_status),
                     style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.Normal
                 )
             }
             if (wsEnabled) {
                 Text(
-                    text = "访问地址: ws://$ipAddress:$wsPort",
+                    text = context.getString(R.string.ws_access_url, ipAddress, wsPort),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(top = 8.dp, start = 40.dp)
@@ -284,7 +287,7 @@ private fun SectionTitle(text: String) {
     Text(
         text = text,
         style = MaterialTheme.typography.labelLarge,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        color = MaterialTheme.colorScheme.primary,
         modifier = Modifier.padding(start = 2.dp)
     )
 }

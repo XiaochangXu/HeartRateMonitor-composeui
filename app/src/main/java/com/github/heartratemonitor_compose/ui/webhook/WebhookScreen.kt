@@ -14,10 +14,12 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import com.github.heartratemonitor_compose.R
 import com.github.heartratemonitor_compose.data.Webhook
 import com.github.heartratemonitor_compose.data.WebhookTrigger
 
@@ -43,25 +45,25 @@ fun WebhookScreen(
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         topBar = {
             TopAppBar(
-                title = { Text("Webhook 设置") },
+                title = { Text(stringResource(R.string.webhook_title)) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.AutoMirrored.Default.ArrowBack, "返回")
+                        Icon(Icons.AutoMirrored.Default.ArrowBack, stringResource(R.string.cd_back))
                     }
                 },
                 actions = {
                     IconButton(onClick = { showSyncConfirm = true }) {
-                        Icon(Icons.Default.Add, "从 GitHub 同步")
+                        Icon(Icons.Default.Add, stringResource(R.string.cd_sync_github))
                     }
                 }
             )
         },
         floatingActionButton = {
             FloatingActionButton(
-                onClick = { showEditDialog = Pair(null, Webhook("新的 Webhook", "")) },
+                onClick = { showEditDialog = Pair(null, Webhook(context.getString(R.string.new_webhook), "")) },
                 containerColor = MaterialTheme.colorScheme.primaryContainer
             ) {
-                Icon(Icons.Default.Add, "新增 Webhook")
+                Icon(Icons.Default.Add, stringResource(R.string.cd_add_webhook))
             }
         }
     ) { padding ->
@@ -80,7 +82,7 @@ fun WebhookScreen(
                         .height(200.dp),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text("暂无 Webhook，点击 + 添加", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(stringResource(R.string.no_webhooks), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             } else {
                 webhooks.forEachIndexed { index, webhook ->
@@ -125,8 +127,8 @@ fun WebhookScreen(
     if (showSyncConfirm) {
         AlertDialog(
             onDismissRequest = { showSyncConfirm = false },
-            title = { Text("确认同步") },
-            text = { Text("这将从 GitHub 下载官方预设，并覆盖你本地的 config_webhook.json 文件。\n\n你所有自定义的 Webhook 都将丢失。确定要继续吗？") },
+            title = { Text(stringResource(R.string.confirm_sync)) },
+            text = { Text(stringResource(R.string.sync_confirm_message)) },
             confirmButton = {
                 TextButton(onClick = {
                     showSyncConfirm = false
@@ -137,10 +139,10 @@ fun WebhookScreen(
                             webhooks.addAll(webhookManager.getWebhooks().toMutableStateList())
                         }
                     }
-                }) { Text("确定", color = MaterialTheme.colorScheme.error) }
+                }) { Text(stringResource(R.string.confirm_text), color = MaterialTheme.colorScheme.error) }
             },
             dismissButton = {
-                TextButton(onClick = { showSyncConfirm = false }) { Text("取消") }
+                TextButton(onClick = { showSyncConfirm = false }) { Text(stringResource(R.string.cancel)) }
             }
         )
     }
@@ -149,10 +151,11 @@ fun WebhookScreen(
     syncResult?.let { (success, message) ->
         AlertDialog(
             onDismissRequest = { syncResult = null },
-            title = { Text("同步结果") },
+            title = { Text(stringResource(R.string.sync_result)) },
             text = { Text(message) },
             confirmButton = {
-                TextButton(onClick = { syncResult = null }) { Text("好的") }
+                TextButton(onClick = { syncResult = null }) { Text(stringResource(R.string.ok)) }
+
             }
         )
     }
@@ -161,14 +164,15 @@ fun WebhookScreen(
     testResponse?.let { response ->
         AlertDialog(
             onDismissRequest = { testResponse = null },
-            title = { Text("Webhook 测试响应") },
+            title = { Text(stringResource(R.string.webhook_test_response)) },
             text = {
                 Column {
                     Text(response, style = MaterialTheme.typography.bodySmall, fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace)
                 }
             },
             confirmButton = {
-                TextButton(onClick = { testResponse = null }) { Text("关闭") }
+                TextButton(onClick = { testResponse = null }) { Text(stringResource(R.string.close)) }
+
             }
         )
     }
@@ -230,12 +234,12 @@ private fun WebhookListItem(
 
             // 编辑按钮
             IconButton(onClick = onEdit) {
-                Icon(Icons.Default.Edit, "编辑", tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                Icon(Icons.Default.Edit, stringResource(R.string.cd_edit), tint = MaterialTheme.colorScheme.onSurfaceVariant)
             }
 
             // 删除按钮
             IconButton(onClick = onDelete) {
-                Icon(Icons.Default.Delete, "删除", tint = MaterialTheme.colorScheme.error)
+                Icon(Icons.Default.Delete, stringResource(R.string.cd_delete), tint = MaterialTheme.colorScheme.error)
             }
         }
     }
@@ -274,19 +278,19 @@ private fun WebhookEditDialog(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text("启用此 Webhook", style = MaterialTheme.typography.bodyLarge)
+                    Text(stringResource(R.string.enable_this_webhook), style = MaterialTheme.typography.bodyLarge)
                     Switch(checked = enabled, onCheckedChange = { enabled = it })
                 }
 
                 // 触发器
-                Text("触发器类型 (可多选)", style = MaterialTheme.typography.labelLarge)
+                Text(stringResource(R.string.trigger_types), style = MaterialTheme.typography.labelLarge)
                 TriggerCheckboxes(triggers) { newTriggers -> triggers = newTriggers }
 
                 // 名称
                 OutlinedTextField(
                     value = name,
                     onValueChange = { name = it },
-                    label = { Text("名称") },
+                    label = { Text(stringResource(R.string.name_label)) },
                     modifier = Modifier.fillMaxWidth()
                 )
 
@@ -326,7 +330,7 @@ private fun WebhookEditDialog(
                     modifier = Modifier.fillMaxWidth(),
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)
                 ) {
-                    Text("测试发送 (心率: 88)")
+                    Text(stringResource(R.string.test_send))
                 }
 
                 // 操作按钮
@@ -335,12 +339,13 @@ private fun WebhookEditDialog(
                     horizontalArrangement = Arrangement.End,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    TextButton(onClick = onDismiss) { Text("取消") }
+                    TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) }
                     Spacer(Modifier.width(8.dp))
                     Button(onClick = {
                         onSave(Webhook(name, url, enabled, body, headers, triggers.toMutableList()))
                     }) {
-                        Text("保存")
+                        Text(stringResource(R.string.save))
+
                     }
                 }
             }
@@ -355,9 +360,9 @@ private fun TriggerCheckboxes(
 ) {
     val options = listOf(WebhookTrigger.HEART_RATE_UPDATED, WebhookTrigger.CONNECTED, WebhookTrigger.DISCONNECTED)
     val labels = mapOf(
-        WebhookTrigger.HEART_RATE_UPDATED to "心率刷新时",
-        WebhookTrigger.CONNECTED to "设备连接时",
-        WebhookTrigger.DISCONNECTED to "设备断开时"
+        WebhookTrigger.HEART_RATE_UPDATED to stringResource(R.string.trigger_heart_rate_updated),
+        WebhookTrigger.CONNECTED to stringResource(R.string.trigger_connected),
+        WebhookTrigger.DISCONNECTED to stringResource(R.string.trigger_disconnected)
     )
 
     Column {

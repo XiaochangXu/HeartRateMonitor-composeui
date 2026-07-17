@@ -20,8 +20,8 @@ android {
         applicationId = "com.github.heartratemonitor_compose"
         minSdk = 27
         targetSdk = 37
-        versionCode = 20
-        versionName = "2.6"
+        versionCode = 21
+        versionName = "2.7"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 

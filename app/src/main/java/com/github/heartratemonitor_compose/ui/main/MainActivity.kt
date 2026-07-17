@@ -18,6 +18,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.lifecycleScope
+import com.github.heartratemonitor_compose.R
 import com.github.heartratemonitor_compose.ble.BleState
 import com.github.heartratemonitor_compose.data.db.AppDatabase
 import com.github.heartratemonitor_compose.service.BleService
@@ -289,11 +290,11 @@ class MainActivity : FragmentActivity() {
         lifecycleScope.launch {
             bleService?.bleState?.collect { state ->
                 when (state) {
-                    is BleState.Connected -> showToast("已连接")
-                    is BleState.AutoReconnecting -> showToast("连接已断开，正在尝试自动重连...")
+                    is BleState.Connected -> showToast(getString(R.string.toast_connected))
+                    is BleState.AutoReconnecting -> showToast(getString(R.string.toast_auto_reconnecting))
                     is BleState.ScanFailed -> {
                         if (previousBleState is BleState.AutoReconnecting) {
-                            showToast("重连失败")
+                            showToast(getString(R.string.toast_reconnect_failed))
                         }
                     }
                     else -> { /* 在其他状态下不显示 Toast */ }

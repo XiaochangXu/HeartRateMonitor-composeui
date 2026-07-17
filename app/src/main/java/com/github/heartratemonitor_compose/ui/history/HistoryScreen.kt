@@ -30,6 +30,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import android.widget.Toast
+import androidx.compose.ui.res.stringResource
+import com.github.heartratemonitor_compose.R
 import com.github.heartratemonitor_compose.data.db.AppDatabase
 import com.github.heartratemonitor_compose.data.db.HeartRateSession
 import kotlinx.coroutines.launch
@@ -126,7 +128,7 @@ fun HistoryScreen(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "还没有任何历史记录",
+                    text = stringResource(R.string.no_history),
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -178,8 +180,8 @@ fun HistoryScreen(
     if (showDeleteDialog) {
         AlertDialog(
             onDismissRequest = { showDeleteDialog = false },
-            title = { Text("确认删除") },
-            text = { Text("确定要删除选中的 ${selectedIds.size} 条历史记录吗？此操作无法撤销。") },
+            title = { Text(stringResource(R.string.confirm_delete)) },
+            text = { Text(stringResource(R.string.delete_history_confirm, selectedIds.size)) },
             confirmButton = {
                 TextButton(onClick = {
                     val deleteCount = selectedIds.size
@@ -189,15 +191,15 @@ fun HistoryScreen(
                             showDeleteDialog = false
                             isMultiSelectMode = false
                             selectedIds = emptySet()
-                            Toast.makeText(context, "已删除 $deleteCount 条记录", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, context.getString(R.string.deleted_records, deleteCount), Toast.LENGTH_SHORT).show()
                         } catch (e: Exception) {
-                            Toast.makeText(context, "删除失败: ${e.message}", Toast.LENGTH_LONG).show()
+                            Toast.makeText(context, context.getString(R.string.delete_failed, e.message), Toast.LENGTH_LONG).show()
                         }
                     }
-                }) { Text("确定") }
+                }) { Text(stringResource(R.string.confirm_text)) }
             },
             dismissButton = {
-                TextButton(onClick = { showDeleteDialog = false }) { Text("取消") }
+                TextButton(onClick = { showDeleteDialog = false }) { Text(stringResource(R.string.cancel)) }
             }
         )
     }
@@ -216,13 +218,13 @@ private fun HistoryTopBar(
     TopAppBar(
         title = {
             Text(
-                text = if (isMultiSelectMode) "已选择 $selectedCount 项" else "心率历史记录",
+                text = if (isMultiSelectMode) stringResource(R.string.selected_count, selectedCount) else stringResource(R.string.history_title),
                 style = MaterialTheme.typography.titleLarge
             )
         },
         navigationIcon = {
             IconButton(onClick = onNavigateBack) {
-                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "返回")
+                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.cd_back))
             }
         },
         actions = {
@@ -230,7 +232,7 @@ private fun HistoryTopBar(
                 IconButton(onClick = onSelectAll) {
                     Icon(
                         Icons.Default.Check,
-                        contentDescription = "全选",
+                        contentDescription = stringResource(R.string.cd_select_all),
                         tint = if (selectedCount == totalCount)
                             MaterialTheme.colorScheme.primary
                         else
@@ -240,7 +242,7 @@ private fun HistoryTopBar(
                 IconButton(onClick = onDelete) {
                     Icon(
                         Icons.Default.Delete,
-                        contentDescription = "删除",
+                        contentDescription = stringResource(R.string.cd_delete),
                         tint = MaterialTheme.colorScheme.error
                     )
                 }
@@ -311,7 +313,7 @@ private fun SessionCard(
                 val startTime = dateFormat.format(Date(session.startTime))
                 val endTime = session.endTime?.let {
                     dateFormat.format(Date(it)).substring(11)
-                } ?: "进行中"
+                } ?: stringResource(R.string.in_progress)
                 Text(
                     text = "$startTime - $endTime",
                     style = MaterialTheme.typography.bodySmall,
@@ -321,7 +323,7 @@ private fun SessionCard(
                 if (previewData != null && !isMultiSelectMode) {
                     Spacer(Modifier.height(4.dp))
                     Text(
-                        text = "平均 ${previewData.avgHeartRate.toInt()} · 最低 ${previewData.minHeartRate} · 最高 ${previewData.maxHeartRate} · ${previewData.recordCount} 条记录",
+                        text = stringResource(R.string.stats_format, previewData.avgHeartRate.toInt(), previewData.minHeartRate, previewData.maxHeartRate, previewData.recordCount),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
                         maxLines = 1,

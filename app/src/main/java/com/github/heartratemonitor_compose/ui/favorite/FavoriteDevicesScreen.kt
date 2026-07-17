@@ -13,6 +13,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -39,21 +40,20 @@ fun FavoriteDevicesScreen(
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         topBar = {
             TopAppBar(
-                title = { Text("收藏设备") },
+                title = { Text(stringResource(R.string.favorite_devices)) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "返回")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.cd_back))
                     }
                 },
                 actions = {
-                    // 一键清空所有收藏设备。无设备时禁用,tint 用 onSurfaceVariant 提示不可点击。
                     IconButton(
                         onClick = { showClearAllDialog = true },
                         enabled = devices.isNotEmpty()
                     ) {
                         Icon(
                             painter = painterResource(R.drawable.ic_delete_forever),
-                            contentDescription = "清空所有收藏设备",
+                            contentDescription = stringResource(R.string.cd_clear_all_favorites),
                             tint = if (devices.isEmpty()) MaterialTheme.colorScheme.onSurfaceVariant
                                    else MaterialTheme.colorScheme.error
                         )
@@ -70,7 +70,7 @@ fun FavoriteDevicesScreen(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "暂无收藏设备",
+                    text = stringResource(R.string.no_favorite_devices),
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -104,8 +104,8 @@ fun FavoriteDevicesScreen(
     if (showDeleteDialog && deviceToDelete != null) {
         AlertDialog(
             onDismissRequest = { showDeleteDialog = false },
-            title = { Text("删除收藏设备") },
-            text = { Text("确定要删除「${deviceToDelete!!.name}」的收藏记录吗？") },
+            title = { Text(stringResource(R.string.delete_favorite_title)) },
+            text = { Text(stringResource(R.string.delete_favorite_confirm, deviceToDelete!!.name)) },
             confirmButton = {
                 TextButton(onClick = {
                     val id = deviceToDelete!!.id
@@ -117,10 +117,10 @@ fun FavoriteDevicesScreen(
                     }
                     showDeleteDialog = false
                     deviceToDelete = null
-                }) { Text("删除") }
+                }) { Text(stringResource(R.string.delete)) }
             },
             dismissButton = {
-                TextButton(onClick = { showDeleteDialog = false }) { Text("取消") }
+                TextButton(onClick = { showDeleteDialog = false }) { Text(stringResource(R.string.cancel)) }
             }
         )
     }
@@ -128,8 +128,8 @@ fun FavoriteDevicesScreen(
     if (showClearAllDialog) {
         AlertDialog(
             onDismissRequest = { showClearAllDialog = false },
-            title = { Text("清空所有收藏") },
-            text = { Text("确定要删除全部 ${devices.size} 个收藏设备吗？此操作不可撤销。") },
+            title = { Text(stringResource(R.string.clear_all_favorites_title)) },
+            text = { Text(stringResource(R.string.clear_all_favorites_confirm, devices.size)) },
             confirmButton = {
                 TextButton(onClick = {
                     scope.launch {
@@ -137,10 +137,10 @@ fun FavoriteDevicesScreen(
                         sharedPreferences.edit().putString("favorite_device_id", null).apply()
                     }
                     showClearAllDialog = false
-                }) { Text("全部删除", color = MaterialTheme.colorScheme.error) }
+                }) { Text(stringResource(R.string.delete_all), color = MaterialTheme.colorScheme.error) }
             },
             dismissButton = {
-                TextButton(onClick = { showClearAllDialog = false }) { Text("取消") }
+                TextButton(onClick = { showClearAllDialog = false }) { Text(stringResource(R.string.cancel)) }
             }
         )
     }
@@ -182,7 +182,7 @@ private fun DeviceCard(
             IconButton(onClick = onDelete) {
                 Icon(
                     Icons.Default.Delete,
-                    contentDescription = "删除",
+                    contentDescription = stringResource(R.string.cd_delete),
                     tint = MaterialTheme.colorScheme.error
                 )
             }

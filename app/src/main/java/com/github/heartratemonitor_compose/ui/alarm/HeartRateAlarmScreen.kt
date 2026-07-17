@@ -26,6 +26,7 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
@@ -64,6 +65,10 @@ fun HeartRateAlarmScreen(
     val calibrationBuffer = remember { mutableListOf<FloatArray>() }
     var calibrationProgress by remember { mutableIntStateOf(0) }
     var calibratingPostureName by remember { mutableStateOf("") }
+
+    // 本地化姿态标签
+    val sittingLabel = stringResource(R.string.sitting)
+    val standingLabel = stringResource(R.string.standing)
 
     // 姿态显示
     var currentPosture by remember { mutableStateOf(PostureType.UNKNOWN) }
@@ -153,7 +158,7 @@ fun HeartRateAlarmScreen(
                 calibrationProgress = i
             }
             isCalibrating = false
-            finishCalibration(sharedPreferences, currentCalibration, calibratingPostureName, calibrationBuffer) { newCal ->
+            finishCalibration(sharedPreferences, currentCalibration, calibratingPostureName, calibrationBuffer, sittingLabel) { newCal ->
                 currentCalibration = newCal
                 postureDetector.setCalibration(newCal)
             }
@@ -164,10 +169,10 @@ fun HeartRateAlarmScreen(
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         topBar = {
             TopAppBar(
-                title = { Text("心率预警") },
+                title = { Text(stringResource(R.string.alarm_title)) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "返回")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.cd_back))
                     }
                 }
             )
@@ -198,11 +203,11 @@ fun HeartRateAlarmScreen(
                     calibratingPostureName = calibratingPostureName,
                     calibrationProgress = calibrationProgress,
                     onCalibrateSitting = {
-                        calibratingPostureName = "静坐"
+                        calibratingPostureName = sittingLabel
                         isCalibrating = true
                     },
                     onCalibrateStanding = {
-                        calibratingPostureName = "站立"
+                        calibratingPostureName = standingLabel
                         isCalibrating = true
                     },
                     onClearCalibration = {
@@ -296,7 +301,7 @@ private fun PostureCard(
             )
             Spacer(Modifier.height(8.dp))
             Text(
-                text = posture.label,
+                text = stringResource(posture.labelRes),
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Normal
             )
@@ -305,9 +310,9 @@ private fun PostureCard(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
-                PostureIndicator("静坐", PostureType.SITTING.emoji, posture == PostureType.SITTING)
-                PostureIndicator("站立", PostureType.STANDING.emoji, posture == PostureType.STANDING)
-                PostureIndicator("运动", PostureType.EXERCISE.emoji, posture == PostureType.EXERCISE)
+                PostureIndicator(stringResource(R.string.sitting), PostureType.SITTING.emoji, posture == PostureType.SITTING)
+                PostureIndicator(stringResource(R.string.standing), PostureType.STANDING.emoji, posture == PostureType.STANDING)
+                PostureIndicator(stringResource(R.string.exercise), PostureType.EXERCISE.emoji, posture == PostureType.EXERCISE)
             }
         }
     }
@@ -343,10 +348,11 @@ private fun CalibrationCard(
     onCalibrateStanding: () -> Unit,
     onClearCalibration: () -> Unit
 ) {
+    val context = LocalContext.current
     val sitStatus = if (calibration?.sittingSamples?.isNotEmpty() == true)
-        "已校准 ✓（${calibration.sittingSamples.size} 个样本）" else "未校准"
+        context.getString(R.string.calibrated_samples, calibration.sittingSamples.size) else context.getString(R.string.not_calibrated)
     val standStatus = if (calibration?.standingSamples?.isNotEmpty() == true)
-        "已校准 ✓（${calibration.standingSamples.size} 个样本）" else "未校准"
+        context.getString(R.string.calibrated_samples, calibration.standingSamples.size) else context.getString(R.string.not_calibrated)
 
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -356,16 +362,16 @@ private fun CalibrationCard(
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(
-                text = "姿态校准",
+                text = stringResource(R.string.posture_calibration),
                 style = MaterialTheme.typography.labelLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = MaterialTheme.colorScheme.primary
             )
             Spacer(Modifier.height(12.dp))
 
             if (isCalibrating) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(
-                        text = "正在校准${calibratingPostureName}…",
+                        text = context.getString(R.string.calibrating_format, calibratingPostureName),
                         style = MaterialTheme.typography.bodyMedium
                     )
                     Spacer(Modifier.height(8.dp))
@@ -375,7 +381,7 @@ private fun CalibrationCard(
                     )
                     Spacer(Modifier.height(4.dp))
                     Text(
-                        text = "剩余 ${CALIBRATION_DURATION_SECONDS - calibrationProgress} 秒",
+                        text = context.getString(R.string.remaining_seconds, CALIBRATION_DURATION_SECONDS - calibrationProgress),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -383,22 +389,23 @@ private fun CalibrationCard(
             } else {
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     OutlinedButton(onClick = onCalibrateSitting, modifier = Modifier.weight(1f)) {
-                        Text("校准静坐")
+                        Text(stringResource(R.string.calibrate_sitting))
                     }
                     OutlinedButton(onClick = onCalibrateStanding, modifier = Modifier.weight(1f)) {
-                        Text("校准站立")
+                        Text(stringResource(R.string.calibrate_standing))
                     }
                 }
                 Spacer(Modifier.height(8.dp))
                 Text(
-                    text = "静坐：$sitStatus\n站立：$standStatus",
+                    text = context.getString(R.string.calibration_status_format, sitStatus, standStatus),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 if (calibration?.isComplete() == true) {
                     Spacer(Modifier.height(8.dp))
                     TextButton(onClick = onClearCalibration) {
-                        Text("清除校准", color = MaterialTheme.colorScheme.error)
+                        Text(stringResource(R.string.clear_calibration), color = MaterialTheme.colorScheme.error)
+
                     }
                 }
             }
@@ -428,9 +435,9 @@ private fun AlarmSettingsCard(
 ) {
     Column {
         Text(
-            text = "预警设置",
+            text = stringResource(R.string.alarm_settings),
             style = MaterialTheme.typography.labelLarge,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            color = MaterialTheme.colorScheme.primary,
             modifier = Modifier.padding(bottom = 12.dp)
         )
 
@@ -440,7 +447,7 @@ private fun AlarmSettingsCard(
                 AlarmSwitch(
                     checked = alarmEnabled,
                     onCheckedChange = onAlarmEnabledChange,
-                    title = "启用心率预警",
+                    title = stringResource(R.string.enable_alarm),
                     leadingIcon = painterResource(R.drawable.ic_enable_alarm)
                 )
             }
@@ -451,7 +458,7 @@ private fun AlarmSettingsCard(
                 AlarmSwitch(
                     checked = excludePostureDetection,
                     onCheckedChange = onExcludePostureDetectionChange,
-                    title = "排除姿态检测",
+                    title = stringResource(R.string.exclude_posture_detection),
                     leadingIcon = painterResource(R.drawable.ic_hide_source)
                 )
             }
@@ -460,7 +467,7 @@ private fun AlarmSettingsCard(
             // 超过阈值（动态下限：至少比低阈值大 1）
             AlarmItem {
                 AlarmDragSlider(
-                    label = "超过",
+                    label = stringResource(R.string.above_threshold),
                     value = highThreshold,
                     onValueChange = onHighThresholdChange,
                     range = maxOf(HIGH_THRESHOLD_MIN, lowThreshold + 1)..HIGH_THRESHOLD_MAX,
@@ -473,7 +480,7 @@ private fun AlarmSettingsCard(
             // 低于阈值（动态上限：至多比高阈值小 1）
             AlarmItem {
                 AlarmDragSlider(
-                    label = "低于",
+                    label = stringResource(R.string.below_threshold),
                     value = lowThreshold,
                     onValueChange = onLowThresholdChange,
                     range = LOW_THRESHOLD_MIN..minOf(LOW_THRESHOLD_MAX, highThreshold - 1),
@@ -486,11 +493,11 @@ private fun AlarmSettingsCard(
             // 持续时长
             AlarmItem {
                 AlarmDragSlider(
-                    label = "持续",
+                    label = stringResource(R.string.duration_label),
                     value = durationSeconds,
                     onValueChange = onDurationChange,
                     range = DURATION_MIN..60,
-                    suffix = " 秒",
+                    suffix = stringResource(R.string.seconds_suffix),
                     leadingIcon = painterResource(R.drawable.ic_hourglass)
                 )
             }
@@ -501,7 +508,7 @@ private fun AlarmSettingsCard(
                 AlarmSwitch(
                     checked = repeatEnabled,
                     onCheckedChange = onRepeatEnabledChange,
-                    title = "重复报警",
+                    title = stringResource(R.string.repeat_alarm),
                     leadingIcon = painterResource(R.drawable.ic_repeat_alarm)
                 )
             }
@@ -510,11 +517,11 @@ private fun AlarmSettingsCard(
                 AlarmDivider()
                 AlarmItem {
                     AlarmDragSlider(
-                        label = "报警间隔",
+                        label = stringResource(R.string.alarm_interval),
                         value = repeatInterval,
                         onValueChange = onRepeatIntervalChange,
                         range = REPEAT_INTERVAL_MIN..30,
-                        suffix = " 分钟",
+                        suffix = stringResource(R.string.minutes_suffix),
                         leadingIcon = painterResource(R.drawable.ic_alarm_interval)
                     )
                 }
@@ -714,10 +721,11 @@ private fun finishCalibration(
     currentCalibration: PostureCalibration?,
     postureName: String,
     samples: List<FloatArray>,
+    sittingLabel: String,
     onUpdated: (PostureCalibration) -> Unit
 ) {
     if (samples.isEmpty()) return
-    val isSitting = postureName == "静坐"
+    val isSitting = postureName == sittingLabel
 
     val n = samples.size
     val meanX = samples.map { it[0] }.average().toFloat()

@@ -1,6 +1,8 @@
 package com.github.heartratemonitor_compose.ui.settings
 
+import android.content.Context
 import android.util.Log
+import com.github.heartratemonitor_compose.R
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONArray
@@ -65,7 +67,8 @@ object UpdateChecker {
      *
      * @param currentVersion 当前应用版本名（已去除 'v' 前缀，如 "1.0.0"）
      */
-    suspend fun check(currentVersion: String): Result = withContext(Dispatchers.IO) {
+    suspend fun check(context: Context, currentVersion: String): Result = withContext(Dispatchers.IO) {
+        val appContext = context.applicationContext
         val startMs = System.currentTimeMillis()
         Log.i(TAG, "check: start, currentVersion=$currentVersion, url=$API_URL")
         try {
@@ -73,15 +76,15 @@ object UpdateChecker {
             val elapsed = System.currentTimeMillis() - startMs
             Log.i(TAG, "check: http done in ${elapsed}ms, code=$code, bodyLen=${body.length}")
             when {
-                code == 404 -> Result.Error("未找到任何 Release，请先在 Gitee 上发布一个版本")
-                code == 403 -> Result.Error("Gitee API 限流，请稍后再试")
-                code != 200 -> Result.Error("Gitee API 返回错误码：$code")
-                else -> findLatestRelease(body, currentVersion)
+                code == 404 -> Result.Error(appContext.getString(R.string.update_no_release))
+                code == 403 -> Result.Error(appContext.getString(R.string.update_api_rate_limit))
+                code != 200 -> Result.Error(appContext.getString(R.string.update_api_error, code))
+                else -> findLatestRelease(appContext, body, currentVersion)
             }
         } catch (e: Exception) {
             val elapsed = System.currentTimeMillis() - startMs
             Log.e(TAG, "check: failed in ${elapsed}ms", e)
-            Result.Error("网络错误：${e.message ?: e.javaClass.simpleName}")
+            Result.Error(appContext.getString(R.string.update_network_error, e.message ?: e.javaClass.simpleName))
         }
     }
 
@@ -90,10 +93,10 @@ object UpdateChecker {
      *
      * 跳过 prerelease，取 tag_name 按语义化版本比较取最大值。
      */
-    private fun findLatestRelease(body: String, currentVersion: String): Result {
+    private fun findLatestRelease(context: Context, body: String, currentVersion: String): Result {
         val releases = JSONArray(body)
         if (releases.length() == 0) {
-            return Result.Error("未找到任何 Release，请先在 Gitee 上发布一个版本")
+            return Result.Error(context.getString(R.string.update_no_release))
         }
 
         // 遍历所有 release，找出版本号最高的非 prerelease
@@ -111,7 +114,7 @@ object UpdateChecker {
         }
 
         if (bestRelease == null || bestVersion.isEmpty()) {
-            return Result.Error("未找到有效的正式 Release")
+            return Result.Error(context.getString(R.string.update_no_valid_release))
         }
 
         val cmp = compareVersions(currentVersion, bestVersion)

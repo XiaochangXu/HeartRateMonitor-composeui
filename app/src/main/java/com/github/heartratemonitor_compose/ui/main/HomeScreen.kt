@@ -86,6 +86,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -185,7 +186,7 @@ fun HomeScreen(
                     IconButton(onClick = onOpenHistory) {
                         Icon(
                             imageVector = Icons.Filled.History,
-                            contentDescription = "查看历史记录",
+                            contentDescription = stringResource(R.string.cd_view_history),
                             tint = MaterialTheme.colorScheme.onSurface
                         )
                     }
@@ -203,7 +204,7 @@ fun HomeScreen(
                     ) {
                         Icon(
                             imageVector = Icons.Filled.Search,
-                            contentDescription = "搜索蓝牙设备",
+                            contentDescription = stringResource(R.string.cd_search_bluetooth),
                             tint = if (appStatus == AppStatus.DISCONNECTED) MaterialTheme.colorScheme.onSurface
                                    else MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -237,20 +238,20 @@ fun HomeScreen(
     if (showSearchTipDialog) {
         AlertDialog(
             onDismissRequest = { showSearchTipDialog = false },
-            title = { Text("注意事项") },
-            text = { Text("请先打开设备的心率广播，再点击搜索，否则找不到设备。") },
+            title = { Text(stringResource(R.string.search_tip_title)) },
+            text = { Text(stringResource(R.string.search_tip_message)) },
             confirmButton = {
                 TextButton(onClick = {
                     sharedPreferences.edit { putBoolean("search_tip_shown", true) }
                     showSearchTipDialog = false
                     viewModel.startScan()
-                }) { Text("我知道了") }
+                }) { Text(stringResource(R.string.got_it)) }
             },
             dismissButton = {
                 TextButton(onClick = {
                     sharedPreferences.edit { putBoolean("search_tip_shown", true) }
                     showSearchTipDialog = false
-                }) { Text("取消") }
+                }) { Text(stringResource(R.string.cancel)) }
             }
         )
     }
@@ -344,9 +345,9 @@ private fun HomeContent(
                     ) {
                         // 标题
                         Text(
-                            text = "可用设备",
+                            text = stringResource(R.string.available_devices),
                             style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.onSurface,
+                            color = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp)
                         )
                         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
@@ -354,7 +355,7 @@ private fun HomeContent(
                         if (sortedScanResults.isEmpty()) {
                             // 空状态：暂无设备
                             Text(
-                                text = "暂无可用设备，请点击右上角搜索",
+                                text = stringResource(R.string.no_available_devices),
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 textAlign = TextAlign.Center,
@@ -410,7 +411,7 @@ private fun HomeContent(
                         )
                         Spacer(Modifier.width(8.dp))
                         Text(
-                            text = "进入全屏模式",
+                            text = stringResource(R.string.enter_fullscreen),
                             style = MaterialTheme.typography.titleMedium
                         )
                     }
@@ -432,7 +433,7 @@ private fun HomeContent(
                         modifier = Modifier.size(18.dp)
                     )
                     Spacer(Modifier.width(8.dp))
-                    Text("断开连接")
+                    Text(stringResource(R.string.disconnect))
                 }
             }
         }
@@ -589,7 +590,7 @@ private fun SpeedCard(
             verticalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
-                text = "速度",
+                text = stringResource(R.string.speed),
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -820,7 +821,7 @@ private fun DeviceItem(
             Icon(
                 imageVector = if (isFavorite) Icons.Filled.Star
                                else Icons.Filled.StarBorder,
-                contentDescription = "收藏",
+                contentDescription = stringResource(R.string.cd_favorite),
                 tint = MaterialTheme.colorScheme.primary
             )
         }
@@ -1004,7 +1005,7 @@ internal fun FullScreenHeartRate(
                         softWrap = false
                     )
                     Text(
-                        text = "次/分",
+                        text = stringResource(R.string.bpm_unit),
                         color = heartColor.copy(alpha = 0.7f),
                         fontSize = (bpmFontSize.value * 0.3f).toInt().sp,
                         fontWeight = FontWeight.Medium
@@ -1015,7 +1016,7 @@ internal fun FullScreenHeartRate(
 
         // 退出提示
         Text(
-            text = "点击屏幕或按返回键退出",
+            text = stringResource(R.string.fullscreen_exit_hint),
             color = ComposeColor.White.copy(alpha = 0.35f),
             fontSize = 13.sp,
             modifier = Modifier

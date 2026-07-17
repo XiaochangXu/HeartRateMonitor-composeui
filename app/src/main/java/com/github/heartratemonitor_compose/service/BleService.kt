@@ -87,7 +87,7 @@ class BleService : Service() {
     private val isScanning = AtomicBoolean(false)
     private var lastConnectedDeviceId: String? = null
     @Volatile private var currentSessionId: Long? = null
-    @Volatile private var lastConnectedDeviceName: String = "未知设备"
+    @Volatile private var lastConnectedDeviceName: String = "Unknown Device"
 
     // --- 自动重连退避 ---
     private var autoReconnectAttempt = 0
@@ -139,6 +139,7 @@ class BleService : Service() {
 
     override fun onCreate() {
         super.onCreate()
+        lastConnectedDeviceName = getString(R.string.unknown_device)
         // 修复：BleManager 不再需要 context 参数
         bleManager = BleManager()
         webhookManager = WebhookManager(applicationContext)
@@ -167,7 +168,7 @@ class BleService : Service() {
 
     private fun startForegroundService() {
         val channelId = "BleServiceChannel"
-        val channelName = "BLE 连接状态"
+        val channelName = getString(R.string.notification_channel_name)
 
         // 修复：移除 Android 8.0+ 的冗余检查 (minSdk >= 27)
         val chan = NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_LOW)
@@ -176,8 +177,8 @@ class BleService : Service() {
         manager.createNotificationChannel(chan)
 
         val notification = NotificationCompat.Builder(this, channelId)
-            .setContentTitle("心率监控器")
-            .setContentText("服务正在后台运行")
+            .setContentTitle(getString(R.string.app_name))
+            .setContentText(getString(R.string.notification_content))
             .setSmallIcon(R.drawable.ic_bluetooth_connected)
             .setOngoing(true)
             .build()
@@ -238,7 +239,7 @@ class BleService : Service() {
                 // 修复：未使用变量重命名为 _
             } finally {
                 withContext(NonCancellable) {
-                    val statusMessage = if (foundDevicesMap.isNotEmpty()) "扫描结束" else "未找到任何设备"
+                    val statusMessage = if (foundDevicesMap.isNotEmpty()) getString(R.string.ble_scan_finished) else getString(R.string.ble_no_devices_found)
                     _bleState.value = BleState.ScanFailed(statusMessage)
                     isScanning.set(false)
                 }
@@ -281,7 +282,7 @@ class BleService : Service() {
                         connectToDevice(favoriteDeviceId)
                     } else {
                         if (_bleState.value is BleState.AutoConnecting || _bleState.value is BleState.AutoReconnecting) {
-                            _bleState.value = BleState.ScanFailed("自动连接失败: 未找到设备")
+                            _bleState.value = BleState.ScanFailed(getString(R.string.ble_auto_connect_failed))
                         }
                     }
                 }
@@ -320,9 +321,9 @@ class BleService : Service() {
 
             } catch (e: Exception) {
                 val errorMessage = when (e) {
-                    is TimeoutCancellationException -> "连接超时"
-                    is CancellationException -> "连接已取消: ${e.message}"
-                    else -> "连接失败: ${e.message}"
+                    is TimeoutCancellationException -> getString(R.string.ble_connect_timeout)
+                    is CancellationException -> getString(R.string.ble_connect_cancelled, e.message)
+                    else -> getString(R.string.ble_connect_failed, e.message)
                 }
                 Log.e("BleService", "Connection to $identifier failed", e)
                 if (_bleState.value !is BleState.AutoReconnecting) {
@@ -345,9 +346,9 @@ class BleService : Service() {
                 }
             }
             is State.Connected -> {
-                val deviceName = peripheral.name ?: "未知设备"
+                val deviceName = peripheral.name ?: getString(R.string.unknown_device)
                 lastConnectedDeviceName = deviceName
-                _bleState.value = BleState.Connected("已连接到 $deviceName")
+                _bleState.value = BleState.Connected(getString(R.string.ble_connected_to, deviceName))
                 autoReconnectAttempt = 0  // 连接成功，重置重试计数
                 webhookManager.triggerWebhooks(WebhookTrigger.CONNECTED, speed = _speed.value)
 
@@ -358,7 +359,7 @@ class BleService : Service() {
                 // 作为 connectionJob 的子协程启动：断开连接时随 connectionJob 取消，避免泄漏
                 CoroutineScope(coroutineContext).launch { observeHeartRateData(peripheral) }
             }
-            is State.Disconnecting -> _bleState.value = BleState.Disconnected("正在断开...")
+            is State.Disconnecting -> _bleState.value = BleState.Disconnected(getString(R.string.ble_disconnecting))
             is State.Disconnected -> {
                 throw CancellationException("Device disconnected: ${state.status}")
             }
@@ -401,7 +402,7 @@ class BleService : Service() {
             currentSessionId = null
         }
 
-        val message = if (isManuallyDisconnected) "已手动断开" else "设备连接已断开"
+        val message = if (isManuallyDisconnected) getString(R.string.ble_manual_disconnect) else getString(R.string.ble_device_disconnected)
         // 无条件设置断开状态，避免设备从 Connected 直接跳到 Disconnected（未经 Disconnecting）时状态卡在 Connected
         _bleState.value = BleState.Disconnected(message)
 
@@ -417,7 +418,7 @@ class BleService : Service() {
 
         autoReconnectAttempt++
         if (autoReconnectAttempt > MAX_AUTO_RECONNECT_ATTEMPTS) {
-            _bleState.value = BleState.ScanFailed("自动重连已达最大尝试次数（$MAX_AUTO_RECONNECT_ATTEMPTS），请手动重连")
+            _bleState.value = BleState.ScanFailed(getString(R.string.ble_max_reconnect, MAX_AUTO_RECONNECT_ATTEMPTS))
             autoReconnectAttempt = 0
             return
         }
@@ -497,7 +498,7 @@ class BleService : Service() {
         val json = JSONObject().apply {
             put("heart_rate", _heartRate.value)
             put("connected", isDeviceConnected())
-            put("status", _bleState.value.message)
+            put("status", _bleState.value.getMessage(applicationContext))
             put("timestamp", System.currentTimeMillis())
             put("speed", _speed.value)
         }
@@ -556,7 +557,7 @@ class BleService : Service() {
             // 端口或 token 变更、首次启动时（重新）创建服务器
             if (httpServerManager == null || currentHttpPort != port || currentHttpAuthToken != authToken) {
                 httpServerManager?.stop()
-                httpServerManager = HttpServerManager(port, authToken, _heartRate, _speed, ::isDeviceConnected) { _bleState.value.message }
+                httpServerManager = HttpServerManager(port, authToken, _heartRate, _speed, ::isDeviceConnected) { _bleState.value.getMessage(applicationContext) }
                 httpServerManager?.start()
                 currentHttpPort = port
                 currentHttpAuthToken = authToken

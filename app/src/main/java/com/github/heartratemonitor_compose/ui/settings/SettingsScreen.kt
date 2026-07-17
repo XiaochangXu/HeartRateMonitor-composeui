@@ -31,6 +31,7 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
@@ -66,7 +67,7 @@ fun SettingsScreen(
             TopAppBar(
                 title = {
                     Text(
-                        "设置",
+                        stringResource(R.string.settings),
                         style = MaterialTheme.typography.headlineSmall,
                         fontWeight = FontWeight.Normal
                     )
@@ -75,7 +76,7 @@ fun SettingsScreen(
                     IconButton(onClick = onNavigateBack) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "返回"
+                            contentDescription = stringResource(R.string.cd_back)
                         )
                     }
                 }
@@ -144,7 +145,7 @@ private fun SectionTitle(title: String) {
     Text(
         text = title,
         style = MaterialTheme.typography.labelLarge,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        color = MaterialTheme.colorScheme.primary,
         modifier = Modifier.padding(bottom = 12.dp)
     )
 }
@@ -424,7 +425,7 @@ private fun GeneralSection(
     val showWarningDialog = remember { mutableStateOf(false) }
     val showSpeedDialog = remember { mutableStateOf(false) }
 
-    SectionTitle("常规")
+    SectionTitle(stringResource(R.string.general))
     SettingsGroupCard {
         // 记录历史数据
         SettingsItem {
@@ -438,7 +439,7 @@ private fun GeneralSection(
                         prefs.edit().putBoolean("history_recording_enabled", false).apply()
                     }
                 },
-                title = "记录历史数据",
+                title = stringResource(R.string.record_history),
                 leadingIcon = painterResource(R.drawable.ic_deployed_code_history)
             )
         }
@@ -446,17 +447,17 @@ private fun GeneralSection(
         if (showWarningDialog.value) {
             AlertDialog(
                 onDismissRequest = { showWarningDialog.value = false },
-                title = { Text("性能警告") },
-                text = { Text("开启历史记录将持续写入数据到存储，可能会增加耗电量。确认开启吗？") },
+                title = { Text(stringResource(R.string.performance_warning)) },
+                text = { Text(stringResource(R.string.history_warning_message)) },
                 confirmButton = {
                     TextButton(onClick = {
                         prefs.edit().putBoolean("history_recording_enabled", true).apply()
                         isHistoryEnabled = true
                         showWarningDialog.value = false
-                    }) { Text("确认") }
+                    }) { Text(stringResource(R.string.confirm)) }
                 },
                 dismissButton = {
-                    TextButton(onClick = { showWarningDialog.value = false }) { Text("取消") }
+                    TextButton(onClick = { showWarningDialog.value = false }) { Text(stringResource(R.string.cancel)) }
                 }
             )
         }
@@ -470,7 +471,7 @@ private fun GeneralSection(
                     isAnimationEnabled = it
                     prefs.edit().putBoolean("heartbeat_animation_enabled", it).apply()
                 },
-                title = "心跳动画效果",
+                title = stringResource(R.string.heartbeat_animation),
                 leadingIcon = painterResource(R.drawable.ic_animation)
             )
         }
@@ -488,8 +489,8 @@ private fun GeneralSection(
                         prefs.edit().putBoolean("speed_display_enabled", false).apply()
                     }
                 },
-                title = "显示时速 (GPS)",
-                subtitle = "开启时速显示将使用GPS定位，可能会增加耗电。",
+                title = stringResource(R.string.display_speed_gps),
+                subtitle = stringResource(R.string.speed_gps_subtitle),
                 leadingIcon = painterResource(R.drawable.ic_speed)
             )
         }
@@ -497,17 +498,17 @@ private fun GeneralSection(
         if (showSpeedDialog.value) {
             AlertDialog(
                 onDismissRequest = { showSpeedDialog.value = false },
-                title = { Text("开启速度显示") },
-                text = { Text("该功能使用 GPS 计算速度，可能会增加耗电量并需要定位权限。确认开启吗？") },
+                title = { Text(stringResource(R.string.enable_speed_title)) },
+                text = { Text(stringResource(R.string.speed_gps_warning)) },
                 confirmButton = {
                     TextButton(onClick = {
                         prefs.edit().putBoolean("speed_display_enabled", true).apply()
                         isSpeedEnabled = true
                         showSpeedDialog.value = false
-                    }) { Text("确认") }
+                    }) { Text(stringResource(R.string.confirm)) }
                 },
                 dismissButton = {
-                    TextButton(onClick = { showSpeedDialog.value = false }) { Text("取消") }
+                    TextButton(onClick = { showSpeedDialog.value = false }) { Text(stringResource(R.string.cancel)) }
                 }
             )
         }
@@ -521,8 +522,8 @@ private fun GeneralSection(
                     isHideFromRecents = it
                     prefs.edit().putBoolean("hide_from_recents_enabled", it).apply()
                 },
-                title = "退出应用隐藏后台",
-                subtitle = "开启后应用不会出现在最近任务列表中",
+                title = stringResource(R.string.hide_from_recents),
+                subtitle = stringResource(R.string.hide_from_recents_subtitle),
                 leadingIcon = painterResource(R.drawable.ic_hide_source)
             )
         }
@@ -530,13 +531,13 @@ private fun GeneralSection(
         SettingsDivider()
         // 收藏设备
         SettingsItem(onClick = { onNavigate("favorite") }) {
-            SettingsLink(title = "收藏设备", leadingIcon = painterResource(R.drawable.ic_star))
+            SettingsLink(title = stringResource(R.string.favorite_devices), leadingIcon = painterResource(R.drawable.ic_star))
         }
 
         SettingsDivider()
         // 心率预警
         SettingsItem(onClick = { onNavigate("alarm") }) {
-            SettingsLink(title = "心率预警", leadingIcon = painterResource(R.drawable.ic_warning))
+            SettingsLink(title = stringResource(R.string.heart_rate_alarm), leadingIcon = painterResource(R.drawable.ic_warning))
         }
     }
 }
@@ -546,7 +547,7 @@ private fun BluetoothSection(prefs: SharedPreferences) {
     var isAutoConnectEnabled by remember { mutableStateOf(prefs.getBoolean("auto_connect_enabled", false)) }
     var isAutoReconnectEnabled by remember { mutableStateOf(prefs.getBoolean("auto_reconnect_enabled", true)) }
 
-    SectionTitle("蓝牙")
+    SectionTitle(stringResource(R.string.bluetooth))
     SettingsGroupCard {
         SettingsItem {
             SettingsSwitch(
@@ -555,7 +556,7 @@ private fun BluetoothSection(prefs: SharedPreferences) {
                     isAutoConnectEnabled = it
                     prefs.edit().putBoolean("auto_connect_enabled", it).apply()
                 },
-                title = "启动时自动连接收藏设备",
+                title = stringResource(R.string.auto_connect_favorite),
                 leadingIcon = painterResource(R.drawable.ic_bluetooth_connected_symbol)
             )
         }
@@ -568,7 +569,7 @@ private fun BluetoothSection(prefs: SharedPreferences) {
                     isAutoReconnectEnabled = it
                     prefs.edit().putBoolean("auto_reconnect_enabled", it).apply()
                 },
-                title = "断开后自动重连",
+                title = stringResource(R.string.auto_reconnect),
                 leadingIcon = painterResource(R.drawable.ic_plug_connect)
             )
         }
@@ -581,15 +582,15 @@ private fun IntegrationSection(
     prefs: SharedPreferences,
     onRequestMediaProjection: (Intent) -> Unit
 ) {
-    SectionTitle("集成 & 外部访问")
+    SectionTitle(stringResource(R.string.integration))
     SettingsGroupCard {
         SettingsItem(onClick = { onNavigate("server") }) {
-            SettingsLink(title = "HTTP & WebSocket 服务器", leadingIcon = painterResource(R.drawable.ic_http_websocket))
+            SettingsLink(title = stringResource(R.string.http_websocket_server), leadingIcon = painterResource(R.drawable.ic_http_websocket))
         }
 
         SettingsDivider()
         SettingsItem(onClick = { onNavigate("webhook") }) {
-            SettingsLink(title = "Webhook 设置", leadingIcon = painterResource(R.drawable.ic_webhook))
+            SettingsLink(title = stringResource(R.string.webhook_settings), leadingIcon = painterResource(R.drawable.ic_webhook))
         }
     }
 }
@@ -600,7 +601,7 @@ private fun StatusBarSection(
     onRequestMediaProjection: (Intent) -> Unit
 ) {
     val context = LocalContext.current
-    SectionTitle("状态栏常驻")
+    SectionTitle(stringResource(R.string.status_bar_resident))
     SettingsGroupCard {
         // 状态栏常驻心率
         SettingsItem {
@@ -649,13 +650,13 @@ private fun StatusBarSection(
                         }
                 ) {
                     Text(
-                        text = "状态栏常驻心率",
+                        text = stringResource(R.string.status_bar_heart_rate),
                         style = MaterialTheme.typography.bodyLarge,
                         fontWeight = FontWeight.Normal,
                         color = MaterialTheme.colorScheme.onSurface
                     )
                     Text(
-                        text = "在顶部状态栏显示实时心率（需悬浮窗权限）",
+                        text = stringResource(R.string.status_bar_heart_rate_subtitle),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(top = 4.dp)
@@ -704,7 +705,7 @@ private fun StatusBarSection(
                     isBpmTextEnabled = it
                     prefs.edit().putBoolean("status_bar_bpm_text_enabled", it).apply()
                 },
-                title = "显示 BPM 单位",
+                title = stringResource(R.string.display_bpm_unit),
                 leadingIcon = painterResource(R.drawable.ic_bpm_unit)
             )
         }
@@ -713,7 +714,7 @@ private fun StatusBarSection(
         // 水平位置
         SettingsItem {
             DragSlider(
-                label = "水平位置",
+                label = stringResource(R.string.horizontal_position),
                 value = prefs.getInt("status_bar_x_position", 0),
                 onValueChange = { prefs.edit().putInt("status_bar_x_position", it).apply() },
                 range = 0..100,
@@ -726,7 +727,7 @@ private fun StatusBarSection(
         // 垂直微调
         SettingsItem {
             DragSlider(
-                label = "垂直微调",
+                label = stringResource(R.string.vertical_adjust),
                 value = prefs.getInt("status_bar_y_offset", 10),
                 onValueChange = { prefs.edit().putInt("status_bar_y_offset", it).apply() },
                 range = 0..20,
@@ -739,7 +740,7 @@ private fun StatusBarSection(
         // 整体大小
         SettingsItem {
             DragSlider(
-                label = "整体大小",
+                label = stringResource(R.string.overall_size),
                 value = prefs.getInt("status_bar_size", 100),
                 onValueChange = { prefs.edit().putInt("status_bar_size", it).apply() },
                 range = 50..200,
@@ -752,7 +753,7 @@ private fun StatusBarSection(
         // 文字粗细
         SettingsItem {
             DragSlider(
-                label = "文字粗细",
+                label = stringResource(R.string.text_thickness),
                 value = prefs.getInt("status_bar_text_thickness", 0),
                 onValueChange = { prefs.edit().putInt("status_bar_text_thickness", it).apply() },
                 range = 0..100,
@@ -777,7 +778,7 @@ private fun StatusBarSection(
                     )
                     Spacer(Modifier.width(16.dp))
                     Text(
-                        text = "文字颜色",
+                        text = stringResource(R.string.text_color),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -787,19 +788,19 @@ private fun StatusBarSection(
                     horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
                     ColorPreviewButton(
-                        label = "黑色",
+                        label = stringResource(R.string.black),
                         color = android.graphics.Color.BLACK,
                         onClick = {
                             prefs.edit().putBoolean("status_bar_white_text", false).apply()
                         }
                     )
                     ColorPreviewButton(
-                        label = "白色",
+                        label = stringResource(R.string.white),
                         color = android.graphics.Color.WHITE,
                         onClick = {
                             val isAuto = prefs.getBoolean("status_bar_auto_color", false)
                             if (isAuto) {
-                                android.widget.Toast.makeText(context, "自动识别已开启，请先关闭后再手动选择颜色。", android.widget.Toast.LENGTH_SHORT).show()
+                                android.widget.Toast.makeText(context, context.getString(R.string.auto_color_conflict), android.widget.Toast.LENGTH_SHORT).show()
                                 return@ColorPreviewButton
                             }
                             prefs.edit().putBoolean("status_bar_white_text", true).apply()
@@ -842,7 +843,7 @@ private fun StatusBarSection(
                         .clickable {
                             if (!autoChecked) {
                                 if (!prefs.getBoolean("status_bar_resident_enabled", false)) {
-                                    android.widget.Toast.makeText(context, "请先开启「状态栏常驻心率」开关后再使用自动识别。", android.widget.Toast.LENGTH_SHORT).show()
+                                    android.widget.Toast.makeText(context, context.getString(R.string.enable_resident_first), android.widget.Toast.LENGTH_SHORT).show()
                                     return@clickable
                                 }
                                 val projectionManager = context.getSystemService(android.media.projection.MediaProjectionManager::class.java)
@@ -858,13 +859,13 @@ private fun StatusBarSection(
                         }
                 ) {
                     Text(
-                        text = "自动识别屏幕颜色",
+                        text = stringResource(R.string.auto_color_detect),
                         style = MaterialTheme.typography.bodyLarge,
                         fontWeight = FontWeight.Normal,
                         color = MaterialTheme.colorScheme.onSurface
                     )
                     Text(
-                        text = "通过截屏采样状态栏区域亮度，自动切换黑/白文字。需要一次录屏授权，会增加少量耗电。",
+                        text = stringResource(R.string.auto_color_subtitle),
                         style = MaterialTheme.typography.bodySmall,
                         fontWeight = FontWeight.Normal,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -877,7 +878,7 @@ private fun StatusBarSection(
                     onCheckedChange = { checked ->
                         if (checked) {
                             if (!prefs.getBoolean("status_bar_resident_enabled", false)) {
-                                android.widget.Toast.makeText(context, "请先开启「状态栏常驻心率」开关后再使用自动识别。", android.widget.Toast.LENGTH_SHORT).show()
+                                android.widget.Toast.makeText(context, context.getString(R.string.enable_resident_first), android.widget.Toast.LENGTH_SHORT).show()
                                 return@Switch
                             }
                             val projectionManager = context.getSystemService(android.media.projection.MediaProjectionManager::class.java)
@@ -918,7 +919,7 @@ private fun StatusBarSection(
                             val newValue = !whiteChecked
                             val isAuto = prefs.getBoolean("status_bar_auto_color", false)
                             if (newValue && isAuto) {
-                                android.widget.Toast.makeText(context, "自动识别开启时不可用", android.widget.Toast.LENGTH_SHORT).show()
+                                android.widget.Toast.makeText(context, context.getString(R.string.auto_color_unavailable), android.widget.Toast.LENGTH_SHORT).show()
                                 return@clickable
                             }
                             prefs.edit().putBoolean("status_bar_white_text", newValue).apply()
@@ -926,13 +927,13 @@ private fun StatusBarSection(
                         }
                 ) {
                     Text(
-                        text = "使用白色文字",
+                        text = stringResource(R.string.use_white_text),
                         style = MaterialTheme.typography.bodyLarge,
                         fontWeight = FontWeight.Normal,
                         color = MaterialTheme.colorScheme.onSurface
                     )
                     Text(
-                        text = "关闭「自动识别」时生效。默认关闭即为纯黑文字。",
+                        text = stringResource(R.string.white_text_subtitle),
                         style = MaterialTheme.typography.bodySmall,
                         fontWeight = FontWeight.Normal,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -945,7 +946,7 @@ private fun StatusBarSection(
                     onCheckedChange = { checked ->
                         val isAuto = prefs.getBoolean("status_bar_auto_color", false)
                         if (checked && isAuto) {
-                            android.widget.Toast.makeText(context, "自动识别开启时不可用", android.widget.Toast.LENGTH_SHORT).show()
+                            android.widget.Toast.makeText(context, context.getString(R.string.auto_color_unavailable), android.widget.Toast.LENGTH_SHORT).show()
                             return@Switch
                         }
                         prefs.edit().putBoolean("status_bar_white_text", checked).apply()
@@ -962,12 +963,13 @@ private fun FloatingWindowSection(
     prefs: SharedPreferences,
     onShowColorPicker: (prefKey: String, title: String, defaultColor: Int) -> Unit
 ) {
-    SectionTitle("悬浮窗样式")
+    val context = LocalContext.current
+    SectionTitle(stringResource(R.string.floating_window_style))
     SettingsGroupCard {
         // 说明
         SettingsItem {
             Text(
-                text = "长按悬浮窗开启触摸穿透，开启后触摸直接传递给下方应用，不影响手机其他操作。再次长按悬浮窗或点击通知栏按钮关闭。",
+                text = stringResource(R.string.floating_window_tip),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -983,7 +985,7 @@ private fun FloatingWindowSection(
                     isBpmTextEnabled = it
                     prefs.edit().putBoolean("bpm_text_enabled", it).apply()
                 },
-                title = "显示 BPM 文字",
+                title = stringResource(R.string.display_bpm_text),
                 leadingIcon = painterResource(R.drawable.ic_bpm_text)
             )
         }
@@ -998,7 +1000,7 @@ private fun FloatingWindowSection(
                     isHeartIconEnabled = it
                     prefs.edit().putBoolean("heart_icon_enabled", it).apply()
                 },
-                title = "显示心形图标",
+                title = stringResource(R.string.display_heart_icon),
                 leadingIcon = painterResource(R.drawable.ic_heart_icon)
             )
         }
@@ -1007,7 +1009,7 @@ private fun FloatingWindowSection(
         // 整体大小
         SettingsItem {
             DragSlider(
-                label = "整体大小",
+                label = stringResource(R.string.overall_size),
                 value = prefs.getInt("floating_size", 100),
                 onValueChange = { prefs.edit().putInt("floating_size", it).apply() },
                 range = 50..200,
@@ -1020,7 +1022,7 @@ private fun FloatingWindowSection(
         // 图标大小
         SettingsItem {
             DragSlider(
-                label = "图标大小",
+                label = stringResource(R.string.icon_size),
                 value = prefs.getInt("floating_icon_size", 100),
                 onValueChange = { prefs.edit().putInt("floating_icon_size", it).apply() },
                 range = 50..200,
@@ -1033,7 +1035,7 @@ private fun FloatingWindowSection(
         // 圆角半径
         SettingsItem {
             DragSlider(
-                label = "圆角半径",
+                label = stringResource(R.string.corner_radius),
                 value = prefs.getInt("floating_corner_radius", 50),
                 onValueChange = { prefs.edit().putInt("floating_corner_radius", it).apply() },
                 range = 0..100,
@@ -1046,7 +1048,7 @@ private fun FloatingWindowSection(
         // 背景不透明度
         SettingsItem {
             DragSlider(
-                label = "背景不透明度",
+                label = stringResource(R.string.bg_opacity),
                 value = prefs.getInt("floating_bg_alpha", 80),
                 onValueChange = { prefs.edit().putInt("floating_bg_alpha", it).apply() },
                 range = 0..100,
@@ -1059,7 +1061,7 @@ private fun FloatingWindowSection(
         // 边框不透明度
         SettingsItem {
             DragSlider(
-                label = "边框不透明度",
+                label = stringResource(R.string.border_opacity),
                 value = prefs.getInt("floating_border_alpha", 100),
                 onValueChange = { prefs.edit().putInt("floating_border_alpha", it).apply() },
                 range = 0..100,
@@ -1085,7 +1087,7 @@ private fun FloatingWindowSection(
                     )
                     Spacer(Modifier.width(16.dp))
                     Text(
-                        text = "颜色选择",
+                        text = stringResource(R.string.color_picker),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -1095,19 +1097,19 @@ private fun FloatingWindowSection(
                     horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
                     ColorPreviewButton(
-                        label = "文本",
+                        label = stringResource(R.string.text_label),
                         color = prefs.getInt("floating_text_color", android.graphics.Color.BLACK),
-                        onClick = { onShowColorPicker("floating_text_color", "文本颜色", android.graphics.Color.BLACK) }
+                        onClick = { onShowColorPicker("floating_text_color", context.getString(R.string.text_color_picker), android.graphics.Color.BLACK) }
                     )
                     ColorPreviewButton(
-                        label = "背景",
+                        label = stringResource(R.string.background_label),
                         color = prefs.getInt("floating_bg_color", android.graphics.Color.BLACK),
-                        onClick = { onShowColorPicker("floating_bg_color", "背景颜色", android.graphics.Color.BLACK) }
+                        onClick = { onShowColorPicker("floating_bg_color", context.getString(R.string.bg_color_picker), android.graphics.Color.BLACK) }
                     )
                     ColorPreviewButton(
-                        label = "边框",
+                        label = stringResource(R.string.border_label),
                         color = prefs.getInt("floating_border_color", android.graphics.Color.GRAY),
-                        onClick = { onShowColorPicker("floating_border_color", "边框颜色", android.graphics.Color.GRAY) }
+                        onClick = { onShowColorPicker("floating_border_color", context.getString(R.string.border_color_picker), android.graphics.Color.GRAY) }
                     )
                 }
             }
@@ -1129,9 +1131,9 @@ private fun AboutSection(
         try {
             val raw = aboutContext.packageManager
                 .getPackageInfo(aboutContext.packageName, 0).versionName
-            if (raw != null) raw.removePrefix("v").removePrefix("V") else "未知"
+            if (raw != null) raw.removePrefix("v").removePrefix("V") else aboutContext.getString(R.string.unknown_version)
         } catch (e: Exception) {
-            "未知"
+            aboutContext.getString(R.string.unknown_version)
         }
     }
 
@@ -1142,7 +1144,7 @@ private fun AboutSection(
     // 错误/已是最新版提示弹窗
     var messageDialog by remember { mutableStateOf<String?>(null) }
 
-    SectionTitle("关于")
+    SectionTitle(stringResource(R.string.about))
     SettingsGroupCard {
         // 版本
         SettingsItem {
@@ -1158,7 +1160,7 @@ private fun AboutSection(
                 )
                 Spacer(Modifier.width(16.dp))
                 Text(
-                    text = "版本",
+                    text = stringResource(R.string.version),
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurface
                 )
@@ -1180,14 +1182,14 @@ private fun AboutSection(
                     updateDialog = updateState as UpdateChecker.Result.UpdateAvailable
                 } else {
                     // 发起新的检查
-                    updateState = UpdateChecker.Result.Error("正在检查...") // 占位，避免重复点击
+                    updateState = UpdateChecker.Result.Error(aboutContext.getString(R.string.checking_update)) // 占位，避免重复点击
                     scope.launch {
-                        val result = UpdateChecker.check(currentVersion)
+                        val result = UpdateChecker.check(aboutContext, currentVersion)
                         updateState = result
                         when (result) {
                             is UpdateChecker.Result.UpdateAvailable -> updateDialog = result
                             is UpdateChecker.Result.UpToDate ->
-                                messageDialog = "当前已是最新版本（v${result.currentVersion}）"
+                                messageDialog = aboutContext.getString(R.string.up_to_date, result.currentVersion)
                             is UpdateChecker.Result.Error ->
                                 messageDialog = result.message
                         }
@@ -1197,8 +1199,8 @@ private fun AboutSection(
         ) {
             SettingsLink(
                 title = if (updateState is UpdateChecker.Result.Error &&
-                            (updateState as UpdateChecker.Result.Error).message == "正在检查...")
-                            "正在检查..." else "检查更新",
+                            (updateState as UpdateChecker.Result.Error).message == aboutContext.getString(R.string.checking_update))
+                            aboutContext.getString(R.string.checking_update) else aboutContext.getString(R.string.check_update),
                 leadingIcon = painterResource(R.drawable.ic_check_update)
             )
         }
@@ -1206,7 +1208,7 @@ private fun AboutSection(
         SettingsDivider()
         // 公平运行内存
         SettingsItem(onClick = { onNavigate("fair_memory") }) {
-            SettingsLink(title = "公平运行内存", leadingIcon = painterResource(R.drawable.ic_fair_memory))
+            SettingsLink(title = stringResource(R.string.fair_memory), leadingIcon = painterResource(R.drawable.ic_fair_memory))
         }
 
         SettingsDivider()
@@ -1221,7 +1223,7 @@ private fun AboutSection(
                 onOpenExternal(intent)
             }
         ) {
-            SettingsLink(title = "访问 GitHub 仓库", leadingIcon = painterResource(R.drawable.ic_github_repo))
+            SettingsLink(title = stringResource(R.string.github_repo), leadingIcon = painterResource(R.drawable.ic_github_repo))
         }
     }
 
@@ -1230,18 +1232,18 @@ private fun AboutSection(
     updateDialog?.let { info ->
         AlertDialog(
             onDismissRequest = { updateDialog = null },
-            title = { Text("发现新版本 v${info.newVersion}") },
+            title = { Text(aboutContext.getString(R.string.new_version_found, info.newVersion)) },
             text = {
                 Column {
                     Text(
-                        text = "当前版本：v$currentVersion",
+                        text = aboutContext.getString(R.string.current_version_label, currentVersion),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Spacer(Modifier.height(12.dp))
                     if (info.releaseNotes.isNotEmpty()) {
                         Text(
-                            text = "更新内容：",
+                            text = stringResource(R.string.release_notes_title),
                             style = MaterialTheme.typography.bodyMedium,
                             fontWeight = FontWeight.Medium
                         )
@@ -1253,7 +1255,7 @@ private fun AboutSection(
                         )
                     } else {
                         Text(
-                            text = "暂无更新日志",
+                            text = stringResource(R.string.no_release_notes),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -1262,7 +1264,7 @@ private fun AboutSection(
             },
             // 左下角：确认（关闭弹窗）
             confirmButton = {
-                TextButton(onClick = { updateDialog = null }) { Text("确认") }
+                TextButton(onClick = { updateDialog = null }) { Text(stringResource(R.string.confirm)) }
             },
             // 右下角：跳转更新（打开 GitHub Release 页）
             dismissButton = {
@@ -1274,7 +1276,7 @@ private fun AboutSection(
                     )
                     com.github.heartratemonitor_compose.ui.main.MainActivity.suppressHideForExternalLaunch = true
                     onOpenExternal(intent)
-                }) { Text("跳转更新") }
+                }) { Text(stringResource(R.string.go_update)) }
             }
         )
     }
@@ -1283,10 +1285,10 @@ private fun AboutSection(
     messageDialog?.let { msg ->
         AlertDialog(
             onDismissRequest = { messageDialog = null },
-            title = { Text("检查更新") },
+            title = { Text(stringResource(R.string.update_check_title)) },
             text = { Text(msg) },
             confirmButton = {
-                TextButton(onClick = { messageDialog = null }) { Text("确认") }
+                TextButton(onClick = { messageDialog = null }) { Text(stringResource(R.string.confirm)) }
             }
         )
     }
@@ -1345,7 +1347,7 @@ private fun ColorPickerDialog(
                 // 亮度滑块（V 通道，0-100）
                 val brightnessPercent = (hsv[2] * 100f).toInt()
                 Text(
-                    text = "亮度: $brightnessPercent%",
+                    text = stringResource(R.string.brightness, brightnessPercent),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -1364,7 +1366,7 @@ private fun ColorPickerDialog(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text("初始", style = MaterialTheme.typography.bodySmall)
+                        Text(stringResource(R.string.initial_color), style = MaterialTheme.typography.bodySmall)
                         Spacer(Modifier.height(4.dp))
                         Box(
                             modifier = Modifier
@@ -1373,7 +1375,7 @@ private fun ColorPickerDialog(
                         )
                     }
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text("当前", style = MaterialTheme.typography.bodySmall)
+                        Text(stringResource(R.string.current_color), style = MaterialTheme.typography.bodySmall)
                         Spacer(Modifier.height(4.dp))
                         Box(
                             modifier = Modifier
@@ -1386,12 +1388,12 @@ private fun ColorPickerDialog(
         },
         confirmButton = {
             TextButton(onClick = { onConfirm(currentColor) }) {
-                Text("确认")
+                Text(stringResource(R.string.confirm))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("取消")
+                Text(stringResource(R.string.cancel))
             }
         }
     )

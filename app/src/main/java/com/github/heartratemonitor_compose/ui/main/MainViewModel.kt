@@ -8,6 +8,7 @@ import android.util.Log
 import androidx.core.content.edit
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.github.heartratemonitor_compose.R
 import com.github.heartratemonitor_compose.ble.BleState
 import com.github.heartratemonitor_compose.ble.HeartRateMeasurement
 import com.github.heartratemonitor_compose.data.db.AppDatabase
@@ -53,7 +54,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private var serviceDataJob: Job? = null
 
     // --- StateFlow for UI ---
-    private val _statusMessage = MutableStateFlow("Click button below to scan")
+    private val _statusMessage = MutableStateFlow(getApplication<Application>().getString(R.string.ble_idle))
     val statusMessage: StateFlow<String> = _statusMessage.asStateFlow()
 
     private val _appStatus = MutableStateFlow(AppStatus.DISCONNECTED)
@@ -175,7 +176,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
             launch {
                 service.bleState.collectLatest { state ->
-                    _statusMessage.value = state.message
+                    _statusMessage.value = state.getMessage(getApplication())
                     val newStatus = when (state) {
                         is BleState.Scanning -> AppStatus.SCANNING
                         is BleState.AutoConnecting, is BleState.Connecting, is BleState.AutoReconnecting -> AppStatus.CONNECTING
@@ -346,7 +347,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 putString("favorite_device_id", id)
             }
             _favoriteDeviceId.value = id
-            addToFavoriteHistory(id, ad.name ?: "未知设备")
+            addToFavoriteHistory(id, ad.name ?: getApplication<Application>().getString(R.string.unknown_device))
             // 删除旧收藏的 Room 记录，确保设置页收藏列表实时同步
             if (currentFavorite != null) {
                 viewModelScope.launch {

@@ -29,6 +29,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import com.github.heartratemonitor_compose.R
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -116,12 +118,12 @@ fun ChartScreen(
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         topBar = {
             TopAppBar(
-                title = { Text("心率详情") },
+                title = { Text(stringResource(R.string.chart_detail)) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "返回"
+                            contentDescription = stringResource(R.string.cd_back)
                         )
                     }
                 },
@@ -137,7 +139,7 @@ fun ChartScreen(
                     }) {
                         Icon(
                             imageVector = Icons.Filled.ScreenRotation,
-                            contentDescription = "切换方向"
+                            contentDescription = stringResource(R.string.cd_rotate_screen)
                         )
                     }
                 }
@@ -151,7 +153,7 @@ fun ChartScreen(
         ) {
             if (records.isEmpty()) {
                 Text(
-                    text = "没有心率数据可显示",
+                    text = stringResource(R.string.no_heart_rate_data),
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.align(Alignment.Center)
@@ -185,6 +187,7 @@ private fun HeartRateChart(
     timeFormat: SimpleDateFormat,
     modifier: Modifier = Modifier
 ) {
+    val context = LocalContext.current
     val modelProducer = remember { CartesianChartModelProducer() }
 
     // 数据填充:把记录转成 Vico 的 lineSeries（X=整数索引，Y=心率）
@@ -232,7 +235,7 @@ private fun HeartRateChart(
             } else {
                 ""
             }
-            "心率: ${entry.y.toInt()} bpm\n时间: $timeString"
+            java.util.Locale.getDefault().let { context.getString(R.string.marker_heart_rate, entry.y.toInt(), timeString) }
         }
     }
 
