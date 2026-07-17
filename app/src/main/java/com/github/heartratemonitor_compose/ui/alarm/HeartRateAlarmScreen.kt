@@ -60,7 +60,8 @@ fun HeartRateAlarmScreen(
     }
     var currentCalibration by remember { mutableStateOf(calibration) }
     var isCalibrating by remember { mutableStateOf(false) }
-    var calibrationBuffer by remember { mutableStateOf(listOf<FloatArray>()) }
+    // 使用普通 MutableList 避免每次追加时 O(n) 不可变列表拷贝
+    val calibrationBuffer = remember { mutableListOf<FloatArray>() }
     var calibrationProgress by remember { mutableIntStateOf(0) }
     var calibratingPostureName by remember { mutableStateOf("") }
 
@@ -119,7 +120,7 @@ fun HeartRateAlarmScreen(
                 override fun onSensorChanged(event: SensorEvent) {
                     postureDetector.onSensorSample(event.values[0], event.values[1], event.values[2])
                     if (isCalibrating) {
-                        calibrationBuffer = calibrationBuffer + floatArrayOf(event.values[0], event.values[1], event.values[2])
+                        calibrationBuffer.add(floatArrayOf(event.values[0], event.values[1], event.values[2]))
                     }
                 }
                 override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
@@ -146,7 +147,7 @@ fun HeartRateAlarmScreen(
     LaunchedEffect(isCalibrating) {
         if (isCalibrating) {
             calibrationProgress = 0
-            calibrationBuffer = emptyList()
+            calibrationBuffer.clear()
             for (i in 1..CALIBRATION_DURATION_SECONDS) {
                 kotlinx.coroutines.delay(1000L)
                 calibrationProgress = i
@@ -229,7 +230,7 @@ fun HeartRateAlarmScreen(
                     // 开启排除时中断正在进行的校准
                     if (enabled) {
                         isCalibrating = false
-                        calibrationBuffer = emptyList()
+                        calibrationBuffer.clear()
                     }
                 },
                 highThreshold = highThreshold,

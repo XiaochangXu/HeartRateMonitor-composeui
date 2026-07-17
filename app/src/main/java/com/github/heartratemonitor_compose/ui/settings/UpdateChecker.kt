@@ -94,10 +94,12 @@ object UpdateChecker {
         val remoteVersion = tagName.removePrefix("v").removePrefix("V").trim()
         val releaseNotes = json.optString("body", "").trim()
         val htmlUrl = json.optString("html_url", RELEASE_PAGE_URL).trim()
-        return when (compareVersions(currentVersion, remoteVersion)) {
-            in -1 downTo Int.MIN_VALUE ->
-                Result.UpdateAvailable(remoteVersion, releaseNotes, htmlUrl)
-            else -> Result.UpToDate(currentVersion)
+        val cmp = compareVersions(currentVersion, remoteVersion)
+        // cmp < 0 表示 current < remote，有新版本
+        return if (cmp < 0) {
+            Result.UpdateAvailable(remoteVersion, releaseNotes, htmlUrl)
+        } else {
+            Result.UpToDate(currentVersion)
         }
     }
 

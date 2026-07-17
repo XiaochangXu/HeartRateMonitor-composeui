@@ -151,8 +151,9 @@ class BleService : Service() {
         startForegroundService()
         registerSettingsListener()
 
-        updateHttpServerState()
-        updateWebSocketServerState()
+        // 服务器 start/stop 涉及 Socket bind，移至 IO 线程避免阻塞主线程
+        serviceScope.launch { updateHttpServerState() }
+        serviceScope.launch { updateWebSocketServerState() }
         updateLocationUpdates()
         broadcastWebSocketState()
     }
@@ -505,8 +506,10 @@ class BleService : Service() {
 
     private val settingsChangeListener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
         when (key) {
-            "http_server_enabled", "http_server_port", "server_access_token" -> updateHttpServerState()
-            "websocket_server_enabled", "websocket_server_port", "server_access_token" -> updateWebSocketServerState()
+            "http_server_enabled", "http_server_port", "server_access_token" ->
+                serviceScope.launch { updateHttpServerState() }
+            "websocket_server_enabled", "websocket_server_port", "server_access_token" ->
+                serviceScope.launch { updateWebSocketServerState() }
             "speed_display_enabled" -> {
                 updateLocationUpdates()
                 startForegroundService()
