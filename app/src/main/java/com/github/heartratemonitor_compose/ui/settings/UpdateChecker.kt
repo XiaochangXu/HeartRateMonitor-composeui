@@ -1,9 +1,9 @@
 package com.github.heartratemonitor_compose.ui.settings
 
-import android.content.Context
 import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.json.JSONArray
 import org.json.JSONObject
 import java.net.HttpURLConnection
 import java.net.URL
@@ -19,7 +19,10 @@ import java.net.URL
  * Gitee 是国内代码托管平台，国内访问稳定快速（~50ms），
  * 相比 GitHub API 在国内偶有被墙的问题，Gitee 是国内用户首选。
  *
- * 端点：`https://gitee.com/api/v5/repos/{owner}/{repo}/releases/latest`
+ * 端点：`https://gitee.com/api/v5/repos/{owner}/{repo}/releases?page=1&per_page=10`
+ *
+ * 注意：不使用 `/releases/latest`，因为 Gitee 的 latest 标记可能延迟或不准，
+ * 改为拉取列表后按语义化版本比较取最高版本。
  *
  * 限流：
  * - 未认证：60 次/小时/IP
@@ -35,7 +38,7 @@ object UpdateChecker {
     private const val OWNER = "xiaochang-xu"
     private const val REPO = "heart-rate-monitor-composeui"
     private const val API_URL =
-        "https://gitee.com/api/v5/repos/$OWNER/$REPO/releases/latest"
+        "https://gitee.com/api/v5/repos/$OWNER/$REPO/releases?page=1&per_page=10"
     private const val RELEASE_PAGE_URL =
         "https://gitee.com/$OWNER/$REPO/releases/latest"
 
@@ -73,7 +76,7 @@ object UpdateChecker {
                 code == 404 -> Result.Error("未找到任何 Release，请先在 Gitee 上发布一个版本")
                 code == 403 -> Result.Error("Gitee API 限流，请稍后再试")
                 code != 200 -> Result.Error("Gitee API 返回错误码：$code")
-                else -> parseReleaseJson(body, currentVersion)
+                else -> findLatestRelease(body, currentVersion)
             }
         } catch (e: Exception) {
             val elapsed = System.currentTimeMillis() - startMs
@@ -83,21 +86,39 @@ object UpdateChecker {
     }
 
     /**
-     * 解析 Gitee Release JSON 响应。
+     * 从 Gitee releases 列表中找版本号最高的 release，与当前版本比较。
+     *
+     * 跳过 prerelease，取 tag_name 按语义化版本比较取最大值。
      */
-    private fun parseReleaseJson(body: String, currentVersion: String): Result {
-        val json = JSONObject(body)
-        val tagName = json.optString("tag_name", "").trim()
-        if (tagName.isEmpty()) {
-            return Result.Error("Release 缺少 tag_name 字段")
+    private fun findLatestRelease(body: String, currentVersion: String): Result {
+        val releases = JSONArray(body)
+        if (releases.length() == 0) {
+            return Result.Error("未找到任何 Release，请先在 Gitee 上发布一个版本")
         }
-        val remoteVersion = tagName.removePrefix("v").removePrefix("V").trim()
-        val releaseNotes = json.optString("body", "").trim()
-        val htmlUrl = json.optString("html_url", RELEASE_PAGE_URL).trim()
-        val cmp = compareVersions(currentVersion, remoteVersion)
-        // cmp < 0 表示 current < remote，有新版本
+
+        // 遍历所有 release，找出版本号最高的非 prerelease
+        var bestVersion = ""
+        var bestRelease: JSONObject? = null
+        for (i in 0 until releases.length()) {
+            val release = releases.getJSONObject(i)
+            if (release.optBoolean("prerelease", false)) continue
+            val tagName = release.optString("tag_name", "").removePrefix("v").removePrefix("V").trim()
+            if (tagName.isEmpty()) continue
+            if (bestVersion.isEmpty() || compareVersions(tagName, bestVersion) > 0) {
+                bestVersion = tagName
+                bestRelease = release
+            }
+        }
+
+        if (bestRelease == null || bestVersion.isEmpty()) {
+            return Result.Error("未找到有效的正式 Release")
+        }
+
+        val cmp = compareVersions(currentVersion, bestVersion)
         return if (cmp < 0) {
-            Result.UpdateAvailable(remoteVersion, releaseNotes, htmlUrl)
+            val releaseNotes = bestRelease.optString("body", "").trim()
+            val htmlUrl = bestRelease.optString("html_url", RELEASE_PAGE_URL).trim()
+            Result.UpdateAvailable(bestVersion, releaseNotes, htmlUrl)
         } else {
             Result.UpToDate(currentVersion)
         }
