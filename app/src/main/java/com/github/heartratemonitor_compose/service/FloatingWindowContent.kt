@@ -1,4 +1,4 @@
-﻿package com.github.heartratemonitor_compose.service
+package com.github.heartratemonitor_compose.service
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Animatable
@@ -125,7 +125,6 @@ fun FloatingWindowContent(
                     modifier = Modifier.padding(start = 2.dp)
                 )
             }
-            // 速度块：divider + speed number + "km/h" 单位
             // 原 XML 中 speed_layout + speed_divider 共同显隐，此处用 AnimatedVisibility 包裹整块
             AnimatedVisibility(
                 visible = appearance.isSpeedEnabled,

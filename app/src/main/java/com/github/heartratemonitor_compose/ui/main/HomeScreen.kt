@@ -39,9 +39,11 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Bluetooth
 import androidx.compose.material.icons.filled.BluetoothDisabled
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.HeartBroken
 import androidx.compose.material.icons.filled.Fullscreen
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Search
@@ -50,11 +52,7 @@ import androidx.compose.material.icons.filled.StarBorder
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -130,6 +128,7 @@ import com.patrykandpatrick.vico.compose.common.Fill
 fun HomeScreen(
     viewModel: MainViewModel,
     onOpenHistory: () -> Unit,
+    onNavigateToDevices: () -> Unit,
     onEnterFullScreen: () -> Unit
 ) {
     val context = LocalContext.current
@@ -137,22 +136,17 @@ fun HomeScreen(
         context.getSharedPreferences("app_settings", Context.MODE_PRIVATE)
     }
 
-    // 订阅 ViewModel 状态（StateFlow → collectAsStateWithLifecycle）
     val heartRate by viewModel.heartRate.collectAsStateWithLifecycle()
     val speed by viewModel.speed.collectAsStateWithLifecycle()
-    val statusMessage by viewModel.statusMessage.collectAsStateWithLifecycle()
     val appStatus by viewModel.appStatus.collectAsStateWithLifecycle()
-    val scanResults by viewModel.scanResults.collectAsStateWithLifecycle()
     val newChartEntries by viewModel.newChartEntries.collectAsStateWithLifecycle()
-    val favoriteDeviceId by viewModel.favoriteDeviceId.collectAsStateWithLifecycle()
+    val sessionMaxHr by viewModel.sessionMaxHr.collectAsStateWithLifecycle()
+    val sessionMinHr by viewModel.sessionMinHr.collectAsStateWithLifecycle()
+    val connectedDevice by viewModel.connectedDevice.collectAsStateWithLifecycle()
 
-    // 读取本地设置（每次重组读最新）
     var isHistoryEnabled by remember { mutableStateOf(sharedPreferences.getBoolean("history_recording_enabled", false)) }
     var isSpeedEnabled by remember { mutableStateOf(sharedPreferences.getBoolean("speed_display_enabled", false)) }
     var isAnimationEnabled by remember { mutableStateOf(sharedPreferences.getBoolean("heartbeat_animation_enabled", true)) }
-
-    // 首次搜索提示弹窗（只弹出一次）
-    var showSearchTipDialog by remember { mutableStateOf(false) }
 
     // 监听 SharedPreferences 变化（悬浮窗/历史/速度/动画开关可能从设置页修改）
     DisposableEffect(Unit) {
@@ -182,31 +176,11 @@ fun HomeScreen(
                     )
                 },
                 actions = {
-                    // 历史按钮
                     IconButton(onClick = onOpenHistory) {
                         Icon(
                             imageVector = Icons.Filled.History,
                             contentDescription = stringResource(R.string.cd_view_history),
                             tint = MaterialTheme.colorScheme.onSurface
-                        )
-                    }
-                    // 扫描按钮
-                    IconButton(
-                        onClick = {
-                            // 首次点击时弹出提示
-                            if (!sharedPreferences.getBoolean("search_tip_shown", false)) {
-                                showSearchTipDialog = true
-                            } else {
-                                viewModel.startScan()
-                            }
-                        },
-                        enabled = appStatus == AppStatus.DISCONNECTED
-                    ) {
-                        Icon(
-                            imageVector = Icons.Filled.Search,
-                            contentDescription = stringResource(R.string.cd_search_bluetooth),
-                            tint = if (appStatus == AppStatus.DISCONNECTED) MaterialTheme.colorScheme.onSurface
-                                   else MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 }
@@ -221,38 +195,17 @@ fun HomeScreen(
             viewModel = viewModel,
             heartRate = heartRate,
             speed = speed,
-            statusMessage = statusMessage,
             appStatus = appStatus,
-            scanResults = scanResults,
             newChartEntries = newChartEntries,
-            favoriteDeviceId = favoriteDeviceId,
             isConnected = isConnected,
             isHistoryEnabled = isHistoryEnabled,
             isSpeedEnabled = isSpeedEnabled,
             isAnimationEnabled = isAnimationEnabled,
+            sessionMaxHr = sessionMaxHr,
+            sessionMinHr = sessionMinHr,
+            connectedDeviceName = connectedDevice?.name,
+            onNavigateToDevices = onNavigateToDevices,
             onEnterFullScreen = onEnterFullScreen
-        )
-    }
-
-    // 首次搜索提示弹窗
-    if (showSearchTipDialog) {
-        AlertDialog(
-            onDismissRequest = { showSearchTipDialog = false },
-            title = { Text(stringResource(R.string.search_tip_title)) },
-            text = { Text(stringResource(R.string.search_tip_message)) },
-            confirmButton = {
-                TextButton(onClick = {
-                    sharedPreferences.edit { putBoolean("search_tip_shown", true) }
-                    showSearchTipDialog = false
-                    viewModel.startScan()
-                }) { Text(stringResource(R.string.got_it)) }
-            },
-            dismissButton = {
-                TextButton(onClick = {
-                    sharedPreferences.edit { putBoolean("search_tip_shown", true) }
-                    showSearchTipDialog = false
-                }) { Text(stringResource(R.string.cancel)) }
-            }
         )
     }
 }
@@ -263,25 +216,18 @@ private fun HomeContent(
     viewModel: MainViewModel,
     heartRate: Int,
     speed: Float,
-    statusMessage: String,
     appStatus: AppStatus,
-    scanResults: List<Advertisement>,
     newChartEntries: List<HeartRatePoint>?,
-    favoriteDeviceId: String?,
     isConnected: Boolean,
     isHistoryEnabled: Boolean,
     isSpeedEnabled: Boolean,
     isAnimationEnabled: Boolean,
+    sessionMaxHr: Int,
+    sessionMinHr: Int,
+    connectedDeviceName: String?,
+    onNavigateToDevices: () -> Unit,
     onEnterFullScreen: () -> Unit
 ) {
-    // 排序结果缓存：用 favoriteDeviceId 直接比较，避免每个设备都读 SharedPreferences
-    val sortedScanResults = remember(scanResults, favoriteDeviceId) {
-        scanResults.sortedWith(
-            compareByDescending<Advertisement> { it.identifier == favoriteDeviceId }
-                .thenByDescending { it.rssi }
-        )
-    }
-
     // 内容延伸到屏幕底部（iOS 风格），底部 contentPadding 留出胶囊+系统导航栏空间
     val navBarInset = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
     LazyColumn(
@@ -294,105 +240,95 @@ private fun HomeContent(
         ),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        // 顶部卡片行：心率卡 + 速度卡
         item {
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 HeartRateCard(
                     modifier = Modifier.weight(1f),
                     heartRate = heartRate,
-                    statusMessage = statusMessage,
                     appStatus = appStatus,
-                    isAnimationEnabled = isAnimationEnabled
+                    isAnimationEnabled = isAnimationEnabled,
+                    sessionMaxHr = sessionMaxHr,
+                    sessionMinHr = sessionMinHr
                 )
-                if (isSpeedEnabled && isConnected) {
-                    SpeedCard(
-                        modifier = Modifier.width(120.dp),
-                        speed = speed
+                val isSpeedActive = isSpeedEnabled && isConnected
+                SpeedCard(
+                    modifier = Modifier.width(120.dp),
+                    speed = speed,
+                    isActive = isSpeedActive
+                )
+            }
+        }
+
+        item {
+            when {
+                isConnected && isHistoryEnabled -> {
+                    RealtimeChart(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(200.dp),
+                        viewModel = viewModel,
+                        newChartEntries = newChartEntries,
+                        appStatus = appStatus
+                    )
+                }
+                isConnected && !isHistoryEnabled -> {
+                    ChartPlaceholder(R.string.history_not_enabled)
+                }
+                else -> {
+                    ChartPlaceholder(R.string.device_not_connected)
+                }
+            }
+        }
+
+        item {
+            val availableDevicesText = stringResource(R.string.available_devices)
+            val connectedDeviceText = stringResource(R.string.connected_device)
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(28.dp),
+                color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                contentColor = MaterialTheme.colorScheme.onSurface,
+                onClick = onNavigateToDevices
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 14.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Bluetooth,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(Modifier.width(12.dp))
+                    Text(
+                        text = if (isConnected && !connectedDeviceName.isNullOrEmpty()) {
+                            "$connectedDeviceText $connectedDeviceName"
+                        } else {
+                            availableDevicesText
+                        },
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.weight(1f),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }
         }
 
-        // 实时图表（连接且开启历史记录时显示）
-        if (isConnected && isHistoryEnabled) {
-            item {
-                RealtimeChart(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(200.dp),
-                    viewModel = viewModel,
-                    newChartEntries = newChartEntries,
-                    appStatus = appStatus
-                )
-            }
-        }
-
-        // 可用设备卡片容器（未连接时）：圆角卡片包裹整个设备列表，支持上下滑动选择蓝牙设备
-        if (!isConnected) {
-            item {
-                Surface(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .heightIn(max = 400.dp),
-                    shape = RoundedCornerShape(20.dp),
-                    color = MaterialTheme.colorScheme.surfaceContainerHigh,
-                    contentColor = MaterialTheme.colorScheme.onSurface
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .verticalScroll(rememberScrollState())
-                    ) {
-                        // 标题
-                        Text(
-                            text = stringResource(R.string.available_devices),
-                            style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp)
-                        )
-                        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-
-                        if (sortedScanResults.isEmpty()) {
-                            // 空状态：暂无设备
-                            Text(
-                                text = stringResource(R.string.no_available_devices),
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                textAlign = TextAlign.Center,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 16.dp, vertical = 24.dp)
-                            )
-                        } else {
-                            sortedScanResults.forEachIndexed { index, advertisement ->
-                                DeviceItem(
-                                    advertisement = advertisement,
-                                    isFavorite = advertisement.identifier == favoriteDeviceId,
-                                    onDeviceClick = { viewModel.connectToDevice(advertisement.identifier) },
-                                    onFavoriteClick = {
-                                        viewModel.toggleFavoriteDevice(advertisement)
-                                    }
-                                )
-                                if (index < sortedScanResults.lastIndex) {
-                                    HorizontalDivider(
-                                        color = MaterialTheme.colorScheme.outlineVariant,
-                                        modifier = Modifier.padding(horizontal = 16.dp)
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        // 全屏模式按钮 + 断开连接按钮（已连接时）
         if (isConnected) {
             item {
-                // 进入全屏模式：圆角卡片容器，与断开连接按钮等宽
                 Surface(
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(16.dp),
+                    shape = RoundedCornerShape(28.dp),
                     color = MaterialTheme.colorScheme.primaryContainer,
                     contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
                     onClick = onEnterFullScreen
@@ -419,67 +355,96 @@ private fun HomeContent(
             }
 
             item {
-                Button(
-                    onClick = { viewModel.disconnectDevice() },
+                // 断开连接（与全屏模式按钮形状统一）
+                Surface(
                     modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.error,
-                        contentColor = MaterialTheme.colorScheme.onError
-                    )
+                    shape = RoundedCornerShape(28.dp),
+                    color = MaterialTheme.colorScheme.error,
+                    contentColor = MaterialTheme.colorScheme.onError,
+                    onClick = { viewModel.disconnectDevice() }
                 ) {
-                    Icon(
-                        imageVector = Icons.Filled.BluetoothDisabled,
-                        contentDescription = null,
-                        modifier = Modifier.size(18.dp)
-                    )
-                    Spacer(Modifier.width(8.dp))
-                    Text(stringResource(R.string.disconnect))
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 14.dp),
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.BluetoothDisabled,
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Spacer(Modifier.width(8.dp))
+                        Text(
+                            text = stringResource(R.string.disconnect),
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                    }
                 }
             }
         }
     }
 }
 
+/**
+ * 图表占位卡片：未连接设备 / 已连接但未开启历史记录时显示。
+ * 与 RealtimeChart 等高（200dp）+ surfaceContainerHigh 背景，保持视觉一致性。
+ * 居中文字使用 alpha 0.45 含蓄提示，不抢视觉焦点。
+ */
+@Composable
+private fun ChartPlaceholder(messageRes: Int) {
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(200.dp),
+        shape = RoundedCornerShape(28.dp),
+        color = MaterialTheme.colorScheme.surfaceContainerHigh
+    ) {
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier.alpha(0.45f)
+        ) {
+            Text(
+                text = stringResource(messageRes),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+}
+
 /** 心率卡片：
- * 连接时显示「❤️ + 数值」+ 渐变红背景 + 心跳动画，
- * 未连接时显示「💔 + 未连接」+ 灰色渐变。
+ * 使用 surfaceContainerHigh 背景 + onSurface 文字（不跟随 seed 色，仅跟随亮/暗模式）。
+ * 心跳动画作用于背景爱心 emoji，文字不跳动。
+ * 右上角显示本次连接的心率最大值/最小值（断开即清零）。
  */
 @Composable
 private fun HeartRateCard(
     modifier: Modifier,
     heartRate: Int,
-    statusMessage: String,
     appStatus: AppStatus,
-    isAnimationEnabled: Boolean
+    isAnimationEnabled: Boolean,
+    sessionMaxHr: Int,
+    sessionMinHr: Int
 ) {
     val isConnected = appStatus == AppStatus.CONNECTED
 
-    // 渐变背景（对应原 drawable background_heart_rate_connected/disconnected，angle=135）
-    // 用 remember 缓存，避免每次心率更新重组都新建 List 和 Brush 对象
-    val gradientBrush = remember(isConnected) {
-        val colors = if (isConnected) {
-            listOf(ComposeColor(0xFFFCA5A5), ComposeColor(0xFFF87171))
-        } else {
-            listOf(ComposeColor(0xFFD4D4D8), ComposeColor(0xFFA1A1AA))
-        }
-        Brush.linearGradient(
-            colors = colors,
-            start = androidx.compose.ui.geometry.Offset(0f, Float.POSITIVE_INFINITY),
-            end = androidx.compose.ui.geometry.Offset(Float.POSITIVE_INFINITY, 0f)
-        )
-    }
+    // 中性色令牌：不跟随 seed 色，仅跟随亮/暗模式（亮色黑、暗色白）
+    val containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+    val contentColor = MaterialTheme.colorScheme.onSurface
 
-    // 心跳动画：bpm > 30 且开启动画且已连接时缩放
+    // 心跳动画：bpm > 30 且开启动画且已连接时缩放（作用于背景爱心，文字不跳动）
+    // 缩放范围 1.0 → 1.15，配合 96dp 图标尺寸：最大 ~110dp，在 150dp 高的卡片内有充足余量，不会被 Surface 圆角裁剪
     val heartScale = remember { Animatable(1f) }
     val shouldAnimate = isAnimationEnabled && heartRate > 30 && isConnected
-    // 量化 bpm 到 5 步长，减少动画重启频率（对应原 (currentDuration - targetDuration).absoluteValue > 50 阈值）
+    // 量化 bpm 到 5 步长，减少动画重启频率
     val animBpm = if (shouldAnimate) (heartRate / 5) * 5 else 0
     LaunchedEffect(animBpm) {
         if (animBpm > 0) {
             val cycleMs = (60000f / animBpm).toLong()
-            // 循环：1 → 1.3 → 1，单次完整周期等于 cycleMs
             while (true) {
-                heartScale.animateTo(1.3f, tween((cycleMs / 2).toInt(), easing = FastOutSlowInEasing))
+                heartScale.animateTo(1.15f, tween((cycleMs / 2).toInt(), easing = FastOutSlowInEasing))
                 heartScale.animateTo(1f, tween((cycleMs / 2).toInt(), easing = FastOutSlowInEasing))
             }
         } else {
@@ -489,74 +454,71 @@ private fun HeartRateCard(
 
     Surface(
         modifier = modifier.height(150.dp),
-        shape = RoundedCornerShape(24.dp),
-        color = ComposeColor.Transparent
+        shape = RoundedCornerShape(28.dp),
+        color = containerColor,
+        contentColor = contentColor
     ) {
-        Box(
-            modifier = Modifier.background(gradientBrush)
-        ) {
-            // 背景心形 emoji（半透明）
-            Text(
-                text = if (isConnected) "❤️" else "💔",
-                fontSize = 100.sp,
+        Box {
+            // 背景爱心图标（纯红 + 心跳缩放动画）
+            // 使用矢量图标：精确控制尺寸 96dp，缩放 1.15x ≈ 110dp，在 150dp 卡片内不会被圆角裁剪
+            // 已连接：Icons.Filled.Favorite（完整爱心）；断开：Icons.Filled.HeartBroken（裂成两半的实心爱心）
+            // tint 使用纯红 Color(0xFFFF0000)，alpha 0.35 保留含蓄感
+            Icon(
+                imageVector = if (isConnected) Icons.Filled.Favorite
+                              else Icons.Filled.HeartBroken,
+                contentDescription = null,
+                tint = ComposeColor(0xFFFF0000),
                 modifier = Modifier
                     .align(Alignment.Center)
-                    .alpha(0.2f)
+                    .size(96.dp)
+                    .alpha(if (isConnected) 0.35f else 0.25f)
+                    .scale(heartScale.value)
             )
 
-            // BPM 数值（连接时）—— 用 scaled Modifier 应用动画
+            if (isConnected && sessionMaxHr > 0) {
+                Text(
+                    text = "MAX ${sessionMaxHr}",
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(12.dp),
+                    color = contentColor.copy(alpha = 0.7f),
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Medium,
+                    maxLines = 1
+                )
+            }
+
+            if (isConnected && sessionMaxHr > 0) {
+                Text(
+                    text = "MIN ${sessionMinHr}",
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .padding(12.dp),
+                    color = contentColor.copy(alpha = 0.7f),
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Medium,
+                    maxLines = 1
+                )
+            }
+
+            // BPM 数值（文字不跳动）
             Row(
                 modifier = Modifier.align(Alignment.Center),
                 verticalAlignment = Alignment.Bottom
             ) {
                 Text(
                     text = if (isConnected && heartRate > 0) "$heartRate" else "--",
-                    color = ComposeColor.White,
+                    color = contentColor,
                     fontSize = 48.sp,
-                    fontWeight = FontWeight.Medium,
-                    modifier = Modifier
-                        .scale(heartScale.value)
+                    fontWeight = FontWeight.Medium
                 )
                 Spacer(Modifier.width(4.dp))
                 Text(
                     text = "BPM",
-                    color = ComposeColor.White.copy(alpha = 0.9f),
+                    color = contentColor.copy(alpha = 0.9f),
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Medium,
                     modifier = Modifier.padding(bottom = 8.dp)
-                )
-            }
-
-            // 状态栏（左下角：图标 + 进度/状态文本）
-            Row(
-                modifier = Modifier
-                    .align(Alignment.BottomStart)
-                    .padding(12.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                if (appStatus == AppStatus.SCANNING || appStatus == AppStatus.CONNECTING) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(14.dp),
-                        strokeWidth = 2.dp,
-                        color = ComposeColor.White
-                    )
-                } else {
-                    Icon(
-                        imageVector = if (isConnected) Icons.Filled.Bluetooth
-                                      else Icons.Filled.BluetoothDisabled,
-                        contentDescription = null,
-                        tint = if (isConnected) ComposeColor.White
-                               else ComposeColor.White.copy(alpha = 0.87f),
-                        modifier = Modifier.size(14.dp)
-                    )
-                }
-                Spacer(Modifier.width(4.dp))
-                Text(
-                    text = statusMessage,
-                    color = ComposeColor.White.copy(alpha = 0.87f),
-                    fontSize = 11.sp,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
                 )
             }
         }
@@ -564,24 +526,22 @@ private fun HeartRateCard(
 }
 
 /**
- * 速度卡片：遵循 Material 3 规范。
- * - 容器使用 MD3 [Card] 组件 (Filled 变体,0dp 阴影,保持与 HeartRateCard 平齐)
- * - 形状/排版均使用 MaterialTheme 令牌 (shapes.extraLarge、typography.*)
- * - 容器色 surfaceContainer,onSurfaceVariant 作为辅助文本色,符合 M3 色调层级
+ * 速度卡片：与 HeartRateCard 视觉风格一致。
+ * - Surface 容器 + surfaceContainerHigh 背景 + onSurface 内容色（不跟随 seed 色）
+ * - 20dp 圆角，与首页其他卡片统一（项目规范：一级卡片 20dp 圆角 + 0dp 阴影）
+ * - [isActive]=false 时仅显示 "--"，颜色与已激活时一致（不做颜色区分）
  */
 @Composable
 private fun SpeedCard(
     modifier: Modifier,
-    speed: Float
+    speed: Float,
+    isActive: Boolean
 ) {
-    Card(
+    Surface(
         modifier = modifier.height(150.dp),
-        shape = MaterialTheme.shapes.extraLarge,
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-            contentColor = MaterialTheme.colorScheme.onSurface
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+        shape = RoundedCornerShape(28.dp),
+        color = MaterialTheme.colorScheme.surfaceContainerHigh,
+        contentColor = MaterialTheme.colorScheme.onSurface
     ) {
         Column(
             modifier = Modifier
@@ -595,7 +555,7 @@ private fun SpeedCard(
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Text(
-                text = "%.1f".format(speed),
+                text = if (isActive) "%.1f".format(speed) else "--",
                 style = MaterialTheme.typography.headlineSmall,
                 color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.fillMaxWidth().wrapContentWidth(Alignment.CenterHorizontally)
@@ -634,8 +594,6 @@ private fun RealtimeChart(
     val modelProducer = remember { CartesianChartModelProducer() }
     val history = viewModel.chartHistory
 
-    // 历史数据回填（连接中 + 有数据 + 模型尚未填充时）
-    // 监听 history.size 变化,首次或断开重连后回填
     // x 值用「整数毫秒」((timeOffsetSec * 1000).toLong())：浮点秒的辗转相除 GCD 会被
     // 浮点误差磨成 0 触发 Vico "x-values are too precise" 异常；整数毫秒 GCD 永不归零。
     LaunchedEffect(history.size, appStatus) {
@@ -675,7 +633,6 @@ private fun RealtimeChart(
         }
     }
 
-    // 断开连接时清空图表数据
     LaunchedEffect(appStatus) {
         if (appStatus != AppStatus.CONNECTED) {
             modelProducer.runTransaction {
@@ -690,7 +647,7 @@ private fun RealtimeChart(
     // 圆角卡片容器包裹心率图表，使用主题色适配深色/浅色模式，与 SpeedCard 视觉风格保持一致
     Surface(
         modifier = modifier,
-        shape = RoundedCornerShape(16.dp),
+        shape = RoundedCornerShape(28.dp),
         color = MaterialTheme.colorScheme.surfaceContainerHigh
     ) {
         CartesianChartHost(
@@ -717,7 +674,6 @@ private fun RealtimeChart(
                     // 固定每 20 bpm 一条网格线 (40/60/80/100/120/140/160/180),ECG 风格刻度
                     itemPlacer = VerticalAxis.ItemPlacer.step({ 20.0 }),
                     valueFormatter = CartesianValueFormatter { _, value, _ ->
-                        // Y 轴显示整数 BPM
                         value.toInt().toString()
                     }
                 ),
@@ -752,7 +708,7 @@ private fun RealtimeChart(
  * 设备列表项：替代原 list_item_device.xml + DeviceAdapter。
  */
 @Composable
-private fun DeviceItem(
+internal fun DeviceItem(
     advertisement: Advertisement,
     isFavorite: Boolean,
     onDeviceClick: () -> Unit,
@@ -891,7 +847,6 @@ internal fun FullScreenHeartRate(
                 val cyclesOnScreen = 4f
                 val currentPhase = ecgPhase.value
 
-                // ECG 网格
                 val gridColor = heartColor.copy(alpha = 0.1f)
                 val gridStep = canvasW / 20f
                 var gx = 0f
@@ -915,7 +870,6 @@ internal fun FullScreenHeartRate(
                     gy += amplitude * 0.5f
                 }
 
-                // ECG 波形
                 val path = Path()
                 var first = true
                 var x = 0f
@@ -962,7 +916,6 @@ internal fun FullScreenHeartRate(
                 .padding(horizontal = horizontalMargin),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // ── 左半屏：爱心图标（静态 + 光晕脉冲）──
             Box(
                 modifier = Modifier
                     .weight(1f)
@@ -977,7 +930,6 @@ internal fun FullScreenHeartRate(
                 )
             }
 
-            // ── 中间分隔：冒号 ──
             Text(
                 text = ":",
                 color = heartColor.copy(alpha = heartAlpha),
@@ -985,7 +937,6 @@ internal fun FullScreenHeartRate(
                 fontWeight = FontWeight.Bold
             )
 
-            // ── 右半屏：心率数值 + 单位 ──
             Box(
                 modifier = Modifier
                     .weight(1f)
@@ -1014,7 +965,6 @@ internal fun FullScreenHeartRate(
             }
         }
 
-        // 退出提示
         Text(
             text = stringResource(R.string.fullscreen_exit_hint),
             color = ComposeColor.White.copy(alpha = 0.35f),

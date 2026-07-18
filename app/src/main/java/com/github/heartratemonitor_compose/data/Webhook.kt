@@ -1,4 +1,4 @@
-﻿package com.github.heartratemonitor_compose.data
+package com.github.heartratemonitor_compose.data
 
 import android.util.Log
 import org.json.JSONArray
@@ -36,7 +36,6 @@ data class Webhook(
                         triggers.add(trigger)
                     } catch (e: IllegalArgumentException) {
                         // 忽略无法识别的trigger值, 比如 "heart_rate_updated" vs "HEART_RATE_UPDATE"
-                        // 让我们尝试修复这个
                         val triggerString = triggersArray.getString(i)
                         if (triggerString.equals("heart_rate_updated", ignoreCase = true)) {
                             triggers.add(WebhookTrigger.HEART_RATE_UPDATED)

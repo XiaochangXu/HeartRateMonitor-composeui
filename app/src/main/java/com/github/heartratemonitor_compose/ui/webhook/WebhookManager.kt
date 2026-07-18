@@ -1,4 +1,4 @@
-﻿package com.github.heartratemonitor_compose.ui.webhook
+package com.github.heartratemonitor_compose.ui.webhook
 
 import android.content.Context
 import android.util.Log
@@ -35,7 +35,6 @@ class WebhookManager(context: Context) {
     private val cacheLock = Any()
 
     init {
-        // 初始化时预加载缓存
         refreshCache()
     }
 

@@ -90,7 +90,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     init {
-        // 初始化收藏设备缓存
         _favoriteDeviceId.value = sharedPrefs.getString("favorite_device_id", null)
 
         // 监听 SharedPreferences 变化（来自 FavoriteDevicesScreen 等外部修改），同步 StateFlow
@@ -143,8 +142,20 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val _speed = MutableStateFlow(0f)
     val speed: StateFlow<Float> = _speed.asStateFlow()
 
+    // --- 本次连接的心率最大值/最小值（断开或重连时重置，进程死亡自然丢失）---
+    private val _sessionMaxHr = MutableStateFlow(0)
+    val sessionMaxHr: StateFlow<Int> = _sessionMaxHr.asStateFlow()
+
+    private val _sessionMinHr = MutableStateFlow(0)
+    val sessionMinHr: StateFlow<Int> = _sessionMinHr.asStateFlow()
+
     private val _scanResults = MutableStateFlow<List<Advertisement>>(emptyList())
     val scanResults: StateFlow<List<Advertisement>> = _scanResults.asStateFlow()
+
+    // 当前已连接设备信息（id + name），断开时为 null。供 DevicesScreen 显示。
+    // 中转 BleService.connectedDevice：服务未绑定前返回 null，绑定后自动镜像服务端状态。
+    private val _connectedDevice = MutableStateFlow<BleService.ConnectedDevice?>(null)
+    val connectedDevice: StateFlow<BleService.ConnectedDevice?> = _connectedDevice.asStateFlow()
 
     fun setBleService(service: BleService) {
         if (bleServiceRef?.get() === service && serviceDataJob?.isActive == true) return
@@ -175,6 +186,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             }
 
             launch {
+                service.connectedDevice.collect { _connectedDevice.value = it }
+            }
+
+            launch {
                 service.bleState.collectLatest { state ->
                     _statusMessage.value = state.getMessage(getApplication())
                     val newStatus = when (state) {
@@ -188,6 +203,11 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                         initializeChart()
                     }
 
+                    if (_appStatus.value == AppStatus.CONNECTED && newStatus != AppStatus.CONNECTED) {
+                        _sessionMaxHr.value = 0
+                        _sessionMinHr.value = 0
+                    }
+
                     _appStatus.value = newStatus
                 }
             }
@@ -198,6 +218,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         chartStartTime = System.currentTimeMillis()
         chartDataPoints.clear()
         lastChartTimeSec = 0f
+        _sessionMaxHr.value = 0
+        _sessionMinHr.value = 0
     }
 
     /**
@@ -218,6 +240,17 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         // 防御竞态：状态流通知与数据流到达之间可能存在窗口，确保 chartStartTime 已初始化
         if (chartStartTime == 0L) {
             chartStartTime = System.currentTimeMillis()
+        }
+
+        // 更新本次连接的心率最大值/最小值（基于设备上报的平均 bpm）
+        val bpm = measurement.bpm
+        if (bpm > 0) {
+            if (_sessionMaxHr.value == 0 || bpm > _sessionMaxHr.value) {
+                _sessionMaxHr.value = bpm
+            }
+            if (_sessionMinHr.value == 0 || bpm < _sessionMinHr.value) {
+                _sessionMinHr.value = bpm
+            }
         }
 
         val newPoints = mutableListOf<HeartRatePoint>()
@@ -274,7 +307,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     fun releaseNonCriticalMemory(notifyType: Int) {
         val isPss = notifyType == FairMemoryReceiver.NOTIFY_TYPE_PSS
 
-        // 1. 图表数据释放
         if (chartDataPoints.isNotEmpty()) {
             val originalSize = chartDataPoints.size
             if (isPss) {
@@ -290,7 +322,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             }
         }
 
-        // 2. 非扫描态清空扫描结果
         if (_appStatus.value != AppStatus.SCANNING) {
             _scanResults.value = emptyList()
             Log.i("MainViewModel", "TRIM(${if (isPss) "PSS" else "HEAP"}): 已清空扫描结果缓存")
@@ -342,7 +373,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 }
             }
         } else {
-            // 收藏设备（替换旧收藏）
             sharedPrefs.edit {
                 putString("favorite_device_id", id)
             }

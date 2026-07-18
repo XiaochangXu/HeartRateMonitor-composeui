@@ -101,7 +101,6 @@ fun WebhookScreen(
         }
     }
 
-    // 编辑/新增对话框
     showEditDialog?.let { (editIndex, webhook) ->
         WebhookEditDialog(
             webhook = webhook,
@@ -123,7 +122,6 @@ fun WebhookScreen(
         )
     }
 
-    // 同步确认对话框
     if (showSyncConfirm) {
         AlertDialog(
             onDismissRequest = { showSyncConfirm = false },
@@ -147,7 +145,6 @@ fun WebhookScreen(
         )
     }
 
-    // 同步结果对话框
     syncResult?.let { (success, message) ->
         AlertDialog(
             onDismissRequest = { syncResult = null },
@@ -160,7 +157,6 @@ fun WebhookScreen(
         )
     }
 
-    // 测试响应对话框
     testResponse?.let { response ->
         AlertDialog(
             onDismissRequest = { testResponse = null },
@@ -186,7 +182,7 @@ private fun WebhookListItem(
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(20.dp),
+        shape = RoundedCornerShape(28.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh)
     ) {
@@ -196,10 +192,9 @@ private fun WebhookListItem(
                 .padding(horizontal = 16.dp, vertical = 14.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // 状态图标
             Surface(
                 modifier = Modifier.size(40.dp),
-                shape = RoundedCornerShape(20.dp),
+                shape = RoundedCornerShape(28.dp),
                 color = MaterialTheme.colorScheme.surfaceContainerHighest
             ) {
                 Box(contentAlignment = Alignment.Center) {
@@ -213,7 +208,6 @@ private fun WebhookListItem(
 
             Spacer(Modifier.width(16.dp))
 
-            // 名称和 URL
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = webhook.name,
@@ -232,12 +226,10 @@ private fun WebhookListItem(
 
             Spacer(Modifier.width(8.dp))
 
-            // 编辑按钮
             IconButton(onClick = onEdit) {
                 Icon(Icons.Default.Edit, stringResource(R.string.cd_edit), tint = MaterialTheme.colorScheme.onSurfaceVariant)
             }
 
-            // 删除按钮
             IconButton(onClick = onDelete) {
                 Icon(Icons.Default.Delete, stringResource(R.string.cd_delete), tint = MaterialTheme.colorScheme.error)
             }
@@ -272,7 +264,6 @@ private fun WebhookEditDialog(
                     .padding(24.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                // 启用开关
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -282,11 +273,9 @@ private fun WebhookEditDialog(
                     Switch(checked = enabled, onCheckedChange = { enabled = it })
                 }
 
-                // 触发器
                 Text(stringResource(R.string.trigger_types), style = MaterialTheme.typography.labelLarge)
                 TriggerCheckboxes(triggers) { newTriggers -> triggers = newTriggers }
 
-                // 名称
                 OutlinedTextField(
                     value = name,
                     onValueChange = { name = it },
@@ -294,7 +283,6 @@ private fun WebhookEditDialog(
                     modifier = Modifier.fillMaxWidth()
                 )
 
-                // URL
                 OutlinedTextField(
                     value = url,
                     onValueChange = { url = it },
@@ -302,7 +290,6 @@ private fun WebhookEditDialog(
                     modifier = Modifier.fillMaxWidth()
                 )
 
-                // Body
                 OutlinedTextField(
                     value = body,
                     onValueChange = { body = it },
@@ -312,7 +299,6 @@ private fun WebhookEditDialog(
                     minLines = 4
                 )
 
-                // Headers
                 OutlinedTextField(
                     value = headers,
                     onValueChange = { headers = it },
@@ -322,7 +308,6 @@ private fun WebhookEditDialog(
                     minLines = 3
                 )
 
-                // 测试按钮
                 Button(
                     onClick = {
                         onTest(Webhook(name, url, enabled, body, headers, triggers.toMutableList()))
@@ -333,7 +318,6 @@ private fun WebhookEditDialog(
                     Text(stringResource(R.string.test_send))
                 }
 
-                // 操作按钮
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.End,

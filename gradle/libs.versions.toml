@@ -17,6 +17,7 @@ fragmentKtx = "1.8.6"
 kable = "0.32.0"
 permissionx = "1.8.1"
 nanohttpd = "2.3.1"
+materialKolor = "5.0.0-alpha07"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -62,6 +63,8 @@ permissionx = { group = "com.guolindev.permissionx", name = "permissionx", versi
 # NanoHTTPD
 nanohttpd = { group = "org.nanohttpd", name = "nanohttpd", version.ref = "nanohttpd" }
 nanohttpd-websocket = { group = "org.nanohttpd", name = "nanohttpd-websocket", version.ref = "nanohttpd" }
+# MaterialKolor：从 seed 色生成 Material 3 ColorScheme，支持 2025 spec (surfaceBright/Dim 等)
+materialkolor = { group = "com.materialkolor", name = "material-kolor", version.ref = "materialKolor" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

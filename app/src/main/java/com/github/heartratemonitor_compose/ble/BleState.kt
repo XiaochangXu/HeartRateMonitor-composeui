@@ -1,4 +1,4 @@
-﻿package com.github.heartratemonitor_compose.ble
+package com.github.heartratemonitor_compose.ble
 
 import android.content.Context
 import androidx.annotation.StringRes
@@ -12,15 +12,12 @@ import com.juul.kable.Advertisement
  * @param messageRes 要在UI上显示给用户的状态文本资源 ID（0 表示使用动态消息）。
  */
 sealed class BleState(@StringRes val messageRes: Int) {
-    // 空闲/初始状态
     object Idle : BleState(R.string.ble_idle)
 
-    // 扫描状态
     object Scanning : BleState(R.string.ble_scanning)
     class ScanResults : BleState(R.string.ble_scan_results)
     class ScanFailed(val displayMessage: String) : BleState(0)
 
-    // 连接状态
     object Connecting : BleState(R.string.ble_connecting)
     // **【修改前为AutoConnecting】** 应用启动时的自动连接
     object AutoConnecting: BleState(R.string.ble_auto_connecting)

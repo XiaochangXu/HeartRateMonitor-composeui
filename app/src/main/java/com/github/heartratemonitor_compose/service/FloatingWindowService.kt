@@ -181,7 +181,6 @@ class FloatingWindowService : Service() {
                 isConnected = bleService?.isDeviceConnected() ?: false
             }
         }
-        // 监听速度数据
         serviceScope.launch {
             bleService?.speed?.collectLatest { speed ->
                 speedText = String.format("%.1f", speed)
@@ -199,7 +198,6 @@ class FloatingWindowService : Service() {
             // 提升为 started 服务，使悬浮窗在 Activity 解绑（如开启"退出应用隐藏后台"后按 HOME 触发 finishAffinity）后仍能存活
             startService(Intent(this, FloatingWindowService::class.java))
         } catch (e: Exception) {
-            // Handle exception
         }
     }
 
@@ -221,7 +219,6 @@ class FloatingWindowService : Service() {
             // 释放 showWindow 时的 start 保活；若仍被绑定则服务继续存活
             stopSelf()
         } catch (e: Exception) {
-            // Handle exception
         }
     }
 

@@ -74,8 +74,6 @@ class HeartRateAlarmService : Service() {
     private val classifyHandler = Handler(Looper.getMainLooper())
     private val serviceScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
 
-    // ========== 生命周期 ==========
-
     override fun onCreate() {
         super.onCreate()
         sharedPreferences = getSharedPreferences("app_settings", Context.MODE_PRIVATE)
@@ -180,8 +178,6 @@ class HeartRateAlarmService : Service() {
         sharedPreferences.unregisterOnSharedPreferenceChangeListener(settingsListener)
     }
 
-    // ========== BleService 绑定 ==========
-
     private val bleServiceConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
             bleService = (service as BleService.LocalBinder).getService()
@@ -218,8 +214,6 @@ class HeartRateAlarmService : Service() {
             }
         }
     }
-
-    // ========== 加速度传感器 ==========
 
     private val sensorListener = object : SensorEventListener {
         override fun onSensorChanged(event: SensorEvent) {
@@ -318,8 +312,6 @@ class HeartRateAlarmService : Service() {
         }
     }
 
-    // ========== 触发报警 ==========
-
     private fun triggerAlarm(rate: Int, isHigh: Boolean, posture: PostureType, threshold: Int) {
         val direction = if (isHigh) "超过高限" else "低于低限"
         val body = "心率 ${rate} BPM ${direction} ${threshold}（${getString(posture.labelRes)}状态），请关注"
@@ -398,8 +390,6 @@ class HeartRateAlarmService : Service() {
             .setOngoing(true)
             .build()
     }
-
-    // ========== SharedPreferences 热更新 ==========
 
     private val settingsListener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
         when (key) {

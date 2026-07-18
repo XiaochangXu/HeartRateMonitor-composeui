@@ -62,7 +62,6 @@ fun HistoryScreen(
     var showDeleteDialog by remember { mutableStateOf(false) }
     var previewDataMap by remember { mutableStateOf(mapOf<Long, SessionPreviewData>()) }
 
-    // 异步加载每个会话的预览数据
     // 优化：用 getAllSessionStats() 批量获取统计信息（1 次查询替代 N 次），
     // 仅对有数据的 session 查询轻量采样数据用于迷你图表。
     LaunchedEffect(sessions) {
@@ -70,7 +69,6 @@ fun HistoryScreen(
             previewDataMap = emptyMap()
             return@LaunchedEffect
         }
-        // 批量获取所有会话的聚合统计
         val statsList = db.heartRateDao().getAllSessionStats()
         val statsMap = statsList.associateBy { it.sessionId }
 
@@ -278,7 +276,7 @@ private fun SessionCard(
                 onClick = onClick,
                 onLongClick = onLongClick
             ),
-        shape = RoundedCornerShape(20.dp),
+        shape = RoundedCornerShape(28.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
         ),
@@ -319,7 +317,6 @@ private fun SessionCard(
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
-                // 显示预览统计数据
                 if (previewData != null && !isMultiSelectMode) {
                     Spacer(Modifier.height(4.dp))
                     Text(
@@ -333,7 +330,6 @@ private fun SessionCard(
             }
 
             if (!isMultiSelectMode) {
-                // 迷你折线图预览
                 if (previewData != null && previewData.heartRateSamples.size >= 2) {
                     MiniChart(
                         samples = previewData.heartRateSamples,
@@ -383,7 +379,6 @@ private fun MiniChart(
         val maxVal = samples.max().toFloat()
         val range = (maxVal - minVal).coerceAtLeast(1f)
 
-        // 绘制网格线（水平参考线）
         val gridLineColor = gridColorValue
         for (i in 0..2) {
             val y = canvasHeight * i / 2f
@@ -395,7 +390,6 @@ private fun MiniChart(
             )
         }
 
-        // 绘制折线
         val stepX = canvasWidth / (samples.size - 1).coerceAtLeast(1)
         val path = Path()
         samples.forEachIndexed { index, value ->
@@ -419,7 +413,6 @@ private fun MiniChart(
             )
         )
 
-        // 绘制起点和终点圆点
         val firstY = canvasHeight - ((samples.first() - minVal) / range) * (canvasHeight - 4f) - 2f
         val lastY = canvasHeight - ((samples.last() - minVal) / range) * (canvasHeight - 4f) - 2f
         drawCircle(color = lineColorValue, radius = 2.5f, center = Offset(0f, firstY))

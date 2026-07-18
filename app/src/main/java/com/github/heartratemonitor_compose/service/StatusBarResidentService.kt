@@ -1,4 +1,4 @@
-﻿package com.github.heartratemonitor_compose.service
+package com.github.heartratemonitor_compose.service
 
 import android.app.Notification
 import android.app.NotificationChannel
@@ -123,7 +123,6 @@ class StatusBarResidentService : Service() {
         }
     }
 
-    // ========== MediaProjection 截屏采样相关 ==========
     private var mediaProjection: MediaProjection? = null
     private var mediaProjectionCallback: MediaProjection.Callback? = null
     private var virtualDisplay: VirtualDisplay? = null
@@ -141,7 +140,6 @@ class StatusBarResidentService : Service() {
         }
     }
 
-    // ========== 前台服务保活 + 自愈检查 ==========
     // specialUse 前台服务防止系统在锁屏/内存压力下杀死服务，保证 overlay 持续可用。
     private var isResidentForeground = false
     // 标记服务正在销毁，避免 stopMediaProjectionSampling 中误调 ensureResidentForeground

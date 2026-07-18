@@ -44,11 +44,9 @@ interface HeartRateDao {
     @Query("DELETE FROM heart_rate_sessions WHERE id = :sessionId")
     suspend fun deleteSession(sessionId: Long)
 
-    // 新增：查询所有未关闭的会话
     @Query("SELECT * FROM heart_rate_sessions WHERE endTime IS NULL")
     suspend fun getOpenSessions(): List<HeartRateSession>
 
-    // 新增：查询某个会话的最后一条记录时间
     @Query("SELECT MAX(timestamp) FROM heart_rate_records WHERE sessionId = :sessionId")
     suspend fun getLastRecordTimestampForSession(sessionId: Long): Long?
 

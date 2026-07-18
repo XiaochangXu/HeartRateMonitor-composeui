@@ -55,7 +55,6 @@ fun HeartRateAlarmScreen(
     val context = LocalContext.current
     val postureDetector = remember { PostureDetector() }
 
-    // 校准状态
     val calibration = remember {
         PostureCalibration.fromJson(sharedPreferences.getString("posture_calibration_data", null))
     }
@@ -66,14 +65,11 @@ fun HeartRateAlarmScreen(
     var calibrationProgress by remember { mutableIntStateOf(0) }
     var calibratingPostureName by remember { mutableStateOf("") }
 
-    // 本地化姿态标签
     val sittingLabel = stringResource(R.string.sitting)
     val standingLabel = stringResource(R.string.standing)
 
-    // 姿态显示
     var currentPosture by remember { mutableStateOf(PostureType.UNKNOWN) }
 
-    // 预警设置
     var alarmEnabled by remember { mutableStateOf(sharedPreferences.getBoolean("heart_rate_alarm_enabled", false)) }
     var excludePostureDetection by remember { mutableStateOf(sharedPreferences.getBoolean("heart_rate_alarm_exclude_posture_detection", false)) }
     var highThreshold by remember { mutableIntStateOf(sharedPreferences.getInt("heart_rate_alarm_high_threshold", 100)) }
@@ -91,14 +87,12 @@ fun HeartRateAlarmScreen(
         }
     }
 
-    // 弹出动画
     val popAnim = remember { Animatable(0.7f) }
     LaunchedEffect(currentPosture) {
         popAnim.snapTo(0.7f)
         popAnim.animateTo(1f, animationSpec = tween(200, easing = FastOutSlowInEasing))
     }
 
-    // 运动弹跳动画
     val infiniteTransition = rememberInfiniteTransition(label = "bounce")
     val bounceOffset by infiniteTransition.animateFloat(
         initialValue = 0f,
@@ -148,7 +142,6 @@ fun HeartRateAlarmScreen(
         }
     }
 
-    // 校准倒计时
     LaunchedEffect(isCalibrating) {
         if (isCalibrating) {
             calibrationProgress = 0
@@ -186,7 +179,6 @@ fun HeartRateAlarmScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // 1. 姿态展示卡片（排除姿态检测时隐藏）
             if (!excludePostureDetection) {
                 PostureCard(
                     posture = currentPosture,
@@ -195,7 +187,6 @@ fun HeartRateAlarmScreen(
                 )
             }
 
-            // 2. 姿态校准区（排除姿态检测时隐藏）
             if (!excludePostureDetection) {
                 CalibrationCard(
                     calibration = currentCalibration,
@@ -218,7 +209,6 @@ fun HeartRateAlarmScreen(
                 )
             }
 
-            // 3. 预警设置区
             AlarmSettingsCard(
                 sharedPreferences = sharedPreferences,
                 alarmEnabled = alarmEnabled,
@@ -282,7 +272,7 @@ private fun PostureCard(
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(20.dp),
+        shape = RoundedCornerShape(28.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
@@ -356,7 +346,7 @@ private fun CalibrationCard(
 
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(20.dp),
+        shape = RoundedCornerShape(28.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
@@ -442,8 +432,7 @@ private fun AlarmSettingsCard(
         )
 
         AlarmGroupCard {
-            // 启用开关
-            AlarmItem {
+            AlarmItem(isFirst = true) {
                 AlarmSwitch(
                     checked = alarmEnabled,
                     onCheckedChange = onAlarmEnabledChange,
@@ -452,8 +441,6 @@ private fun AlarmSettingsCard(
                 )
             }
 
-            AlarmDivider()
-            // 排除姿态检测开关（位于启用心率预警下方）
             AlarmItem {
                 AlarmSwitch(
                     checked = excludePostureDetection,
@@ -463,7 +450,6 @@ private fun AlarmSettingsCard(
                 )
             }
 
-            AlarmDivider()
             // 超过阈值（动态下限：至少比低阈值大 1）
             AlarmItem {
                 AlarmDragSlider(
@@ -476,7 +462,6 @@ private fun AlarmSettingsCard(
                 )
             }
 
-            AlarmDivider()
             // 低于阈值（动态上限：至多比高阈值小 1）
             AlarmItem {
                 AlarmDragSlider(
@@ -489,8 +474,6 @@ private fun AlarmSettingsCard(
                 )
             }
 
-            AlarmDivider()
-            // 持续时长
             AlarmItem {
                 AlarmDragSlider(
                     label = stringResource(R.string.duration_label),
@@ -502,9 +485,7 @@ private fun AlarmSettingsCard(
                 )
             }
 
-            AlarmDivider()
-            // 重复报警开关
-            AlarmItem {
+            AlarmItem(isLast = !repeatEnabled) {
                 AlarmSwitch(
                     checked = repeatEnabled,
                     onCheckedChange = onRepeatEnabledChange,
@@ -514,8 +495,7 @@ private fun AlarmSettingsCard(
             }
 
             if (repeatEnabled) {
-                AlarmDivider()
-                AlarmItem {
+                AlarmItem(isLast = true) {
                     AlarmDragSlider(
                         label = stringResource(R.string.alarm_interval),
                         value = repeatInterval,
@@ -531,52 +511,63 @@ private fun AlarmSettingsCard(
 }
 
 /**
- * 分组卡片容器：用一张圆角卡片包裹同组的多个设置项，
- * 项之间用 [AlarmDivider] 分隔。与设置页风格统一为 Material 3 grouped list。
+ * 分组容器：用 Column 包裹同组的多个独立设置项卡片，
+ * 项之间用 2dp 间隔分隔（露出背景），取代传统的分割线设计。
+ * 这是 Material 3 分段列表（Segmented List）模式的变体，
+ * 每个设置项是独立的 Surface 卡片，视觉上既分组又分离。
  */
 @Composable
 private fun AlarmGroupCard(
     content: @Composable ColumnScope.() -> Unit
 ) {
-    Surface(
+    Column(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(20.dp),
-        color = MaterialTheme.colorScheme.surfaceContainerHigh,
-        contentColor = MaterialTheme.colorScheme.onSurface
-    ) {
-        Column(content = content)
-    }
+        verticalArrangement = Arrangement.spacedBy(2.dp),
+        content = content
+    )
 }
 
 /**
- * 分组卡片内的单个设置项行（不再包裹独立 Card）。
- * - [onClick] 非空时整行可点击，ripple 覆盖整行（含圆角由外层 Surface clip）。
+ * 独立设置项卡片：根据在分组中的位置应用不同的圆角形状。
+ * - [isFirst] && [isLast]：四角全圆角（单独一项）
+ * - [isFirst]：顶部圆角，底部直角（首项）
+ * - [isLast]：底部圆角，顶部直角（末项）
+ * - 都不传：四角直角（中间项，长方形）
+ * 卡片之间有 2dp 间隙，背景透过间隙显示，形成"分段式卡片组"视觉效果。
+ * - [onClick] 非空时整张卡片可点击，ripple 被 Surface 的 clip 裁剪到圆角内。
  * - 最小高度 56dp，与 MD3 列表规范一致。
  */
 @Composable
 private fun AlarmItem(
+    isFirst: Boolean = false,
+    isLast: Boolean = false,
     onClick: (() -> Unit)? = null,
     content: @Composable () -> Unit
 ) {
-    Column(
+    val shape = when {
+        isFirst && isLast -> RoundedCornerShape(28.dp)
+        isFirst -> RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
+        isLast -> RoundedCornerShape(bottomStart = 28.dp, bottomEnd = 28.dp)
+        else -> RoundedCornerShape(0.dp)
+    }
+    Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .heightIn(min = 56.dp)
-            .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
-            .padding(horizontal = 16.dp, vertical = 8.dp),
-        verticalArrangement = Arrangement.Center
+            .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier),
+        shape = shape,
+        color = MaterialTheme.colorScheme.surfaceContainerHigh,
+        contentColor = MaterialTheme.colorScheme.onSurface
     ) {
-        content()
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .heightIn(min = 56.dp)
+                .padding(horizontal = 16.dp, vertical = 8.dp),
+            verticalArrangement = Arrangement.Center
+        ) {
+            content()
+        }
     }
-}
-
-/** 分组卡片内项之间的分隔线。左右留 16dp 与行内容对齐。 */
-@Composable
-private fun AlarmDivider() {
-    HorizontalDivider(
-        color = MaterialTheme.colorScheme.outlineVariant,
-        modifier = Modifier.padding(horizontal = 16.dp)
-    )
 }
 
 // ────────────────── M3 Expressive 开关组件 ──────────────────

@@ -56,11 +56,9 @@ class BleService : Service() {
     private lateinit var db: AppDatabase
     private var locationManager: LocationManager? = null
 
-    // --- Server Managers ---
     private var httpServerManager: HttpServerManager? = null
     private var webSocketServerManager: WebSocketServerManager? = null
 
-    // --- StateFlow ---
     private val _bleState = MutableStateFlow<BleState>(BleState.Idle)
     val bleState: StateFlow<BleState> = _bleState.asStateFlow()
 
@@ -77,9 +75,14 @@ class BleService : Service() {
     private val _scanResults = MutableStateFlow<List<Advertisement>>(emptyList())
     val scanResults: StateFlow<List<Advertisement>> = _scanResults.asStateFlow()
 
+    // 当前已连接设备信息（id + name），断开时为 null。
+    // 供 DevicesScreen 在已连接时顶部显示当前设备（修复：连接后 scanResults 被清空导致列表为空）。
+    data class ConnectedDevice(val id: String, val name: String)
+    private val _connectedDevice = MutableStateFlow<ConnectedDevice?>(null)
+    val connectedDevice: StateFlow<ConnectedDevice?> = _connectedDevice.asStateFlow()
+
     private val webSocketStateFlow = MutableSharedFlow<String>(replay = 1)
 
-    // --- BLE State ---
     private var connectedPeripheral: Peripheral? = null
     private var connectionJob: Job? = null
     private var scanJob: Job? = null
@@ -230,7 +233,6 @@ class BleService : Service() {
                 _bleState.value = BleState.Scanning
                 withTimeout(durationMillis) {
                     bleManager.scan().collect { advertisement ->
-                        // Update the map with the latest advertisement for this ID
                         foundDevicesMap[advertisement.identifier] = advertisement
                         _scanResults.value = foundDevicesMap.values.toList()
                     }
@@ -348,6 +350,8 @@ class BleService : Service() {
             is State.Connected -> {
                 val deviceName = peripheral.name ?: getString(R.string.unknown_device)
                 lastConnectedDeviceName = deviceName
+                // 同步当前已连接设备信息（id + name）供 UI 显示
+                _connectedDevice.value = ConnectedDevice(lastConnectedDeviceId ?: "", deviceName)
                 _bleState.value = BleState.Connected(getString(R.string.ble_connected_to, deviceName))
                 autoReconnectAttempt = 0  // 连接成功，重置重试计数
                 webhookManager.triggerWebhooks(WebhookTrigger.CONNECTED, speed = _speed.value)
@@ -408,6 +412,8 @@ class BleService : Service() {
 
         webhookManager.triggerWebhooks(WebhookTrigger.DISCONNECTED, _heartRate.value, _speed.value)
         _heartRate.value = 0
+        // 清除已连接设备信息（断开后 DevicesScreen 不再显示已连接卡片）
+        _connectedDevice.value = null
         broadcastWebSocketState()
         connectedPeripheral = null
     }

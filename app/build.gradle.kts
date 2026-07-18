@@ -20,16 +20,13 @@ android {
         applicationId = "com.github.heartratemonitor_compose"
         minSdk = 27
         targetSdk = 37
-        versionCode = 21
-        versionName = "2.7"
+        versionCode = 22
+        versionName = "2.8"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        // arm64-v8a：现代设备（minSdk 27）几乎全部支持
-        // x86_64：模拟器调试支持
         ndk {
             abiFilters += "arm64-v8a"
-            abiFilters += "x86_64"
         }
     }
 
@@ -122,4 +119,7 @@ dependencies {
 
     implementation(libs.nanohttpd)
     implementation(libs.nanohttpd.websocket)
+
+    // MaterialKolor：从用户 seed 色生成 Material 3 ColorScheme（自定义主题）
+    implementation(libs.materialkolor)
 }

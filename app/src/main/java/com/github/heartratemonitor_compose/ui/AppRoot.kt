@@ -89,11 +89,13 @@ import com.github.heartratemonitor_compose.ui.history.ChartScreen
 import com.github.heartratemonitor_compose.ui.history.HistoryScreen
 import com.github.heartratemonitor_compose.ui.main.AppStatus
 import com.github.heartratemonitor_compose.ui.main.FullScreenHeartRate
+import com.github.heartratemonitor_compose.ui.main.DevicesScreen
 import com.github.heartratemonitor_compose.ui.main.HomeScreen
 import com.github.heartratemonitor_compose.ui.main.MainViewModel
 import com.github.heartratemonitor_compose.ui.server.ServerScreen
 import com.github.heartratemonitor_compose.ui.settings.FairMemoryScreen
 import com.github.heartratemonitor_compose.ui.settings.SettingsScreen
+import com.github.heartratemonitor_compose.ui.theme.ThemeSettingsScreen
 import com.github.heartratemonitor_compose.ui.webhook.WebhookScreen
 import kotlinx.coroutines.launch
 
@@ -132,6 +134,8 @@ sealed class Screen {
     object Server : Screen()
     object Webhook : Screen()
     object FairMemory : Screen()
+    object Theme : Screen()
+    object Devices : Screen()
 }
 
 /** 底部导航 Tab 页（home / settings） */
@@ -155,6 +159,8 @@ private fun String.toScreen(): Screen = when (this) {
     "webhook" -> Screen.Webhook
     "fair_memory" -> Screen.FairMemory
     "history" -> Screen.History
+    "theme" -> Screen.Theme
+    "devices" -> Screen.Devices
     else -> Screen.Home
 }
 
@@ -428,6 +434,7 @@ fun AppRoot(
                 HomeScreen(
                     viewModel = mainViewModel,
                     onOpenHistory = { navigate(Screen.History) },
+                    onNavigateToDevices = { navigate(Screen.Devices) },
                     onEnterFullScreen = { isFullScreenMode = true }
                 )
             }
@@ -445,7 +452,6 @@ fun AppRoot(
             ) {
                 SettingsScreen(
                     sharedPreferences = sharedPreferences,
-                    onNavigateBack = { popBack() },
                     onNavigate = { route -> navigate(route.toScreen()) },
                     onOpenExternal = onOpenExternal,
                     onRequestMediaProjection = onMediaProjectionRequest,
@@ -584,6 +590,13 @@ fun AppRoot(
                             context = context
                         )
                         Screen.FairMemory -> FairMemoryScreen(
+                            onNavigateBack = { popBack() }
+                        )
+                        Screen.Theme -> ThemeSettingsScreen(
+                            onNavigateBack = { popBack() }
+                        )
+                        Screen.Devices -> DevicesScreen(
+                            viewModel = mainViewModel,
                             onNavigateBack = { popBack() }
                         )
                         else -> {}

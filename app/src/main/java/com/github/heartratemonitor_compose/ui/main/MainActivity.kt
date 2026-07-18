@@ -39,9 +39,11 @@ import kotlinx.coroutines.launch
  * - 处理权限请求、悬浮窗开关、MediaProjection 授权（launcher 吸收自 SettingsActivity）
  * - 应用启动时恢复 [StatusBarResidentService] / [HeartRateAlarmService]（修复原仅 SettingsActivity 触发的时序 bug）
  * - 「退出应用隐藏后台」逻辑（吸收自原 BaseActivity）
- * - 莫奈取色切换重建
  *
  * 原 XML 布局 logic（chart、device list、heartbeat anim）已下沉到 [HomeScreen]。
+ *
+ * 主题切换由 [com.github.heartratemonitor_compose.ui.theme.ThemeState] 驱动，
+ * 修改后通过 StateFlow 触发全 App 重组即时生效，无需重建 Activity。
  */
 class MainActivity : FragmentActivity() {
 
@@ -59,13 +61,6 @@ class MainActivity : FragmentActivity() {
 
     /** 跟踪当前 Activity 是否处于 started 状态，用于「退出应用隐藏后台」 */
     private var isStarted = false
-
-    /**
-     * 记录 MainActivity 创建时莫奈取色的开关状态。
-     * Compose 主题的 dynamicColor 参数仅在 Activity 创建时读取；若用户在设置页切换，
-     * 返回首页时需重建 MainActivity 才能应用/移除动态取色。
-     */
-    private var monetEnabledAtCreate = true
 
     // ─────────── Service Bindings ───────────
     private var bleService: BleService? = null
@@ -162,17 +157,13 @@ class MainActivity : FragmentActivity() {
         sharedPreferences = getSharedPreferences("app_settings", Context.MODE_PRIVATE)
         db = AppDatabase.getDatabase(this)
 
-        monetEnabledAtCreate = sharedPreferences.getBoolean("monet_color_enabled", true)
-
         cleanupOpenSessions()
         startAndBindServices()
         recoverServices()
         requestPermissions()
 
         setContent {
-            HeartRateMonitorMobileTheme(
-                dynamicColor = sharedPreferences.getBoolean("monet_color_enabled", true)
-            ) {
+            HeartRateMonitorMobileTheme {
                 AppRoot(
                     onToggleFloatingWindow = { toggleFloatingWindow() },
                     onMediaProjectionRequest = { screenCaptureIntent ->
@@ -204,18 +195,6 @@ class MainActivity : FragmentActivity() {
 
     override fun onResume() {
         super.onResume()
-        // 莫奈取色状态若在离开首页期间被切换，需重启 MainActivity 以应用/移除动态取色。
-        // 使用 startActivity + finish 而非 recreate()：后者在新实例上 setDecorFitsSystemWindows(false)
-        // 可能未及时生效，导致底部导航栏 edge-to-edge 失效、系统手势条无法沉浸。
-        val monetEnabledNow = sharedPreferences.getBoolean("monet_color_enabled", true)
-        if (monetEnabledNow != monetEnabledAtCreate) {
-            monetEnabledAtCreate = monetEnabledNow
-            val intent = Intent(this, MainActivity::class.java)
-            startActivity(intent)
-            overridePendingTransition(0, 0)
-            finish()
-            return
-        }
         updateFloatingWindowUi(sharedPreferences.getBoolean("floating_window_enabled", false))
     }
 

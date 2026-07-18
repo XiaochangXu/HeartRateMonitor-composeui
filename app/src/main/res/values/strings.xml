@@ -23,6 +23,9 @@
     <string name="cd_favorite">收藏</string>
     <string name="bpm_unit">次/分</string>
     <string name="fullscreen_exit_hint">点击屏幕或按返回键退出</string>
+    <string name="history_not_enabled">未开启历史记录</string>
+    <string name="device_not_connected">未连接设备</string>
+    <string name="connected_device">已连接设备</string>
 
     <!-- SettingsScreen - General -->
     <string name="settings">设置</string>
@@ -53,7 +56,6 @@
     <!-- SettingsScreen - Status Bar -->
     <string name="status_bar_resident">状态栏常驻</string>
     <string name="status_bar_heart_rate">状态栏常驻心率</string>
-    <string name="status_bar_heart_rate_subtitle">在顶部状态栏显示实时心率（需悬浮窗权限）</string>
     <string name="display_bpm_unit">显示 BPM 单位</string>
     <string name="horizontal_position">水平位置</string>
     <string name="vertical_adjust">垂直微调</string>
@@ -66,9 +68,6 @@
     <string name="auto_color_subtitle">通过截屏采样状态栏区域亮度，自动切换黑/白文字。需要一次录屏授权，会增加少量耗电。</string>
     <string name="enable_resident_first">请先开启「状态栏常驻心率」开关后再使用自动识别。</string>
     <string name="auto_color_conflict">自动识别已开启，请先关闭后再手动选择颜色。</string>
-    <string name="use_white_text">使用白色文字</string>
-    <string name="white_text_subtitle">关闭「自动识别」时生效。默认关闭即为纯黑文字。</string>
-    <string name="auto_color_unavailable">自动识别开启时不可用</string>
 
     <!-- SettingsScreen - Floating Window -->
     <string name="floating_window_style">悬浮窗样式</string>
@@ -279,4 +278,33 @@
     <string name="update_api_error">Gitee API 返回错误码：%1$d</string>
     <string name="update_network_error">网络错误：%1$s</string>
     <string name="update_no_valid_release">未找到有效的正式 Release</string>
+
+    <!-- ThemeSettings -->
+    <string name="theme_settings">主题设置</string>
+    <string name="theme_color">主题色彩</string>
+    <string name="theme_custom">自定义主题</string>
+    <string name="theme_mode">主题模式</string>
+    <string name="theme_mode_system">跟随系统</string>
+    <string name="theme_mode_light">亮色</string>
+    <string name="theme_mode_dark">暗色</string>
+    <string name="theme_preset_seeds">预设色卡</string>
+    <string name="theme_custom_seed">自定义主题色</string>
+    <string name="theme_variant">色调风格</string>
+    <string name="theme_seed_red">红色</string>
+    <string name="theme_seed_orange">橙色</string>
+    <string name="theme_seed_yellow">黄色</string>
+    <string name="theme_seed_green">绿色</string>
+    <string name="theme_seed_teal">青色</string>
+    <string name="theme_seed_blue">蓝色</string>
+    <string name="theme_seed_purple">紫色</string>
+    <string name="theme_seed_pink">粉色</string>
+    <string name="theme_variant_tonal_spot">色调点位</string>
+    <string name="theme_variant_vibrant">鲜艳</string>
+    <string name="theme_variant_expressive">表现力</string>
+    <string name="theme_variant_neutral">中性</string>
+    <string name="theme_variant_monochrome">单色</string>
+    <string name="theme_variant_fidelity">保真</string>
+    <string name="theme_variant_content">内容</string>
+    <string name="theme_variant_rainbow">彩虹</string>
+    <string name="theme_variant_fruit_salad">水果沙拉</string>
 </resources>

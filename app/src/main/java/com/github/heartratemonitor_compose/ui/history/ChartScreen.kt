@@ -95,7 +95,6 @@ fun ChartScreen(
     var startTime by remember { mutableStateOf(0L) }
     val timeFormat = remember { SimpleDateFormat("HH:mm:ss", Locale.getDefault()) }
 
-    // 异步加载会话记录
     LaunchedEffect(sessionId) {
         val loaded = withContext(Dispatchers.IO) {
             db.heartRateDao().getRecordsForSession(sessionId)
@@ -220,7 +219,6 @@ private fun HeartRateChart(
         }
     }
 
-    // Marker:显示「心率: X bpm / 时间: HH:mm:ss」
     val markerFormatter = remember(startTime, timeFormat, records) {
         DefaultCartesianMarker.ValueFormatter { _, targets ->
             val target = targets.firstOrNull() ?: return@ValueFormatter ""

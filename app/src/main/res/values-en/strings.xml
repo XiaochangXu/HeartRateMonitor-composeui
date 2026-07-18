@@ -23,6 +23,9 @@
     <string name="cd_favorite">Favorite</string>
     <string name="bpm_unit">BPM</string>
     <string name="fullscreen_exit_hint">Tap screen or press back to exit</string>
+    <string name="history_not_enabled">History Not Enabled</string>
+    <string name="device_not_connected">Device Not Connected</string>
+    <string name="connected_device">Connected Device</string>
 
     <!-- SettingsScreen - General -->
     <string name="settings">Settings</string>
@@ -53,7 +56,6 @@
     <!-- SettingsScreen - Status Bar -->
     <string name="status_bar_resident">Status Bar Resident</string>
     <string name="status_bar_heart_rate">Status Bar Heart Rate</string>
-    <string name="status_bar_heart_rate_subtitle">Show real-time heart rate in status bar (requires overlay permission)</string>
     <string name="display_bpm_unit">Display BPM Unit</string>
     <string name="horizontal_position">Horizontal Position</string>
     <string name="vertical_adjust">Vertical Adjust</string>
@@ -66,9 +68,6 @@
     <string name="auto_color_subtitle">Sample status bar brightness via screenshot to auto-switch black/white text. Requires one screen recording authorizationation. Slightly increases battery usage.</string>
     <string name="enable_resident_first">Please enable \"Status Bar Heart Rate\" first before using auto-detection.</string>
     <string name="auto_color_conflict">Auto-detection is enabled. Please disable it first before manually selecting a color.</string>
-    <string name="use_white_text">Use White Text</string>
-    <string name="white_text_subtitle">Takes effect when \"Auto-detect\" is off. Default is pure black text.</string>
-    <string name="auto_color_unavailable">Unavailable when auto-detection is enabled</string>
 
     <!-- SettingsScreen - Floating Window -->
     <string name="floating_window_style">Floating Window Style</string>
@@ -269,4 +268,33 @@
     <string name="update_api_error">Gitee API returned error code: %1$d</string>
     <string name="update_network_error">Network error: %1$s</string>
     <string name="update_no_valid_release">No valid official release found</string>
+
+    <!-- ThemeSettings -->
+    <string name="theme_settings">Theme</string>
+    <string name="theme_color">Theme Color</string>
+    <string name="theme_custom">Custom Theme</string>
+    <string name="theme_mode">Theme Mode</string>
+    <string name="theme_mode_system">Follow System</string>
+    <string name="theme_mode_light">Light</string>
+    <string name="theme_mode_dark">Dark</string>
+    <string name="theme_preset_seeds">Preset Seeds</string>
+    <string name="theme_custom_seed">Custom Color</string>
+    <string name="theme_variant">Palette Style</string>
+    <string name="theme_seed_red">Red</string>
+    <string name="theme_seed_orange">Orange</string>
+    <string name="theme_seed_yellow">Yellow</string>
+    <string name="theme_seed_green">Green</string>
+    <string name="theme_seed_teal">Teal</string>
+    <string name="theme_seed_blue">Blue</string>
+    <string name="theme_seed_purple">Purple</string>
+    <string name="theme_seed_pink">Pink</string>
+    <string name="theme_variant_tonal_spot">Tonal Spot</string>
+    <string name="theme_variant_vibrant">Vibrant</string>
+    <string name="theme_variant_expressive">Expressive</string>
+    <string name="theme_variant_neutral">Neutral</string>
+    <string name="theme_variant_monochrome">Monochrome</string>
+    <string name="theme_variant_fidelity">Fidelity</string>
+    <string name="theme_variant_content">Content</string>
+    <string name="theme_variant_rainbow">Rainbow</string>
+    <string name="theme_variant_fruit_salad">Fruit Salad</string>
 </resources>

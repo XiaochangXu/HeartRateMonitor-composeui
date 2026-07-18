@@ -14,11 +14,14 @@ import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
-import androidx.compose.ui.graphics.toArgb
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
+import com.materialkolor.rememberDynamicColorScheme
 
 private val ExpressLightColorScheme = lightColorScheme(
     primary = ExpressPrimaryLight,
@@ -89,21 +92,41 @@ val ExpressShapes = Shapes(
 )
 
 /**
- * HeartRateMonitorMobile M3 Expressive 主题
+ * HeartRateMonitorMobile M3 Expressive 主题。
  *
- * 在 Android 12+ 上使用系统动态取色（Monet），
- * 低版本回退到预设的 M3 Expressive 颜色方案。
- * 总是使用 Expressive 排版和形状。
+ * 主题决策由 [ThemeState] 驱动（在 HeartRateApp.onCreate 初始化）：
+ * - **色彩来源** ([ThemeConfig.source])：
+ *   - [ThemeSource.SYSTEM_MONET]：Android 12+ 调用系统 `dynamicLight/DarkColorScheme` 取壁纸色；
+ *     Android 11- 回退到预设的 Expressive 静态方案。**默认值，零回归。**
+ *   - [ThemeSource.CUSTOM]：调用 MaterialKolor `rememberDynamicColorScheme(seed, isDark, style)`，
+ *     从用户 seed 色生成完整 ColorScheme，**切断系统壁纸联动**。
+ * - **明暗模式** ([ThemeConfig.mode])：跟随系统 / 强制亮色 / 强制暗色，与色彩来源正交。
+ *
+ * Activity 与 Services（FloatingWindowService / StatusBarResidentService）共用同一 [ThemeState]
+ * 实例（同进程），任一调用方修改主题后全 App 即时重配色。
  */
 @Composable
 fun HeartRateMonitorMobileTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
-    dynamicColor: Boolean = true,
     content: @Composable () -> Unit
 ) {
+    val config by ThemeState.config.collectAsState()
+
+    // 计算有效明暗：mode 覆盖系统暗色模式
+    val systemDark = isSystemInDarkTheme()
+    val darkTheme = when (config.mode) {
+        ThemeMode.LIGHT -> false
+        ThemeMode.DARK -> true
+        else -> systemDark
+    }
+
+    val context = LocalContext.current
     val colorScheme = when {
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            val context = LocalContext.current
+        config.source == ThemeSource.CUSTOM -> rememberDynamicColorScheme(
+            seedColor = Color(config.seedArgb),
+            isDark = darkTheme,
+            style = config.style
+        )
+        Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
             if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
         }
         darkTheme -> ExpressDarkColorScheme
@@ -118,7 +141,6 @@ fun HeartRateMonitorMobileTheme(
             val activity = view.context.findActivity()
             if (activity != null) {
                 val window = activity.window
-                val schemeColor = colorScheme.primary.toArgb()
                 window.statusBarColor = android.graphics.Color.TRANSPARENT
                 window.navigationBarColor = android.graphics.Color.TRANSPARENT
                 val isLight = colorScheme.surface.brightness() > 0.5

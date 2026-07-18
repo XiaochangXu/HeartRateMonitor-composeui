@@ -55,9 +55,9 @@ class HttpServerManager(
                 val json = JSONObject().apply {
                     put("heart_rate", heartRateFlow.value)
                     put("connected", isDeviceConnected())
-                    put("status", getStatusMessage()) // 添加状态
-                    put("timestamp", System.currentTimeMillis()) // 添加时间戳
-                    put("speed", speedFlow.value) // 添加速度
+                    put("status", getStatusMessage())
+                    put("timestamp", System.currentTimeMillis())
+                    put("speed", speedFlow.value)
                 }
                 return newFixedLengthResponse(Response.Status.OK, "application/json", json.toString())
             }

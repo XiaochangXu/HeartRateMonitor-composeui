@@ -50,7 +50,6 @@ import kotlin.math.sqrt
 @Composable
 fun SettingsScreen(
     sharedPreferences: SharedPreferences,
-    onNavigateBack: () -> Unit,
     onNavigate: (String) -> Unit,
     onOpenExternal: (Intent) -> Unit,
     onRequestMediaProjection: (Intent) -> Unit,
@@ -71,14 +70,6 @@ fun SettingsScreen(
                         style = MaterialTheme.typography.headlineSmall,
                         fontWeight = FontWeight.Normal
                     )
-                },
-                navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = stringResource(R.string.cd_back)
-                        )
-                    }
                 }
             )
         }
@@ -151,52 +142,63 @@ private fun SectionTitle(title: String) {
 }
 
 /**
- * 分组卡片容器：用一张圆角卡片包裹同组的多个设置项，
- * 项之间用 [SettingsDivider] 分隔。统一为 Material 3 grouped list 风格。
+ * 分组容器：用 Column 包裹同组的多个独立设置项卡片，
+ * 项之间用 2dp 间隔分隔（露出背景），取代传统的分割线设计。
+ * 这是 Material 3 分段列表（Segmented List）模式的变体，
+ * 每个设置项是独立的 Surface 卡片，视觉上既分组又分离。
  */
 @Composable
 private fun SettingsGroupCard(
     content: @Composable ColumnScope.() -> Unit
 ) {
-    Surface(
+    Column(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(20.dp),
-        color = MaterialTheme.colorScheme.surfaceContainerHigh,
-        contentColor = MaterialTheme.colorScheme.onSurface
-    ) {
-        Column(content = content)
-    }
+        verticalArrangement = Arrangement.spacedBy(2.dp),
+        content = content
+    )
 }
 
 /**
- * 分组卡片内的单个设置项行（不再包裹独立 Card）。
- * - [onClick] 非空时整行可点击，ripple 覆盖整行（含圆角由外层 Surface clip）。
+ * 独立设置项卡片：根据在分组中的位置应用不同的圆角形状。
+ * - [isFirst] && [isLast]：四角全圆角（单独一项）
+ * - [isFirst]：顶部圆角，底部直角（首项）
+ * - [isLast]：底部圆角，顶部直角（末项）
+ * - 都不传：四角直角（中间项，长方形）
+ * 卡片之间有 2dp 间隙，背景透过间隙显示，形成"分段式卡片组"视觉效果。
+ * - [onClick] 非空时整张卡片可点击，ripple 被 Surface 的 clip 裁剪到圆角内。
  * - 最小高度 56dp，与 MD3 列表规范一致。
  */
 @Composable
 private fun SettingsItem(
+    isFirst: Boolean = false,
+    isLast: Boolean = false,
     onClick: (() -> Unit)? = null,
     content: @Composable () -> Unit
 ) {
-    Column(
+    val shape = when {
+        isFirst && isLast -> RoundedCornerShape(28.dp)
+        isFirst -> RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
+        isLast -> RoundedCornerShape(bottomStart = 28.dp, bottomEnd = 28.dp)
+        else -> RoundedCornerShape(0.dp)
+    }
+    Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .heightIn(min = 56.dp)
-            .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
-            .padding(horizontal = 16.dp, vertical = 8.dp),
-        verticalArrangement = Arrangement.Center
+            .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier),
+        shape = shape,
+        color = MaterialTheme.colorScheme.surfaceContainerHigh,
+        contentColor = MaterialTheme.colorScheme.onSurface
     ) {
-        content()
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .heightIn(min = 56.dp)
+                .padding(horizontal = 16.dp, vertical = 8.dp),
+            verticalArrangement = Arrangement.Center
+        ) {
+            content()
+        }
     }
-}
-
-/** 分组卡片内项之间的分隔线。左右留 16dp 与行内容对齐。 */
-@Composable
-private fun SettingsDivider() {
-    HorizontalDivider(
-        color = MaterialTheme.colorScheme.outlineVariant,
-        modifier = Modifier.padding(horizontal = 16.dp)
-    )
 }
 
 @Composable
@@ -427,8 +429,7 @@ private fun GeneralSection(
 
     SectionTitle(stringResource(R.string.general))
     SettingsGroupCard {
-        // 记录历史数据
-        SettingsItem {
+        SettingsItem(isFirst = true) {
             SettingsSwitch(
                 checked = isHistoryEnabled,
                 onCheckedChange = { checked ->
@@ -462,8 +463,6 @@ private fun GeneralSection(
             )
         }
 
-        SettingsDivider()
-        // 心跳动画效果
         SettingsItem {
             SettingsSwitch(
                 checked = isAnimationEnabled,
@@ -476,8 +475,6 @@ private fun GeneralSection(
             )
         }
 
-        SettingsDivider()
-        // 显示时速
         SettingsItem {
             SettingsSwitch(
                 checked = isSpeedEnabled,
@@ -513,8 +510,6 @@ private fun GeneralSection(
             )
         }
 
-        SettingsDivider()
-        // 退出应用隐藏后台
         SettingsItem {
             SettingsSwitch(
                 checked = isHideFromRecents,
@@ -528,15 +523,15 @@ private fun GeneralSection(
             )
         }
 
-        SettingsDivider()
-        // 收藏设备
+        SettingsItem(onClick = { onNavigate("theme") }) {
+            SettingsLink(title = stringResource(R.string.theme_settings), leadingIcon = painterResource(R.drawable.ic_text_color))
+        }
+
         SettingsItem(onClick = { onNavigate("favorite") }) {
             SettingsLink(title = stringResource(R.string.favorite_devices), leadingIcon = painterResource(R.drawable.ic_star))
         }
 
-        SettingsDivider()
-        // 心率预警
-        SettingsItem(onClick = { onNavigate("alarm") }) {
+        SettingsItem(isLast = true, onClick = { onNavigate("alarm") }) {
             SettingsLink(title = stringResource(R.string.heart_rate_alarm), leadingIcon = painterResource(R.drawable.ic_warning))
         }
     }
@@ -549,7 +544,7 @@ private fun BluetoothSection(prefs: SharedPreferences) {
 
     SectionTitle(stringResource(R.string.bluetooth))
     SettingsGroupCard {
-        SettingsItem {
+        SettingsItem(isFirst = true) {
             SettingsSwitch(
                 checked = isAutoConnectEnabled,
                 onCheckedChange = {
@@ -561,8 +556,7 @@ private fun BluetoothSection(prefs: SharedPreferences) {
             )
         }
 
-        SettingsDivider()
-        SettingsItem {
+        SettingsItem(isLast = true) {
             SettingsSwitch(
                 checked = isAutoReconnectEnabled,
                 onCheckedChange = {
@@ -584,12 +578,11 @@ private fun IntegrationSection(
 ) {
     SectionTitle(stringResource(R.string.integration))
     SettingsGroupCard {
-        SettingsItem(onClick = { onNavigate("server") }) {
+        SettingsItem(isFirst = true, onClick = { onNavigate("server") }) {
             SettingsLink(title = stringResource(R.string.http_websocket_server), leadingIcon = painterResource(R.drawable.ic_http_websocket))
         }
 
-        SettingsDivider()
-        SettingsItem(onClick = { onNavigate("webhook") }) {
+        SettingsItem(isLast = true, onClick = { onNavigate("webhook") }) {
             SettingsLink(title = stringResource(R.string.webhook_settings), leadingIcon = painterResource(R.drawable.ic_webhook))
         }
     }
@@ -603,8 +596,7 @@ private fun StatusBarSection(
     val context = LocalContext.current
     SectionTitle(stringResource(R.string.status_bar_resident))
     SettingsGroupCard {
-        // 状态栏常驻心率
-        SettingsItem {
+        SettingsItem(isFirst = true) {
             var residentChecked by remember { mutableStateOf(prefs.getBoolean("status_bar_resident_enabled", false)) }
 
             Row(
@@ -655,12 +647,6 @@ private fun StatusBarSection(
                         fontWeight = FontWeight.Normal,
                         color = MaterialTheme.colorScheme.onSurface
                     )
-                    Text(
-                        text = stringResource(R.string.status_bar_heart_rate_subtitle),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(top = 4.dp)
-                    )
                 }
                 Spacer(Modifier.width(16.dp))
                 Switch(
@@ -695,8 +681,6 @@ private fun StatusBarSection(
             }
         }
 
-        SettingsDivider()
-        // 显示 'bpm' 单位
         SettingsItem {
             var isBpmTextEnabled by remember { mutableStateOf(prefs.getBoolean("status_bar_bpm_text_enabled", true)) }
             SettingsSwitch(
@@ -710,8 +694,6 @@ private fun StatusBarSection(
             )
         }
 
-        SettingsDivider()
-        // 水平位置
         SettingsItem {
             DragSlider(
                 label = stringResource(R.string.horizontal_position),
@@ -723,8 +705,6 @@ private fun StatusBarSection(
             )
         }
 
-        SettingsDivider()
-        // 垂直微调
         SettingsItem {
             DragSlider(
                 label = stringResource(R.string.vertical_adjust),
@@ -736,8 +716,6 @@ private fun StatusBarSection(
             )
         }
 
-        SettingsDivider()
-        // 整体大小
         SettingsItem {
             DragSlider(
                 label = stringResource(R.string.overall_size),
@@ -749,8 +727,6 @@ private fun StatusBarSection(
             )
         }
 
-        SettingsDivider()
-        // 文字粗细
         SettingsItem {
             DragSlider(
                 label = stringResource(R.string.text_thickness),
@@ -762,7 +738,6 @@ private fun StatusBarSection(
             )
         }
 
-        SettingsDivider()
         // 文字颜色：黑/白预设，点击切换 status_bar_white_text
         SettingsItem {
             Column {
@@ -810,9 +785,7 @@ private fun StatusBarSection(
             }
         }
 
-        SettingsDivider()
-        // 自动识别屏幕颜色
-        SettingsItem {
+        SettingsItem(isLast = true) {
             var autoChecked by remember { mutableStateOf(prefs.getBoolean("status_bar_auto_color", false)) }
             // 监听 sharedPrefs 变化：MediaProjection 授权结果由 MainActivity 异步写入，
             // 不监听会导致开关状态与实际启用状态不一致。
@@ -895,66 +868,6 @@ private fun StatusBarSection(
                 )
             }
         }
-
-        SettingsDivider()
-        // 使用白色文字
-        SettingsItem {
-            var whiteChecked by remember { mutableStateOf(prefs.getBoolean("status_bar_white_text", false)) }
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(
-                    painter = painterResource(R.drawable.ic_white_text),
-                    contentDescription = null,
-                    modifier = Modifier.size(24.dp),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Spacer(Modifier.width(16.dp))
-                Column(
-                    modifier = Modifier
-                        .weight(1f)
-                        .clickable {
-                            val newValue = !whiteChecked
-                            val isAuto = prefs.getBoolean("status_bar_auto_color", false)
-                            if (newValue && isAuto) {
-                                android.widget.Toast.makeText(context, context.getString(R.string.auto_color_unavailable), android.widget.Toast.LENGTH_SHORT).show()
-                                return@clickable
-                            }
-                            prefs.edit().putBoolean("status_bar_white_text", newValue).apply()
-                            whiteChecked = newValue
-                        }
-                ) {
-                    Text(
-                        text = stringResource(R.string.use_white_text),
-                        style = MaterialTheme.typography.bodyLarge,
-                        fontWeight = FontWeight.Normal,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                    Text(
-                        text = stringResource(R.string.white_text_subtitle),
-                        style = MaterialTheme.typography.bodySmall,
-                        fontWeight = FontWeight.Normal,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(top = 4.dp)
-                    )
-                }
-                Spacer(Modifier.width(16.dp))
-                Switch(
-                    checked = whiteChecked,
-                    onCheckedChange = { checked ->
-                        val isAuto = prefs.getBoolean("status_bar_auto_color", false)
-                        if (checked && isAuto) {
-                            android.widget.Toast.makeText(context, context.getString(R.string.auto_color_unavailable), android.widget.Toast.LENGTH_SHORT).show()
-                            return@Switch
-                        }
-                        prefs.edit().putBoolean("status_bar_white_text", checked).apply()
-                        whiteChecked = checked
-                    }
-                )
-            }
-        }
     }
 }
 
@@ -966,8 +879,7 @@ private fun FloatingWindowSection(
     val context = LocalContext.current
     SectionTitle(stringResource(R.string.floating_window_style))
     SettingsGroupCard {
-        // 说明
-        SettingsItem {
+        SettingsItem(isFirst = true) {
             Text(
                 text = stringResource(R.string.floating_window_tip),
                 style = MaterialTheme.typography.bodySmall,
@@ -975,8 +887,6 @@ private fun FloatingWindowSection(
             )
         }
 
-        SettingsDivider()
-        // 显示 'bpm' 文字
         SettingsItem {
             var isBpmTextEnabled by remember { mutableStateOf(prefs.getBoolean("bpm_text_enabled", true)) }
             SettingsSwitch(
@@ -990,8 +900,6 @@ private fun FloatingWindowSection(
             )
         }
 
-        SettingsDivider()
-        // 显示心形图标
         SettingsItem {
             var isHeartIconEnabled by remember { mutableStateOf(prefs.getBoolean("heart_icon_enabled", true)) }
             SettingsSwitch(
@@ -1005,8 +913,6 @@ private fun FloatingWindowSection(
             )
         }
 
-        SettingsDivider()
-        // 整体大小
         SettingsItem {
             DragSlider(
                 label = stringResource(R.string.overall_size),
@@ -1018,8 +924,6 @@ private fun FloatingWindowSection(
             )
         }
 
-        SettingsDivider()
-        // 图标大小
         SettingsItem {
             DragSlider(
                 label = stringResource(R.string.icon_size),
@@ -1031,8 +935,6 @@ private fun FloatingWindowSection(
             )
         }
 
-        SettingsDivider()
-        // 圆角半径
         SettingsItem {
             DragSlider(
                 label = stringResource(R.string.corner_radius),
@@ -1044,8 +946,6 @@ private fun FloatingWindowSection(
             )
         }
 
-        SettingsDivider()
-        // 背景不透明度
         SettingsItem {
             DragSlider(
                 label = stringResource(R.string.bg_opacity),
@@ -1057,8 +957,6 @@ private fun FloatingWindowSection(
             )
         }
 
-        SettingsDivider()
-        // 边框不透明度
         SettingsItem {
             DragSlider(
                 label = stringResource(R.string.border_opacity),
@@ -1070,11 +968,8 @@ private fun FloatingWindowSection(
             )
         }
 
-        SettingsDivider()
-        // 颜色选择
-        SettingsItem {
+        SettingsItem(isLast = true) {
             Column {
-                // 标题行:Leading Icon + 标题文字
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.padding(bottom = 8.dp)
@@ -1146,8 +1041,7 @@ private fun AboutSection(
 
     SectionTitle(stringResource(R.string.about))
     SettingsGroupCard {
-        // 版本
-        SettingsItem {
+        SettingsItem(isFirst = true) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
@@ -1173,15 +1067,11 @@ private fun AboutSection(
             }
         }
 
-        SettingsDivider()
-        // 检查更新（GitHub Release）
         SettingsItem(
             onClick = {
                 if (updateState is UpdateChecker.Result.UpdateAvailable) {
-                    // 已经知道有更新，直接打开弹窗
                     updateDialog = updateState as UpdateChecker.Result.UpdateAvailable
                 } else {
-                    // 发起新的检查
                     updateState = UpdateChecker.Result.Error(aboutContext.getString(R.string.checking_update)) // 占位，避免重复点击
                     scope.launch {
                         val result = UpdateChecker.check(aboutContext, currentVersion)
@@ -1205,15 +1095,12 @@ private fun AboutSection(
             )
         }
 
-        SettingsDivider()
-        // 公平运行内存
         SettingsItem(onClick = { onNavigate("fair_memory") }) {
             SettingsLink(title = stringResource(R.string.fair_memory), leadingIcon = painterResource(R.drawable.ic_fair_memory))
         }
 
-        SettingsDivider()
-        // GitHub
         SettingsItem(
+            isLast = true,
             onClick = {
                 val intent = android.content.Intent(
                     android.content.Intent.ACTION_VIEW,
@@ -1262,11 +1149,9 @@ private fun AboutSection(
                     }
                 }
             },
-            // 左下角：确认（关闭弹窗）
             confirmButton = {
                 TextButton(onClick = { updateDialog = null }) { Text(stringResource(R.string.confirm)) }
             },
-            // 右下角：跳转更新（打开 GitHub Release 页）
             dismissButton = {
                 TextButton(onClick = {
                     updateDialog = null
@@ -1316,13 +1201,12 @@ private fun AboutSection(
  * @param onDismiss 取消/关闭回调
  */
 @Composable
-private fun ColorPickerDialog(
+internal fun ColorPickerDialog(
     title: String,
     initialColor: Int,
     onConfirm: (Int) -> Unit,
     onDismiss: () -> Unit
 ) {
-    // 初始 HSV
     val initialHsv = remember(initialColor) {
         FloatArray(3).also { android.graphics.Color.colorToHSV(initialColor, it) }
     }
@@ -1337,7 +1221,6 @@ private fun ColorPickerDialog(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // HSV 色轮：H（0-360）+ S（0-1），通过点击/拖动选择
                 HueSatWheelPicker(
                     hsv = hsv,
                     onHsvChanged = { hsv = it }
@@ -1359,7 +1242,6 @@ private fun ColorPickerDialog(
                 )
                 Spacer(Modifier.height(12.dp))
 
-                // 当前色 + 预览色色块
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceEvenly,
@@ -1415,7 +1297,6 @@ private fun HueSatWheelPicker(
     val wheelSizePx = with(density) { wheelSize.toPx() }
     val radiusPx = wheelSizePx / 2f
 
-    // 选择圆圈位置（相对于圆盘中心）
     val indicatorOffset = remember(hsv) {
         val angleRad = Math.toRadians(hsv[0].toDouble())
         val r = hsv[1] * radiusPx
@@ -1474,7 +1355,6 @@ private fun HueSatWheelPicker(
                 radius = radiusPx
             )
         )
-        // 选择圆圈（白色描边 + 黑色描边）
         drawCircle(
             color = Color.White,
             radius = 10f,

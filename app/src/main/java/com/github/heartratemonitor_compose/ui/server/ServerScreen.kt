@@ -139,7 +139,7 @@ private fun ServerCard(
 
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(20.dp),
+        shape = RoundedCornerShape(28.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
         colors = CardDefaults.cardColors(
             containerColor = if (enabled) containerColor.copy(alpha = 0.8f) else containerColor
@@ -216,67 +216,78 @@ private fun ServerStatusCard(
     ipAddress: String
 ) {
     val context = LocalContext.current
-    Card(
+    // 用 Column + 2dp 间隔取代单 Card + Divider，与设置页分段式卡片组风格统一
+    Column(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+        verticalArrangement = Arrangement.spacedBy(2.dp)
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            // HTTP 状态行：根据启用状态切换图标
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(
-                    painter = painterResource(
-                        if (httpEnabled) R.drawable.ic_http_server_enabled
-                        else R.drawable.ic_http_server_disabled
-                    ),
-                    contentDescription = null,
-                    modifier = Modifier.size(24.dp),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Spacer(Modifier.width(16.dp))
-                Text(
-                    text = if (httpEnabled) stringResource(R.string.http_enabled_status) else stringResource(R.string.http_disabled_status),
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = FontWeight.Normal
-                )
+        Surface(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
+            color = MaterialTheme.colorScheme.surfaceContainerHigh,
+            contentColor = MaterialTheme.colorScheme.onSurface
+        ) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        painter = painterResource(
+                            if (httpEnabled) R.drawable.ic_http_server_enabled
+                            else R.drawable.ic_http_server_disabled
+                        ),
+                        contentDescription = null,
+                        modifier = Modifier.size(24.dp),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(Modifier.width(16.dp))
+                    Text(
+                        text = if (httpEnabled) stringResource(R.string.http_enabled_status) else stringResource(R.string.http_disabled_status),
+                        style = MaterialTheme.typography.bodyLarge,
+                        fontWeight = FontWeight.Normal
+                    )
+                }
+                if (httpEnabled) {
+                    Text(
+                        text = context.getString(R.string.http_access_url, ipAddress, httpPort),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.padding(top = 8.dp, start = 40.dp)
+                    )
+                }
             }
-            if (httpEnabled) {
-                Text(
-                    text = context.getString(R.string.http_access_url, ipAddress, httpPort),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.padding(top = 8.dp, start = 40.dp)
-                )
-            }
+        }
 
-            Divider(modifier = Modifier.padding(vertical = 12.dp), color = MaterialTheme.colorScheme.outlineVariant)
-
-            // WebSocket 状态行：根据启用状态切换图标
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(
-                    painter = painterResource(
-                        if (wsEnabled) R.drawable.ic_websocket_server_enabled
-                        else R.drawable.ic_websocket_server_disabled
-                    ),
-                    contentDescription = null,
-                    modifier = Modifier.size(24.dp),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Spacer(Modifier.width(16.dp))
-                Text(
-                    text = if (wsEnabled) stringResource(R.string.ws_enabled_status) else stringResource(R.string.ws_disabled_status),
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = FontWeight.Normal
-                )
-            }
-            if (wsEnabled) {
-                Text(
-                    text = context.getString(R.string.ws_access_url, ipAddress, wsPort),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(top = 8.dp, start = 40.dp)
-                )
+        Surface(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(bottomStart = 28.dp, bottomEnd = 28.dp),
+            color = MaterialTheme.colorScheme.surfaceContainerHigh,
+            contentColor = MaterialTheme.colorScheme.onSurface
+        ) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        painter = painterResource(
+                            if (wsEnabled) R.drawable.ic_websocket_server_enabled
+                            else R.drawable.ic_websocket_server_disabled
+                        ),
+                        contentDescription = null,
+                        modifier = Modifier.size(24.dp),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(Modifier.width(16.dp))
+                    Text(
+                        text = if (wsEnabled) stringResource(R.string.ws_enabled_status) else stringResource(R.string.ws_disabled_status),
+                        style = MaterialTheme.typography.bodyLarge,
+                        fontWeight = FontWeight.Normal
+                    )
+                }
+                if (wsEnabled) {
+                    Text(
+                        text = context.getString(R.string.ws_access_url, ipAddress, wsPort),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(top = 8.dp, start = 40.dp)
+                    )
+                }
             }
         }
     }
