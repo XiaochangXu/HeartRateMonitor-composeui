@@ -5,6 +5,12 @@ plugins {
 }
 
 android {
+    // Disable dependency metadata signing block to avoid F-Droid CI errors
+    dependenciesInfo {
+        includeInApk = false
+        includeInBundle = false
+    }
+
     signingConfigs {
         create("release") {
             storeFile = file("../.key/key")
@@ -112,7 +118,10 @@ dependencies {
     implementation(libs.androidx.lifecycle.process)
 
     // Kable for Bluetooth LE
-    implementation(libs.kable.core.android)
+    implementation(libs.kable.core.android) {
+        exclude(group = "io.opencensus", module = "opencensus-api")
+        exclude(group = "io.opencensus", module = "opencensus-proto")
+    }
 
     // Permissions
     implementation(libs.permissionx)
