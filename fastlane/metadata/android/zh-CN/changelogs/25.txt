@@ -1,0 +1,1 @@
+修复 Release 包中心跳动画、历史记录、时速显示三个开关间歇性失效的问题。根因是 R8 将仅在 init 块读取一次的 OnSharedPreferenceChangeListener 字段 inline 为局部变量，导致 listener 被 GC 回收后 SharedPreferences 变更监听失效。改用 @Volatile var 持有强引用以阻止 R8 优化。

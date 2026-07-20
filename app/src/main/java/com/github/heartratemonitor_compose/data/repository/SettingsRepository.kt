@@ -30,7 +30,14 @@ class SettingsRepository(context: Context) {
     private val floatFlows = ConcurrentHashMap<String, MutableStateFlow<Float>>()
     private val longFlows = ConcurrentHashMap<String, MutableStateFlow<Long>>()
 
-    private val listener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
+    // SharedPreferences 内部用 WeakHashMap 持有 listener，listener 失去强引用会被 GC 回收。
+    // 必须保留 listener 字段为强引用。原 listener 字段是 private val 且仅在 init 块中被读取一次，
+    // 被 R8 inline 成 init 局部变量，init 结束后失去强引用，导致 release 包监听器间歇性失效。
+    // 用 @Volatile var 阻止 R8 把字段 inline 成局部变量：volatile 读写有内存屏障语义，
+    // R8 不能假设字段值是常量，不会 inline。@Suppress 抑制 "本可声明为 val" 的警告。
+    @Suppress("VarCouldBeVal")
+    @Volatile
+    private var listener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
         if (key == null) return@OnSharedPreferenceChangeListener
         booleanFlows[key]?.let { it.value = getBoolean(key, it.value) }
         stringFlows[key]?.let { it.value = getString(key, it.value) }
@@ -55,7 +62,9 @@ class SettingsRepository(context: Context) {
     }
 
     fun observeBoolean(key: String, default: Boolean): StateFlow<Boolean> {
-        return booleanFlows.computeIfAbsent(key) { MutableStateFlow(getBoolean(key, default)) }
+        return booleanFlows.computeIfAbsent(key) {
+            MutableStateFlow(getBoolean(key, default))
+        }
     }
 
     // ── String ──
