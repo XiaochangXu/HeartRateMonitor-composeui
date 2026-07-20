@@ -1,0 +1,291 @@
+<resources>
+    <string name="app_name">Heart Rate Monitor</string>
+
+    <!-- Navigation -->
+    <string name="nav_home">Home</string>
+    <string name="nav_settings">Settings</string>
+    <string name="cd_toggle_floating_window">Toggle floating window</string>
+    <string name="cd_back">Back</string>
+
+    <!-- HomeScreen -->
+    <string name="cd_view_history">View history</string>
+    <string name="cd_search_bluetooth">Search Bluetooth devices</string>
+    <string name="search_tip_title">Notice</string>
+    <string name="search_tip_message">Please turn on your device\'s heart rate broadcast first, then tap search. Otherwise the device cannot be found.</string>
+    <string name="got_it">Got it</string>
+    <string name="cancel">Cancel</string>
+    <string name="confirm">OK</string>
+    <string name="available_devices">Available Devices</string>
+    <string name="no_available_devices">No devices found. Tap search in the top right corner</string>
+    <string name="enter_fullscreen">Enter Fullscreen Mode</string>
+    <string name="disconnect">Disconnect</string>
+    <string name="speed">Speed</string>
+    <string name="cd_favorite">Favorite</string>
+    <string name="bpm_unit">BPM</string>
+    <string name="fullscreen_exit_hint">Tap screen or press back to exit</string>
+    <string name="history_not_enabled">History Not Enabled</string>
+    <string name="device_not_connected">Device Not Connected</string>
+    <string name="connected_device">Connected Device</string>
+
+    <!-- SettingsScreen - General -->
+    <string name="settings">Settings</string>
+    <string name="general">General</string>
+    <string name="record_history">Record History Data</string>
+    <string name="performance_warning">Performance Warning</string>
+    <string name="history_warning_message">Enabling history recording will continuously write data to storage, which may increase battery consumption. Are you sure you want to enable it?</string>
+    <string name="heartbeat_animation">Heartbeat Animation</string>
+    <string name="display_speed_gps">Display Speed (GPS)</string>
+    <string name="speed_gps_subtitle">Enabling speed display will use GPS location, which may increase battery consumption.</string>
+    <string name="enable_speed_title">Enable Speed Display</string>
+    <string name="speed_gps_warning">This feature uses GPS to calculate speed, which may increase battery consumption and requires location permission. Are you sure you want to enable it?</string>
+    <string name="hide_from_recents">Hide from Recents</string>
+    <string name="hide_from_recents_subtitle">The app will not appear in the recent tasks list</string>
+    <string name="favorite_devices">Favorite Devices</string>
+    <string name="heart_rate_alarm">Heart Rate Alarm</string>
+
+    <!-- SettingsScreen - Bluetooth -->
+    <string name="bluetooth">Bluetooth</string>
+    <string name="auto_connect_favorite">Auto-connect Favorite Device on Start</string>
+    <string name="auto_reconnect">Auto-reconnect on Disconnect</string>
+
+    <!-- SettingsScreen - Integration -->
+    <string name="integration">Integration &amp; External Access</string>
+    <string name="http_websocket_server">HTTP &amp; WebSocket Server</string>
+    <string name="webhook_settings">Webhook Settings</string>
+
+    <!-- SettingsScreen - Status Bar -->
+    <string name="status_bar_resident">Status Bar Resident</string>
+    <string name="status_bar_heart_rate">Status Bar Heart Rate</string>
+    <string name="display_bpm_unit">Display BPM Unit</string>
+    <string name="horizontal_position">Horizontal Position</string>
+    <string name="vertical_adjust">Vertical Adjust</string>
+    <string name="overall_size">Overall Size</string>
+    <string name="text_thickness">Text Thickness</string>
+    <string name="text_color">Text Color</string>
+    <string name="black">Black</string>
+    <string name="white">White</string>
+
+
+    <!-- SettingsScreen - Floating Window -->
+    <string name="floating_window_style">Floating Window Style</string>
+    <string name="floating_window_tip">Long-press the floating window to enable touch pass-through. When enabled, touches are passed to the app below. Long-press again or tap the notification button to disable.</string>
+    <string name="display_bpm_text">Display BPM Text</string>
+    <string name="display_heart_icon">Display Heart Icon</string>
+    <string name="icon_size">Icon Size</string>
+    <string name="corner_radius">Corner Radius</string>
+    <string name="bg_opacity">Background Opacity</string>
+    <string name="border_opacity">Border Opacity</string>
+    <string name="color_picker">Color Picker</string>
+    <string name="text_label">Text</string>
+    <string name="background_label">Background</string>
+    <string name="border_label">Border</string>
+    <string name="text_color_picker">Text Color</string>
+    <string name="bg_color_picker">Background Color</string>
+    <string name="border_color_picker">Border Color</string>
+
+    <!-- SettingsScreen - About -->
+    <string name="about">About</string>
+    <string name="version">Version</string>
+    <string name="unknown_version">Unknown</string>
+    <string name="checking_update">Checking...</string>
+    <string name="check_update">Check for Updates</string>
+    <string name="up_to_date">Already up to date (v%1$s)</string>
+    <string name="fair_memory">Fair Memory</string>
+    <string name="github_repo">Visit GitHub Repository</string>
+    <string name="new_version_found">New version v%1$s found</string>
+    <string name="current_version_label">Current version: v%1$s</string>
+    <string name="release_notes_title">Release notes:</string>
+    <string name="no_release_notes">No release notes available</string>
+    <string name="go_update">Update</string>
+    <string name="update_check_title">Check for Updates</string>
+
+    <!-- Color Picker Dialog -->
+    <string name="brightness">Brightness: %1$d%%</string>
+    <string name="initial_color">Initial</string>
+    <string name="current_color">Current</string>
+
+    <!-- HistoryScreen -->
+    <string name="history_title">Heart Rate History</string>
+    <string name="no_history">No history records yet</string>
+    <string name="confirm_delete">Confirm Delete</string>
+    <string name="delete_history_confirm">Are you sure you want to delete %1$d selected records? This action cannot be undone.</string>
+    <string name="deleted_records">Deleted %1$d records</string>
+    <string name="delete_failed">Delete failed: %1$s</string>
+    <string name="confirm_text">OK</string>
+    <string name="selected_count">%1$d selected</string>
+    <string name="cd_select_all">Select all</string>
+    <string name="cd_delete">Delete</string>
+    <string name="in_progress">In Progress</string>
+    <string name="stats_format">Avg %1$d · Min %2$d · Max %3$d · %4$d records</string>
+
+    <!-- ChartScreen -->
+    <string name="chart_detail">Heart Rate Details</string>
+    <string name="cd_rotate_screen">Rotate screen</string>
+    <string name="no_heart_rate_data">No heart rate data to display</string>
+    <string name="marker_heart_rate">HR: %1$d bpm\nTime: %2$s</string>
+
+    <!-- FavoriteDevicesScreen -->
+    <string name="cd_clear_all_favorites">Clear all favorite devices</string>
+    <string name="no_favorite_devices">No favorite devices</string>
+    <string name="delete_favorite_title">Delete Favorite Device</string>
+    <string name="delete_favorite_confirm">Are you sure you want to delete the favorite record for \"%1$s\"?</string>
+    <string name="delete">Delete</string>
+    <string name="clear_all_favorites_title">Clear All Favorites</string>
+    <string name="clear_all_favorites_confirm">Are you sure you want to delete all %1$d favorite devices? This action cannot be undone.</string>
+    <string name="delete_all">Delete All</string>
+
+    <!-- HeartRateAlarmScreen -->
+    <string name="alarm_title">Heart Rate Alarm</string>
+    <string name="posture_unknown">Not Detected</string>
+    <string name="sitting">Sitting</string>
+    <string name="standing">Standing</string>
+    <string name="exercise">Exercise</string>
+    <string name="calibrated_samples">Calibrated ✓ (%1$d samples)</string>
+    <string name="not_calibrated">Not calibrated</string>
+    <string name="posture_calibration">Posture Calibration</string>
+    <string name="calibrating_format">Calibrating %1$s…</string>
+    <string name="remaining_seconds">%1$d seconds remaining</string>
+    <string name="calibrate_sitting">Calibrate Sitting</string>
+    <string name="calibrate_standing">Calibrate Standing</string>
+    <string name="calibration_status_format">Sitting: %1$s\nStanding: %2$s</string>
+    <string name="clear_calibration">Clear Calibration</string>
+    <string name="alarm_settings">Alarm Settings</string>
+    <string name="enable_alarm">Enable Heart Rate Alarm</string>
+    <string name="exclude_posture_detection">Exclude Posture Detection</string>
+    <string name="above_threshold">Above</string>
+    <string name="below_threshold">Below</string>
+    <string name="duration_label">Duration</string>
+    <string name="seconds_suffix"> sec</string>
+    <string name="repeat_alarm">Repeat Alarm</string>
+    <string name="alarm_interval">Alarm Interval</string>
+    <string name="minutes_suffix"> min</string>
+
+    <!-- ServerScreen -->
+    <string name="server_settings">Server Settings</string>
+    <string name="not_connected_network">Not connected to network</string>
+    <string name="http_server_passive">HTTP Server (Passive Pull)</string>
+    <string name="http_port_hint">HTTP Port</string>
+    <string name="websocket_server_active">WebSocket Server (Active Push)</string>
+    <string name="websocket_port_hint">WebSocket Port</string>
+    <string name="server_status">Server Status</string>
+    <string name="enable_server_format">Enable %1$s Server</string>
+    <string name="access_url_format">URL: %1$s://%2$s:%3$s</string>
+    <string name="http_enabled_status">HTTP Server Enabled</string>
+    <string name="http_disabled_status">HTTP Server Disabled</string>
+    <string name="http_access_url">URL: http://%1$s:%2$d/heartrate</string>
+    <string name="ws_enabled_status">WebSocket Server Enabled</string>
+    <string name="ws_disabled_status">WebSocket Server Disabled</string>
+    <string name="ws_access_url">URL: ws://%1$s:%2$d</string>
+
+    <!-- WebhookScreen -->
+    <string name="webhook_title">Webhook Settings</string>
+    <string name="cd_add_webhook">Add Webhook</string>
+    <string name="no_webhooks">No webhooks. Tap + to add</string>
+    <string name="new_webhook">New Webhook</string>
+    <string name="ok">OK</string>
+    <string name="webhook_test_response">Webhook Test Response</string>
+    <string name="close">Close</string>
+    <string name="cd_edit">Edit</string>
+    <string name="enable_this_webhook">Enable this Webhook</string>
+    <string name="trigger_types">Trigger Types (multiple allowed)</string>
+    <string name="name_label">Name</string>
+    <string name="test_send">Test Send (HR: 88)</string>
+    <string name="save">Save</string>
+    <string name="trigger_heart_rate_updated">On heart rate update</string>
+    <string name="trigger_connected">On device connected</string>
+    <string name="trigger_disconnected">On device disconnected</string>
+
+    <!-- FairMemoryScreen -->
+    <string name="fair_memory_title">Fair Memory</string>
+    <string name="overview">Overview</string>
+    <string name="fair_memory_overview">Fair Memory is an Android memory management specification jointly advocated by GSA board members (vivo, Xiaomi, OPPO, Honor). It aims to let apps proactively cooperate with the system to release resources through standardized system broadcasts when memory is tight, thereby improving overall device performance and stability, and reducing the probability of background apps being force-killed.</string>
+    <string name="how_it_works">How It Works</string>
+    <string name="fair_memory_how_it_works">When system memory resources are tight, the device ROM sends specific broadcast notifications to registered apps. Upon receiving the broadcast, apps can perform corresponding memory optimization operations based on the broadcast type, including releasing non-critical caches, stopping low-priority tasks, saving current state, etc. This proactive approach is smoother than the system directly killing processes, effectively reducing the experience interruption caused by app restarts.</string>
+    <string name="broadcast_actions">Monitored Broadcast Actions</string>
+    <string name="memory_warning_title">1. Memory Warning</string>
+    <string name="memory_warning_desc">Action: itgsa.intent.action.TRIM\nSent when system memory is tight. Upon receiving this, apps should proactively release non-critical memory, such as clearing image caches, stopping non-essential background tasks, triggering garbage collection, etc.</string>
+    <string name="app_kill_title">2. App Kill</string>
+    <string name="app_kill_desc">Action: itgsa.intent.action.KILL\nSent when the system is about to kill this app. Upon receiving this, apps should save critical state data, release all releasable resources, and prepare for process termination.</string>
+    <string name="app_adaptation">App Adaptation</string>
+    <string name="fair_memory_adaptation">This app has been adapted to the Fair Memory mechanism according to GSA official documentation:\n\n• Dynamically register broadcast receivers at Application startup with RECEIVER_EXPORTED flag\n• Parse common and extra Bundles from Intent, extracting anomaly type (physical memory/Java heap), memory usage, callback IBinder info\n• TRIM broadcast: differentiated release by notifyType — physical memory anomaly (1000) clears entire chart cache, Java heap anomaly (2000) downsamples to keep latest 500 points; both clear scan results and trigger System.gc(), notify system via IBinder callback within 3 seconds\n• KILL broadcast: notify MainViewModel to save state (heart rate data already persisted via Room database), notify system via IBinder callback within 3 seconds\n• Delegate release logic to MainViewModel via MemoryListener interface (WeakReference) to prevent memory leaks\n• Implement IBinder.DeathRecipient to monitor system service abnormal death\n• Use dedicated HandlerThread for broadcast processing to avoid blocking main thread\n\nBLE heart rate service (BleService) runs as a foreground service and won\'t be interrupted by memory warnings. Status bar resident service and floating window service may be reclaimed by the system under extreme memory pressure; the app will auto-recover on next launch.</string>
+    <string name="reference_docs">Reference Documentation</string>
+    <string name="oppo_desc">Fair Memory Adaptation Guide</string>
+    <string name="vivo_desc">Fair Memory Mechanism Adaptation</string>
+    <string name="xiaomi_desc">Fair Memory Adaptation: Developer Documentation</string>
+
+    <!-- BleState messages -->
+    <string name="ble_idle">Tap button above to scan devices</string>
+    <string name="ble_scanning">Scanning for devices...</string>
+    <string name="ble_scan_results">Please select a device to connect</string>
+    <string name="ble_connecting">Connecting...</string>
+    <string name="ble_auto_connecting">Trying to connect to favorite device...</string>
+    <string name="ble_auto_reconnecting">Auto-reconnecting...</string>
+
+    <!-- BleService dynamic messages -->
+    <string name="ble_scan_finished">Scan finished</string>
+    <string name="ble_no_devices_found">No devices found</string>
+    <string name="ble_auto_connect_failed">Auto-connect failed: device not found</string>
+    <string name="ble_connect_timeout">Connection timeout</string>
+    <string name="ble_connect_cancelled">Connection cancelled: %1$s</string>
+    <string name="ble_connect_failed">Connection failed: %1$s</string>
+    <string name="ble_connected_to">Connected to %1$s</string>
+    <string name="ble_disconnecting">Disconnecting...</string>
+    <string name="ble_manual_disconnect">Manually disconnected</string>
+    <string name="ble_device_disconnected">Device disconnected</string>
+    <string name="ble_max_reconnect">Max auto-reconnect attempts reached (%1$d). Please reconnect manually.</string>
+
+    <!-- MainActivity Toast messages -->
+    <string name="toast_connected">Connected</string>
+    <string name="toast_auto_reconnecting">Disconnected, trying to auto-reconnect...</string>
+    <string name="toast_reconnect_failed">Reconnection failed</string>
+    <string name="unknown_device">Unknown Device</string>
+
+    <!-- BleService notification -->
+    <string name="notification_channel_name">BLE Connection Status</string>
+    <string name="notification_content">Service is running in the background</string>
+
+    <!-- WebhookManager -->
+    <string name="webhook_send_failed_headers">Send failed: Headers is not valid JSON: %1$s</string>
+    <string name="webhook_send_error">Unknown error while sending: %1$s</string>
+    <string name="webhook_sent">Webhook Sent</string>
+    <string name="webhook_resp_name">Name</string>
+    <string name="webhook_resp_trigger">Triggered by</string>
+    <string name="webhook_resp_status">Status</string>
+    <string name="webhook_resp_body">Response Body</string>
+
+    <!-- UpdateChecker -->
+    <string name="update_no_release">No releases found. Please publish a release on Gitee first.</string>
+    <string name="update_api_rate_limit">Gitee API rate limited. Please try again later.</string>
+    <string name="update_api_error">Gitee API returned error code: %1$d</string>
+    <string name="update_network_error">Network error: %1$s</string>
+    <string name="update_no_valid_release">No valid official release found</string>
+
+    <!-- ThemeSettings -->
+    <string name="theme_settings">Theme</string>
+    <string name="theme_color">Theme Color</string>
+    <string name="theme_custom">Custom Theme</string>
+    <string name="theme_mode">Theme Mode</string>
+    <string name="theme_mode_system">Follow System</string>
+    <string name="theme_mode_light">Light</string>
+    <string name="theme_mode_dark">Dark</string>
+    <string name="theme_preset_seeds">Preset Seeds</string>
+    <string name="theme_custom_seed">Custom Color</string>
+    <string name="theme_variant">Palette Style</string>
+    <string name="theme_seed_red">Red</string>
+    <string name="theme_seed_orange">Orange</string>
+    <string name="theme_seed_yellow">Yellow</string>
+    <string name="theme_seed_green">Green</string>
+    <string name="theme_seed_teal">Teal</string>
+    <string name="theme_seed_blue">Blue</string>
+    <string name="theme_seed_purple">Purple</string>
+    <string name="theme_seed_pink">Pink</string>
+    <string name="theme_variant_tonal_spot">Tonal Spot</string>
+    <string name="theme_variant_vibrant">Vibrant</string>
+    <string name="theme_variant_expressive">Expressive</string>
+    <string name="theme_variant_neutral">Neutral</string>
+    <string name="theme_variant_monochrome">Monochrome</string>
+    <string name="theme_variant_fidelity">Fidelity</string>
+    <string name="theme_variant_content">Content</string>
+    <string name="theme_variant_rainbow">Rainbow</string>
+    <string name="theme_variant_fruit_salad">Fruit Salad</string>
+</resources>

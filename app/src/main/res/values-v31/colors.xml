@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Android 12+ (API 31+)：windowBackground 直接引用系统 Monet 中性色，
+         与 Compose dynamicLightColorScheme/dynamicDarkColorScheme 中的 surfaceDim 同色源，
+         保证开屏瞬间背景色与应用内 surfaceDim 完全一致。
+         - system_neutral1_10: 亮模式中性背景（接近白，跟随壁纸取色）
+         - system_neutral1_900: 暗模式中性背景（接近黑，跟随壁纸取色） -->
+    <color name="window_background_light">@android:color/system_neutral1_10</color>
+    <color name="window_background_dark">@android:color/system_neutral1_900</color>
+</resources>

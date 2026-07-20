@@ -1,0 +1,15 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!--
+      Compose 接管所有 UI 颜色（MaterialTheme.colorScheme）；
+      本主题仅提供窗口级系统配色（statusBar / navigationBar / windowBackground）。
+      父主题使用 framework 级 android:Theme.Material.Light.NoActionBar，
+      不再依赖 com.google.android.material:material 主题。
+    -->
+    <style name="Theme.HeartRateMonitorMobile" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowLightNavigationBar">true</item>
+        <item name="android:windowBackground">@color/window_background_light</item>
+    </style>
+</resources>

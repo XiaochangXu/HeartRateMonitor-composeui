@@ -1,0 +1,13 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="960"
+    android:viewportHeight="960">
+    <!-- 源自 Material Symbols: bluetooth_connected_24dp_1F1F1F_FILL0_wght400_GRAD0_opsz24.svg
+         命名为 _symbol 后缀以避免与 BleService 通知小图标 ic_bluetooth_connected.xml 冲突 -->
+    <group android:translateY="960">
+        <path
+            android:fillColor="#1F1F1F"
+            android:pathData="M440,-80v-304L256,-200l-56,-56 224,-224 -224,-224 56,-56 184,184v-304h40l228,228 -172,172 172,172L480,-80h-40Zm80,-496 76,-76 -76,-74v150Zm0,342 76,-74 -76,-76v150ZM157.5,-437.5Q140,-455 140,-480t17.5,-42.5Q175,-540 200,-540t42.5,17.5Q260,-505 260,-480t-17.5,42.5Q225,-420 200,-420t-42.5,-17.5Zm560,0Q700,-455 700,-480t17.5,-42.5Q735,-540 760,-540t42.5,17.5Q820,-505 820,-480t-17.5,42.5Q785,-420 760,-420t-42.5,-17.5Z" />
+    </group>
+</vector>
