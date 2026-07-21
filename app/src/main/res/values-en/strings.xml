@@ -35,11 +35,17 @@
     <string name="history_warning_message">Enabling history recording will continuously write data to storage, which may increase battery consumption. Are you sure you want to enable it?</string>
     <string name="heartbeat_animation">Heartbeat Animation</string>
     <string name="display_speed_gps">Display Speed (GPS)</string>
-    <string name="speed_gps_subtitle">Enabling speed display will use GPS location, which may increase battery consumption.</string>
     <string name="enable_speed_title">Enable Speed Display</string>
     <string name="speed_gps_warning">This feature uses GPS to calculate speed, which may increase battery consumption and requires location permission. Are you sure you want to enable it?</string>
     <string name="hide_from_recents">Hide from Recents</string>
-    <string name="hide_from_recents_subtitle">The app will not appear in the recent tasks list</string>
+    <string name="fullscreen_sound">Fullscreen Mode</string>
+    <string name="sound_settings">Sound Settings</string>
+    <string name="fullscreen_sound_off">Voice Off</string>
+    <string name="fullscreen_sound_cn">Chinese Voice</string>
+    <string name="fullscreen_sound_en">English Voice</string>
+    <string name="sound_preview">Sound Preview</string>
+    <string name="start_preview">Start Preview</string>
+    <string name="enable_voice_first">Please enable voice first</string>
     <string name="favorite_devices">Favorite Devices</string>
     <string name="heart_rate_alarm">Heart Rate Alarm</string>
 
@@ -64,6 +70,7 @@
     <string name="text_color">Text Color</string>
     <string name="black">Black</string>
     <string name="white">White</string>
+    <string name="custom_color">Custom</string>
 
 
     <!-- SettingsScreen - Floating Window -->

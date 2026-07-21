@@ -15,6 +15,8 @@ object PrefsKeys {
     const val HEARTBEAT_ANIMATION_ENABLED = "heartbeat_animation_enabled"
     const val SPEED_DISPLAY_ENABLED = "speed_display_enabled"
     const val HIDE_FROM_RECENTS_ENABLED = "hide_from_recents_enabled"
+    const val FULLSCREEN_SOUND_ENABLED = "fullscreen_sound_enabled"
+    const val FULLSCREEN_SOUND_MODE = "fullscreen_sound_mode"
 
     // ── 蓝牙 ──
     const val AUTO_CONNECT_ENABLED = "auto_connect_enabled"
@@ -42,6 +44,7 @@ object PrefsKeys {
     const val STATUS_BAR_SIZE = "status_bar_size"
     const val STATUS_BAR_TEXT_THICKNESS = "status_bar_text_thickness"
     const val STATUS_BAR_WHITE_TEXT = "status_bar_white_text"
+    const val STATUS_BAR_TEXT_COLOR = "status_bar_text_color"
 
     // ── 心率预警 ──
     const val HEART_RATE_ALARM_ENABLED = "heart_rate_alarm_enabled"

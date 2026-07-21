@@ -206,18 +206,7 @@ fun FairMemoryScreen(
     }
 }
 
-/**
- * 参考文档卡片。点击跳转到对应链接。
- *
- * 使用 Material3 [Card] 的 onClick 重载，确保 ripple 裁剪到圆角
- * （符合项目规范：有点击交互的 Card 必须用 onClick 重载）。
- *
- * 作为分段式卡片组成员时，根据 [isFirst]/[isLast] 应用位置感知圆角：
- * - 首项：顶部圆角，底部直角
- * - 末项：底部圆角，顶部直角
- * - 中间项：四角直角
- * - 单独一项（首+末）：四角全圆角
- */
+
 @Composable
 private fun DocumentationLinkCard(
     title: String,

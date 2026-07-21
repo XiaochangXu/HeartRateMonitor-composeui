@@ -60,6 +60,14 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val _appStatus = MutableStateFlow(AppStatus.DISCONNECTED)
     val appStatus: StateFlow<AppStatus> = _appStatus.asStateFlow()
 
+    // --- Currently connecting device (for per-row progress indicator) ---
+    private val _connectingDeviceId = MutableStateFlow<String?>(null)
+    val connectingDeviceId: StateFlow<String?> = _connectingDeviceId.asStateFlow()
+
+    // 防止自动重连扫描的 ScanFailed（DISCONNECTED）在手动连接的 Connecting 到达之前清空 connectingDeviceId
+    @Volatile
+    private var manualConnectionPending = false
+
     // --- Favorite device ---
     // 直接暴露 SettingsRepository 的 StateFlow，SharedPreferences listener 同步更新，
     // 避免 MutableStateFlow + 协程 collect 的异步延迟（FavoriteDevicesScreen 取消收藏后 DevicesScreen 可实时感知）。
@@ -181,6 +189,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
             launch {
                 service.bleState.collectLatest { state ->
+                    Log.d("MainViewModel", "bleState: ${state.javaClass.simpleName}, manualPending=$manualConnectionPending, connectingId=${_connectingDeviceId.value}")
                     _statusMessage.value = state.getMessage(getApplication())
                     val newStatus = when (state) {
                         is BleState.Scanning -> AppStatus.SCANNING
@@ -198,6 +207,21 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                         _sessionMinHr.value = 0
                     }
 
+                    if (newStatus != AppStatus.CONNECTING) {
+                        // 手动连接中途可能收到自动重连扫描的 ScanFailed（DISCONNECTED），
+                        // 此时 manualConnectionPending=true，不能清空 connectingDeviceId，
+                        // 否则后续 Connecting 到达时已丢失设备信息，动画不会显示。
+                        if (!manualConnectionPending) {
+                            Log.d("MainViewModel", "clearing connectingDeviceId (newStatus=$newStatus)")
+                            _connectingDeviceId.value = null
+                        } else {
+                            Log.d("MainViewModel", "keeping connectingDeviceId=${_connectingDeviceId.value} (manualPending=true)")
+                        }
+                    } else {
+                        Log.d("MainViewModel", "CONNECTING reached, clearing manualPending, connectingId=${_connectingDeviceId.value}")
+                        manualConnectionPending = false
+                    }
+
                     _appStatus.value = newStatus
                 }
             }
@@ -213,15 +237,13 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     /**
-     * 清空当前会话的图表缓存和统计。
-     * 用于关闭历史记录时立即重置首页图表/MAX/MIN。
+     * 清空当前会话的图表缓存。
+     * 用于关闭历史记录时立即重置首页图表，不重置 MAX/MIN（MAX/MIN 独立于历史记录）。
      */
     private fun clearChartData() {
         chartDataPoints.clear()
         chartStartTime = 0L
         lastChartTimeSec = 0f
-        _sessionMaxHr.value = 0
-        _sessionMinHr.value = 0
         _newChartEntries.value = null
     }
 
@@ -229,16 +251,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private fun processHeartRateMeasurement(measurement: HeartRateMeasurement) {
         if (appStatus.value != AppStatus.CONNECTED) return
 
-        // 历史记录开关关闭时不累积图表数据和统计。
-        // 首页图表/MAX/MIN 会由 clearChartData() 重置，并在 UI 层显示占位提示。
-        if (!_isHistoryEnabled.value) return
-
-        // 防御竞态：状态流通知与数据流到达之间可能存在窗口，确保 chartStartTime 已初始化
-        if (chartStartTime == 0L) {
-            chartStartTime = System.currentTimeMillis()
-        }
-
-        // 更新本次连接的心率最大值/最小值（基于设备上报的平均 bpm）
+        // MAX/MIN 独立于历史记录开关：无论是否开启历史记录，始终跟踪当次连接的心率极值
         val bpm = measurement.bpm
         if (bpm > 0) {
             if (_sessionMaxHr.value == 0 || bpm > _sessionMaxHr.value) {
@@ -247,6 +260,14 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             if (_sessionMinHr.value == 0 || bpm < _sessionMinHr.value) {
                 _sessionMinHr.value = bpm
             }
+        }
+
+        // 历史记录开关关闭时不累积图表数据。
+        if (!_isHistoryEnabled.value) return
+
+        // 防御竞态：状态流通知与数据流到达之间可能存在窗口，确保 chartStartTime 已初始化
+        if (chartStartTime == 0L) {
+            chartStartTime = System.currentTimeMillis()
         }
 
         val newPoints = mutableListOf<HeartRatePoint>()
@@ -337,10 +358,14 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun startAutoConnectScan(identifier: String) {
+        _connectingDeviceId.value = identifier
         bleServiceRef?.get()?.startAutoConnectScan(identifier)
     }
 
     fun connectToDevice(identifier: String) {
+        Log.d("MainViewModel", "connectToDevice: $identifier, setting manualPending=true")
+        _connectingDeviceId.value = identifier
+        manualConnectionPending = true
         bleServiceRef?.get()?.connectToDevice(identifier)
     }
 

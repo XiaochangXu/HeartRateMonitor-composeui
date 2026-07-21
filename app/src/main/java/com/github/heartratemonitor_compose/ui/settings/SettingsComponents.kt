@@ -164,7 +164,8 @@ internal fun SettingsSwitch(
 internal fun SettingsLink(
     title: String,
     icon: ImageVector? = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-    leadingIcon: Painter? = null
+    leadingIcon: Painter? = null,
+    subtitle: String? = null
 ) {
     // 纯展示组件：不在此处处理点击。
     // 点击由外层 SettingsItem(onClick = ...) 承担，使 ripple 覆盖整行
@@ -185,13 +186,22 @@ internal fun SettingsLink(
             )
             Spacer(Modifier.width(16.dp))
         }
-        Text(
-            text = title,
-            style = MaterialTheme.typography.bodyLarge,
-            fontWeight = FontWeight.Normal,
-            color = MaterialTheme.colorScheme.onSurface,
-            modifier = Modifier.weight(1f)
-        )
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.bodyLarge,
+                fontWeight = FontWeight.Normal,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            if (subtitle != null) {
+                Text(
+                    text = subtitle,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(top = 4.dp)
+                )
+            }
+        }
         if (icon != null) {
             Icon(
                 imageVector = icon,

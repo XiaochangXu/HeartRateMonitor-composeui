@@ -49,6 +49,7 @@ import androidx.compose.material.icons.filled.StarBorder
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -114,6 +115,18 @@ import com.patrykandpatrick.vico.compose.cartesian.data.CartesianLayerRangeProvi
 import com.patrykandpatrick.vico.compose.cartesian.data.CartesianValueFormatter
 import com.patrykandpatrick.vico.compose.cartesian.data.lineSeries
 import com.patrykandpatrick.vico.compose.common.Fill
+import com.github.heartratemonitor_compose.util.SoundManager
+import com.github.heartratemonitor_compose.ui.settings.resolveSoundMode
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.withTimeoutOrNull
+
+/**
+ * 全屏模式心率状态机：用于驱动声音播放。
+ * - HIGH：心率 > highThreshold（默认 100）
+ * - LOW：心率 <= highThreshold
+ */
+private enum class FullscreenHrState { HIGH, LOW }
 
 /**
  * 
@@ -137,6 +150,7 @@ fun HomeScreen(
     val heartRate by viewModel.heartRate.collectAsStateWithLifecycle()
     val speed by viewModel.speed.collectAsStateWithLifecycle()
     val appStatus by viewModel.appStatus.collectAsStateWithLifecycle()
+    val statusMessage by viewModel.statusMessage.collectAsStateWithLifecycle()
     val newChartEntries by viewModel.newChartEntries.collectAsStateWithLifecycle()
     val sessionMaxHr by viewModel.sessionMaxHr.collectAsStateWithLifecycle()
     val sessionMinHr by viewModel.sessionMinHr.collectAsStateWithLifecycle()
@@ -184,6 +198,7 @@ fun HomeScreen(
             heartRate = heartRate,
             speed = speed,
             appStatus = appStatus,
+            statusMessage = statusMessage,
             newChartEntries = newChartEntries,
             isConnected = isConnected,
             isHistoryEnabled = isHistoryEnabled,
@@ -205,6 +220,7 @@ private fun HomeContent(
     heartRate: Int,
     speed: Float,
     appStatus: AppStatus,
+    statusMessage: String,
     newChartEntries: List<HeartRatePoint>?,
     isConnected: Boolean,
     isHistoryEnabled: Boolean,
@@ -271,6 +287,7 @@ private fun HomeContent(
         item {
             val availableDevicesText = stringResource(R.string.available_devices)
             val connectedDeviceText = stringResource(R.string.connected_device)
+            val isConnecting = appStatus == AppStatus.CONNECTING
             Surface(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(28.dp),
@@ -292,10 +309,10 @@ private fun HomeContent(
                     )
                     Spacer(Modifier.width(12.dp))
                     Text(
-                        text = if (isConnected && !connectedDeviceName.isNullOrEmpty()) {
-                            "$connectedDeviceText $connectedDeviceName"
-                        } else {
-                            availableDevicesText
+                        text = when {
+                            isConnecting -> statusMessage
+                            isConnected && !connectedDeviceName.isNullOrEmpty() -> "$connectedDeviceText $connectedDeviceName"
+                            else -> availableDevicesText
                         },
                         style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.onSurface,
@@ -303,11 +320,19 @@ private fun HomeContent(
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                    if (isConnecting) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(20.dp),
+                            color = MaterialTheme.colorScheme.primary,
+                            strokeWidth = 2.dp
+                        )
+                    } else {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                 }
             }
         }
@@ -476,7 +501,7 @@ private fun HeartRateCard(
                 )
             }
 
-            if (isConnected && sessionMaxHr > 0) {
+            if (isConnected && sessionMinHr > 0) {
                 Text(
                     text = "MIN ${sessionMinHr}",
                     modifier = Modifier
@@ -678,6 +703,7 @@ private fun RealtimeChart(
 internal fun DeviceItem(
     advertisement: Advertisement,
     isFavorite: Boolean,
+    isConnecting: Boolean,
     onDeviceClick: () -> Unit,
     onFavoriteClick: () -> Unit
 ) {
@@ -727,18 +753,26 @@ internal fun DeviceItem(
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
-        Icon(
-            painter = painterResource(R.drawable.ic_signal_wifi),
-            contentDescription = null,
-            tint = signalTint,
-            modifier = Modifier.size(20.dp)
-        )
-        Spacer(Modifier.width(8.dp))
-        Text(
-            text = "${rssi}dBm",
-            style = MaterialTheme.typography.labelSmall,
-            color = rssiColor
-        )
+        if (isConnecting) {
+            CircularProgressIndicator(
+                modifier = Modifier.size(20.dp),
+                color = MaterialTheme.colorScheme.primary,
+                strokeWidth = 2.dp
+            )
+        } else {
+            Icon(
+                painter = painterResource(R.drawable.ic_signal_wifi),
+                contentDescription = null,
+                tint = signalTint,
+                modifier = Modifier.size(20.dp)
+            )
+            Spacer(Modifier.width(8.dp))
+            Text(
+                text = "${rssi}dBm",
+                style = MaterialTheme.typography.labelSmall,
+                color = rssiColor
+            )
+        }
         Spacer(Modifier.width(8.dp))
         IconButton(onClick = onFavoriteClick) {
             Icon(
@@ -772,6 +806,62 @@ internal fun FullScreenHeartRate(
         ComposeColor(settings.getInt(PrefsKeys.FLOATING_TEXT_COLOR, android.graphics.Color.RED))
     }
     val isAnimationEnabled = remember { settings.getBoolean(PrefsKeys.HEARTBEAT_ANIMATION_ENABLED, true) }
+
+    // ── 全屏模式声音：根据 FULLSCREEN_SOUND_MODE 选择关闭/中文/英文语音 ──
+    val soundMode = remember { resolveSoundMode(settings) }
+    val highThreshold = 100  // 全屏模式声音阈值固定 100：高于 100 播高音，低于等于 100 播低音
+    val soundManager = remember(soundMode) {
+        if (soundMode != "off") SoundManager(context, soundMode) else null
+    }
+    DisposableEffect(soundManager) {
+        onDispose { soundManager?.release() }
+    }
+    // 初始 null：首次状态语音播完后才设置，触发循环 beep 启动
+    var hrState by remember { mutableStateOf<FullscreenHrState?>(null) }
+
+    LaunchedEffect(Unit) {
+        val sm = soundManager ?: return@LaunchedEffect
+        if (heartRate <= 0) return@LaunchedEffect
+        delay(500)
+        withTimeoutOrNull(2000) { sm.awaitLoaded() } ?: return@LaunchedEffect
+        val newState = if (heartRate > highThreshold) FullscreenHrState.HIGH else FullscreenHrState.LOW
+        val voiceType = if (newState == FullscreenHrState.HIGH) SoundManager.SoundType.TOO_HIGH else SoundManager.SoundType.TOO_LOW
+        sm.play(voiceType)
+        delay(sm.getDurationMs(voiceType) + 500)
+        hrState = newState
+    }
+
+    // 后续心率变化：跨阈值瞬间播放状态语音（首次由上面的 LaunchedEffect(Unit) 处理）
+    LaunchedEffect(heartRate) {
+        val sm = soundManager ?: return@LaunchedEffect
+        if (heartRate <= 0 || hrState == null) return@LaunchedEffect
+        val newState = if (heartRate > highThreshold) FullscreenHrState.HIGH else FullscreenHrState.LOW
+        if (newState != hrState) {
+            val voiceType = if (newState == FullscreenHrState.HIGH) SoundManager.SoundType.TOO_HIGH else SoundManager.SoundType.TOO_LOW
+            sm.play(voiceType)
+            delay(sm.getDurationMs(voiceType) + 150)
+            hrState = newState
+        }
+    }
+
+    // 循环 beep：按 60_000/bpm 间隔重复播放，节奏跟心跳
+    // HIGH→high_beep, LOW→low_beep
+    // 依赖 hrState：首次状态语音播完后（hrState 被设置）才启动，避免与状态语音重叠
+    LaunchedEffect(hrState, heartRate) {
+        val sm = soundManager ?: return@LaunchedEffect
+        if (heartRate <= 0 || hrState == null) return@LaunchedEffect
+        withTimeoutOrNull(2000) { sm.awaitLoaded() } ?: return@LaunchedEffect
+        val state = hrState!!
+        val beepType = when (state) {
+            FullscreenHrState.HIGH -> SoundManager.SoundType.HIGH_BEEP
+            FullscreenHrState.LOW -> SoundManager.SoundType.LOW_BEEP
+        }
+        val intervalMs = (60_000f / heartRate).toLong().coerceIn(200L, 3_000L)
+        while (isActive) {
+            sm.play(beepType)
+            delay(intervalMs)
+        }
+    }
 
     // ECG 滚动动画：ecgPhase 在 0..1 之间循环，每个周期 = 一个心动周期（60_000/bpm ms）
     val effectiveBpm = if (isAnimationEnabled && heartRate > 30) heartRate else 0

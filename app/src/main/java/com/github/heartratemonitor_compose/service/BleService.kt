@@ -203,9 +203,12 @@ class BleService : Service() {
                 // 修复：未使用变量重命名为 _
             } finally {
                 withContext(NonCancellable) {
-                    val statusMessage = if (foundDevicesMap.isNotEmpty()) getString(R.string.ble_scan_finished) else getString(R.string.ble_no_devices_found)
-                    _bleState.value = BleState.ScanFailed(statusMessage)
                     isScanning.set(false)
+                    // 仅当仍在扫描状态时才发出 ScanFailed，避免覆盖正在进行的连接状态
+                    if (_bleState.value is BleState.Scanning) {
+                        val statusMessage = if (foundDevicesMap.isNotEmpty()) getString(R.string.ble_scan_finished) else getString(R.string.ble_no_devices_found)
+                        _bleState.value = BleState.ScanFailed(statusMessage)
+                    }
                 }
             }
         }
@@ -243,10 +246,14 @@ class BleService : Service() {
                 withContext(NonCancellable) {
                     isScanning.set(false)
                     if (favoriteFound) {
+                        Log.d("BleService", "autoScan finally: favoriteFound=true, calling connectToDevice($favoriteDeviceId)")
                         connectToDevice(favoriteDeviceId)
                     } else {
                         if (_bleState.value is BleState.AutoConnecting || _bleState.value is BleState.AutoReconnecting) {
+                            Log.d("BleService", "autoScan finally: favoriteFound=false, emitting ScanFailed (currentBleState=${_bleState.value.javaClass.simpleName})")
                             _bleState.value = BleState.ScanFailed(getString(R.string.ble_auto_connect_failed))
+                        } else {
+                            Log.d("BleService", "autoScan finally: favoriteFound=false, NOT emitting ScanFailed (currentBleState=${_bleState.value.javaClass.simpleName})")
                         }
                     }
                 }
@@ -267,7 +274,10 @@ class BleService : Service() {
                 lastConnectedDeviceId = identifier
 
                 if (_bleState.value !is BleState.AutoReconnecting) {
+                    Log.d("BleService", "connectToDevice: setting BleState.Connecting for $identifier")
                     _bleState.value = BleState.Connecting
+                } else {
+                    Log.d("BleService", "connectToDevice: keeping AutoReconnecting, will use existing BleState")
                 }
 
                 val stateMonitor = launch {
@@ -314,6 +324,7 @@ class BleService : Service() {
                 lastConnectedDeviceName = deviceName
                 // 同步当前已连接设备信息（id + name）供 UI 显示
                 _connectedDevice.value = ConnectedDevice(lastConnectedDeviceId ?: "", deviceName)
+                _scanResults.value = emptyList()
                 _bleState.value = BleState.Connected(getString(R.string.ble_connected_to, deviceName))
                 autoReconnectAttempt = 0  // 连接成功，重置重试计数
                 webhookRepository.triggerWebhooks(WebhookTrigger.CONNECTED, speed = speedProvider.speed.value)
@@ -340,10 +351,10 @@ class BleService : Service() {
     private fun stopAllBleActivities() {
         scanJob?.cancel()
         connectionJob?.cancel()
-        _scanResults.value = emptyList()
     }
 
     private suspend fun cleanupConnection(peripheral: Peripheral?) {
+        Log.d("BleService", "cleanupConnection: isManuallyDisconnected=$isManuallyDisconnected")
         try {
             peripheral?.disconnect()
         } catch (_: Exception) { /* 修复：未使用变量重命名为 _ */ }
@@ -358,12 +369,14 @@ class BleService : Service() {
         _heartRate.value = 0
         // 清除已连接设备信息（断开后 DevicesScreen 不再显示已连接卡片）
         _connectedDevice.value = null
+        _scanResults.value = emptyList()
         broadcastWebSocketState()
         connectedPeripheral = null
     }
 
     private suspend fun checkAutoReconnect() {
         val autoReconnectEnabled = sharedPreferences.getBoolean(PrefsKeys.AUTO_RECONNECT_ENABLED, true)
+        Log.d("BleService", "checkAutoReconnect: enabled=$autoReconnectEnabled, isManual=$isManuallyDisconnected, lastDeviceId=$lastConnectedDeviceId")
         if (!autoReconnectEnabled || isManuallyDisconnected || lastConnectedDeviceId == null) return
 
         autoReconnectAttempt++

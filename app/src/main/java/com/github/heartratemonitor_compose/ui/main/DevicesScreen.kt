@@ -1,5 +1,6 @@
 package com.github.heartratemonitor_compose.ui.main
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -19,6 +20,7 @@ import androidx.compose.material.icons.filled.Bluetooth
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -67,6 +69,7 @@ fun DevicesScreen(
 
     val scanResults by viewModel.scanResults.collectAsStateWithLifecycle()
     val appStatus by viewModel.appStatus.collectAsStateWithLifecycle()
+    val connectingDeviceId by viewModel.connectingDeviceId.collectAsStateWithLifecycle()
     val favoriteDeviceId by viewModel.favoriteDeviceId.collectAsStateWithLifecycle()
     val connectedDevice by viewModel.connectedDevice.collectAsStateWithLifecycle()
 
@@ -102,19 +105,19 @@ fun DevicesScreen(
                 actions = {
                     IconButton(
                         onClick = {
-                            if (!settings.getBoolean(PrefsKeys.SEARCH_TIP_SHOWN, false)) {
+                            if (appStatus == AppStatus.CONNECTED || appStatus == AppStatus.CONNECTING) {
+                                Toast.makeText(context, R.string.please_disconnect_first, Toast.LENGTH_SHORT).show()
+                            } else if (!settings.getBoolean(PrefsKeys.SEARCH_TIP_SHOWN, false)) {
                                 showSearchTipDialog = true
                             } else {
                                 viewModel.startScan()
                             }
-                        },
-                        enabled = appStatus == AppStatus.DISCONNECTED
+                        }
                     ) {
                         Icon(
                             imageVector = Icons.Filled.Search,
                             contentDescription = stringResource(R.string.cd_search_bluetooth),
-                            tint = if (appStatus == AppStatus.DISCONNECTED) MaterialTheme.colorScheme.onSurface
-                                   else MaterialTheme.colorScheme.onSurfaceVariant
+                            tint = MaterialTheme.colorScheme.onSurface
                         )
                     }
                 }
@@ -147,6 +150,7 @@ fun DevicesScreen(
                 AvailableDevicesList(
                     devices = sortedScanResults,
                     favoriteDeviceId = favoriteDeviceId,
+                    isConnecting = { id -> id == connectingDeviceId && appStatus == AppStatus.CONNECTING },
                     onDeviceClick = { viewModel.connectToDevice(it) },
                     onFavoriteClick = { viewModel.toggleFavoriteDevice(it) }
                 )
@@ -275,6 +279,7 @@ private fun ConnectedDeviceCard(
 private fun AvailableDevicesList(
     devices: List<com.juul.kable.Advertisement>,
     favoriteDeviceId: String?,
+    isConnecting: (String) -> Boolean,
     onDeviceClick: (String) -> Unit,
     onFavoriteClick: (com.juul.kable.Advertisement) -> Unit
 ) {
@@ -330,6 +335,7 @@ private fun AvailableDevicesList(
                     DeviceItem(
                         advertisement = advertisement,
                         isFavorite = advertisement.identifier == favoriteDeviceId,
+                        isConnecting = isConnecting(advertisement.identifier),
                         onDeviceClick = { onDeviceClick(advertisement.identifier) },
                         onFavoriteClick = { onFavoriteClick(advertisement) }
                     )

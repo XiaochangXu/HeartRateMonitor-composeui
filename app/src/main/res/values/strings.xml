@@ -19,6 +19,7 @@
     <string name="no_available_devices">暂无可用设备，请点击右上角搜索</string>
     <string name="enter_fullscreen">进入全屏模式</string>
     <string name="disconnect">断开连接</string>
+    <string name="please_disconnect_first">请先断开设备</string>
     <string name="speed">速度</string>
     <string name="cd_favorite">收藏</string>
     <string name="bpm_unit">次/分</string>
@@ -35,11 +36,17 @@
     <string name="history_warning_message">开启历史记录将持续写入数据到存储，可能会增加耗电量。确认开启吗？</string>
     <string name="heartbeat_animation">心跳动画效果</string>
     <string name="display_speed_gps">显示时速 (GPS)</string>
-    <string name="speed_gps_subtitle">开启时速显示将使用GPS定位，可能会增加耗电。</string>
     <string name="enable_speed_title">开启速度显示</string>
     <string name="speed_gps_warning">该功能使用 GPS 计算速度，可能会增加耗电量并需要定位权限。确认开启吗？</string>
     <string name="hide_from_recents">退出应用隐藏后台</string>
-    <string name="hide_from_recents_subtitle">开启后应用不会出现在最近任务列表中</string>
+    <string name="fullscreen_sound">全屏模式</string>
+    <string name="sound_settings">声音设置</string>
+    <string name="fullscreen_sound_off">关闭语音</string>
+    <string name="fullscreen_sound_cn">中文语音</string>
+    <string name="fullscreen_sound_en">英文语音</string>
+    <string name="sound_preview">声音试听</string>
+    <string name="start_preview">开始试听</string>
+    <string name="enable_voice_first">请先开启语音</string>
     <string name="favorite_devices">收藏设备</string>
     <string name="heart_rate_alarm">心率预警</string>
 
@@ -64,6 +71,7 @@
     <string name="text_color">文字颜色</string>
     <string name="black">黑色</string>
     <string name="white">白色</string>
+    <string name="custom_color">自定义</string>
 
 
     <!-- SettingsScreen - Floating Window -->

@@ -134,7 +134,7 @@ class StatusBarResidentService : Service() {
                 }
             }
             PrefsKeys.STATUS_BAR_BPM_TEXT_ENABLED, PrefsKeys.STATUS_BAR_TEXT_THICKNESS -> applyTextStyle()
-            PrefsKeys.STATUS_BAR_WHITE_TEXT -> applyAppearance()
+            PrefsKeys.STATUS_BAR_TEXT_COLOR -> applyAppearance()
         }
     }
 
@@ -349,11 +349,10 @@ class StatusBarResidentService : Service() {
     /**
      * 刷新文字/图标颜色（纯色，无阴影/描边）。
      *
-     * 颜色判定：status_bar_white_text = true → 纯白；否则 → 纯黑（默认）。
+     * 颜色来源：status_bar_text_color（ARGB int），默认纯黑。
      */
     private fun applyAppearance() {
-        val useWhite = sharedPreferences.getBoolean(PrefsKeys.STATUS_BAR_WHITE_TEXT, false)
-        val textColor = if (useWhite) Color.WHITE else Color.BLACK
+        val textColor = sharedPreferences.getInt(PrefsKeys.STATUS_BAR_TEXT_COLOR, Color.BLACK)
         appearance = appearance.copy(textColor = textColor)
     }
 

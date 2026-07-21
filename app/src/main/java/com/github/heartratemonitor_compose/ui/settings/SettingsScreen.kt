@@ -71,7 +71,12 @@ fun SettingsScreen(
             Spacer(Modifier.height(24.dp))
             IntegrationSection(onNavigate, settings)
             Spacer(Modifier.height(24.dp))
-            StatusBarSection(settings)
+            StatusBarSection(
+                settings = settings,
+                onShowColorPicker = { prefKey, title, defaultColor ->
+                    colorPickerRequest = ColorPickerRequest(prefKey, title, defaultColor)
+                }
+            )
             Spacer(Modifier.height(24.dp))
             FloatingWindowSection(
                 settings = settings,
@@ -191,7 +196,6 @@ private fun GeneralSection(
                     }
                 },
                 title = stringResource(R.string.display_speed_gps),
-                subtitle = stringResource(R.string.speed_gps_subtitle),
                 leadingIcon = painterResource(R.drawable.ic_speed)
             )
         }
@@ -222,8 +226,14 @@ private fun GeneralSection(
                     settings.setBoolean(PrefsKeys.HIDE_FROM_RECENTS_ENABLED, it)
                 },
                 title = stringResource(R.string.hide_from_recents),
-                subtitle = stringResource(R.string.hide_from_recents_subtitle),
                 leadingIcon = painterResource(R.drawable.ic_hide_source)
+            )
+        }
+
+        SettingsItem(onClick = { onNavigate("fullscreen_sound") }) {
+            SettingsLink(
+                title = stringResource(R.string.fullscreen_sound),
+                leadingIcon = painterResource(R.drawable.ic_fullscreen_sound)
             )
         }
 
@@ -293,7 +303,8 @@ private fun IntegrationSection(
 
 @Composable
 private fun StatusBarSection(
-    settings: SettingsRepository
+    settings: SettingsRepository,
+    onShowColorPicker: (prefKey: String, title: String, defaultColor: Int) -> Unit
 ) {
     SectionTitle(stringResource(R.string.status_bar_resident))
     SettingsGroupCard {
@@ -356,8 +367,9 @@ private fun StatusBarSection(
             )
         }
 
-        // 文字颜色：黑/白预设，点击切换 status_bar_white_text
+        // 文字颜色：黑/自定义/白
         SettingsItem(isLast = true) {
+            val context = LocalContext.current
             Column {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -384,14 +396,25 @@ private fun StatusBarSection(
                         label = stringResource(R.string.black),
                         color = android.graphics.Color.BLACK,
                         onClick = {
-                            settings.setBoolean(PrefsKeys.STATUS_BAR_WHITE_TEXT, false)
+                            settings.setInt(PrefsKeys.STATUS_BAR_TEXT_COLOR, android.graphics.Color.BLACK)
+                        }
+                    )
+                    ColorPreviewButton(
+                        label = stringResource(R.string.custom_color),
+                        color = settings.getInt(PrefsKeys.STATUS_BAR_TEXT_COLOR, android.graphics.Color.BLACK),
+                        onClick = {
+                            onShowColorPicker(
+                                PrefsKeys.STATUS_BAR_TEXT_COLOR,
+                                context.getString(R.string.text_color_picker),
+                                android.graphics.Color.BLACK
+                            )
                         }
                     )
                     ColorPreviewButton(
                         label = stringResource(R.string.white),
                         color = android.graphics.Color.WHITE,
                         onClick = {
-                            settings.setBoolean(PrefsKeys.STATUS_BAR_WHITE_TEXT, true)
+                            settings.setInt(PrefsKeys.STATUS_BAR_TEXT_COLOR, android.graphics.Color.WHITE)
                         }
                     )
                 }

@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.os.Build
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContentTransitionScope
@@ -93,13 +94,14 @@ import com.github.heartratemonitor_compose.ui.main.HomeScreen
 import com.github.heartratemonitor_compose.ui.main.MainViewModel
 import com.github.heartratemonitor_compose.ui.server.ServerScreen
 import com.github.heartratemonitor_compose.ui.settings.FairMemoryScreen
+import com.github.heartratemonitor_compose.ui.settings.FullscreenSoundScreen
 import com.github.heartratemonitor_compose.ui.settings.SettingsScreen
 import com.github.heartratemonitor_compose.ui.theme.ThemeSettingsScreen
 import com.github.heartratemonitor_compose.ui.webhook.WebhookScreen
 import com.github.heartratemonitor_compose.util.settingsRepository
 import kotlinx.coroutines.launch
 
-// 悬浮胶囊式底部导航：高度 + 底部留白
+
 private const val FLOATING_NAV_HEIGHT = 64
 private const val FLOATING_NAV_BOTTOM_MARGIN = 8
 private const val NAV_ITEM_DURATION = 200
@@ -107,7 +109,7 @@ private val NAV_INDICATOR_HEIGHT = 40.dp
 private val NAV_INDICATOR_CORNER = 20.dp
 private val NAV_ICON_SIZE = 24.dp
 
-// Tab 页切换动画时长（graphicsLayer 位移，GPU 合成零开销）
+// Tab 页切换动画时长
 private const val TAB_SLIDE_DURATION = 200
 // 二级页面 NavHost 转场动画时长
 private const val SECONDARY_SLIDE_DURATION = 300
@@ -134,6 +136,7 @@ sealed class Screen(val route: String) {
     object FairMemory : Screen("fair_memory")
     object Theme : Screen("theme")
     object Devices : Screen("devices")
+    object FullscreenSound : Screen("fullscreen_sound")
 }
 
 /** 底部导航 Tab 页 */
@@ -149,16 +152,11 @@ private fun String.toScreenRoute(): String = when (this) {
     "history" -> Screen.History.route
     "theme" -> Screen.Theme.route
     "devices" -> Screen.Devices.route
+    "fullscreen_sound" -> Screen.FullscreenSound.route
     else -> Screen.Home.route
 }
 
-/**
- * 单 Activity 架构的根 Composable。
- *
- * 签名仅保留 2 个跨 Activity 回调：
- * - [onToggleFloatingWindow] — HomeScreen 调用
- * - [onOpenExternal] — SettingsScreen GitHub 外链 / 系统设置 Intent
- */
+
 @Composable
 fun AppRoot(
     onToggleFloatingWindow: () -> Unit,
@@ -167,6 +165,49 @@ fun AppRoot(
     val context = LocalContext.current
     val settings = remember { context.settingsRepository }
     val navController = rememberNavController()
+
+    // ── 导航防抖：防止转场动画期间快速导航导致 AnimatedContent 状态不同步 ──
+    val navGuard = remember { object { var lastNavTimeMs = 0L } }
+    val navDebounceMs = SECONDARY_SLIDE_DURATION.toLong()
+
+    // 禁用 NavController 自带的返回回调，所有返回键由 BackHandler 统一处理
+    // 防止转场动画期间 BackHandler 被短暂禁用时 NavController 绕过防抖直接 pop
+    DisposableEffect(navController) {
+        navController.enableOnBackPressed(false)
+        onDispose {
+            navController.enableOnBackPressed(true)
+        }
+    }
+
+    fun safeNavigate(route: String) {
+        val now = System.currentTimeMillis()
+        if (now - navGuard.lastNavTimeMs < navDebounceMs) {
+            Log.w("AppRoot", "navigate blocked by debounce: $route, ${now - navGuard.lastNavTimeMs}ms since last")
+            return
+        }
+        navGuard.lastNavTimeMs = now
+        Log.d("AppRoot", "navigate: $route, from=${navController.currentDestination?.route}")
+        navController.navigate(route)
+    }
+
+    fun safePopBack() {
+        val now = System.currentTimeMillis()
+        if (now - navGuard.lastNavTimeMs < navDebounceMs) {
+            Log.w("AppRoot", "popBack blocked by debounce: ${now - navGuard.lastNavTimeMs}ms since last")
+            return
+        }
+        navGuard.lastNavTimeMs = now
+        val result = navController.popBackStack()
+        Log.d("AppRoot", "popBack: result=$result, currentRoute=${navController.currentDestination?.route}")
+        if (!result) {
+            // popBackStack 失败（BackStack 已在 start destination），强制导航到 placeholder
+            Log.w("AppRoot", "popBack failed, navigating to placeholder")
+            navController.navigate(TAB_PLACEHOLDER) {
+                popUpTo(TAB_PLACEHOLDER) { inclusive = false }
+                launchSingleTop = true
+            }
+        }
+    }
 
     // MainViewModel 绑定到 Activity 级 ViewModelStoreOwner，
     // 与 MainActivity.onServiceConnected 中 ViewModelProvider(this) 获取的是同一实例。
@@ -210,8 +251,16 @@ fun AppRoot(
     // 当前路由：用于底部导航选中态、胶囊隐藏逻辑、返回键拦截
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
+    // 跟踪最后已知的非 null 路由，防止转场动画期间 currentRoute 短暂为 null 导致 isOnTab 误判
+    // 从而避免 BackHandler 在转场期间被错误禁用，让 NavController 自带回调绕过防抖
+    var lastKnownRoute by remember { mutableStateOf(TAB_PLACEHOLDER) }
+    LaunchedEffect(currentRoute) {
+        if (currentRoute != null) {
+            lastKnownRoute = currentRoute
+        }
+    }
     // Tab 页在 NavHost 外部管理，NavHost 在 placeholder 时表示当前在 Tab 页
-    val isOnTab = currentRoute == null || currentRoute == TAB_PLACEHOLDER
+    val isOnTab = lastKnownRoute == TAB_PLACEHOLDER
     val currentScreen = if (isOnTab) currentTab else null
 
     // ── 底层视差位移：进入二级页面时 Tab 层向左移，退出时向右移回 ──
@@ -237,9 +286,9 @@ fun AppRoot(
         easing = FastOutSlowInEasing
     )
 
-    // 离开 Settings Tab 或进入二级页面时立即恢复导航栏
-    LaunchedEffect(currentTab, isOnTab) {
-        if ((currentTab !is Screen.Settings || !isOnTab) && navBarHideProgress.value != 0f) {
+    // 离开 Settings Tab 时立即恢复导航栏（进入二级页面不干预，保持当前隐藏/显示状态）
+    LaunchedEffect(currentTab) {
+        if (currentTab !is Screen.Settings && navBarHideProgress.value != 0f) {
             navBarHideProgress.snapTo(0f)
         }
     }
@@ -288,7 +337,7 @@ fun AppRoot(
 
     // 在二级页面拦截返回键，Tab 页让系统处理（退出应用）
     BackHandler(enabled = !isOnTab) {
-        navController.popBackStack()
+        safePopBack()
     }
 
     fun navigateToTab(route: String) {
@@ -325,8 +374,8 @@ fun AppRoot(
             ) {
                 HomeScreen(
                     viewModel = mainViewModel,
-                    onOpenHistory = { navController.navigate(Screen.History.route) },
-                    onNavigateToDevices = { navController.navigate(Screen.Devices.route) },
+                    onOpenHistory = { safeNavigate(Screen.History.route) },
+                    onNavigateToDevices = { safeNavigate(Screen.Devices.route) },
                     onEnterFullScreen = { isFullScreenMode = true }
                 )
             }
@@ -338,7 +387,7 @@ fun AppRoot(
             ) {
                 SettingsScreen(
                     settings = settings,
-                    onNavigate = { route -> navController.navigate(route.toScreenRoute()) },
+                    onNavigate = { route -> safeNavigate(route.toScreenRoute()) },
                     onOpenExternal = onOpenExternal,
                     showToast = { message ->
                         Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
@@ -347,87 +396,8 @@ fun AppRoot(
             }
         }
 
-        // ── 上层：NavHost 管理二级页面（覆盖在 Tab 层之上）──
-        NavHost(
-            navController = navController,
-            startDestination = TAB_PLACEHOLDER,
-            modifier = Modifier.fillMaxSize(),
-            enterTransition = {
-                slideInHorizontally(tween(SECONDARY_SLIDE_DURATION, easing = FastOutSlowInEasing)) { fullWidth -> fullWidth }
-            },
-            exitTransition = {
-                slideOutHorizontally(tween(SECONDARY_SLIDE_DURATION, easing = FastOutSlowInEasing)) { fullWidth -> -fullWidth }
-            },
-            popEnterTransition = {
-                slideInHorizontally(tween(SECONDARY_SLIDE_DURATION, easing = FastOutSlowInEasing)) { fullWidth -> -fullWidth }
-            },
-            popExitTransition = {
-                slideOutHorizontally(tween(SECONDARY_SLIDE_DURATION, easing = FastOutSlowInEasing)) { fullWidth -> fullWidth }
-            }
-        ) {
-            composable(TAB_PLACEHOLDER) { /* 透明占位，Tab 层在下方可见 */ }
-            composable(Screen.History.route) {
-                HistoryScreen(
-                    onNavigateBack = { navController.popBackStack() },
-                    onNavigateToChart = { sessionId ->
-                        navController.navigate(Screen.Chart.createRoute(sessionId))
-                    }
-                )
-            }
-            composable(
-                route = Screen.Chart.route,
-                arguments = listOf(
-                    navArgument("sessionId") { type = NavType.LongType }
-                )
-            ) { backStackEntry ->
-                val sessionId = backStackEntry.arguments?.getLong("sessionId") ?: return@composable
-                ChartScreen(
-                    sessionId = sessionId,
-                    onNavigateBack = { navController.popBackStack() }
-                )
-            }
-            composable(Screen.Favorite.route) {
-                FavoriteDevicesScreen(
-                    onNavigateBack = { navController.popBackStack() }
-                )
-            }
-            composable(Screen.Alarm.route) {
-                HeartRateAlarmScreen(
-                    settings = settings,
-                    onNavigateBack = { navController.popBackStack() }
-                )
-            }
-            composable(Screen.Server.route) {
-                ServerScreen(
-                    onNavigateBack = { navController.popBackStack() },
-                    settings = settings
-                )
-            }
-            composable(Screen.Webhook.route) {
-                WebhookScreen(
-                    onNavigateBack = { navController.popBackStack() }
-                )
-            }
-            composable(Screen.FairMemory.route) {
-                FairMemoryScreen(
-                    onNavigateBack = { navController.popBackStack() }
-                )
-            }
-            composable(Screen.Theme.route) {
-                ThemeSettingsScreen(
-                    onNavigateBack = { navController.popBackStack() }
-                )
-            }
-            composable(Screen.Devices.route) {
-                DevicesScreen(
-                    viewModel = mainViewModel,
-                    onNavigateBack = { navController.popBackStack() }
-                )
-            }
-        }
-
-        // ── 中层：悬浮胶囊式底部导航 ──
-        if (!isFullScreenMode && isOnTab) {
+        // ── 中层：悬浮胶囊式底部导航（始终渲染，保持在原位，由上层 NavHost 滑入覆盖）──
+        if (!isFullScreenMode) {
             Row(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
@@ -489,6 +459,91 @@ fun AppRoot(
                         )
                     }
                 }
+            }
+        }
+
+        // ── 上层：NavHost 管理二级页面（覆盖在 Tab 层和导航栏之上）──
+        NavHost(
+            navController = navController,
+            startDestination = TAB_PLACEHOLDER,
+            modifier = Modifier.fillMaxSize(),
+            enterTransition = {
+                slideInHorizontally(tween(SECONDARY_SLIDE_DURATION, easing = FastOutSlowInEasing)) { fullWidth -> fullWidth }
+            },
+            exitTransition = {
+                slideOutHorizontally(tween(SECONDARY_SLIDE_DURATION, easing = FastOutSlowInEasing)) { fullWidth -> -fullWidth }
+            },
+            popEnterTransition = {
+                slideInHorizontally(tween(SECONDARY_SLIDE_DURATION, easing = FastOutSlowInEasing)) { fullWidth -> -fullWidth }
+            },
+            popExitTransition = {
+                slideOutHorizontally(tween(SECONDARY_SLIDE_DURATION, easing = FastOutSlowInEasing)) { fullWidth -> fullWidth }
+            }
+        ) {
+            composable(TAB_PLACEHOLDER) { /* 透明占位，Tab 层在下方可见 */ }
+            composable(Screen.History.route) {
+                HistoryScreen(
+                    onNavigateBack = { safePopBack() },
+                    onNavigateToChart = { sessionId ->
+                        safeNavigate(Screen.Chart.createRoute(sessionId))
+                    }
+                )
+            }
+            composable(
+                route = Screen.Chart.route,
+                arguments = listOf(
+                    navArgument("sessionId") { type = NavType.LongType }
+                )
+            ) { backStackEntry ->
+                val sessionId = backStackEntry.arguments?.getLong("sessionId") ?: return@composable
+                ChartScreen(
+                    sessionId = sessionId,
+                    onNavigateBack = { safePopBack() }
+                )
+            }
+            composable(Screen.Favorite.route) {
+                FavoriteDevicesScreen(
+                    onNavigateBack = { safePopBack() }
+                )
+            }
+            composable(Screen.Alarm.route) {
+                HeartRateAlarmScreen(
+                    settings = settings,
+                    onNavigateBack = { safePopBack() }
+                )
+            }
+            composable(Screen.Server.route) {
+                ServerScreen(
+                    onNavigateBack = { safePopBack() },
+                    settings = settings
+                )
+            }
+            composable(Screen.Webhook.route) {
+                WebhookScreen(
+                    onNavigateBack = { safePopBack() }
+                )
+            }
+            composable(Screen.FairMemory.route) {
+                FairMemoryScreen(
+                    onNavigateBack = { safePopBack() }
+                )
+            }
+            composable(Screen.Theme.route) {
+                ThemeSettingsScreen(
+                    onNavigateBack = { safePopBack() }
+                )
+            }
+            composable(Screen.Devices.route) {
+                DevicesScreen(
+                    viewModel = mainViewModel,
+                    onNavigateBack = { safePopBack() }
+                )
+            }
+            composable(Screen.FullscreenSound.route) {
+                FullscreenSoundScreen(
+                    settings = settings,
+                    onNavigateBack = { safePopBack() }
+                )
             }
         }
 

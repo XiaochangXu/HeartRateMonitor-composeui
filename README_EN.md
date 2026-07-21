@@ -19,7 +19,7 @@
 - 📊 **Heart Rate History & Charts**: Auto-recording, history list, batch management, chart analysis, landscape view
 - 🎨 **Personalization**: Feature toggles, floating window style customization
 - 📡 **Data Interfaces**: HTTP server, WebSocket server, Webhook push
-- 📌 **Status Bar Heart Rate**: Display real-time heart rate in the status bar with automatic background color detection
+- 📌 **Status Bar Heart Rate**: Display real-time heart rate in the status bar
 - 🔔 **Heart Rate Alert**: Posture detection combined with threshold-based notifications and vibration
 - 🧠 **Fair Memory Management**: Adapted to domestic vendor memory management mechanisms
 - 🎨 **Color Picker**: Self-drawn HSV color wheel

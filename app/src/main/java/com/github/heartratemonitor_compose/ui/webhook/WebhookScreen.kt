@@ -51,7 +51,8 @@ fun WebhookScreen(
         floatingActionButton = {
             FloatingActionButton(
                 onClick = { showEditDialog = Pair(null, Webhook(newWebhookName, "")) },
-                containerColor = MaterialTheme.colorScheme.primaryContainer
+                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                modifier = Modifier.windowInsetsPadding(WindowInsets.navigationBars)
             ) {
                 Icon(Icons.Default.Add, stringResource(R.string.cd_add_webhook))
             }
@@ -264,8 +265,7 @@ private fun WebhookEditDialog(
                     onClick = {
                         onTest(Webhook(name, url, enabled, body, headers, triggers.toMutableList()))
                     },
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)
+                    modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(stringResource(R.string.test_send))
                 }
