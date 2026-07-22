@@ -241,6 +241,9 @@
     <string name="oppo_desc">Fair Memory Adaptation Guide</string>
     <string name="vivo_desc">Fair Memory Mechanism Adaptation</string>
     <string name="xiaomi_desc">Fair Memory Adaptation: Developer Documentation</string>
+    <string name="device_memory">Device Memory</string>
+    <string name="app_used_memory">App used %1$s MB</string>
+    <string name="system_total_memory">Total system %1$s GB</string>
 
     <!-- BleState messages -->
     <string name="ble_idle">Tap button above to scan devices</string>

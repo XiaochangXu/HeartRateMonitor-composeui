@@ -283,9 +283,9 @@ private fun BluetoothSection(settings: SettingsRepository) {
     var isAutoConnectEnabled by remember { mutableStateOf(settings.getBoolean(PrefsKeys.AUTO_CONNECT_ENABLED, false)) }
     var isAutoReconnectEnabled by remember { mutableStateOf(settings.getBoolean(PrefsKeys.AUTO_RECONNECT_ENABLED, true)) }
 
-    // Icon Container: 蓝牙使用紫色系
-    val containerColor = lerp(MaterialTheme.colorScheme.secondaryContainer, MaterialTheme.colorScheme.surfaceContainer, 0.4f)
-    val iconTint = MaterialTheme.colorScheme.onSecondaryContainer
+    // Icon Container: 蓝牙使用蓝色系（与常规功能统一）
+    val containerColor = lerp(MaterialTheme.colorScheme.primaryContainer, MaterialTheme.colorScheme.surfaceContainer, 0.4f)
+    val iconTint = MaterialTheme.colorScheme.onPrimaryContainer
 
     SectionTitle(stringResource(R.string.bluetooth))
     SettingsGroupCard {
@@ -326,9 +326,9 @@ private fun IntegrationSection(
     onNavigate: (String) -> Unit,
     settings: SettingsRepository
 ) {
-    // Icon Container: 集成功能使用青绿色系
-    val containerColor = lerp(MaterialTheme.colorScheme.tertiaryContainer, MaterialTheme.colorScheme.surfaceContainer, 0.4f)
-    val iconTint = MaterialTheme.colorScheme.onTertiaryContainer
+    // Icon Container: 集成功能使用蓝色系（与常规功能统一）
+    val containerColor = lerp(MaterialTheme.colorScheme.primaryContainer, MaterialTheme.colorScheme.surfaceContainer, 0.4f)
+    val iconTint = MaterialTheme.colorScheme.onPrimaryContainer
 
     SectionTitle(stringResource(R.string.integration))
     SettingsGroupCard {
@@ -351,6 +351,10 @@ private fun StatusBarSection(
     settings: SettingsRepository,
     onShowColorPicker: (prefKey: String, title: String, defaultColor: Int) -> Unit
 ) {
+    val context = LocalContext.current
+    val statusBarTextColor by settings.observeInt(PrefsKeys.STATUS_BAR_TEXT_COLOR, android.graphics.Color.BLACK)
+        .collectAsState()
+
     // Icon Container: 状态栏使用紫蓝色系
     val containerColor = lerp(
         lerp(MaterialTheme.colorScheme.primaryContainer, MaterialTheme.colorScheme.secondaryContainer, 0.6f),
@@ -473,7 +477,7 @@ private fun StatusBarSection(
                     )
                     ColorPreviewButton(
                         label = stringResource(R.string.custom_color),
-                        color = settings.getInt(PrefsKeys.STATUS_BAR_TEXT_COLOR, android.graphics.Color.BLACK),
+                        color = statusBarTextColor,
                         onClick = {
                             onShowColorPicker(
                                 PrefsKeys.STATUS_BAR_TEXT_COLOR,
@@ -584,13 +588,15 @@ private fun FloatingWindowSection(
     onShowColorPicker: (prefKey: String, title: String, defaultColor: Int) -> Unit
 ) {
     val context = LocalContext.current
-    // Icon Container: 悬浮窗使用珊瑚色系
-    val containerColor = lerp(
-        lerp(MaterialTheme.colorScheme.secondaryContainer, MaterialTheme.colorScheme.tertiaryContainer, 0.6f),
-        MaterialTheme.colorScheme.surfaceContainer,
-        0.4f
-    )
-    val iconTint = MaterialTheme.colorScheme.onSecondaryContainer
+    val floatingTextColor by settings.observeInt(PrefsKeys.FLOATING_TEXT_COLOR, android.graphics.Color.BLACK)
+        .collectAsState()
+    val floatingBgColor by settings.observeInt(PrefsKeys.FLOATING_BG_COLOR, android.graphics.Color.BLACK)
+        .collectAsState()
+    val floatingBorderColor by settings.observeInt(PrefsKeys.FLOATING_BORDER_COLOR, android.graphics.Color.GRAY)
+        .collectAsState()
+    // Icon Container: 悬浮窗使用蓝色系（与常规功能统一）
+    val containerColor = lerp(MaterialTheme.colorScheme.primaryContainer, MaterialTheme.colorScheme.surfaceContainer, 0.4f)
+    val iconTint = MaterialTheme.colorScheme.onPrimaryContainer
 
     SectionTitle(stringResource(R.string.floating_window_style))
     SettingsGroupCard {
@@ -732,17 +738,17 @@ private fun FloatingWindowSection(
                 ) {
                     ColorPreviewButton(
                         label = stringResource(R.string.text_label),
-                        color = settings.getInt(PrefsKeys.FLOATING_TEXT_COLOR, android.graphics.Color.BLACK),
+                        color = floatingTextColor,
                         onClick = { onShowColorPicker(PrefsKeys.FLOATING_TEXT_COLOR, context.getString(R.string.text_color_picker), android.graphics.Color.BLACK) }
                     )
                     ColorPreviewButton(
                         label = stringResource(R.string.background_label),
-                        color = settings.getInt(PrefsKeys.FLOATING_BG_COLOR, android.graphics.Color.BLACK),
+                        color = floatingBgColor,
                         onClick = { onShowColorPicker(PrefsKeys.FLOATING_BG_COLOR, context.getString(R.string.bg_color_picker), android.graphics.Color.BLACK) }
                     )
                     ColorPreviewButton(
                         label = stringResource(R.string.border_label),
-                        color = settings.getInt(PrefsKeys.FLOATING_BORDER_COLOR, android.graphics.Color.GRAY),
+                        color = floatingBorderColor,
                         onClick = { onShowColorPicker(PrefsKeys.FLOATING_BORDER_COLOR, context.getString(R.string.border_color_picker), android.graphics.Color.GRAY) }
                     )
                 }
@@ -760,13 +766,9 @@ private fun AboutSection(
     val aboutContext = LocalContext.current
     val scope = rememberCoroutineScope()
 
-    // Icon Container: 关于使用青蓝色系
-    val containerColor = lerp(
-        lerp(MaterialTheme.colorScheme.tertiaryContainer, MaterialTheme.colorScheme.primaryContainer, 0.6f),
-        MaterialTheme.colorScheme.surfaceContainer,
-        0.4f
-    )
-    val iconTint = MaterialTheme.colorScheme.onTertiaryContainer
+    // Icon Container: 关于使用蓝色系（与常规功能统一）
+    val containerColor = lerp(MaterialTheme.colorScheme.primaryContainer, MaterialTheme.colorScheme.surfaceContainer, 0.4f)
+    val iconTint = MaterialTheme.colorScheme.onPrimaryContainer
 
     // 当前版本号（去除 'v' 前缀，用于与 GitHub Release tag 对比）
     val currentVersion = remember {

@@ -131,6 +131,8 @@ private val navBarShowSpec: AnimationSpec<Float> = spring(
     dampingRatio = Spring.DampingRatioMediumBouncy,
     stiffness = 600f
 )
+// 底部导航栏隐藏/显示触发的最小滚动距离（px），过滤手指轻微抖动
+private const val NAV_BAR_SCROLL_THRESHOLD = 8f
 
 /** 导航栏 Channel 消息：串行化 scroll 追踪和 fling 动画，消除竞态 */
 private sealed class NavBarMsg {
@@ -334,6 +336,8 @@ fun AppRoot(
             override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
                 if (currentTab !is Screen.Settings || !isOnTab) return Offset.Zero
                 if (source == NestedScrollSource.SideEffect) return Offset.Zero
+                val absY = kotlin.math.abs(available.y)
+                if (absY < NAV_BAR_SCROLL_THRESHOLD) return Offset.Zero
                 if (available.y > 0f && navBarHideProgress.targetValue != 0f) {
                     navBarChannel.trySend(NavBarMsg.AnimateTo(0f, navBarShowSpec))
                 } else if (available.y < 0f && navBarHideProgress.targetValue != 1f) {
@@ -349,6 +353,8 @@ fun AppRoot(
             ): Offset {
                 if (currentTab !is Screen.Settings || !isOnTab) return Offset.Zero
                 if (source == NestedScrollSource.SideEffect) return Offset.Zero
+                val absY = kotlin.math.abs(available.y)
+                if (absY < NAV_BAR_SCROLL_THRESHOLD) return Offset.Zero
                 if (available.y > 0f && navBarHideProgress.targetValue != 0f) {
                     navBarChannel.trySend(NavBarMsg.AnimateTo(0f, navBarShowSpec))
                 } else if (available.y < 0f && navBarHideProgress.targetValue != 1f) {

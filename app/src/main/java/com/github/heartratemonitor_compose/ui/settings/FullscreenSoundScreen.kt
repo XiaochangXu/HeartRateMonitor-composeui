@@ -419,7 +419,7 @@ private fun SoundSwitchRow(
         Surface(
             modifier = Modifier.size(40.dp),
             shape = CircleShape,
-            color = MaterialTheme.colorScheme.primaryContainer
+            color = lerp(MaterialTheme.colorScheme.primaryContainer, MaterialTheme.colorScheme.surfaceContainer, 0.4f)
         ) {
             Box(contentAlignment = Alignment.Center) {
                 Icon(

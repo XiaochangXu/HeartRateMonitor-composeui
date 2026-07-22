@@ -252,6 +252,9 @@
     <string name="oppo_desc">公平运行内存适配指南</string>
     <string name="vivo_desc">公平运行内存机制适配</string>
     <string name="xiaomi_desc">公平运行内存适配：开发者文档</string>
+    <string name="device_memory">设备内存</string>
+    <string name="app_used_memory">App 已用 %1$s MB</string>
+    <string name="system_total_memory">系统总 %1$s GB</string>
 
     <!-- BleState messages -->
     <string name="ble_idle">点击右上角按钮扫描设备</string>
