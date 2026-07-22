@@ -1,0 +1,31 @@
+Categories:
+  - Sports & Health
+License: MIT
+AuthorName: XiaochangXu
+SourceCode: https://github.com/XiaochangXu/HeartRateMonitor-composeui
+IssueTracker: https://github.com/XiaochangXu/HeartRateMonitor-composeui/issues
+Changelog: https://github.com/XiaochangXu/HeartRateMonitor-composeui/releases
+
+AutoName: 心率监控器
+
+RepoType: git
+Repo: https://github.com/XiaochangXu/HeartRateMonitor-composeui.git
+Binaries: 
+  https://github.com/XiaochangXu/HeartRateMonitor-composeui/releases/download/v%v/app-release.apk
+
+Builds:
+  - versionName: '3.2'
+    versionCode: 26
+    commit: 18819e83b65c5d000c52600ab66b18d9f90b8cf0
+    subdir: app
+    gradle:
+      - yes
+
+AllowedAPKSigningKeys: 336a345e7eda8606d5de58cca4d221da17edcebdace73b9aff75ecddbc33a3dd
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+CurrentVersion: '3.2'
+CurrentVersionCode: 26
+
+MR链接： https://gitlab.com/fdroid/fdroiddata/-/merge_requests/43148

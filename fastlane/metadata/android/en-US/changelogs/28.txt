@@ -1,0 +1,1 @@
+Fixed update checker failing to detect latest version due to API pagination truncation

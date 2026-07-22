@@ -40,7 +40,7 @@ object UpdateChecker {
     private const val OWNER = "xiaochang-xu"
     private const val REPO = "heart-rate-monitor-composeui"
     private const val API_URL =
-        "https://gitee.com/api/v5/repos/$OWNER/$REPO/releases?page=1&per_page=10"
+        "https://gitee.com/api/v5/repos/$OWNER/$REPO/releases?page=1&per_page=100"
     private const val RELEASE_PAGE_URL =
         "https://gitee.com/$OWNER/$REPO/releases/latest"
 
