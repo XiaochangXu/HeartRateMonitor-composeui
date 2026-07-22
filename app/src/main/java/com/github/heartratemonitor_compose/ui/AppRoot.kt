@@ -13,8 +13,10 @@ import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.FiniteAnimationSpec
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandHorizontally
 import androidx.compose.animation.fadeIn
@@ -53,7 +55,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -69,7 +70,6 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.IntOffset
-import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -99,11 +99,13 @@ import com.github.heartratemonitor_compose.ui.settings.SettingsScreen
 import com.github.heartratemonitor_compose.ui.theme.ThemeSettingsScreen
 import com.github.heartratemonitor_compose.ui.webhook.WebhookScreen
 import com.github.heartratemonitor_compose.util.settingsRepository
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
 
 
 private const val FLOATING_NAV_HEIGHT = 64
-private const val FLOATING_NAV_BOTTOM_MARGIN = 8
+private const val FLOATING_NAV_BOTTOM_MARGIN = 0
 private const val NAV_ITEM_DURATION = 200
 private val NAV_INDICATOR_HEIGHT = 40.dp
 private val NAV_INDICATOR_CORNER = 20.dp
@@ -118,6 +120,25 @@ private const val BACKGROUND_PARALLAX_RATIO = 0.2f
 
 // NavHost 占位路由：Tab 页在 NavHost 外部管理，此路由仅作为 startDestination
 private const val TAB_PLACEHOLDER = "tab_placeholder"
+
+// ── 悬浮胶囊导航栏动画规格 ──
+// spring 物理弹簧：短距离自动快速完成，长距离平滑过渡，方向切换即时响应
+private val navBarHideSpec: AnimationSpec<Float> = spring(
+    dampingRatio = Spring.DampingRatioMediumBouncy,
+    stiffness = 600f
+)
+private val navBarShowSpec: AnimationSpec<Float> = spring(
+    dampingRatio = Spring.DampingRatioMediumBouncy,
+    stiffness = 600f
+)
+
+/** 导航栏 Channel 消息：串行化 scroll 追踪和 fling 动画，消除竞态 */
+private sealed class NavBarMsg {
+    /** 滚动跟踪：立即 snapTo 到该位置 */
+    data class Track(val progress: Float) : NavBarMsg()
+    /** Fling 结束：平滑动画到目标位置 */
+    data class AnimateTo(val target: Float, val spec: AnimationSpec<Float>) : NavBarMsg()
+}
 
 /**
  * 路由定义。使用 Navigation Compose 管理页面栈，替代原来的手动 secondaryStack。
@@ -277,15 +298,9 @@ fun AppRoot(
 
     // ── 胶囊导航栏显隐：向下滚动隐藏，向上滚动显示 ──
     val navBarHideProgress = remember { Animatable(0f) }
-    val coroutineScope = rememberCoroutineScope()
     val totalHideDistance = with(LocalDensity.current) {
         (FLOATING_NAV_HEIGHT.dp + FLOATING_NAV_BOTTOM_MARGIN.dp + navBarBottomInset).toPx()
     }
-    val navBarAnimationSpec = tween<Float>(
-        durationMillis = 300,
-        easing = FastOutSlowInEasing
-    )
-
     // 离开 Settings Tab 时立即恢复导航栏（进入二级页面不干预，保持当前隐藏/显示状态）
     LaunchedEffect(currentTab) {
         if (currentTab !is Screen.Settings && navBarHideProgress.value != 0f) {
@@ -293,17 +308,36 @@ fun AppRoot(
         }
     }
 
+    // 使用 CONFLATED Channel 串行化动画请求。
+    // animateTo 放入独立协程，新方向到达时可立即取消当前动画。
+    val navBarChannel = remember { Channel<NavBarMsg>(Channel.CONFLATED) }
+    LaunchedEffect(navBarChannel) {
+        var flingJob: Job? = null
+        for (msg in navBarChannel) {
+            when (msg) {
+                is NavBarMsg.AnimateTo -> {
+                    flingJob?.cancel()
+                    flingJob = launch {
+                        Log.d("AppRoot", "animateTo: target=${msg.target.toInt()} from=${"%.2f".format(navBarHideProgress.value)}")
+                        navBarHideProgress.animateTo(msg.target, msg.spec)
+                        Log.d("AppRoot", "animateTo done: target=${msg.target.toInt()}")
+                    }
+                }
+                else -> {} // Track 消息已废弃，忽略
+            }
+        }
+    }
+
     val nestedScrollConnection = remember(currentTab, isOnTab) {
         object : NestedScrollConnection {
+            // 检测滑动方向，立即触发完整动画（不再渐进式追踪位置）
             override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
-                // 仅在 Settings Tab 且无二级页面覆盖时触发胶囊隐藏/显示
                 if (currentTab !is Screen.Settings || !isOnTab) return Offset.Zero
                 if (source == NestedScrollSource.SideEffect) return Offset.Zero
-                val delta = available.y
-                if (delta != 0f) {
-                    val currentPx = navBarHideProgress.value * totalHideDistance
-                    val newPx = (currentPx - delta).coerceIn(0f, totalHideDistance)
-                    coroutineScope.launch { navBarHideProgress.snapTo(newPx / totalHideDistance) }
+                if (available.y > 0f && navBarHideProgress.targetValue != 0f) {
+                    navBarChannel.trySend(NavBarMsg.AnimateTo(0f, navBarShowSpec))
+                } else if (available.y < 0f && navBarHideProgress.targetValue != 1f) {
+                    navBarChannel.trySend(NavBarMsg.AnimateTo(1f, navBarHideSpec))
                 }
                 return Offset.Zero
             }
@@ -315,22 +349,12 @@ fun AppRoot(
             ): Offset {
                 if (currentTab !is Screen.Settings || !isOnTab) return Offset.Zero
                 if (source == NestedScrollSource.SideEffect) return Offset.Zero
-                val delta = available.y
-                if (delta != 0f) {
-                    val currentPx = navBarHideProgress.value * totalHideDistance
-                    val newPx = (currentPx - delta).coerceIn(0f, totalHideDistance)
-                    coroutineScope.launch { navBarHideProgress.snapTo(newPx / totalHideDistance) }
+                if (available.y > 0f && navBarHideProgress.targetValue != 0f) {
+                    navBarChannel.trySend(NavBarMsg.AnimateTo(0f, navBarShowSpec))
+                } else if (available.y < 0f && navBarHideProgress.targetValue != 1f) {
+                    navBarChannel.trySend(NavBarMsg.AnimateTo(1f, navBarHideSpec))
                 }
                 return Offset.Zero
-            }
-
-            override suspend fun onPostFling(consumed: Velocity, available: Velocity): Velocity {
-                if (currentTab !is Screen.Settings || !isOnTab) return Velocity.Zero
-                val target = if (navBarHideProgress.value > 0.5f) 1f else 0f
-                if (navBarHideProgress.value != target) {
-                    navBarHideProgress.animateTo(target, navBarAnimationSpec)
-                }
-                return Velocity.Zero
             }
         }
     }
@@ -403,7 +427,11 @@ fun AppRoot(
                     .align(Alignment.BottomCenter)
                     .fillMaxWidth()
                     .graphicsLayer {
-                        translationY = navBarHideProgress.value * totalHideDistance
+                        val p = navBarHideProgress.value
+                        translationY = p * totalHideDistance
+                        alpha = 1f - p
+                        scaleX = 1f - 0.06f * p
+                        scaleY = 1f - 0.06f * p
                     }
                     .padding(horizontal = 16.dp)
                     .padding(bottom = navBarBottomInset + FLOATING_NAV_BOTTOM_MARGIN.dp),
