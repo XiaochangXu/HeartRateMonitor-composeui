@@ -31,38 +31,55 @@
     <string name="settings">Settings</string>
     <string name="general">General</string>
     <string name="record_history">Record History Data</string>
+    <string name="subtitle_record_history">Save heart rate data to local database</string>
     <string name="performance_warning">Performance Warning</string>
     <string name="history_warning_message">Enabling history recording will continuously write data to storage, which may increase battery consumption. Are you sure you want to enable it?</string>
     <string name="heartbeat_animation">Heartbeat Animation</string>
+    <string name="subtitle_heartbeat_animation">Show real-time heartbeat animation on home screen</string>
     <string name="display_speed_gps">Display Speed (GPS)</string>
+    <string name="subtitle_display_speed_gps">Get current speed via GPS</string>
     <string name="enable_speed_title">Enable Speed Display</string>
     <string name="speed_gps_warning">This feature uses GPS to calculate speed, which may increase battery consumption and requires location permission. Are you sure you want to enable it?</string>
     <string name="hide_from_recents">Hide from Recents</string>
+    <string name="subtitle_hide_from_recents">Hide app preview from recent tasks screen</string>
     <string name="fullscreen_sound">Fullscreen Mode</string>
+    <string name="subtitle_fullscreen_sound">Play audio cues based on heart rate in fullscreen</string>
     <string name="sound_settings">Sound Settings</string>
     <string name="fullscreen_sound_off">Voice Off</string>
+    <string name="subtitle_fullscreen_sound_off">Mute during heart rate monitoring</string>
     <string name="fullscreen_sound_cn">Chinese Voice</string>
+    <string name="subtitle_fullscreen_sound_cn">Use Chinese voice announcements</string>
     <string name="fullscreen_sound_en">English Voice</string>
+    <string name="subtitle_fullscreen_sound_en">Use English voice announcements</string>
     <string name="sound_preview">Sound Preview</string>
     <string name="start_preview">Start Preview</string>
+    <string name="subtitle_start_preview">Preview current voice alert sound</string>
     <string name="enable_voice_first">Please enable voice first</string>
     <string name="favorite_devices">Favorite Devices</string>
+    <string name="subtitle_favorite_devices">Manage saved Bluetooth devices</string>
     <string name="heart_rate_alarm">Heart Rate Alarm</string>
+    <string name="subtitle_heart_rate_alarm">Configure abnormal heart rate alert thresholds</string>
 
     <!-- SettingsScreen - Bluetooth -->
     <string name="bluetooth">Bluetooth</string>
     <string name="auto_connect_favorite">Auto-connect Favorite Device on Start</string>
+    <string name="subtitle_auto_connect_favorite">Auto-connect device</string>
     <string name="auto_reconnect">Auto-reconnect on Disconnect</string>
+    <string name="subtitle_auto_reconnect">Automatically attempt reconnection after disconnection</string>
 
     <!-- SettingsScreen - Integration -->
     <string name="integration">Integration &amp; External Access</string>
     <string name="http_websocket_server">HTTP &amp; WebSocket Server</string>
+    <string name="subtitle_http_websocket_server">Share heart rate data over local network</string>
     <string name="webhook_settings">Webhook Settings</string>
+    <string name="subtitle_webhook_settings">Push heart rate data to remote server</string>
 
     <!-- SettingsScreen - Status Bar -->
     <string name="status_bar_resident">Status Bar Resident</string>
     <string name="status_bar_heart_rate">Status Bar Heart Rate</string>
+    <string name="subtitle_status_bar_heart_rate">Show real-time heart rate in status bar</string>
     <string name="display_bpm_unit">Display BPM Unit</string>
+    <string name="subtitle_display_bpm_unit">Show BPM unit suffix after the value</string>
     <string name="horizontal_position">Horizontal Position</string>
     <string name="vertical_adjust">Vertical Adjust</string>
     <string name="overall_size">Overall Size</string>
@@ -77,7 +94,9 @@
     <string name="floating_window_style">Floating Window Style</string>
     <string name="floating_window_tip">Long-press the floating window to enable touch pass-through. When enabled, touches are passed to the app below. Long-press again or tap the notification button to disable.</string>
     <string name="display_bpm_text">Display BPM Text</string>
+    <string name="subtitle_display_bpm_text">Show heart rate value in floating window</string>
     <string name="display_heart_icon">Display Heart Icon</string>
+    <string name="subtitle_display_heart_icon">Show heart icon in floating window</string>
     <string name="icon_size">Icon Size</string>
     <string name="corner_radius">Corner Radius</string>
     <string name="bg_opacity">Background Opacity</string>
@@ -96,9 +115,12 @@
     <string name="unknown_version">Unknown</string>
     <string name="checking_update">Checking...</string>
     <string name="check_update">Check for Updates</string>
+    <string name="subtitle_check_update">Get latest version info from GitHub</string>
     <string name="up_to_date">Already up to date (v%1$s)</string>
     <string name="fair_memory">Fair Memory</string>
+    <string name="subtitle_fair_memory">View app memory usage details</string>
     <string name="github_repo">Visit GitHub Repository</string>
+    <string name="subtitle_github_repo">Visit project source code repository</string>
     <string name="new_version_found">New version v%1$s found</string>
     <string name="current_version_label">Current version: v%1$s</string>
     <string name="release_notes_title">Release notes:</string>
@@ -269,6 +291,7 @@
 
     <!-- ThemeSettings -->
     <string name="theme_settings">Theme</string>
+    <string name="subtitle_theme_settings">Customize app color scheme</string>
     <string name="theme_color">Theme Color</string>
     <string name="theme_custom">Custom Theme</string>
     <string name="theme_mode">Theme Mode</string>

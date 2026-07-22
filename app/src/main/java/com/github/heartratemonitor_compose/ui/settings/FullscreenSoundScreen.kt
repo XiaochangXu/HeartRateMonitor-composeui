@@ -23,6 +23,7 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -163,16 +164,23 @@ fun FullscreenSoundScreen(
                 title = {
                     Text(
                         stringResource(R.string.fullscreen_sound),
-                        style = MaterialTheme.typography.headlineSmall,
-                        fontWeight = FontWeight.Normal
+                        style = MaterialTheme.typography.headlineSmall
                     )
                 },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = stringResource(R.string.cd_back)
-                        )
+                        Surface(
+                            modifier = Modifier.size(40.dp),
+                            shape = CircleShape,
+                            color = MaterialTheme.colorScheme.surfaceContainer
+                        ) {
+                            Box(contentAlignment = Alignment.Center) {
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                    contentDescription = stringResource(R.string.cd_back)
+                                )
+                            }
+                        }
                     }
                 }
             )
@@ -187,20 +195,14 @@ fun FullscreenSoundScreen(
         ) {
             Spacer(Modifier.height(8.dp))
 
-            // ── 声音设置 ──
-            SectionTitle(stringResource(R.string.sound_settings))
+            // ── 语音选项 ──
+            SectionTitle(stringResource(R.string.fullscreen_sound))
 
             SettingsGroupCard {
                 SettingsItem(isFirst = true) {
-                    SettingsLink(
-                        title = stringResource(R.string.sound_settings),
-                        leadingIcon = painterResource(R.drawable.ic_sound_settings),
-                        icon = null
-                    )
-                }
-                SettingsItem {
                     SoundSwitchRow(
                         title = stringResource(R.string.fullscreen_sound_off),
+                        subtitle = stringResource(R.string.subtitle_fullscreen_sound_off),
                         icon = painterResource(R.drawable.ic_sound_off),
                         checked = currentMode == "off",
                         onCheckedChange = {
@@ -212,6 +214,7 @@ fun FullscreenSoundScreen(
                 SettingsItem {
                     SoundSwitchRow(
                         title = stringResource(R.string.fullscreen_sound_cn),
+                        subtitle = stringResource(R.string.subtitle_fullscreen_sound_cn),
                         icon = painterResource(R.drawable.ic_sound_cn),
                         checked = currentMode == "cn",
                         onCheckedChange = {
@@ -223,6 +226,7 @@ fun FullscreenSoundScreen(
                 SettingsItem(isLast = true) {
                     SoundSwitchRow(
                         title = stringResource(R.string.fullscreen_sound_en),
+                        subtitle = stringResource(R.string.subtitle_fullscreen_sound_en),
                         icon = painterResource(R.drawable.ic_sound_en),
                         checked = currentMode == "en",
                         onCheckedChange = {
@@ -245,19 +249,34 @@ fun FullscreenSoundScreen(
                         modifier = Modifier.fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Icon(
-                            painter = painterResource(R.drawable.ic_sound_preview),
-                            contentDescription = null,
-                            modifier = Modifier.size(24.dp),
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
+                        Surface(
+                            modifier = Modifier.size(40.dp),
+                            shape = CircleShape,
+                            color = lerp(MaterialTheme.colorScheme.primaryContainer, MaterialTheme.colorScheme.surfaceContainer, 0.4f)
+                        ) {
+                            Box(contentAlignment = Alignment.Center) {
+                                Icon(
+                                    painter = painterResource(R.drawable.ic_sound_preview),
+                                    contentDescription = null,
+                                    modifier = Modifier.size(24.dp),
+                                    tint = MaterialTheme.colorScheme.onPrimaryContainer
+                                )
+                            }
+                        }
                         Spacer(Modifier.width(16.dp))
-                        Text(
-                            text = stringResource(R.string.start_preview),
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.onSurface,
-                            modifier = Modifier.weight(1f)
-                        )
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = stringResource(R.string.start_preview),
+                                style = MaterialTheme.typography.titleMedium,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            Text(
+                                text = stringResource(R.string.subtitle_start_preview),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.padding(top = 4.dp)
+                            )
+                        }
                         Spacer(Modifier.width(16.dp))
                         Surface(
                             modifier = Modifier.size(40.dp),
@@ -388,6 +407,7 @@ private fun SineWaveProgress(
 @Composable
 private fun SoundSwitchRow(
     title: String,
+    subtitle: String? = null,
     icon: Painter,
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit
@@ -396,20 +416,36 @@ private fun SoundSwitchRow(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(
-            painter = icon,
-            contentDescription = null,
-            modifier = Modifier.size(24.dp),
-            tint = MaterialTheme.colorScheme.onSurfaceVariant
-        )
+        Surface(
+            modifier = Modifier.size(40.dp),
+            shape = CircleShape,
+            color = MaterialTheme.colorScheme.primaryContainer
+        ) {
+            Box(contentAlignment = Alignment.Center) {
+                Icon(
+                    painter = icon,
+                    contentDescription = null,
+                    modifier = Modifier.size(24.dp),
+                    tint = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+            }
+        }
         Spacer(Modifier.width(16.dp))
-        Text(
-            text = title,
-            style = MaterialTheme.typography.bodyLarge,
-            fontWeight = FontWeight.Normal,
-            color = MaterialTheme.colorScheme.onSurface,
-            modifier = Modifier.weight(1f)
-        )
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            if (subtitle != null) {
+                Text(
+                    text = subtitle,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(top = 4.dp)
+                )
+            }
+        }
         Spacer(Modifier.width(16.dp))
         Switch(
             checked = checked,

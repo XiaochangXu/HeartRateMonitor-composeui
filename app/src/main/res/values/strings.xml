@@ -32,38 +32,55 @@
     <string name="settings">设置</string>
     <string name="general">常规</string>
     <string name="record_history">记录历史数据</string>
+    <string name="subtitle_record_history">将心率数据保存到历史</string>
     <string name="performance_warning">性能警告</string>
     <string name="history_warning_message">开启历史记录将持续写入数据到存储，可能会增加耗电量。确认开启吗？</string>
     <string name="heartbeat_animation">心跳动画效果</string>
+    <string name="subtitle_heartbeat_animation">显示实时心跳动画</string>
     <string name="display_speed_gps">显示时速 (GPS)</string>
+    <string name="subtitle_display_speed_gps">通过 GPS 获取当前移动速度</string>
     <string name="enable_speed_title">开启速度显示</string>
     <string name="speed_gps_warning">该功能使用 GPS 计算速度，可能会增加耗电量并需要定位权限。确认开启吗？</string>
     <string name="hide_from_recents">退出应用隐藏后台</string>
+    <string name="subtitle_hide_from_recents">在多任务界面隐藏应用预览</string>
     <string name="fullscreen_sound">全屏模式</string>
+    <string name="subtitle_fullscreen_sound">全屏时根据心率播报提示音</string>
     <string name="sound_settings">声音设置</string>
     <string name="fullscreen_sound_off">关闭语音</string>
+    <string name="subtitle_fullscreen_sound_off">在心率监测时静音</string>
     <string name="fullscreen_sound_cn">中文语音</string>
+    <string name="subtitle_fullscreen_sound_cn">使用中文语音播报</string>
     <string name="fullscreen_sound_en">英文语音</string>
+    <string name="subtitle_fullscreen_sound_en">使用英文语音播报</string>
     <string name="sound_preview">声音试听</string>
     <string name="start_preview">开始试听</string>
+    <string name="subtitle_start_preview">试听当前语音提示音效</string>
     <string name="enable_voice_first">请先开启语音</string>
     <string name="favorite_devices">收藏设备</string>
+    <string name="subtitle_favorite_devices">管理已收藏的蓝牙设备</string>
     <string name="heart_rate_alarm">心率预警</string>
+    <string name="subtitle_heart_rate_alarm">设置心率异常自动告警阈值</string>
 
     <!-- SettingsScreen - Bluetooth -->
     <string name="bluetooth">蓝牙</string>
     <string name="auto_connect_favorite">启动时自动连接收藏设备</string>
+    <string name="subtitle_auto_connect_favorite">自动连接设备</string>
     <string name="auto_reconnect">断开后自动重连</string>
+    <string name="subtitle_auto_reconnect">连接断开后自动尝试重新连接</string>
 
     <!-- SettingsScreen - Integration -->
     <string name="integration">集成 &amp; 外部访问</string>
     <string name="http_websocket_server">HTTP &amp; WebSocket 服务器</string>
+    <string name="subtitle_http_websocket_server">通过局域网共享心率数据</string>
     <string name="webhook_settings">Webhook 设置</string>
+    <string name="subtitle_webhook_settings">将心率数据推送到远程服务器</string>
 
     <!-- SettingsScreen - Status Bar -->
     <string name="status_bar_resident">状态栏常驻</string>
     <string name="status_bar_heart_rate">状态栏常驻心率</string>
+    <string name="subtitle_status_bar_heart_rate">在状态栏显示实时心率数值</string>
     <string name="display_bpm_unit">显示 BPM 单位</string>
+    <string name="subtitle_display_bpm_unit">在数值后方显示 BPM 单位</string>
     <string name="horizontal_position">水平位置</string>
     <string name="vertical_adjust">垂直微调</string>
     <string name="overall_size">整体大小</string>
@@ -78,7 +95,9 @@
     <string name="floating_window_style">悬浮窗样式</string>
     <string name="floating_window_tip">长按悬浮窗开启触摸穿透，开启后触摸直接传递给下方应用，不影响手机其他操作。再次长按悬浮窗或点击通知栏按钮关闭。</string>
     <string name="display_bpm_text">显示 BPM 文字</string>
+    <string name="subtitle_display_bpm_text">在悬浮窗中显示心率数值</string>
     <string name="display_heart_icon">显示心形图标</string>
+    <string name="subtitle_display_heart_icon">在悬浮窗中显示心形图标</string>
     <string name="icon_size">图标大小</string>
     <string name="corner_radius">圆角半径</string>
     <string name="bg_opacity">背景不透明度</string>
@@ -97,9 +116,12 @@
     <string name="unknown_version">未知</string>
     <string name="checking_update">正在检查...</string>
     <string name="check_update">检查更新</string>
+    <string name="subtitle_check_update">从 GitHub 获取最新版本信息</string>
     <string name="up_to_date">当前已是最新版本（v%1$s）</string>
     <string name="fair_memory">公平运行内存</string>
+    <string name="subtitle_fair_memory">查看应用内存使用详情</string>
     <string name="github_repo">访问 GitHub 仓库</string>
+    <string name="subtitle_github_repo">访问项目源代码仓库</string>
     <string name="new_version_found">发现新版本 v%1$s</string>
     <string name="current_version_label">当前版本：v%1$s</string>
     <string name="release_notes_title">更新内容：</string>
@@ -280,6 +302,7 @@
 
     <!-- ThemeSettings -->
     <string name="theme_settings">主题设置</string>
+    <string name="subtitle_theme_settings">自定义应用配色方案</string>
     <string name="theme_color">主题色彩</string>
     <string name="theme_custom">自定义主题</string>
     <string name="theme_mode">主题模式</string>

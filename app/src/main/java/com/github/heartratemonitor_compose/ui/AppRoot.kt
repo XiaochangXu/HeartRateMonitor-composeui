@@ -441,7 +441,7 @@ fun AppRoot(
                 Surface(
                     modifier = Modifier.weight(1f).height(FLOATING_NAV_HEIGHT.dp),
                     shape = RoundedCornerShape(32.dp),
-                    color = MaterialTheme.colorScheme.surfaceContainer
+                    color = MaterialTheme.colorScheme.surfaceContainerHigh
                 ) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -471,7 +471,7 @@ fun AppRoot(
                     modifier = Modifier.size(FLOATING_NAV_HEIGHT.dp),
                     shape = CircleShape,
                     color = if (floatingWindowEnabled) MaterialTheme.colorScheme.primary
-                    else MaterialTheme.colorScheme.surfaceContainer,
+                    else MaterialTheme.colorScheme.surfaceContainerHigh,
                     onClick = onToggleFloatingWindow
                 ) {
                     Box(contentAlignment = Alignment.Center) {

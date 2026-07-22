@@ -33,6 +33,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -174,16 +175,24 @@ fun HomeScreen(
                 title = {
                     Text(
                         text = context.getString(R.string.app_name),
-                        style = MaterialTheme.typography.titleLarge
+                        style = MaterialTheme.typography.headlineSmall
                     )
                 },
                 actions = {
                     IconButton(onClick = onOpenHistory) {
-                        Icon(
-                            imageVector = Icons.Filled.History,
-                            contentDescription = stringResource(R.string.cd_view_history),
-                            tint = MaterialTheme.colorScheme.onSurface
-                        )
+                        Surface(
+                            modifier = Modifier.size(40.dp),
+                            shape = CircleShape,
+                            color = MaterialTheme.colorScheme.surfaceContainer
+                        ) {
+                            Box(contentAlignment = Alignment.Center) {
+                                Icon(
+                                    imageVector = Icons.Filled.History,
+                                    contentDescription = stringResource(R.string.cd_view_history),
+                                    tint = MaterialTheme.colorScheme.onSurface
+                                )
+                            }
+                        }
                     }
                 }
             )
@@ -291,7 +300,7 @@ private fun HomeContent(
             Surface(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(28.dp),
-                color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                color = MaterialTheme.colorScheme.surfaceContainer,
                 contentColor = MaterialTheme.colorScheme.onSurface,
                 onClick = onNavigateToDevices
             ) {
@@ -412,7 +421,7 @@ private fun ChartPlaceholder(messageRes: Int) {
             .fillMaxWidth()
             .height(200.dp),
         shape = RoundedCornerShape(28.dp),
-        color = MaterialTheme.colorScheme.surfaceContainerHigh
+        color = MaterialTheme.colorScheme.surfaceContainer
     ) {
         Box(
             contentAlignment = Alignment.Center,
@@ -444,7 +453,7 @@ private fun HeartRateCard(
     val isConnected = appStatus == AppStatus.CONNECTED
 
     // 中性色令牌：不跟随 seed 色，仅跟随亮/暗模式（亮色黑、暗色白）
-    val containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+    val containerColor = MaterialTheme.colorScheme.surfaceContainer
     val contentColor = MaterialTheme.colorScheme.onSurface
 
     // 心跳动画：bpm > 30 且开启动画且已连接时缩放（作用于背景爱心，文字不跳动）
@@ -553,7 +562,7 @@ private fun SpeedCard(
     Surface(
         modifier = modifier.height(150.dp),
         shape = RoundedCornerShape(28.dp),
-        color = MaterialTheme.colorScheme.surfaceContainerHigh,
+        color = MaterialTheme.colorScheme.surfaceContainer,
         contentColor = MaterialTheme.colorScheme.onSurface
     ) {
         Column(
@@ -640,7 +649,7 @@ private fun RealtimeChart(
     Surface(
         modifier = modifier,
         shape = RoundedCornerShape(28.dp),
-        color = MaterialTheme.colorScheme.surfaceContainerHigh
+        color = MaterialTheme.colorScheme.surfaceContainer
     ) {
         CartesianChartHost(
             chart = rememberCartesianChart(

@@ -6,11 +6,14 @@ import android.net.Uri
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -49,8 +52,7 @@ fun SettingsScreen(
                 title = {
                     Text(
                         stringResource(R.string.settings),
-                        style = MaterialTheme.typography.headlineSmall,
-                        fontWeight = FontWeight.Normal
+                        style = MaterialTheme.typography.headlineSmall
                     )
                 }
             )
@@ -136,6 +138,10 @@ private fun GeneralSection(
     val showWarningDialog = remember { mutableStateOf(false) }
     val showSpeedDialog = remember { mutableStateOf(false) }
 
+    // Icon Container: 常规功能使用蓝色系
+    val containerColor = lerp(MaterialTheme.colorScheme.primaryContainer, MaterialTheme.colorScheme.surfaceContainer, 0.4f)
+    val iconTint = MaterialTheme.colorScheme.onPrimaryContainer
+
     SectionTitle(stringResource(R.string.general))
     SettingsGroupCard {
         SettingsItem(isFirst = true) {
@@ -150,7 +156,10 @@ private fun GeneralSection(
                     }
                 },
                 title = stringResource(R.string.record_history),
-                leadingIcon = painterResource(R.drawable.ic_deployed_code_history)
+                subtitle = stringResource(R.string.subtitle_record_history),
+                leadingIcon = painterResource(R.drawable.ic_deployed_code_history),
+                leadingIconContainerColor = containerColor,
+                leadingIconTint = iconTint
             )
         }
 
@@ -180,7 +189,10 @@ private fun GeneralSection(
                     settings.setBoolean(PrefsKeys.HEARTBEAT_ANIMATION_ENABLED, it)
                 },
                 title = stringResource(R.string.heartbeat_animation),
-                leadingIcon = painterResource(R.drawable.ic_animation)
+                subtitle = stringResource(R.string.subtitle_heartbeat_animation),
+                leadingIcon = painterResource(R.drawable.ic_animation),
+                leadingIconContainerColor = containerColor,
+                leadingIconTint = iconTint
             )
         }
 
@@ -196,7 +208,10 @@ private fun GeneralSection(
                     }
                 },
                 title = stringResource(R.string.display_speed_gps),
-                leadingIcon = painterResource(R.drawable.ic_speed)
+                subtitle = stringResource(R.string.subtitle_display_speed_gps),
+                leadingIcon = painterResource(R.drawable.ic_speed),
+                leadingIconContainerColor = containerColor,
+                leadingIconTint = iconTint
             )
         }
 
@@ -226,27 +241,39 @@ private fun GeneralSection(
                     settings.setBoolean(PrefsKeys.HIDE_FROM_RECENTS_ENABLED, it)
                 },
                 title = stringResource(R.string.hide_from_recents),
-                leadingIcon = painterResource(R.drawable.ic_hide_source)
+                subtitle = stringResource(R.string.subtitle_hide_from_recents),
+                leadingIcon = painterResource(R.drawable.ic_hide_source),
+                leadingIconContainerColor = containerColor,
+                leadingIconTint = iconTint
             )
         }
 
         SettingsItem(onClick = { onNavigate("fullscreen_sound") }) {
             SettingsLink(
                 title = stringResource(R.string.fullscreen_sound),
-                leadingIcon = painterResource(R.drawable.ic_fullscreen_sound)
+                subtitle = stringResource(R.string.subtitle_fullscreen_sound),
+                leadingIcon = painterResource(R.drawable.ic_fullscreen_sound),
+                leadingIconContainerColor = containerColor,
+                leadingIconTint = iconTint
             )
         }
 
         SettingsItem(onClick = { onNavigate("theme") }) {
-            SettingsLink(title = stringResource(R.string.theme_settings), leadingIcon = painterResource(R.drawable.ic_text_color))
+            SettingsLink(title = stringResource(R.string.theme_settings), subtitle = stringResource(R.string.subtitle_theme_settings),
+                leadingIcon = painterResource(R.drawable.ic_text_color),
+                leadingIconContainerColor = containerColor, leadingIconTint = iconTint)
         }
 
         SettingsItem(onClick = { onNavigate("favorite") }) {
-            SettingsLink(title = stringResource(R.string.favorite_devices), leadingIcon = painterResource(R.drawable.ic_star))
+            SettingsLink(title = stringResource(R.string.favorite_devices), subtitle = stringResource(R.string.subtitle_favorite_devices),
+                leadingIcon = painterResource(R.drawable.ic_star),
+                leadingIconContainerColor = containerColor, leadingIconTint = iconTint)
         }
 
         SettingsItem(isLast = true, onClick = { onNavigate("alarm") }) {
-            SettingsLink(title = stringResource(R.string.heart_rate_alarm), leadingIcon = painterResource(R.drawable.ic_warning))
+            SettingsLink(title = stringResource(R.string.heart_rate_alarm), subtitle = stringResource(R.string.subtitle_heart_rate_alarm),
+                leadingIcon = painterResource(R.drawable.ic_warning),
+                leadingIconContainerColor = containerColor, leadingIconTint = iconTint)
         }
     }
 }
@@ -255,6 +282,10 @@ private fun GeneralSection(
 private fun BluetoothSection(settings: SettingsRepository) {
     var isAutoConnectEnabled by remember { mutableStateOf(settings.getBoolean(PrefsKeys.AUTO_CONNECT_ENABLED, false)) }
     var isAutoReconnectEnabled by remember { mutableStateOf(settings.getBoolean(PrefsKeys.AUTO_RECONNECT_ENABLED, true)) }
+
+    // Icon Container: 蓝牙使用紫色系
+    val containerColor = lerp(MaterialTheme.colorScheme.secondaryContainer, MaterialTheme.colorScheme.surfaceContainer, 0.4f)
+    val iconTint = MaterialTheme.colorScheme.onSecondaryContainer
 
     SectionTitle(stringResource(R.string.bluetooth))
     SettingsGroupCard {
@@ -266,7 +297,10 @@ private fun BluetoothSection(settings: SettingsRepository) {
                     settings.setBoolean(PrefsKeys.AUTO_CONNECT_ENABLED, it)
                 },
                 title = stringResource(R.string.auto_connect_favorite),
-                leadingIcon = painterResource(R.drawable.ic_bluetooth_connected_symbol)
+                subtitle = stringResource(R.string.subtitle_auto_connect_favorite),
+                leadingIcon = painterResource(R.drawable.ic_bluetooth_connected_symbol),
+                leadingIconContainerColor = containerColor,
+                leadingIconTint = iconTint
             )
         }
 
@@ -278,7 +312,10 @@ private fun BluetoothSection(settings: SettingsRepository) {
                     settings.setBoolean(PrefsKeys.AUTO_RECONNECT_ENABLED, it)
                 },
                 title = stringResource(R.string.auto_reconnect),
-                leadingIcon = painterResource(R.drawable.ic_plug_connect)
+                subtitle = stringResource(R.string.subtitle_auto_reconnect),
+                leadingIcon = painterResource(R.drawable.ic_plug_connect),
+                leadingIconContainerColor = containerColor,
+                leadingIconTint = iconTint
             )
         }
     }
@@ -289,14 +326,22 @@ private fun IntegrationSection(
     onNavigate: (String) -> Unit,
     settings: SettingsRepository
 ) {
+    // Icon Container: 集成功能使用青绿色系
+    val containerColor = lerp(MaterialTheme.colorScheme.tertiaryContainer, MaterialTheme.colorScheme.surfaceContainer, 0.4f)
+    val iconTint = MaterialTheme.colorScheme.onTertiaryContainer
+
     SectionTitle(stringResource(R.string.integration))
     SettingsGroupCard {
         SettingsItem(isFirst = true, onClick = { onNavigate("server") }) {
-            SettingsLink(title = stringResource(R.string.http_websocket_server), leadingIcon = painterResource(R.drawable.ic_http_websocket))
+            SettingsLink(title = stringResource(R.string.http_websocket_server), subtitle = stringResource(R.string.subtitle_http_websocket_server),
+                leadingIcon = painterResource(R.drawable.ic_http_websocket),
+                leadingIconContainerColor = containerColor, leadingIconTint = iconTint)
         }
 
         SettingsItem(isLast = true, onClick = { onNavigate("webhook") }) {
-            SettingsLink(title = stringResource(R.string.webhook_settings), leadingIcon = painterResource(R.drawable.ic_webhook))
+            SettingsLink(title = stringResource(R.string.webhook_settings), subtitle = stringResource(R.string.subtitle_webhook_settings),
+                leadingIcon = painterResource(R.drawable.ic_webhook),
+                leadingIconContainerColor = containerColor, leadingIconTint = iconTint)
         }
     }
 }
@@ -306,9 +351,17 @@ private fun StatusBarSection(
     settings: SettingsRepository,
     onShowColorPicker: (prefKey: String, title: String, defaultColor: Int) -> Unit
 ) {
+    // Icon Container: 状态栏使用紫蓝色系
+    val containerColor = lerp(
+        lerp(MaterialTheme.colorScheme.primaryContainer, MaterialTheme.colorScheme.secondaryContainer, 0.6f),
+        MaterialTheme.colorScheme.surfaceContainer,
+        0.4f
+    )
+    val iconTint = MaterialTheme.colorScheme.onPrimaryContainer
+
     SectionTitle(stringResource(R.string.status_bar_resident))
     SettingsGroupCard {
-        StatusBarResidentItem(settings, isFirst = true)
+        StatusBarResidentItem(settings, isFirst = true, containerColor = containerColor, iconTint = iconTint)
 
         SettingsItem {
             var isBpmTextEnabled by remember { mutableStateOf(settings.getBoolean(PrefsKeys.STATUS_BAR_BPM_TEXT_ENABLED, true)) }
@@ -319,7 +372,10 @@ private fun StatusBarSection(
                     settings.setBoolean(PrefsKeys.STATUS_BAR_BPM_TEXT_ENABLED, it)
                 },
                 title = stringResource(R.string.display_bpm_unit),
-                leadingIcon = painterResource(R.drawable.ic_bpm_unit)
+                subtitle = stringResource(R.string.subtitle_display_bpm_unit),
+                leadingIcon = painterResource(R.drawable.ic_bpm_unit),
+                leadingIconContainerColor = containerColor,
+                leadingIconTint = iconTint
             )
         }
 
@@ -330,7 +386,9 @@ private fun StatusBarSection(
                 onValueChange = { settings.setInt(PrefsKeys.STATUS_BAR_X_POSITION, it) },
                 range = 0..100,
                 suffix = "%",
-                leadingIcon = painterResource(R.drawable.ic_horizontal_position)
+                leadingIcon = painterResource(R.drawable.ic_horizontal_position),
+                leadingIconContainerColor = containerColor,
+                leadingIconTint = iconTint
             )
         }
 
@@ -341,7 +399,9 @@ private fun StatusBarSection(
                 onValueChange = { settings.setInt(PrefsKeys.STATUS_BAR_Y_OFFSET, it) },
                 range = 0..20,
                 suffix = "dp",
-                leadingIcon = painterResource(R.drawable.ic_vertical_adjust)
+                leadingIcon = painterResource(R.drawable.ic_vertical_adjust),
+                leadingIconContainerColor = containerColor,
+                leadingIconTint = iconTint
             )
         }
 
@@ -352,7 +412,9 @@ private fun StatusBarSection(
                 onValueChange = { settings.setInt(PrefsKeys.STATUS_BAR_SIZE, it) },
                 range = 50..200,
                 suffix = "%",
-                leadingIcon = painterResource(R.drawable.ic_resize)
+                leadingIcon = painterResource(R.drawable.ic_resize),
+                leadingIconContainerColor = containerColor,
+                leadingIconTint = iconTint
             )
         }
 
@@ -363,7 +425,9 @@ private fun StatusBarSection(
                 onValueChange = { settings.setInt(PrefsKeys.STATUS_BAR_TEXT_THICKNESS, it) },
                 range = 0..100,
                 suffix = "%",
-                leadingIcon = painterResource(R.drawable.ic_text_thickness)
+                leadingIcon = painterResource(R.drawable.ic_text_thickness),
+                leadingIconContainerColor = containerColor,
+                leadingIconTint = iconTint
             )
         }
 
@@ -375,16 +439,24 @@ private fun StatusBarSection(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.padding(bottom = 8.dp)
                 ) {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_text_color),
-                        contentDescription = null,
-                        modifier = Modifier.size(24.dp),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                    Surface(
+                        modifier = Modifier.size(40.dp),
+                        shape = CircleShape,
+                        color = containerColor
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Icon(
+                                painter = painterResource(R.drawable.ic_text_color),
+                                contentDescription = null,
+                                modifier = Modifier.size(24.dp),
+                                tint = iconTint
+                            )
+                        }
+                    }
                     Spacer(Modifier.width(16.dp))
                     Text(
                         text = stringResource(R.string.text_color),
-                        style = MaterialTheme.typography.bodyMedium,
+                        style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
@@ -426,7 +498,9 @@ private fun StatusBarSection(
 @Composable
 private fun StatusBarResidentItem(
     settings: SettingsRepository,
-    isFirst: Boolean = false
+    isFirst: Boolean = false,
+    containerColor: Color = Color.Transparent,
+    iconTint: Color = MaterialTheme.colorScheme.onSurfaceVariant
 ) {
     val context = LocalContext.current
     val overlayProvider = remember { context.applicationContext.appContainer.overlayPermissionProvider }
@@ -454,12 +528,29 @@ private fun StatusBarResidentItem(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(
-                painter = painterResource(R.drawable.ic_status_bar_heart),
-                contentDescription = null,
-                modifier = Modifier.size(24.dp),
-                tint = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+            if (containerColor != Color.Transparent) {
+                Surface(
+                    modifier = Modifier.size(40.dp),
+                    shape = CircleShape,
+                    color = containerColor
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_status_bar_heart),
+                            contentDescription = null,
+                            modifier = Modifier.size(24.dp),
+                            tint = iconTint
+                        )
+                    }
+                }
+            } else {
+                Icon(
+                    painter = painterResource(R.drawable.ic_status_bar_heart),
+                    contentDescription = null,
+                    modifier = Modifier.size(24.dp),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
             Spacer(Modifier.width(16.dp))
             Column(
                 modifier = Modifier
@@ -468,9 +559,14 @@ private fun StatusBarResidentItem(
             ) {
                 Text(
                     text = stringResource(R.string.status_bar_heart_rate),
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = FontWeight.Normal,
+                    style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onSurface
+                )
+                Text(
+                    text = stringResource(R.string.subtitle_status_bar_heart_rate),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(top = 4.dp)
                 )
             }
             Spacer(Modifier.width(16.dp))
@@ -488,6 +584,14 @@ private fun FloatingWindowSection(
     onShowColorPicker: (prefKey: String, title: String, defaultColor: Int) -> Unit
 ) {
     val context = LocalContext.current
+    // Icon Container: 悬浮窗使用珊瑚色系
+    val containerColor = lerp(
+        lerp(MaterialTheme.colorScheme.secondaryContainer, MaterialTheme.colorScheme.tertiaryContainer, 0.6f),
+        MaterialTheme.colorScheme.surfaceContainer,
+        0.4f
+    )
+    val iconTint = MaterialTheme.colorScheme.onSecondaryContainer
+
     SectionTitle(stringResource(R.string.floating_window_style))
     SettingsGroupCard {
         SettingsItem(isFirst = true) {
@@ -507,7 +611,10 @@ private fun FloatingWindowSection(
                     settings.setBoolean(PrefsKeys.BPM_TEXT_ENABLED, it)
                 },
                 title = stringResource(R.string.display_bpm_text),
-                leadingIcon = painterResource(R.drawable.ic_bpm_text)
+                subtitle = stringResource(R.string.subtitle_display_bpm_text),
+                leadingIcon = painterResource(R.drawable.ic_bpm_text),
+                leadingIconContainerColor = containerColor,
+                leadingIconTint = iconTint
             )
         }
 
@@ -520,7 +627,10 @@ private fun FloatingWindowSection(
                     settings.setBoolean(PrefsKeys.HEART_ICON_ENABLED, it)
                 },
                 title = stringResource(R.string.display_heart_icon),
-                leadingIcon = painterResource(R.drawable.ic_heart_icon)
+                subtitle = stringResource(R.string.subtitle_display_heart_icon),
+                leadingIcon = painterResource(R.drawable.ic_heart_icon),
+                leadingIconContainerColor = containerColor,
+                leadingIconTint = iconTint
             )
         }
 
@@ -531,7 +641,9 @@ private fun FloatingWindowSection(
                 onValueChange = { settings.setInt(PrefsKeys.FLOATING_SIZE, it) },
                 range = 50..200,
                 suffix = "%",
-                leadingIcon = painterResource(R.drawable.ic_resize)
+                leadingIcon = painterResource(R.drawable.ic_resize),
+                leadingIconContainerColor = containerColor,
+                leadingIconTint = iconTint
             )
         }
 
@@ -542,7 +654,9 @@ private fun FloatingWindowSection(
                 onValueChange = { settings.setInt(PrefsKeys.FLOATING_ICON_SIZE, it) },
                 range = 50..200,
                 suffix = "%",
-                leadingIcon = painterResource(R.drawable.ic_icon_size)
+                leadingIcon = painterResource(R.drawable.ic_icon_size),
+                leadingIconContainerColor = containerColor,
+                leadingIconTint = iconTint
             )
         }
 
@@ -553,7 +667,9 @@ private fun FloatingWindowSection(
                 onValueChange = { settings.setInt(PrefsKeys.FLOATING_CORNER_RADIUS, it) },
                 range = 0..100,
                 suffix = "%",
-                leadingIcon = painterResource(R.drawable.ic_corner_radius)
+                leadingIcon = painterResource(R.drawable.ic_corner_radius),
+                leadingIconContainerColor = containerColor,
+                leadingIconTint = iconTint
             )
         }
 
@@ -564,7 +680,9 @@ private fun FloatingWindowSection(
                 onValueChange = { settings.setInt(PrefsKeys.FLOATING_BG_ALPHA, it) },
                 range = 0..100,
                 suffix = "%",
-                leadingIcon = painterResource(R.drawable.ic_bg_opacity)
+                leadingIcon = painterResource(R.drawable.ic_bg_opacity),
+                leadingIconContainerColor = containerColor,
+                leadingIconTint = iconTint
             )
         }
 
@@ -575,7 +693,9 @@ private fun FloatingWindowSection(
                 onValueChange = { settings.setInt(PrefsKeys.FLOATING_BORDER_ALPHA, it) },
                 range = 0..100,
                 suffix = "%",
-                leadingIcon = painterResource(R.drawable.ic_border_opacity)
+                leadingIcon = painterResource(R.drawable.ic_border_opacity),
+                leadingIconContainerColor = containerColor,
+                leadingIconTint = iconTint
             )
         }
 
@@ -585,16 +705,24 @@ private fun FloatingWindowSection(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.padding(bottom = 8.dp)
                 ) {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_color_palette),
-                        contentDescription = null,
-                        modifier = Modifier.size(24.dp),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                    Surface(
+                        modifier = Modifier.size(40.dp),
+                        shape = CircleShape,
+                        color = containerColor
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Icon(
+                                painter = painterResource(R.drawable.ic_color_palette),
+                                contentDescription = null,
+                                modifier = Modifier.size(24.dp),
+                                tint = iconTint
+                            )
+                        }
+                    }
                     Spacer(Modifier.width(16.dp))
                     Text(
                         text = stringResource(R.string.color_picker),
-                        style = MaterialTheme.typography.bodyMedium,
+                        style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
@@ -632,6 +760,14 @@ private fun AboutSection(
     val aboutContext = LocalContext.current
     val scope = rememberCoroutineScope()
 
+    // Icon Container: 关于使用青蓝色系
+    val containerColor = lerp(
+        lerp(MaterialTheme.colorScheme.tertiaryContainer, MaterialTheme.colorScheme.primaryContainer, 0.6f),
+        MaterialTheme.colorScheme.surfaceContainer,
+        0.4f
+    )
+    val iconTint = MaterialTheme.colorScheme.onTertiaryContainer
+
     // 当前版本号（去除 'v' 前缀，用于与 GitHub Release tag 对比）
     val currentVersion = remember {
         try {
@@ -657,22 +793,30 @@ private fun AboutSection(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(
-                    painter = painterResource(R.drawable.ic_version),
-                    contentDescription = null,
-                    modifier = Modifier.size(24.dp),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+                Surface(
+                    modifier = Modifier.size(40.dp),
+                    shape = CircleShape,
+                    color = containerColor
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_version),
+                            contentDescription = null,
+                            modifier = Modifier.size(24.dp),
+                            tint = iconTint
+                        )
+                    }
+                }
                 Spacer(Modifier.width(16.dp))
                 Text(
                     text = stringResource(R.string.version),
-                    style = MaterialTheme.typography.bodyLarge,
+                    style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onSurface
                 )
                 Spacer(Modifier.width(8.dp))
                 Text(
                     text = currentVersion,
-                    style = MaterialTheme.typography.bodyLarge,
+                    style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
@@ -702,12 +846,17 @@ private fun AboutSection(
                 title = if (updateState is UpdateChecker.Result.Error &&
                             (updateState as UpdateChecker.Result.Error).message == aboutContext.getString(R.string.checking_update))
                             aboutContext.getString(R.string.checking_update) else aboutContext.getString(R.string.check_update),
-                leadingIcon = painterResource(R.drawable.ic_check_update)
+                subtitle = stringResource(R.string.subtitle_check_update),
+                leadingIcon = painterResource(R.drawable.ic_check_update),
+                leadingIconContainerColor = containerColor,
+                leadingIconTint = iconTint
             )
         }
 
         SettingsItem(onClick = { onNavigate("fair_memory") }) {
-            SettingsLink(title = stringResource(R.string.fair_memory), leadingIcon = painterResource(R.drawable.ic_fair_memory))
+            SettingsLink(title = stringResource(R.string.fair_memory), subtitle = stringResource(R.string.subtitle_fair_memory),
+                leadingIcon = painterResource(R.drawable.ic_fair_memory),
+                leadingIconContainerColor = containerColor, leadingIconTint = iconTint)
         }
 
         SettingsItem(
@@ -721,12 +870,13 @@ private fun AboutSection(
                 onOpenExternal(intent)
             }
         ) {
-            SettingsLink(title = stringResource(R.string.github_repo), leadingIcon = painterResource(R.drawable.ic_github_repo))
+            SettingsLink(title = stringResource(R.string.github_repo), subtitle = stringResource(R.string.subtitle_github_repo),
+                leadingIcon = painterResource(R.drawable.ic_github_repo),
+                leadingIconContainerColor = containerColor, leadingIconTint = iconTint)
         }
     }
 
-    // ── 发现新版本弹窗 ──
-    // 左下角"确认"关闭弹窗；右下角"跳转更新"打开 GitHub Release 页
+    
     updateDialog?.let { info ->
         AlertDialog(
             onDismissRequest = { updateDialog = null },
@@ -777,7 +927,6 @@ private fun AboutSection(
         )
     }
 
-    // ── 通用消息弹窗（已是最新版 / 错误）──
     messageDialog?.let { msg ->
         AlertDialog(
             onDismissRequest = { messageDialog = null },

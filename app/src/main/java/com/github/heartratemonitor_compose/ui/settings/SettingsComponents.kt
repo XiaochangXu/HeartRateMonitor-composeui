@@ -1,5 +1,6 @@
 package com.github.heartratemonitor_compose.ui.settings
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,6 +14,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
@@ -39,7 +41,42 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
-import androidx.compose.foundation.clickable
+
+/**
+ * Material 3 Icon Container：当 [containerColor] 非透明时，将图标包裹在 40dp 彩色圆形背景中，
+ * 提升视觉层级和功能区分度。图标颜色使用 [tint]（默认跟随 onSurfaceVariant）。
+ */
+@Composable
+private fun LeadingIcon(
+    icon: Painter,
+    containerColor: Color = Color.Transparent,
+    tint: Color = MaterialTheme.colorScheme.onSurfaceVariant
+) {
+    if (containerColor != Color.Transparent) {
+        Surface(
+            modifier = Modifier.size(40.dp),
+            shape = CircleShape,
+            color = containerColor
+        ) {
+            Box(contentAlignment = Alignment.Center) {
+                Icon(
+                    painter = icon,
+                    contentDescription = null,
+                    modifier = Modifier.size(24.dp),
+                    tint = tint
+                )
+            }
+        }
+    } else {
+        Icon(
+            painter = icon,
+            contentDescription = null,
+            modifier = Modifier.size(24.dp),
+            tint = tint
+        )
+    }
+    Spacer(Modifier.width(16.dp))
+}
 
 /**
  * 分组标题。
@@ -99,7 +136,7 @@ internal fun SettingsItem(
             .fillMaxWidth()
             .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier),
         shape = shape,
-        color = MaterialTheme.colorScheme.surfaceContainerHigh,
+        color = MaterialTheme.colorScheme.surfaceContainer,
         contentColor = MaterialTheme.colorScheme.onSurface
     ) {
         Column(
@@ -120,27 +157,21 @@ internal fun SettingsSwitch(
     onCheckedChange: (Boolean) -> Unit,
     title: String,
     subtitle: String? = null,
-    leadingIcon: Painter? = null
+    leadingIcon: Painter? = null,
+    leadingIconContainerColor: Color = Color.Transparent,
+    leadingIconTint: Color = MaterialTheme.colorScheme.onSurfaceVariant
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // MD3 列表项 Leading Icon：24dp + 16dp 间距
         if (leadingIcon != null) {
-            Icon(
-                painter = leadingIcon,
-                contentDescription = null,
-                modifier = Modifier.size(24.dp),
-                tint = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            Spacer(Modifier.width(16.dp))
+            LeadingIcon(leadingIcon, leadingIconContainerColor, leadingIconTint)
         }
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = title,
-                style = MaterialTheme.typography.bodyLarge,
-                fontWeight = FontWeight.Normal,
+                style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurface
             )
             if (subtitle != null) {
@@ -165,6 +196,8 @@ internal fun SettingsLink(
     title: String,
     icon: ImageVector? = Icons.AutoMirrored.Filled.KeyboardArrowRight,
     leadingIcon: Painter? = null,
+    leadingIconContainerColor: Color = Color.Transparent,
+    leadingIconTint: Color = MaterialTheme.colorScheme.onSurfaceVariant,
     subtitle: String? = null
 ) {
     // 纯展示组件：不在此处处理点击。
@@ -173,24 +206,16 @@ internal fun SettingsLink(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 12.dp),
+            .heightIn(min = 48.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // MD3 列表项 Leading Icon：24dp + 16dp 间距
         if (leadingIcon != null) {
-            Icon(
-                painter = leadingIcon,
-                contentDescription = null,
-                modifier = Modifier.size(24.dp),
-                tint = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            Spacer(Modifier.width(16.dp))
+            LeadingIcon(leadingIcon, leadingIconContainerColor, leadingIconTint)
         }
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = title,
-                style = MaterialTheme.typography.bodyLarge,
-                fontWeight = FontWeight.Normal,
+                style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurface
             )
             if (subtitle != null) {
@@ -202,6 +227,7 @@ internal fun SettingsLink(
                 )
             }
         }
+        Spacer(Modifier.width(16.dp))
         if (icon != null) {
             Icon(
                 imageVector = icon,
@@ -220,7 +246,9 @@ internal fun DragSlider(
     range: IntRange,
     suffix: String = "",
     enabled: Boolean = true,
-    leadingIcon: Painter? = null
+    leadingIcon: Painter? = null,
+    leadingIconContainerColor: Color = Color.Transparent,
+    leadingIconTint: Color = MaterialTheme.colorScheme.onSurfaceVariant
 ) {
     var internalValue by remember(value) { mutableFloatStateOf(value.toFloat()) }
     var isDragging by remember { mutableStateOf(false) }
@@ -230,23 +258,16 @@ internal fun DragSlider(
         (internalValue - range.first) / (range.last - range.first) else 0f
 
     Column(modifier = Modifier.padding(vertical = 2.dp)) {
-        // MD3 列表项 Leading Icon：24dp + 16dp 间距
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.padding(bottom = 2.dp)
         ) {
             if (leadingIcon != null) {
-                Icon(
-                    painter = leadingIcon,
-                    contentDescription = null,
-                    modifier = Modifier.size(24.dp),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Spacer(Modifier.width(16.dp))
+                LeadingIcon(leadingIcon, leadingIconContainerColor, leadingIconTint)
             }
             Text(
                 text = label,
-                style = MaterialTheme.typography.bodyMedium,
+                style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }

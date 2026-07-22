@@ -22,3 +22,4 @@ local.properties
 .DS_Store
 git推送命令.txt
 build.log
+com.github.heartratemonitor_compose.yml
