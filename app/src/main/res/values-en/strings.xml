@@ -116,6 +116,32 @@
     <string name="checking_update">Checking...</string>
     <string name="check_update">Check for Updates</string>
     <string name="subtitle_check_update">Get latest version info from GitHub</string>
+    <string name="open_source_license">Open Source License</string>
+    <string name="subtitle_open_source_license">MIT License</string>
+    <string name="license_title">Open Source License</string>
+    <string name="license_load_error">Failed to load license content</string>
+    <string name="privacy_policy">Privacy Policy</string>
+    <string name="subtitle_privacy_policy">View app data access and usage</string>
+    <string name="privacy_title">Privacy Policy</string>
+    <string name="privacy_intro">This app respects your privacy. Below is a list of data the app may access and how it is used. All data is stored locally on your device and is never uploaded to any server.</string>
+    <string name="privacy_bluetooth_title">Bluetooth Device Info</string>
+    <string name="privacy_bluetooth_desc">Access Bluetooth to scan and connect heart rate monitor devices. Reads device name and MAC address (for device identification and auto-reconnect only). No other device info is collected.</string>
+    <string name="privacy_heart_rate_title">Heart Rate Data</string>
+    <string name="privacy_heart_rate_desc">Reads real-time heart rate and RR intervals, saves to local database for history and statistics. Data stays on this device and is never uploaded.</string>
+    <string name="privacy_location_title">Location (GPS)</string>
+    <string name="privacy_location_desc">Optional feature to record exercise trajectory correlated with heart rate. Disabled by default; requires manual permission and enablement. Data stored locally only.</string>
+    <string name="privacy_storage_title">Local Storage</string>
+    <string name="privacy_storage_desc">Saves heart rate history and settings to local database and files, ensuring data persists after app closure.</string>
+    <string name="privacy_notification_title">Notifications</string>
+    <string name="privacy_notification_desc">Sends notifications when heart rate exceeds preset thresholds or device disconnects, helping you monitor health status.</string>
+    <string name="privacy_network_title">Network Access</string>
+    <string name="privacy_network_desc">Used for app update checks and repository access; optional HTTP/WebSocket server and webhook push features also use network. No personal data is uploaded.</string>
+    <string name="privacy_foreground_service_title">Foreground Service</string>
+    <string name="privacy_foreground_service_desc">Uses foreground service for continuous heart rate monitoring in background, ensuring data recording continues when screen is off, with a persistent notification.</string>
+    <string name="privacy_clipboard_title">Clipboard</string>
+    <string name="privacy_clipboard_desc">Copies version number to clipboard only when you long-press the version label. Does not automatically read or upload clipboard content.</string>
+    <string name="privacy_conclusion_title">Data Security</string>
+    <string name="privacy_conclusion_desc">This app does not collect, upload, or share any personally identifiable information. All data is stored locally and is completely deleted when the app is uninstalled.</string>
     <string name="up_to_date">Already up to date (v%1$s)</string>
     <string name="fair_memory">Fair Memory</string>
     <string name="subtitle_fair_memory">View app memory usage details</string>
@@ -236,14 +262,24 @@
     <string name="app_kill_title">2. App Kill</string>
     <string name="app_kill_desc">Action: itgsa.intent.action.KILL\nSent when the system is about to kill this app. Upon receiving this, apps should save critical state data, release all releasable resources, and prepare for process termination.</string>
     <string name="app_adaptation">App Adaptation</string>
-    <string name="fair_memory_adaptation">This app has been adapted to the Fair Memory mechanism according to GSA official documentation:\n\n• Dynamically register broadcast receivers at Application startup with RECEIVER_EXPORTED flag\n• Parse common and extra Bundles from Intent, extracting anomaly type (physical memory/Java heap), memory usage, callback IBinder info\n• TRIM broadcast: differentiated release by notifyType — physical memory anomaly (1000) clears entire chart cache, Java heap anomaly (2000) downsamples to keep latest 500 points; both clear scan results and trigger System.gc(), notify system via IBinder callback within 3 seconds\n• KILL broadcast: notify MainViewModel to save state (heart rate data already persisted via Room database), notify system via IBinder callback within 3 seconds\n• Delegate release logic to MainViewModel via MemoryListener interface (WeakReference) to prevent memory leaks\n• Implement IBinder.DeathRecipient to monitor system service abnormal death\n• Use dedicated HandlerThread for broadcast processing to avoid blocking main thread\n\nBLE heart rate service (BleService) runs as a foreground service and won\'t be interrupted by memory warnings. Status bar resident service and floating window service may be reclaimed by the system under extreme memory pressure; the app will auto-recover on next launch.</string>
+    <string name="fair_memory_adaptation">This app has been adapted to the Fair Memory mechanism according to GSA official documentation:\n\n• Dynamically register broadcast receivers at Application startup with RECEIVER_EXPORTED flag\n• Parse common and extra Bundles from Intent, extracting anomaly type (physical memory/Java heap), memory usage, callback IBinder info\n• TRIM broadcast: differentiated release by notifyType — physical memory anomaly (1000) clears entire chart cache, Java heap anomaly (2000) downsamples to keep latest 500 points; both clear scan results and trigger System.gc(), notify system via IBinder callback within 3 seconds\n• TRIM foreground notification: when the app is in the foreground and reaches kill conditions, proactively push notifications to remind users. Java heap anomalies provide \"Close App\" and \"Ignore\" options; physical memory anomalies provide \"Reopen\"\n• KILL broadcast: notify MainViewModel to save state (heart rate data already persisted via Room database), notify system via IBinder callback within 3 seconds\n• Delegate release logic to MainViewModel via MemoryListener interface (WeakReference) to prevent memory leaks\n• Implement IBinder.DeathRecipient to monitor system service abnormal death\n• Use dedicated HandlerThread for broadcast processing to avoid blocking main thread\n\nBLE heart rate service (BleService) runs as a foreground service and won\'t be interrupted by memory warnings. Status bar resident service and floating window service may be reclaimed by the system under extreme memory pressure; the app will auto-recover on next launch.</string>
     <string name="reference_docs">Reference Documentation</string>
     <string name="oppo_desc">Fair Memory Adaptation Guide</string>
     <string name="vivo_desc">Fair Memory Mechanism Adaptation</string>
     <string name="xiaomi_desc">Fair Memory Adaptation: Developer Documentation</string>
-    <string name="device_memory">Device Memory</string>
-    <string name="app_used_memory">App used %1$s MB</string>
-    <string name="system_total_memory">Total system %1$s GB</string>
+
+    <!-- FairMemory notifications -->
+    <string name="fair_memory_heap_channel_title">Java Heap Memory Anomaly</string>
+    <string name="fair_memory_heap_channel_desc">User notification when app Java heap memory usage is abnormal</string>
+    <string name="fair_memory_pss_channel_title">Physical Memory Anomaly</string>
+    <string name="fair_memory_pss_channel_desc">User notification when app physical memory usage is abnormal and the app is closed</string>
+    <string name="fair_memory_heap_notification_title">Memory Running Abnormally</string>
+    <string name="fair_memory_heap_notification_text">App memory is running abnormally and may affect device smoothness. It is recommended to close the app and reopen it to ensure a smooth experience.</string>
+    <string name="fair_memory_pss_notification_title">Memory Running Abnormally</string>
+    <string name="fair_memory_pss_notification_text">A serious memory anomaly has been detected. To ensure stable device operation, the current app has been closed. You can reopen the app to continue using it.</string>
+    <string name="fair_memory_close_app">Close App</string>
+    <string name="fair_memory_ignore">Ignore</string>
+    <string name="fair_memory_reopen_app">Reopen</string>
 
     <!-- BleState messages -->
     <string name="ble_idle">Tap button above to scan devices</string>

@@ -2,6 +2,7 @@ package com.github.heartratemonitor_compose.ui.settings
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
@@ -134,7 +135,15 @@ internal fun SettingsItem(
     Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier),
+            .then(
+                if (onClick != null) {
+                    // 先 clip 成卡片形状，再挂 clickable，
+                    // 否则 ripple / 长按激活范围会超出圆角变成矩形
+                    Modifier.clip(shape).clickable(onClick = onClick)
+                } else {
+                    Modifier
+                }
+            ),
         shape = shape,
         color = MaterialTheme.colorScheme.surfaceContainer,
         contentColor = MaterialTheme.colorScheme.onSurface

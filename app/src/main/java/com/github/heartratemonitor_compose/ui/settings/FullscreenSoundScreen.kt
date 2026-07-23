@@ -19,11 +19,15 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -157,7 +161,10 @@ fun FullscreenSoundScreen(
         previewProgress = 0f
     }
 
+    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
+
     Scaffold(
+        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         topBar = {
             TopAppBar(
@@ -182,7 +189,8 @@ fun FullscreenSoundScreen(
                             }
                         }
                     }
-                }
+                },
+                scrollBehavior = scrollBehavior
             )
         }
     ) { padding ->
@@ -196,7 +204,7 @@ fun FullscreenSoundScreen(
             Spacer(Modifier.height(8.dp))
 
             // ── 语音选项 ──
-            SectionTitle(stringResource(R.string.fullscreen_sound))
+            SectionTitle(stringResource(R.string.sound_settings))
 
             SettingsGroupCard {
                 SettingsItem(isFirst = true) {

@@ -64,15 +64,16 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import kotlinx.coroutines.flow.Flow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color as ComposeColor
@@ -80,6 +81,7 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
@@ -143,28 +145,30 @@ fun HomeScreen(
     viewModel: MainViewModel,
     onOpenHistory: () -> Unit,
     onNavigateToDevices: () -> Unit,
-    onEnterFullScreen: () -> Unit
+    onEnterFullScreen: () -> Unit,
+    isActive: Boolean = true
 ) {
     val context = LocalContext.current
     val settings = remember { context.settingsRepository }
 
-    val heartRate by viewModel.heartRate.collectAsStateWithLifecycle()
-    val speed by viewModel.speed.collectAsStateWithLifecycle()
-    val appStatus by viewModel.appStatus.collectAsStateWithLifecycle()
-    val statusMessage by viewModel.statusMessage.collectAsStateWithLifecycle()
-    val newChartEntries by viewModel.newChartEntries.collectAsStateWithLifecycle()
-    val sessionMaxHr by viewModel.sessionMaxHr.collectAsStateWithLifecycle()
-    val sessionMinHr by viewModel.sessionMinHr.collectAsStateWithLifecycle()
-    val connectedDevice by viewModel.connectedDevice.collectAsStateWithLifecycle()
+    // 不在前台 Tab 时暂停高频状态订阅，避免二级页面转场期间后台 Home 页持续重组抢主线程
+    val heartRate by viewModel.heartRate.collectWhenActive(isActive, initial = 0)
+    val speed by viewModel.speed.collectWhenActive(isActive, initial = 0f)
+    val appStatus by viewModel.appStatus.collectWhenActive(isActive, initial = AppStatus.DISCONNECTED)
+    val statusMessage by viewModel.statusMessage.collectWhenActive(isActive, initial = "")
+    val sessionMaxHr by viewModel.sessionMaxHr.collectWhenActive(isActive, initial = 0)
+    val sessionMinHr by viewModel.sessionMinHr.collectWhenActive(isActive, initial = 0)
+    val connectedDevice by viewModel.connectedDevice.collectWhenActive(isActive, initial = null)
+    val chartDataSnapshot by viewModel.chartDataSnapshot.collectWhenActive(isActive, initial = null)
 
     // 三个设置开关均直接从 SettingsRepository 的 StateFlow 订阅，
     // 避免经 MainViewModel 中转产生额外异步延迟。
     val isHistoryEnabled by settings.observeBoolean(PrefsKeys.HISTORY_RECORDING_ENABLED, false)
-        .collectAsStateWithLifecycle()
+        .collectWhenActive(isActive, initial = false)
     val isSpeedEnabled by settings.observeBoolean(PrefsKeys.SPEED_DISPLAY_ENABLED, false)
-        .collectAsStateWithLifecycle()
+        .collectWhenActive(isActive, initial = false)
     val isAnimationEnabled by settings.observeBoolean(PrefsKeys.HEARTBEAT_ANIMATION_ENABLED, true)
-        .collectAsStateWithLifecycle()
+        .collectWhenActive(isActive, initial = true)
 
     val isConnected = appStatus == AppStatus.CONNECTED
 
@@ -208,7 +212,6 @@ fun HomeScreen(
             speed = speed,
             appStatus = appStatus,
             statusMessage = statusMessage,
-            newChartEntries = newChartEntries,
             isConnected = isConnected,
             isHistoryEnabled = isHistoryEnabled,
             isSpeedEnabled = isSpeedEnabled,
@@ -216,6 +219,7 @@ fun HomeScreen(
             sessionMaxHr = sessionMaxHr,
             sessionMinHr = sessionMinHr,
             connectedDeviceName = connectedDevice?.name,
+            chartDataSnapshot = chartDataSnapshot,
             onNavigateToDevices = onNavigateToDevices,
             onEnterFullScreen = onEnterFullScreen
         )
@@ -230,7 +234,7 @@ private fun HomeContent(
     speed: Float,
     appStatus: AppStatus,
     statusMessage: String,
-    newChartEntries: List<HeartRatePoint>?,
+    chartDataSnapshot: ChartDataSnapshot?,
     isConnected: Boolean,
     isHistoryEnabled: Boolean,
     isSpeedEnabled: Boolean,
@@ -241,7 +245,7 @@ private fun HomeContent(
     onNavigateToDevices: () -> Unit,
     onEnterFullScreen: () -> Unit
 ) {
-    // 内容延伸到屏幕底部（iOS 风格），底部 contentPadding 留出胶囊+系统导航栏空间
+
     val navBarInset = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
     LazyColumn(
         modifier = modifier,
@@ -249,7 +253,7 @@ private fun HomeContent(
             start = 16.dp,
             end = 16.dp,
             top = 16.dp,
-            bottom = 16.dp + 64.dp + 8.dp + navBarInset // 胶囊高度+边距+系统导航栏
+            bottom = 16.dp + 64.dp + 8.dp + navBarInset
         ),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
@@ -279,8 +283,7 @@ private fun HomeContent(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(200.dp),
-                        viewModel = viewModel,
-                        newChartEntries = newChartEntries,
+                        chartDataSnapshot = chartDataSnapshot,
                         appStatus = appStatus
                     )
                 }
@@ -383,7 +386,7 @@ private fun HomeContent(
                     shape = RoundedCornerShape(28.dp),
                     color = MaterialTheme.colorScheme.error,
                     contentColor = MaterialTheme.colorScheme.onError,
-                    onClick = { viewModel.disconnectDevice() }
+                    onClick = remember(viewModel) { { viewModel.disconnectDevice() } }
                 ) {
                     Row(
                         modifier = Modifier
@@ -494,7 +497,10 @@ private fun HeartRateCard(
                     .align(Alignment.Center)
                     .size(96.dp)
                     .alpha(if (isConnected) 0.35f else 0.25f)
-                    .scale(heartScale.value)
+                    .graphicsLayer {
+                        scaleX = heartScale.value
+                        scaleY = heartScale.value
+                    }
             )
 
             if (isConnected && sessionMaxHr > 0) {
@@ -596,8 +602,7 @@ private fun SpeedCard(
  * 实时心率图表（Vico CartesianChartHost）。
  *
  * 数据源:
- * - [MainViewModel.chartHistory] (List<HeartRatePoint>) 用于回填历史
- * - [newChartEntries] (List<HeartRatePoint>?) 用于逐拍增量追加
+ * - [MainViewModel.chartDataSnapshot] (ChartDataSnapshot?) 由 ViewModel 维护的已格式化坐标快照
  *
  * 渲染特点（向心电图风格靠拢）:
  * - 逐拍数据:RR-Interval 累加时间戳 + 瞬时心率,分辨率高于 1Hz 平均 BPM
@@ -609,27 +614,19 @@ private fun SpeedCard(
 @Composable
 private fun RealtimeChart(
     modifier: Modifier,
-    viewModel: MainViewModel,
-    newChartEntries: List<HeartRatePoint>?,
+    chartDataSnapshot: ChartDataSnapshot?,
     appStatus: AppStatus
 ) {
     val modelProducer = remember { CartesianChartModelProducer() }
-    val history = viewModel.chartHistory
 
-    // 心率数据更新时同步完整可视窗口到 Vico。
-    // ViewModel 已在 appendPoint 中维护最近 300 秒滑动窗口，此处无需再做 indexOfFirst/subList
-    // 裁剪，也避免了随着连接时间增长而对全量 history 做线性扫描和完整拷贝的开销。
-    // x 值用「整数毫秒」((timeOffsetSec * 1000).toLong())：浮点秒的辗转相除 GCD 会被
-    // 浮点误差磨成 0 触发 Vico "x-values are too precise" 异常；整数毫秒 GCD 永不归零。
-    LaunchedEffect(newChartEntries) {
-        if (appStatus != AppStatus.CONNECTED || history.isEmpty()) return@LaunchedEffect
-        // 事务外先拷贝数据：runTransaction 是 suspend，若在事务内读 history，
-        // 挂起期间 chartDataPoints 可能被新到达的心率修改，导致 ConcurrentModificationException
-        val xValues = history.map { (it.timeOffsetSec * 1000).toLong().toDouble() }
-        val yValues = history.map { it.heartRate.toDouble() }
+    // 直接使用 MainViewModel 维护的已格式化坐标快照，UI 层不再每拍全量转换/拷贝。
+    // 快照列表在 ViewModel 中已复制为不可变 List，避免 runTransaction 挂起期间被并发修改。
+    LaunchedEffect(chartDataSnapshot) {
+        val snapshot = chartDataSnapshot ?: return@LaunchedEffect
+        if (appStatus != AppStatus.CONNECTED || snapshot.xValues.isEmpty()) return@LaunchedEffect
         modelProducer.runTransaction {
             lineSeries {
-                series(x = xValues, y = yValues)
+                series(x = snapshot.xValues, y = snapshot.yValues)
             }
         }
     }
@@ -806,9 +803,10 @@ internal fun DeviceItem(
  */
 @Composable
 internal fun FullScreenHeartRate(
-    heartRate: Int,
+    viewModel: MainViewModel,
     onExit: () -> Unit
 ) {
+    val heartRate by viewModel.heartRate.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val settings = remember { context.settingsRepository }
     val heartColor = remember {
@@ -889,13 +887,8 @@ internal fun FullScreenHeartRate(
         }
     }
 
-    // 爱心光晕：QRS 波峰时最亮
+    // 爱心光晕：QRS 波峰时最亮；alpha 计算移到 graphicsLayer 绘制阶段，避免每帧重组
     val rPeakPhase = 0.2f
-    val phaseFraction = ecgPhase.value % 1f
-    val rawDist = abs(phaseFraction - rPeakPhase)
-    val distToPeak = min(rawDist, 1f - rawDist)
-    val heartGlow = if (effectiveBpm > 0) (1f - distToPeak / 0.06f).coerceIn(0f, 1f) else 0f
-    val heartAlpha = 0.75f + 0.25f * heartGlow
 
     BackHandler { onExit() }
 
@@ -989,16 +982,31 @@ internal fun FullScreenHeartRate(
                 Icon(
                     imageVector = Icons.Filled.Favorite,
                     contentDescription = null,
-                    tint = heartColor.copy(alpha = heartAlpha),
-                    modifier = Modifier.size(heartSize)
+                    tint = heartColor,
+                    modifier = Modifier
+                        .size(heartSize)
+                        .graphicsLayer {
+                            val phaseFraction = ecgPhase.value % 1f
+                            val rawDist = abs(phaseFraction - rPeakPhase)
+                            val distToPeak = min(rawDist, 1f - rawDist)
+                            val heartGlow = if (effectiveBpm > 0) (1f - distToPeak / 0.06f).coerceIn(0f, 1f) else 0f
+                            alpha = 0.75f + 0.25f * heartGlow
+                        }
                 )
             }
 
             Text(
                 text = ":",
-                color = heartColor.copy(alpha = heartAlpha),
+                color = heartColor,
                 fontSize = bpmFontSize,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.graphicsLayer {
+                    val phaseFraction = ecgPhase.value % 1f
+                    val rawDist = abs(phaseFraction - rPeakPhase)
+                    val distToPeak = min(rawDist, 1f - rawDist)
+                    val heartGlow = if (effectiveBpm > 0) (1f - distToPeak / 0.06f).coerceIn(0f, 1f) else 0f
+                    alpha = 0.75f + 0.25f * heartGlow
+                }
             )
 
             Box(
@@ -1091,4 +1099,22 @@ private fun ecgWaveformValue(phase: Float, amplitude: Float): Float {
         // 基线
         else -> 0f
     }
+}
+
+/**
+ * 仅在 [isActive] 为 true 时收集 Flow，暂停期间保留 [initial] 值。
+ *
+ * 用于 Home 页在切到二级页面时停止订阅心率、图表等高频更新，
+ * 避免后台页面持续重组导致转场动画掉帧。
+ */
+@Composable
+private fun <T> Flow<T>.collectWhenActive(
+    isActive: Boolean,
+    initial: T
+): State<T> {
+    val state = remember { mutableStateOf(initial) }
+    LaunchedEffect(isActive) {
+        if (isActive) this@collectWhenActive.collect { state.value = it }
+    }
+    return state
 }

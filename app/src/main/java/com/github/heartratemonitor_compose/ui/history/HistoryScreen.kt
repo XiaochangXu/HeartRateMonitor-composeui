@@ -32,6 +32,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import android.widget.Toast
 import com.github.heartratemonitor_compose.R
 import kotlinx.coroutines.launch
@@ -54,7 +55,10 @@ fun HistoryScreen(
     var selectedIds by remember { mutableStateOf(setOf<Long>()) }
     var showDeleteDialog by remember { mutableStateOf(false) }
 
+    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
+
     Scaffold(
+        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         topBar = {
             HistoryTopBar(
@@ -76,7 +80,8 @@ fun HistoryScreen(
                     if (selectedIds.isNotEmpty()) {
                         showDeleteDialog = true
                     }
-                }
+                },
+                scrollBehavior = scrollBehavior
             )
         }
     ) { padding ->
@@ -102,7 +107,7 @@ fun HistoryScreen(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
                 contentPadding = PaddingValues(
                     top = 8.dp,
-                    // 底部留出系统导航栏空间
+                    
                     bottom = 8.dp + WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
                 )
             ) {
@@ -173,7 +178,8 @@ private fun HistoryTopBar(
     totalCount: Int,
     onNavigateBack: () -> Unit,
     onSelectAll: () -> Unit,
-    onDelete: () -> Unit
+    onDelete: () -> Unit,
+    scrollBehavior: TopAppBarScrollBehavior
 ) {
     TopAppBar(
         title = {
@@ -215,7 +221,8 @@ private fun HistoryTopBar(
                     )
                 }
             }
-        }
+        },
+        scrollBehavior = scrollBehavior
     )
 }
 
@@ -340,14 +347,24 @@ private fun MiniChart(
     val lineColorValue = lineColor
     val gridColorValue = gridColor
 
+    // 缓存采样范围与端点值，避免 SessionCard 因选中态等无关变化重组时重复遍历
+    val chartData = remember(samples) {
+        val minVal = samples.min().toFloat()
+        val maxVal = samples.max().toFloat()
+        val range = (maxVal - minVal).coerceAtLeast(1f)
+        MiniChartData(
+            minVal = minVal,
+            maxVal = maxVal,
+            range = range,
+            first = samples.first(),
+            last = samples.last()
+        )
+    }
+
     Canvas(modifier = modifier) {
         val canvasWidth = size.width
         val canvasHeight = size.height
         if (samples.size < 2) return@Canvas
-
-        val minVal = samples.min().toFloat()
-        val maxVal = samples.max().toFloat()
-        val range = (maxVal - minVal).coerceAtLeast(1f)
 
         val gridLineColor = gridColorValue
         for (i in 0..2) {
@@ -365,7 +382,7 @@ private fun MiniChart(
         samples.forEachIndexed { index, value ->
             val x = index * stepX
             // 翻转Y轴：最大值在底部，最小值在顶部
-            val y = canvasHeight - ((value - minVal) / range) * (canvasHeight - 4f) - 2f
+            val y = canvasHeight - ((value - chartData.minVal) / chartData.range) * (canvasHeight - 4f) - 2f
             if (index == 0) {
                 path.moveTo(x, y)
             } else {
@@ -383,8 +400,8 @@ private fun MiniChart(
             )
         )
 
-        val firstY = canvasHeight - ((samples.first() - minVal) / range) * (canvasHeight - 4f) - 2f
-        val lastY = canvasHeight - ((samples.last() - minVal) / range) * (canvasHeight - 4f) - 2f
+        val firstY = canvasHeight - ((chartData.first - chartData.minVal) / chartData.range) * (canvasHeight - 4f) - 2f
+        val lastY = canvasHeight - ((chartData.last - chartData.minVal) / chartData.range) * (canvasHeight - 4f) - 2f
         drawCircle(color = lineColorValue, radius = 2.5f, center = Offset(0f, firstY))
         drawCircle(
             color = lineColorValue,
@@ -393,6 +410,14 @@ private fun MiniChart(
         )
     }
 }
+
+private data class MiniChartData(
+    val minVal: Float,
+    val maxVal: Float,
+    val range: Float,
+    val first: Int,
+    val last: Int
+)
 
 private fun toggleSelection(
     sessionId: Long,

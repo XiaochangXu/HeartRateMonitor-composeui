@@ -12,16 +12,20 @@ import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
+import androidx.compose.material3.ColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.produceState
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
-import com.materialkolor.rememberDynamicColorScheme
+import com.materialkolor.dynamicColorScheme
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 private val ExpressLightColorScheme = lightColorScheme(
     primary = ExpressPrimaryLight,
@@ -120,12 +124,26 @@ fun HeartRateMonitorMobileTheme(
     }
 
     val context = LocalContext.current
+
+    // 自定义主题在后台线程计算 ColorScheme，避免 MaterialKolor 的 HCT 转换阻塞主线程
+    val fallbackScheme = if (darkTheme) ExpressDarkColorScheme else ExpressLightColorScheme
+    val customScheme by produceState<ColorScheme?>(
+        initialValue = null,
+        key1 = config.seedArgb,
+        key2 = darkTheme,
+        key3 = config.style
+    ) {
+        value = withContext(Dispatchers.Default) {
+            dynamicColorScheme(
+                seedColor = Color(config.seedArgb),
+                isDark = darkTheme,
+                style = config.style
+            )
+        }
+    }
+
     val colorScheme = when {
-        config.source == ThemeSource.CUSTOM -> rememberDynamicColorScheme(
-            seedColor = Color(config.seedArgb),
-            isDark = darkTheme,
-            style = config.style
-        )
+        config.source == ThemeSource.CUSTOM -> customScheme ?: fallbackScheme
         Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
             if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
         }

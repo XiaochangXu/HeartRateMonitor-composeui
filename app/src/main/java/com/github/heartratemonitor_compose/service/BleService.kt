@@ -35,7 +35,7 @@ import org.json.JSONObject
 import java.util.concurrent.CancellationException
 import java.util.concurrent.atomic.AtomicBoolean
 
-class BleService : Service() {
+class BleService : Service(), FairMemoryReceiver.MemoryListener {
 
     private val binder = LocalBinder()
     inner class LocalBinder : Binder() {
@@ -119,6 +119,9 @@ class BleService : Service() {
 
         startForegroundService()
         registerSettingsListener()
+
+        // 注册公平运行内存监听：TRIM 时清空扫描缓存，KILL 时立即落盘未写入心率记录
+        FairMemoryReceiver.getInstance().addMemoryListener(this)
 
         // 服务器 start/stop 涉及 Socket bind，移至 IO 线程避免阻塞主线程
         serviceScope.launch { serverHost.update() }
@@ -452,6 +455,7 @@ class BleService : Service() {
 
     override fun onDestroy() {
         super.onDestroy()
+        FairMemoryReceiver.getInstance().removeMemoryListener(this)
         // 刷新未写入的批量心率记录：在现有 IO scope 中以 NonCancellable 启动，
         // 既避免阻塞主线程，也避免创建独立线程导致数据竞争。
         heartRateRecorder.cancelFlushLoop()
@@ -461,5 +465,21 @@ class BleService : Service() {
         serverHost.stop()
         // WebhookRepository 是应用级单例，不在 Service 生命周期内 shutdown
         sharedPreferences.unregisterOnSharedPreferenceChangeListener(settingsChangeListener)
+    }
+
+    /** 公平运行内存 TRIM：清空蓝牙扫描缓存，释放 Advertisement 对象占用的内存。 */
+    override fun onTrimMemory(notifyType: Int) {
+        if (!isScanning.get()) {
+            _scanResults.value = emptyList()
+            Log.i("BleService", "TRIM: 已清空蓝牙扫描缓存")
+        }
+    }
+
+    /** 公平运行内存 KILL：同步阻塞等待未写入心率记录落盘。 */
+    override fun onKillMemory() {
+        Log.i("BleService", "KILL: 正在强制落盘未写入心率记录…")
+        heartRateRecorder.cancelFlushLoop()
+        runBlocking(NonCancellable) { heartRateRecorder.flushPendingRecords() }
+        Log.i("BleService", "KILL: 心率记录落盘完成")
     }
 }

@@ -34,8 +34,6 @@
   <img src="images/1.jpg" width="270"/>
   <img src="images/2.jpg" width="270"/>
   <img src="images/3.jpg" width="270"/>
-  <img src="images/4.jpg" width="270"/>
-  <img src="images/5.jpg" width="270"/>
 </div>
 
 -----
@@ -53,7 +51,7 @@
     - 等待 **Gradle** 自动同步依赖
 
 3. **构建并运行**
-    - 使用真机或模拟器（API ≥ 27）连接
+    - 使用真机或模拟器（API ≥ 24）连接
     - 点击工具栏中的 ▶️ 运行按钮
 
 -----

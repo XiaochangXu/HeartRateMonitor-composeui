@@ -15,7 +15,9 @@ import com.github.heartratemonitor_compose.ble.BleState
 import com.github.heartratemonitor_compose.ble.HeartRateMeasurement
 import com.github.heartratemonitor_compose.service.BleService
 import com.github.heartratemonitor_compose.service.FairMemoryReceiver
+import com.github.heartratemonitor_compose.service.KillStateSaver
 import com.juul.kable.Advertisement
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -42,7 +44,17 @@ data class HeartRatePoint(
     val heartRate: Float
 )
 
-class MainViewModel(application: Application) : AndroidViewModel(application) {
+/**
+ * 已格式化的实时图表数据快照。
+ * 由 MainViewModel 维护，避免 UI 层每次心跳都执行 timeOffsetSec->ms 与 Float->Double 的全量转换。
+ */
+data class ChartDataSnapshot(
+    val xValues: List<Double>,
+    val yValues: List<Double>
+)
+
+class MainViewModel(application: Application) : AndroidViewModel(application),
+    FairMemoryReceiver.MemoryListener {
 
     private val container = application.appContainer
     private val settings: SettingsRepository = container.settingsRepository
@@ -76,8 +88,11 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     // --- Chart State Management ---
     private var chartStartTime = 0L
     private val chartDataPoints = ArrayDeque<HeartRatePoint>()
-    private val _newChartEntries = MutableStateFlow<List<HeartRatePoint>?>(null)
-    val newChartEntries: StateFlow<List<HeartRatePoint>?> = _newChartEntries.asStateFlow()
+    // 与 chartDataPoints 同步维护的已格式化 Vico 坐标列表，避免 UI 层每拍全量转换
+    private val chartXValues = ArrayDeque<Double>()
+    private val chartYValues = ArrayDeque<Double>()
+    private val _chartDataSnapshot = MutableStateFlow<ChartDataSnapshot?>(null)
+    val chartDataSnapshot: StateFlow<ChartDataSnapshot?> = _chartDataSnapshot.asStateFlow()
 
     // RR-Interval 累加时间戳:逐拍数据按 RR 秒数累加,得到每个心跳的相对时间 (秒)
     private var lastChartTimeSec = 0f
@@ -124,17 +139,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
 
         // 注册公平运行内存监听器，在 TRIM/KILL 时释放内存
-        FairMemoryReceiver.getInstance().setMemoryListener(object : FairMemoryReceiver.MemoryListener {
-            override fun onTrimMemory(notifyType: Int) {
-                // 监听器在 FairMemoryReceiver 的 HandlerThread 上调用，
-                // chartDataPoints 与 StateFlow 需在主线程操作，切换到主线程
-                mainHandler.post { releaseNonCriticalMemory(notifyType) }
-            }
-
-            override fun onKillMemory() {
-                // 心率数据已通过 Room 持久化，无需额外保存
-            }
-        })
+        FairMemoryReceiver.getInstance().addMemoryListener(this)
 
         // 一次性迁移：将 SharedPreferences 中的收藏历史迁移到 Room
         viewModelScope.launch { favoriteDeviceRepository.migrateLegacyFavoritesIfNeeded(application) }
@@ -242,9 +247,11 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
      */
     private fun clearChartData() {
         chartDataPoints.clear()
+        chartXValues.clear()
+        chartYValues.clear()
         chartStartTime = 0L
         lastChartTimeSec = 0f
-        _newChartEntries.value = null
+        _chartDataSnapshot.value = null
     }
 
     
@@ -292,7 +299,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
 
         if (newPoints.isNotEmpty()) {
-            _newChartEntries.value = newPoints
+            _chartDataSnapshot.value = ChartDataSnapshot(
+                xValues = chartXValues.toList(),
+                yValues = chartYValues.toList()
+            )
         }
     }
 
@@ -302,12 +312,18 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         val windowStart = point.timeOffsetSec - MAX_CHART_WINDOW_SECONDS
         while (chartDataPoints.isNotEmpty() && chartDataPoints.first().timeOffsetSec < windowStart) {
             chartDataPoints.removeFirst()
+            chartXValues.removeFirst()
+            chartYValues.removeFirst()
         }
         // 兜底：异常时间戳/极端频率下仍不突破硬上限
         if (chartDataPoints.size >= MAX_CHART_POINTS) {
             chartDataPoints.removeFirst()
+            chartXValues.removeFirst()
+            chartYValues.removeFirst()
         }
         chartDataPoints.add(point)
+        chartXValues.add((point.timeOffsetSec * 1000).toLong().toDouble())
+        chartYValues.add(point.heartRate.toDouble())
     }
 
     /**
@@ -321,7 +337,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
      *   最大化释放物理内存。
      *
      * - [FairMemoryReceiver.NOTIFY_TYPE_HEAP]（2000，Java 堆内存异常）：
-     *   [System.gc] 对 Java 堆直接有效。降采样到 [TRIM_KEEP_POINTS] 即可，
+     *   [System.gc] 对 Java 堆直接有效。降采样到 [TRIM_KEEP_POINTS] 后建议主动触发 GC，
      *   保留最近图表数据以维持当前会话体验。
      *
      * 必须在主线程执行（操作 [chartDataPoints] 与 [_scanResults]）。
@@ -336,12 +352,25 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             if (isPss) {
                 // 物理内存异常：清空整个图表缓存（数据已 Room 持久化，可恢复）
                 chartDataPoints.clear()
+                chartXValues.clear()
+                chartYValues.clear()
+                _chartDataSnapshot.value = null
                 Log.i("MainViewModel", "TRIM(PSS): 清空图表缓存 $originalSize 点")
             } else if (originalSize > TRIM_KEEP_POINTS) {
                 // Java 堆异常：降采样保留最近 N 点，gc 对堆直接有效
                 val kept = chartDataPoints.takeLast(TRIM_KEEP_POINTS)
                 chartDataPoints.clear()
                 chartDataPoints.addAll(kept)
+                chartXValues.clear()
+                chartYValues.clear()
+                kept.forEach { p ->
+                    chartXValues.add((p.timeOffsetSec * 1000).toLong().toDouble())
+                    chartYValues.add(p.heartRate.toDouble())
+                }
+                _chartDataSnapshot.value = ChartDataSnapshot(
+                    xValues = chartXValues.toList(),
+                    yValues = chartYValues.toList()
+                )
                 Log.i("MainViewModel", "TRIM(HEAP): 图表降采样 $originalSize -> 保留最近 $TRIM_KEEP_POINTS 点")
             }
         }
@@ -350,6 +379,22 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             _scanResults.value = emptyList()
             Log.i("MainViewModel", "TRIM(${if (isPss) "PSS" else "HEAP"}): 已清空扫描结果缓存")
         }
+
+        // HEAP 异常时建议在后台线程触发 GC，避免 System.gc() 暂停主线程
+        if (!isPss) {
+            Log.i("MainViewModel", "TRIM(HEAP): 触发 System.gc()")
+            viewModelScope.launch(Dispatchers.Default) { System.gc() }
+        }
+    }
+
+    /** 公平运行内存 TRIM：在 HandlerThread 收到回调后切到主线程释放。 */
+    override fun onTrimMemory(notifyType: Int) {
+        mainHandler.post { releaseNonCriticalMemory(notifyType) }
+    }
+
+    /** 公平运行内存 KILL：立即保存现场状态，心率数据由 Room 持久化。 */
+    override fun onKillMemory() {
+        KillStateSaver.save(getApplication())
     }
 
     // --- Actions delegated to the service ---
@@ -419,7 +464,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     override fun onCleared() {
         super.onCleared()
-        FairMemoryReceiver.getInstance().setMemoryListener(null)
+        FairMemoryReceiver.getInstance().removeMemoryListener(this)
         serviceDataJob?.cancel()
         bleServiceRef = null
     }

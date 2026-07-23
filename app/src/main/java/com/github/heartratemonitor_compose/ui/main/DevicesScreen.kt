@@ -10,10 +10,12 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -31,7 +33,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
@@ -40,6 +42,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -85,7 +88,10 @@ fun DevicesScreen(
         )
     }
 
+    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
+
     Scaffold(
+        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         topBar = {
             TopAppBar(
@@ -137,10 +143,14 @@ fun DevicesScreen(
                             }
                         }
                     }
-                }
+                },
+                scrollBehavior = scrollBehavior
             )
         }
     ) { padding ->
+        val isConnectingDevice = remember(appStatus, connectingDeviceId) {
+            { id: String -> id == connectingDeviceId && appStatus == AppStatus.CONNECTING }
+        }
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
@@ -151,26 +161,90 @@ fun DevicesScreen(
                 top = 16.dp,
                 bottom = 16.dp
             ),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            verticalArrangement = Arrangement.spacedBy(2.dp)
         ) {
             // 修复：连接后 scanResults 被清空，列表为空。增加此卡片让用户始终能看到当前已连接的设备。
             connectedDevice?.let { device ->
-                item {
+                item(key = "connected") {
+                    val onDisconnect = remember(viewModel) { { viewModel.disconnectDevice() } }
                     ConnectedDeviceCard(
                         device = device,
-                        onDisconnect = { viewModel.disconnectDevice() }
+                        onDisconnect = onDisconnect
+                    )
+                }
+                // 与下一组保持 16dp 间距（2.dp 默认 + 14.dp 间隔）
+                item(key = "gap_connected_available") { Spacer(Modifier.height(14.dp)) }
+            }
+
+            item(key = "available_header") {
+                Surface(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
+                    color = MaterialTheme.colorScheme.surfaceContainer,
+                    contentColor = MaterialTheme.colorScheme.onSurface
+                ) {
+                    Text(
+                        text = stringResource(R.string.available_devices),
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp)
                     )
                 }
             }
 
-            item {
-                AvailableDevicesList(
-                    devices = sortedScanResults,
-                    favoriteDeviceId = favoriteDeviceId,
-                    isConnecting = { id -> id == connectingDeviceId && appStatus == AppStatus.CONNECTING },
-                    onDeviceClick = { viewModel.connectToDevice(it) },
-                    onFavoriteClick = { viewModel.toggleFavoriteDevice(it) }
-                )
+            if (sortedScanResults.isEmpty()) {
+                item(key = "available_empty") {
+                    Surface(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(bottomStart = 28.dp, bottomEnd = 28.dp),
+                        color = MaterialTheme.colorScheme.surfaceContainer,
+                        contentColor = MaterialTheme.colorScheme.onSurface
+                    ) {
+                        Text(
+                            text = stringResource(R.string.no_available_devices),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 24.dp)
+                        )
+                    }
+                }
+            } else {
+                items(
+                    items = sortedScanResults,
+                    key = { it.identifier }
+                ) { advertisement ->
+                    val isLast = advertisement == sortedScanResults.last()
+                    val shape = if (isLast) {
+                        RoundedCornerShape(bottomStart = 28.dp, bottomEnd = 28.dp)
+                    } else {
+                        RoundedCornerShape(0.dp)
+                    }
+                    val isFavorite = advertisement.identifier == favoriteDeviceId
+                    val isConnecting = isConnectingDevice(advertisement.identifier)
+                    val onDeviceClick = remember(advertisement.identifier) {
+                        { viewModel.connectToDevice(advertisement.identifier) }
+                    }
+                    val onFavoriteClick = remember(advertisement.identifier) {
+                        { viewModel.toggleFavoriteDevice(advertisement) }
+                    }
+                    Surface(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = shape,
+                        color = MaterialTheme.colorScheme.surfaceContainer,
+                        contentColor = MaterialTheme.colorScheme.onSurface
+                    ) {
+                        DeviceItem(
+                            advertisement = advertisement,
+                            isFavorite = isFavorite,
+                            isConnecting = isConnecting,
+                            onDeviceClick = onDeviceClick,
+                            onFavoriteClick = onFavoriteClick
+                        )
+                    }
+                }
             }
         }
     }
@@ -287,77 +361,4 @@ private fun ConnectedDeviceCard(
     }
 }
 
-/**
- * 可用设备列表卡片组。
- *
- * 分段式卡片组：用 Column + 2dp 间隔取代单 Card + Divider。
- */
-@Composable
-private fun AvailableDevicesList(
-    devices: List<com.juul.kable.Advertisement>,
-    favoriteDeviceId: String?,
-    isConnecting: (String) -> Boolean,
-    onDeviceClick: (String) -> Unit,
-    onFavoriteClick: (com.juul.kable.Advertisement) -> Unit
-) {
-    Column(
-        modifier = Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(2.dp)
-    ) {
-        Surface(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
-            color = MaterialTheme.colorScheme.surfaceContainer,
-            contentColor = MaterialTheme.colorScheme.onSurface
-        ) {
-            Text(
-                text = stringResource(R.string.available_devices),
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp)
-            )
-        }
 
-        if (devices.isEmpty()) {
-            Surface(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(bottomStart = 28.dp, bottomEnd = 28.dp),
-                color = MaterialTheme.colorScheme.surfaceContainer,
-                contentColor = MaterialTheme.colorScheme.onSurface
-            ) {
-                Text(
-                    text = stringResource(R.string.no_available_devices),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 24.dp)
-                )
-            }
-        } else {
-            devices.forEachIndexed { index, advertisement ->
-                val isLast = index == devices.lastIndex
-                val shape = if (isLast) {
-                    RoundedCornerShape(bottomStart = 28.dp, bottomEnd = 28.dp)
-                } else {
-                    RoundedCornerShape(0.dp)
-                }
-                Surface(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = shape,
-                    color = MaterialTheme.colorScheme.surfaceContainer,
-                    contentColor = MaterialTheme.colorScheme.onSurface
-                ) {
-                    DeviceItem(
-                        advertisement = advertisement,
-                        isFavorite = advertisement.identifier == favoriteDeviceId,
-                        isConnecting = isConnecting(advertisement.identifier),
-                        onDeviceClick = { onDeviceClick(advertisement.identifier) },
-                        onFavoriteClick = { onFavoriteClick(advertisement) }
-                    )
-                }
-            }
-        }
-    }
-}

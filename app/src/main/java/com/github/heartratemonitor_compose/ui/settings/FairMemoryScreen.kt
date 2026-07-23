@@ -1,10 +1,8 @@
 package com.github.heartratemonitor_compose.ui.settings
 
-import android.app.ActivityManager
-import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import android.os.Debug
+import com.github.heartratemonitor_compose.R
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -16,21 +14,21 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.github.heartratemonitor_compose.R
-import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FairMemoryScreen(
     onNavigateBack: () -> Unit
 ) {
+    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
+
     Scaffold(
+        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         topBar = {
             TopAppBar(
@@ -47,15 +45,19 @@ fun FairMemoryScreen(
                             shape = CircleShape,
                             color = MaterialTheme.colorScheme.surfaceContainer
                         ) {
-                            Box(contentAlignment = Alignment.Center) {
-                                Icon(
-                                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                    contentDescription = stringResource(R.string.cd_back)
-                                )
-                            }
+                            Box(
+                                contentAlignment = Alignment.Center,
+                                content = {
+                                    Icon(
+                                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                        contentDescription = stringResource(R.string.cd_back)
+                                    )
+                                }
+                            )
                         }
                     }
-                }
+                },
+                scrollBehavior = scrollBehavior
             )
         }
     ) { padding ->
@@ -182,9 +184,6 @@ fun FairMemoryScreen(
                 )
             }
 
-            // 设备内存
-            DeviceMemorySection()
-
             Text(
                 text = stringResource(R.string.reference_docs),
                 style = MaterialTheme.typography.titleMedium,
@@ -220,95 +219,6 @@ fun FairMemoryScreen(
             }
 
             Spacer(Modifier.height(32.dp))
-        }
-    }
-}
-
-
-@Composable
-private fun DeviceMemorySection() {
-    val context = LocalContext.current
-    
-    // 通过 LaunchedEffect + delay(1000) 实现每秒刷新
-    var appMemoryMb by remember { mutableFloatStateOf(0f) }
-    var totalMemoryGb by remember { mutableFloatStateOf(0f) }
-    
-    LaunchedEffect(Unit) {
-        while (true) {
-            val activityManager = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
-            
-            try {
-                // 获取 App 内存（Debug.getMemoryInfo 将对象传入并填充数据）
-                // getTotalPss() 返回 KB，除以 1024 转为 MB
-                val debugMemInfo = Debug.MemoryInfo()
-                Debug.getMemoryInfo(debugMemInfo)
-                appMemoryMb = debugMemInfo.getTotalPss() / 1024f
-                
-                // 获取系统总内存（字节），除以 1024³ 转为 GB
-                val sysMemInfo = ActivityManager.MemoryInfo()
-                activityManager.getMemoryInfo(sysMemInfo)
-                totalMemoryGb = (sysMemInfo.totalMem.toDouble() / (1024.0 * 1024.0 * 1024.0)).toFloat()
-            } catch (_: Exception) {
-                // 静默失败，保持上次读取的值
-            }
-            
-            delay(1000)
-        }
-    }
-    
-    // 统一单位后再算百分比：appMemoryMb / totalMemoryGbMB * 100
-    val usagePercent = if (totalMemoryGb > 0f) (appMemoryMb / (totalMemoryGb * 1024f) * 100f) else 0f
-    
-    // Icon Container: 与全站统一配色
-    val containerColor = lerp(MaterialTheme.colorScheme.primaryContainer, MaterialTheme.colorScheme.surfaceContainer, 0.4f)
-    val iconTint = MaterialTheme.colorScheme.onPrimaryContainer
-
-    Text(
-        text = stringResource(R.string.device_memory),
-        style = MaterialTheme.typography.titleMedium,
-        color = MaterialTheme.colorScheme.primary,
-        modifier = Modifier.padding(vertical = 4.dp)
-    )
-    SettingsItem(isFirst = true, isLast = true) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Surface(
-                modifier = Modifier.size(40.dp),
-                shape = CircleShape,
-                color = containerColor
-            ) {
-                Box(contentAlignment = Alignment.Center) {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_fair_memory),
-                        contentDescription = null,
-                        modifier = Modifier.size(24.dp),
-                        tint = iconTint
-                    )
-                }
-            }
-            Spacer(Modifier.width(16.dp))
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = stringResource(R.string.app_used_memory, String.format("%.1f", appMemoryMb)),
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-                Text(
-                    text = stringResource(R.string.system_total_memory, String.format("%.1f", totalMemoryGb)),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(top = 2.dp)
-                )
-            }
-            Spacer(Modifier.width(16.dp))
-            Text(
-                text = "${String.format("%.1f", usagePercent)}%",
-                style = MaterialTheme.typography.bodyLarge,
-                fontWeight = FontWeight.Medium,
-                color = MaterialTheme.colorScheme.primary
-            )
         }
     }
 }

@@ -69,6 +69,18 @@ object PrefsKeys {
     const val THEME_CUSTOM_SEED = "theme_custom_seed"
     const val THEME_PALETTE_STYLE = "theme_palette_style"
 
+    // ── 公平运行内存 / KILL 现场保存 ──
+    const val KILL_STATE_SAVED = "kill_state_saved"
+    const val KILL_STATE_ROUTE = "kill_state_route"
+    const val KILL_STATE_TAB = "kill_state_tab"
+    const val KILL_STATE_FULLSCREEN = "kill_state_fullscreen"
+    const val KILL_STATE_CONNECTED_DEVICE_ID = "kill_state_connected_device_id"
+    const val KILL_STATE_CONNECTED_DEVICE_NAME = "kill_state_connected_device_name"
+    const val KILL_STATE_TIMESTAMP = "kill_state_timestamp"
+
+    // ── 内存诊断 ──
+    const val LAST_MEMORY_LIMITER_EXIT_CHECKED = "last_memory_limiter_exit_checked"
+
     // ── 收藏设备迁移 / 一次性提示 ──
     const val FAVORITE_HISTORY_MIGRATED_TO_ROOM = "favorite_history_migrated_to_room"
     const val FAVORITE_DEVICE_HISTORY = "favorite_device_history"

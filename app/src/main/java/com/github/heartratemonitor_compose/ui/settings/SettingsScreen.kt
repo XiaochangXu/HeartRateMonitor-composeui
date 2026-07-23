@@ -2,7 +2,6 @@ package com.github.heartratemonitor_compose.ui.settings
 
 import android.app.Activity
 import android.content.Intent
-import android.net.Uri
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -14,10 +13,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.github.heartratemonitor_compose.R
 import com.github.heartratemonitor_compose.data.PrefsKeys
@@ -26,11 +25,7 @@ import com.github.heartratemonitor_compose.data.repository.SettingsRepository
 import com.github.heartratemonitor_compose.data.system.OverlayPermissionProvider
 import com.github.heartratemonitor_compose.service.ServiceController
 import com.github.heartratemonitor_compose.ui.main.MainActivity
-import kotlinx.coroutines.launch
 
-// ──────────────────────────────────────────────
-// 主屏幕
-// ──────────────────────────────────────────────
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -38,14 +33,17 @@ fun SettingsScreen(
     settings: SettingsRepository,
     onNavigate: (String) -> Unit,
     onOpenExternal: (Intent) -> Unit,
-    showToast: (String) -> Unit = {}
+    showToast: (String) -> Unit = {},
+    isActive: Boolean = true
 ) {
     val context = LocalContext.current
+    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
 
     // Compose ColorPickerDialog 状态。null 表示不显示；非 null 时渲染 Dialog。
     var colorPickerRequest by remember { mutableStateOf<ColorPickerRequest?>(null) }
 
     Scaffold(
+        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         topBar = {
             TopAppBar(
@@ -54,7 +52,8 @@ fun SettingsScreen(
                         stringResource(R.string.settings),
                         style = MaterialTheme.typography.headlineSmall
                     )
-                }
+                },
+                scrollBehavior = scrollBehavior
             )
         }
     ) { padding ->
@@ -87,7 +86,7 @@ fun SettingsScreen(
                 }
             )
             Spacer(Modifier.height(24.dp))
-            AboutSection(settings, onNavigate, onOpenExternal)
+            AboutSection(onNavigate)
             // 内容延伸到屏幕底部（iOS 风格），末尾留出胶囊+系统导航栏空间
             Spacer(Modifier.height(64.dp + 8.dp + WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()))
         }
@@ -759,185 +758,29 @@ private fun FloatingWindowSection(
 
 @Composable
 private fun AboutSection(
-    settings: SettingsRepository,
-    onNavigate: (String) -> Unit,
-    onOpenExternal: (Intent) -> Unit
+    onNavigate: (String) -> Unit
 ) {
-    val aboutContext = LocalContext.current
-    val scope = rememberCoroutineScope()
-
     // Icon Container: 关于使用蓝色系（与常规功能统一）
     val containerColor = lerp(MaterialTheme.colorScheme.primaryContainer, MaterialTheme.colorScheme.surfaceContainer, 0.4f)
     val iconTint = MaterialTheme.colorScheme.onPrimaryContainer
 
-    // 当前版本号（去除 'v' 前缀，用于与 GitHub Release tag 对比）
-    val currentVersion = remember {
-        try {
-            val raw = aboutContext.packageManager
-                .getPackageInfo(aboutContext.packageName, 0).versionName
-            if (raw != null) raw.removePrefix("v").removePrefix("V") else aboutContext.getString(R.string.unknown_version)
-        } catch (e: Exception) {
-            aboutContext.getString(R.string.unknown_version)
-        }
-    }
-
-    // 检查更新状态：null=未触发；Checking=检查中；Result=已返回结果
-    var updateState by remember { mutableStateOf<Any?>(null) }
-    // 更新提示弹窗：UpdateChecker.Result.UpdateAvailable 时显示
-    var updateDialog by remember { mutableStateOf<UpdateChecker.Result.UpdateAvailable?>(null) }
-    // 错误/已是最新版提示弹窗
-    var messageDialog by remember { mutableStateOf<String?>(null) }
-
     SectionTitle(stringResource(R.string.about))
     SettingsGroupCard {
-        SettingsItem(isFirst = true) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Surface(
-                    modifier = Modifier.size(40.dp),
-                    shape = CircleShape,
-                    color = containerColor
-                ) {
-                    Box(contentAlignment = Alignment.Center) {
-                        Icon(
-                            painter = painterResource(R.drawable.ic_version),
-                            contentDescription = null,
-                            modifier = Modifier.size(24.dp),
-                            tint = iconTint
-                        )
-                    }
-                }
-                Spacer(Modifier.width(16.dp))
-                Text(
-                    text = stringResource(R.string.version),
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-                Spacer(Modifier.width(8.dp))
-                Text(
-                    text = currentVersion,
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-        }
-
-        SettingsItem(
-            onClick = {
-                if (updateState is UpdateChecker.Result.UpdateAvailable) {
-                    updateDialog = updateState as UpdateChecker.Result.UpdateAvailable
-                } else {
-                    updateState = UpdateChecker.Result.Error(aboutContext.getString(R.string.checking_update)) // 占位，避免重复点击
-                    scope.launch {
-                        val result = UpdateChecker.check(aboutContext, currentVersion)
-                        updateState = result
-                        when (result) {
-                            is UpdateChecker.Result.UpdateAvailable -> updateDialog = result
-                            is UpdateChecker.Result.UpToDate ->
-                                messageDialog = aboutContext.getString(R.string.up_to_date, result.currentVersion)
-                            is UpdateChecker.Result.Error ->
-                                messageDialog = result.message
-                        }
-                    }
-                }
-            }
-        ) {
+        SettingsItem(isFirst = true, onClick = { onNavigate("about_details") }) {
             SettingsLink(
-                title = if (updateState is UpdateChecker.Result.Error &&
-                            (updateState as UpdateChecker.Result.Error).message == aboutContext.getString(R.string.checking_update))
-                            aboutContext.getString(R.string.checking_update) else aboutContext.getString(R.string.check_update),
-                subtitle = stringResource(R.string.subtitle_check_update),
-                leadingIcon = painterResource(R.drawable.ic_check_update),
+                title = stringResource(R.string.about_details),
+                subtitle = stringResource(R.string.subtitle_about_details),
+                leadingIcon = painterResource(R.drawable.ic_version),
                 leadingIconContainerColor = containerColor,
                 leadingIconTint = iconTint
             )
         }
 
-        SettingsItem(onClick = { onNavigate("fair_memory") }) {
+        SettingsItem(isLast = true, onClick = { onNavigate("fair_memory") }) {
             SettingsLink(title = stringResource(R.string.fair_memory), subtitle = stringResource(R.string.subtitle_fair_memory),
                 leadingIcon = painterResource(R.drawable.ic_fair_memory),
                 leadingIconContainerColor = containerColor, leadingIconTint = iconTint)
         }
-
-        SettingsItem(
-            isLast = true,
-            onClick = {
-                val intent = Intent(
-                    Intent.ACTION_VIEW,
-                    Uri.parse("https://github.com/XiaochangXu/HeartRateMonitor-composeui")
-                )
-                MainActivity.suppressHideForExternalLaunch = true
-                onOpenExternal(intent)
-            }
-        ) {
-            SettingsLink(title = stringResource(R.string.github_repo), subtitle = stringResource(R.string.subtitle_github_repo),
-                leadingIcon = painterResource(R.drawable.ic_github_repo),
-                leadingIconContainerColor = containerColor, leadingIconTint = iconTint)
-        }
-    }
-
-    
-    updateDialog?.let { info ->
-        AlertDialog(
-            onDismissRequest = { updateDialog = null },
-            title = { Text(aboutContext.getString(R.string.new_version_found, info.newVersion)) },
-            text = {
-                Column {
-                    Text(
-                        text = aboutContext.getString(R.string.current_version_label, currentVersion),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Spacer(Modifier.height(12.dp))
-                    if (info.releaseNotes.isNotEmpty()) {
-                        Text(
-                            text = stringResource(R.string.release_notes_title),
-                            style = MaterialTheme.typography.bodyMedium,
-                            fontWeight = FontWeight.Medium
-                        )
-                        Spacer(Modifier.height(4.dp))
-                        Text(
-                            text = info.releaseNotes,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    } else {
-                        Text(
-                            text = stringResource(R.string.no_release_notes),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                }
-            },
-            confirmButton = {
-                TextButton(onClick = { updateDialog = null }) { Text(stringResource(R.string.confirm)) }
-            },
-            dismissButton = {
-                TextButton(onClick = {
-                    updateDialog = null
-                    val intent = Intent(
-                        Intent.ACTION_VIEW,
-                        Uri.parse(info.htmlUrl)
-                    )
-                    MainActivity.suppressHideForExternalLaunch = true
-                    onOpenExternal(intent)
-                }) { Text(stringResource(R.string.go_update)) }
-            }
-        )
-    }
-
-    messageDialog?.let { msg ->
-        AlertDialog(
-            onDismissRequest = { messageDialog = null },
-            title = { Text(stringResource(R.string.update_check_title)) },
-            text = { Text(msg) },
-            confirmButton = {
-                TextButton(onClick = { messageDialog = null }) { Text(stringResource(R.string.confirm)) }
-            }
-        )
     }
 }
 

@@ -112,11 +112,43 @@
 
     <!-- SettingsScreen - About -->
     <string name="about">关于</string>
+    <string name="about_details">详细信息</string>
+    <string name="subtitle_about_details">查看版本、协议与项目仓库</string>
+    <string name="about_details_title">详细信息</string>
+    <string name="app_intro">实时监测心率并记录历史数据</string>
     <string name="version">版本</string>
+    <string name="version_format">版本 %1$s</string>
+    <string name="version_copied">版本号已复制</string>
     <string name="unknown_version">未知</string>
     <string name="checking_update">正在检查...</string>
     <string name="check_update">检查更新</string>
-    <string name="subtitle_check_update">从 GitHub 获取最新版本信息</string>
+    <string name="subtitle_check_update">从 Gitee 获取最新版本信息</string>
+    <string name="open_source_license">查看开源协议</string>
+    <string name="subtitle_open_source_license">MIT 开源许可证</string>
+    <string name="license_title">开源协议</string>
+    <string name="license_load_error">协议内容加载失败</string>
+    <string name="privacy_policy">隐私政策</string>
+    <string name="subtitle_privacy_policy">查看应用数据访问与使用说明</string>
+    <string name="privacy_title">隐私政策</string>
+    <string name="privacy_intro">本应用注重您的隐私保护。以下是应用可能访问的数据及其用途说明。所有数据均存储在本地设备，不会上传到任何服务器。</string>
+    <string name="privacy_bluetooth_title">蓝牙设备信息</string>
+    <string name="privacy_bluetooth_desc">访问蓝牙以扫描、连接心率监测设备。读取设备名称、MAC 地址（仅用于设备识别与自动重连），不收集设备厂商等其他信息。</string>
+    <string name="privacy_heart_rate_title">心率数据</string>
+    <string name="privacy_heart_rate_desc">实时读取心率值与 RR 间期，记录并保存到本地数据库，用于历史查看与统计分析。数据仅保存在本设备，不会上传。</string>
+    <string name="privacy_location_title">位置信息（GPS）</string>
+    <string name="privacy_location_desc">为记录运动轨迹与心率关联，可选择开启 GPS 记录位置数据。此功能默认关闭，需您手动授权并开启，数据仅保存在本地。</string>
+    <string name="privacy_storage_title">本地存储</string>
+    <string name="privacy_storage_desc">将心率历史记录、设置项等保存到本地数据库与文件，确保应用关闭后数据不丢失。</string>
+    <string name="privacy_notification_title">通知权限</string>
+    <string name="privacy_notification_desc">在心率超出预设阈值或设备断开时发送通知提醒，便于您及时关注健康状态。</string>
+    <string name="privacy_network_title">网络访问</string>
+    <string name="privacy_network_desc">用于检查应用更新、访问项目仓库；可选启用的 HTTP/WebSocket 服务器与 Webhook 推送功能也使用网络。不会上传您的个人数据。</string>
+    <string name="privacy_foreground_service_title">前台服务</string>
+    <string name="privacy_foreground_service_desc">使用前台服务在后台持续监测心率，保证屏幕关闭时数据记录不中断，并以通知形式显示运行状态。</string>
+    <string name="privacy_clipboard_title">剪贴板</string>
+    <string name="privacy_clipboard_desc">仅在您长按版本号时将版本号复制到剪贴板，不会自动读取或上传剪贴板内容。</string>
+    <string name="privacy_conclusion_title">数据安全说明</string>
+    <string name="privacy_conclusion_desc">本应用不收集、不上传、不分享任何可识别您个人身份的信息。所有数据均存储在本设备，卸载应用即彻底删除。</string>
     <string name="up_to_date">当前已是最新版本（v%1$s）</string>
     <string name="fair_memory">公平运行内存</string>
     <string name="subtitle_fair_memory">查看应用内存使用详情</string>
@@ -237,24 +269,24 @@
     <string name="app_kill_title">2. 应用查杀</string>
     <string name="app_kill_desc">Action: itgsa.intent.action.KILL\n系统即将查杀本应用时发送。应用收到后应保存关键状态数据、释放所有可释放的资源，为进程终止做好准备。</string>
     <string name="app_adaptation">本应用的适配</string>
-    <string name="fair_memory_adaptation">本应用已按照金标联盟官方文档完成公平运行内存机制适配：
-
-• 在 Application 启动时动态注册广播接收器，使用 RECEIVER_EXPORTED 标志接收系统广播
-• 收到广播后解析 Intent 中的 common 和 extra 两个 Bundle，提取异常类型（物理内存/Java堆内存）、内存用量、回调 IBinder 等信息
-• TRIM 广播：按 notifyType 差异化释放——物理内存异常(1000)清空整个图表缓存，Java堆异常(2000)降采样保留最近 500 点；均清空扫描结果并触发 System.gc()，在 3 秒内通过 IBinder 回调通知系统处理结果
-• KILL 广播：通知 MainViewModel 保存状态（心率数据已通过 Room 数据库持久化），在 3 秒内通过 IBinder 回调通知系统
-• 通过 MemoryListener 接口（WeakReference 持有）将释放逻辑委托给 MainViewModel，避免内存泄漏
-• 实现 IBinder.DeathRecipient 监听系统服务异常死亡，确保 Binder 连接可靠
-• 使用独立 HandlerThread 处理广播，避免阻塞主线程
-
-蓝牙心率服务（BleService）作为前台服务持续运行，不会因内存预警而被中断。状态栏常驻服务和悬浮窗服务在内存极端紧张时可能被系统回收，应用会在下次启动时自动恢复。</string>
+    <string name="fair_memory_adaptation">本应用已按照金标联盟官方文档完成公平运行内存机制适配：\n\n• 在 Application 启动时动态注册广播接收器，使用 RECEIVER_EXPORTED 标志接收系统广播\n• 收到广播后解析 Intent 中的 common 和 extra 两个 Bundle，提取异常类型（物理内存/Java堆内存）、内存用量、回调 IBinder 等信息\n• TRIM 广播：按 notifyType 差异化释放——物理内存异常(1000)清空整个图表缓存，Java堆异常(2000)降采样保留最近 500 点；均清空扫描结果并触发 System.gc()，在 3 秒内通过 IBinder 回调通知系统处理结果\n• TRIM 广播前台提示：当应用位于前台且达到查杀条件时，主动推送通知提醒用户。Java堆异常提供“关闭应用”和“忽略”；物理内存异常提供“重新打开”\n• KILL 广播：通知 MainViewModel 保存状态（心率数据已通过 Room 数据库持久化），在 3 秒内通过 IBinder 回调通知系统\n• 通过 MemoryListener 接口（WeakReference 持有）将释放逻辑委托给 MainViewModel，避免内存泄漏\n• 实现 IBinder.DeathRecipient 监听系统服务异常死亡，确保 Binder 连接可靠\n• 使用独立 HandlerThread 处理广播，避免阻塞主线程\n\n蓝牙心率服务（BleService）作为前台服务持续运行，不会因内存预警而被中断。状态栏常驻服务和悬浮窗服务在内存极端紧张时可能被系统回收，应用会在下次启动时自动恢复。</string>
     <string name="reference_docs">参考文档</string>
     <string name="oppo_desc">公平运行内存适配指南</string>
     <string name="vivo_desc">公平运行内存机制适配</string>
     <string name="xiaomi_desc">公平运行内存适配：开发者文档</string>
-    <string name="device_memory">设备内存</string>
-    <string name="app_used_memory">App 已用 %1$s MB</string>
-    <string name="system_total_memory">系统总 %1$s GB</string>
+
+    <!-- FairMemory notifications -->
+    <string name="fair_memory_heap_channel_title">Java 堆内存异常</string>
+    <string name="fair_memory_heap_channel_desc">应用 Java 堆内存使用异常时的用户提示</string>
+    <string name="fair_memory_pss_channel_title">物理内存异常</string>
+    <string name="fair_memory_pss_channel_desc">应用物理内存使用异常导致被关闭时的用户提示</string>
+    <string name="fair_memory_heap_notification_title">运行内存异常</string>
+    <string name="fair_memory_heap_notification_text">应用运行内存异常，可能影响设备流畅度。建议关闭应用后重新打开，以确保流畅体验。</string>
+    <string name="fair_memory_pss_notification_title">运行内存异常</string>
+    <string name="fair_memory_pss_notification_text">检测到严重的运行内存异常，为保障设备稳定运行，已关闭当前应用，可重新打开该应用继续使用。</string>
+    <string name="fair_memory_close_app">关闭应用</string>
+    <string name="fair_memory_ignore">忽略</string>
+    <string name="fair_memory_reopen_app">重新打开</string>
 
     <!-- BleState messages -->
     <string name="ble_idle">点击右上角按钮扫描设备</string>

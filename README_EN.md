@@ -34,8 +34,6 @@
   <img src="images/1.jpg" width="270"/>
   <img src="images/2.jpg" width="270"/>
   <img src="images/3.jpg" width="270"/>
-  <img src="images/4.jpg" width="270"/>
-  <img src="images/5.jpg" width="270"/>
 </div>
 
 -----
@@ -53,7 +51,7 @@
     - Wait for **Gradle** to automatically sync dependencies
 
 3. **Build and run**
-    - Connect a real device or emulator (API ≥ 27)
+    - Connect a real device or emulator (API ≥ 24)
     - Click the ▶️ Run button in the toolbar
 
 -----

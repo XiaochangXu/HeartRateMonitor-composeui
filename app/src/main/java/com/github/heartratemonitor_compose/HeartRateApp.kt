@@ -2,7 +2,9 @@ package com.github.heartratemonitor_compose
 
 import android.app.Application
 import com.github.heartratemonitor_compose.data.di.AppContainer
+import com.github.heartratemonitor_compose.service.FairMemoryNotifier
 import com.github.heartratemonitor_compose.service.FairMemoryReceiver
+import com.github.heartratemonitor_compose.service.MemoryDiagnostics
 import com.github.heartratemonitor_compose.ui.theme.ThemePreviewCache
 import com.github.heartratemonitor_compose.ui.theme.ThemeState
 import kotlinx.coroutines.CoroutineScope
@@ -38,6 +40,10 @@ class HeartRateApp : Application() {
         super.onCreate()
         ThemeState.init(settingsRepository)
         FairMemoryReceiver.getInstance().initialize(this)
+        // 公平运行内存用户提示：创建通知渠道并注册关闭应用广播接收器
+        FairMemoryNotifier.initialize(this)
+        // Android 17+ 内存诊断：注册系统异常触发器并检查上次是否因 MemoryLimiter 被终止
+        MemoryDiagnostics.initialize(this)
         // 后台预计算主题设置页所有预览色卡，避免首帧卡顿
         ThemePreviewCache.preload(appScope)
     }

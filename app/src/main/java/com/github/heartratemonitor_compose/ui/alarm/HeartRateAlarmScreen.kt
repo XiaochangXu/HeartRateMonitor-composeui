@@ -16,6 +16,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.painter.Painter
@@ -143,7 +144,10 @@ fun HeartRateAlarmScreen(
         }
     }
 
+    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
+
     Scaffold(
+        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         topBar = {
             TopAppBar(
@@ -160,7 +164,8 @@ fun HeartRateAlarmScreen(
                             }
                         }
                     }
-                }
+                },
+                scrollBehavior = scrollBehavior
             )
         }
     ) { padding ->
@@ -253,8 +258,6 @@ fun HeartRateAlarmScreen(
         }
     }
 }
-
-// ────────────────── 姿态展示卡片 ──────────────────
 
 @Composable
 private fun PostureCard(
