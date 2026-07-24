@@ -1,0 +1,1 @@
+将registerReceiver调用全部统一为ContextCompat.registerReceiver，不再有手动的if-else版本兼容判断。

@@ -4,7 +4,6 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.HandlerThread
@@ -12,6 +11,7 @@ import android.os.IBinder
 import android.os.Parcel
 import android.os.RemoteException
 import android.util.Log
+import androidx.core.content.ContextCompat
 import java.lang.ref.WeakReference
 
 /**
@@ -21,7 +21,7 @@ import java.lang.ref.WeakReference
  * - [ACTION_TRIM]：系统内存紧张时通知应用主动释放非关键内存
  * - [ACTION_KILL]：系统即将查杀应用，通知应用保存状态并释放资源
  *
- * 实现要点（遵循官方文档）：
+ * 实现要点：
  * 1. 动态注册广播接收器，使用 [Context.RECEIVER_EXPORTED]（API 33+）
  * 2. 解析 Intent extras 中的 common / extra 两个 Bundle
  * 3. 提取 common 中的 callback IBinder
@@ -169,14 +169,14 @@ class FairMemoryReceiver private constructor() : IBinder.DeathRecipient {
                 addAction(ACTION_KILL)
             }
 
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                context.registerReceiver(
-                    receiver, filter, null, handler,
-                    Context.RECEIVER_EXPORTED
-                )
-            } else {
-                context.registerReceiver(receiver, filter, null, handler)
-            }
+            ContextCompat.registerReceiver(
+                context,
+                receiver,
+                filter,
+                null,
+                handler,
+                ContextCompat.RECEIVER_EXPORTED
+            )
 
             initialized = true
             Log.i(TAG, "公平运行内存机制已初始化，监听 TRIM/KILL 广播")

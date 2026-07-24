@@ -24,6 +24,7 @@ import android.os.Looper
 import android.os.PowerManager
 import android.provider.Settings
 import android.util.TypedValue
+import androidx.core.content.ContextCompat
 import android.view.ContextThemeWrapper
 import android.view.Gravity
 import android.view.WindowManager
@@ -196,8 +197,7 @@ class StatusBarResidentService : Service() {
             addAction(Intent.ACTION_SCREEN_ON)
             addAction(Intent.ACTION_USER_PRESENT)
         }
-        // API 26+ 支持 3 参重载；RECEIVER_NOT_EXPORTED 保证不暴露接收器
-        registerReceiver(screenReceiver, filter, Context.RECEIVER_NOT_EXPORTED)
+        ContextCompat.registerReceiver(this, screenReceiver, filter, ContextCompat.RECEIVER_NOT_EXPORTED)
 
         sharedPreferences.registerOnSharedPreferenceChangeListener(settingsChangeListener)
 

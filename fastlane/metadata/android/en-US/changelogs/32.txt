@@ -1,0 +1,1 @@
+Unify registerReceiver calls to ContextCompat.registerReceiver, no longer manual if-else version compatibility determination.
