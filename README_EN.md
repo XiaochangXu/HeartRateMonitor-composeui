@@ -113,18 +113,6 @@
 
 -----
 
-## ⭐ Star History
-
-<a href="https://www.star-history.com/?repos=XiaochangXu/HeartRateMonitor-composeui&type=date">
- <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=XiaochangXu/HeartRateMonitor-composeui&type=date&theme=dark" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=XiaochangXu/HeartRateMonitor-composeui&type=date" />
-   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=XiaochangXu/HeartRateMonitor-composeui&type=date" />
- </picture>
-</a>
-
------
-
 ## 📄 License
 
 [MIT](./LICENSE) © 2026 XiaochangXu
