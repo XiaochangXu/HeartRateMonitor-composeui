@@ -106,8 +106,6 @@ class FloatingWindowService : Service() {
     private var isTouchThroughEnabled = false
     private val touchThroughHandler = Handler(Looper.getMainLooper())
     private var touchThroughRunnable: Runnable? = null
-    /** 触摸穿透开启时覆盖在悬浮窗中心的不可见触摸接收窗口，用于长按关闭穿透 */
-    private var touchThroughCatcherView: View? = null
 
     private val serviceConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
@@ -204,13 +202,12 @@ class FloatingWindowService : Service() {
 
     fun hideWindow() {
         if (!isWindowShown) return
-        // 重置触摸穿透状态并清理通知与 catcher（避免隐藏后残留）
+        // 重置触摸穿透状态并清理通知（避免隐藏后残留）
         if (isTouchThroughEnabled) {
             isTouchThroughEnabled = false
             layoutParams.flags = layoutParams.flags and WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE.inv()
             cancelTouchThroughNotification()
         }
-        removeTouchThroughCatcher()
         // 取消可能挂起的长按回调
         touchThroughRunnable?.let { touchThroughHandler.removeCallbacks(it) }
         touchThroughRunnable = null
@@ -291,8 +288,7 @@ class FloatingWindowService : Service() {
 
     /**
      * 开启触摸穿透：为窗口添加 FLAG_NOT_TOUCHABLE，触摸事件直接传递给下方应用。
-     * 同时在悬浮窗中心叠加一个不可见的触摸接收窗口（catcher），用于长按关闭穿透。
-     * 通知栏按钮作为关闭的备选方式。
+     * 关闭穿透完全由通知栏按钮负责。
      */
     private fun enableTouchThrough() {
         if (isTouchThroughEnabled || !isWindowShown) return
@@ -306,19 +302,17 @@ class FloatingWindowService : Service() {
             layoutParams.flags = layoutParams.flags and WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE.inv()
             return
         }
-        addTouchThroughCatcher()
         showTouchThroughNotification()
         Toast.makeText(this, R.string.toast_touch_through_enabled, Toast.LENGTH_LONG).show()
     }
 
     /**
-     * 关闭触摸穿透：移除 catcher 窗口和 FLAG_NOT_TOUCHABLE，恢复拖动。
-     * 可由 catcher 的长按或通知栏按钮触发。
+     * 关闭触摸穿透：移除 FLAG_NOT_TOUCHABLE，恢复拖动。
+     * 仅由通知栏按钮触发。
      */
     private fun disableTouchThrough() {
         val wasEnabled = isTouchThroughEnabled
         isTouchThroughEnabled = false
-        removeTouchThroughCatcher()
         if (wasEnabled && isWindowShown) {
             layoutParams.flags = layoutParams.flags and WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE.inv()
             try {
@@ -331,86 +325,6 @@ class FloatingWindowService : Service() {
         if (wasEnabled) {
             Toast.makeText(this, R.string.toast_touch_through_disabled, Toast.LENGTH_SHORT).show()
         }
-    }
-
-    /**
-     * 在悬浮窗中心叠加一个不可见的触摸接收窗口。
-     * 主窗口设置了 FLAG_NOT_TOUCHABLE 后无法接收触摸，
-     * catcher 负责接收长按手势以关闭触摸穿透。
-     * catcher 仅覆盖中心 48dp×48dp 区域，其余区域触摸直接穿透。
-     */
-    @SuppressLint("ClickableViewAccessibility")
-    private fun addTouchThroughCatcher() {
-        if (touchThroughCatcherView != null) return
-        val catcherSize = dpToPx(48f)
-        val catcher = View(this).apply {
-            setBackgroundColor(Color.TRANSPARENT)
-            setOnTouchListener { _, event ->
-                when (event.action) {
-                    MotionEvent.ACTION_DOWN -> {
-                        initialTouchX = event.rawX
-                        initialTouchY = event.rawY
-                        touchThroughRunnable = Runnable { disableTouchThrough() }
-                        touchThroughHandler.postDelayed(touchThroughRunnable!!, LONG_PRESS_THRESHOLD)
-                        true
-                    }
-                    MotionEvent.ACTION_MOVE -> {
-                        if ((event.rawX - initialTouchX).absoluteValue > TOUCH_SLOP ||
-                            (event.rawY - initialTouchY).absoluteValue > TOUCH_SLOP) {
-                            touchThroughRunnable?.let { touchThroughHandler.removeCallbacks(it) }
-                        }
-                        true
-                    }
-                    MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
-                        touchThroughRunnable?.let { touchThroughHandler.removeCallbacks(it) }
-                        touchThroughRunnable = null
-                        true
-                    }
-                    else -> false
-                }
-            }
-        }
-
-        val type = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-            WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
-        else
-            WindowManager.LayoutParams.TYPE_PHONE
-
-        // 以悬浮窗实际位置和尺寸计算 catcher 居中坐标（touchContainer 未测量完成时兜底为 catcherSize）
-        val windowWidth = touchContainer.width.coerceAtLeast(catcherSize)
-        val windowHeight = touchContainer.height.coerceAtLeast(catcherSize)
-        val catcherX = layoutParams.x + (windowWidth - catcherSize) / 2
-        val catcherY = layoutParams.y + (windowHeight - catcherSize) / 2
-
-        val catcherParams = WindowManager.LayoutParams(
-            catcherSize, catcherSize,
-            type,
-            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
-            PixelFormat.TRANSLUCENT
-        ).apply {
-            gravity = Gravity.TOP or Gravity.START
-            x = catcherX
-            y = catcherY
-        }
-
-        touchThroughCatcherView = catcher
-        try {
-            windowManager.addView(catcher, catcherParams)
-        } catch (e: Exception) {
-            // 添加失败不影响穿透本身，仍可通过通知关闭
-            touchThroughCatcherView = null
-        }
-    }
-
-    private fun removeTouchThroughCatcher() {
-        touchThroughCatcherView?.let { catcher ->
-            try {
-                windowManager.removeView(catcher)
-            } catch (e: Exception) {
-                // 忽略
-            }
-        }
-        touchThroughCatcherView = null
     }
 
     private fun createTouchThroughNotificationChannel() {
@@ -477,7 +391,7 @@ class FloatingWindowService : Service() {
         val finalBorderColor = Color.argb((255 * borderAlpha).roundToInt(), Color.red(borderColor), Color.green(borderColor), Color.blue(borderColor))
         val scaleFactor = sizePercent / 100f
         val iconScaleFactor = iconSizePercent / 100f
-        val baseIconSizeSp = 18f
+        val baseIconSizeSp = 22f
         val baseTextSizeSp = 16f
         val baseSmallTextSizeSp = 12f
         val basePaddingDp = 8f
@@ -490,7 +404,7 @@ class FloatingWindowService : Service() {
             cornerRadius = cornerRadius.dp,
             textSize = (baseTextSizeSp * scaleFactor).sp,
             smallTextSize = (baseSmallTextSizeSp * scaleFactor).sp,
-            iconSize = (baseIconSizeSp * iconScaleFactor).sp,
+            iconSize = (baseIconSizeSp * scaleFactor * iconScaleFactor).sp,
             padding = (basePaddingDp * scaleFactor).dp,
             bpmNumberMarginStart = (if (isHeartIconEnabled) baseMarginDp * scaleFactor else 0f).dp,
             isBpmTextEnabled = isBpmTextEnabled,

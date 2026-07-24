@@ -23,6 +23,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogProperties
 import com.github.heartratemonitor_compose.R
 import com.github.heartratemonitor_compose.data.PrefsKeys
@@ -173,8 +174,8 @@ private fun ServerCard(
                 Spacer(Modifier.width(16.dp))
                 Text(
                     text = context.getString(R.string.enable_server_format, if (scheme == "http") "HTTP" else "WebSocket"),
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = FontWeight.Normal,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Medium,
                     color = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier.weight(1f)
                 )
@@ -262,8 +263,8 @@ private fun ServerStatusCard(
                     Spacer(Modifier.width(16.dp))
                     Text(
                         text = if (httpEnabled) stringResource(R.string.http_enabled_status) else stringResource(R.string.http_disabled_status),
-                        style = MaterialTheme.typography.bodyLarge,
-                        fontWeight = FontWeight.Normal
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Medium
                     )
                 }
                 if (httpEnabled) {
@@ -305,8 +306,8 @@ private fun ServerStatusCard(
                     Spacer(Modifier.width(16.dp))
                     Text(
                         text = if (wsEnabled) stringResource(R.string.ws_enabled_status) else stringResource(R.string.ws_disabled_status),
-                        style = MaterialTheme.typography.bodyLarge,
-                        fontWeight = FontWeight.Normal
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Medium
                     )
                 }
                 if (wsEnabled) {

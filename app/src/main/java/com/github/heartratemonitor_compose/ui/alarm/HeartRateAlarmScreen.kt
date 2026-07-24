@@ -277,12 +277,14 @@ private fun PostureCard(
                 .padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(
-                text = posture.emoji,
-                fontSize = 64.sp,
+            Icon(
+                painter = painterResource(posture.iconRes),
+                contentDescription = stringResource(posture.labelRes),
                 modifier = Modifier
+                    .size(64.dp)
                     .scale(scale)
-                    .offset(y = bounceOffset.dp)
+                    .offset(y = bounceOffset.dp),
+                tint = MaterialTheme.colorScheme.onSurface
             )
             Spacer(Modifier.height(8.dp))
             Text(
@@ -295,22 +297,25 @@ private fun PostureCard(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
-                PostureIndicator(stringResource(R.string.sitting), PostureType.SITTING.emoji, posture == PostureType.SITTING)
-                PostureIndicator(stringResource(R.string.standing), PostureType.STANDING.emoji, posture == PostureType.STANDING)
-                PostureIndicator(stringResource(R.string.exercise), PostureType.EXERCISE.emoji, posture == PostureType.EXERCISE)
+                PostureIndicator(stringResource(R.string.sitting), PostureType.SITTING.iconRes, posture == PostureType.SITTING)
+                PostureIndicator(stringResource(R.string.standing), PostureType.STANDING.iconRes, posture == PostureType.STANDING)
+                PostureIndicator(stringResource(R.string.exercise), PostureType.EXERCISE.iconRes, posture == PostureType.EXERCISE)
             }
         }
     }
 }
 
 @Composable
-private fun PostureIndicator(label: String, emoji: String, isActive: Boolean) {
+private fun PostureIndicator(label: String, iconRes: Int, isActive: Boolean) {
     val alphaValue = if (isActive) 1f else 0.3f
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(
-            text = emoji,
-            fontSize = 24.sp,
-            modifier = Modifier.alpha(alphaValue)
+        Icon(
+            painter = painterResource(iconRes),
+            contentDescription = label,
+            modifier = Modifier
+                .size(24.dp)
+                .alpha(alphaValue),
+            tint = MaterialTheme.colorScheme.onSurfaceVariant
         )
         Text(
             text = label,

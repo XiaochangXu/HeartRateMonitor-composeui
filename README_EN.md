@@ -1,13 +1,28 @@
-# ❤️ Heart Rate Monitor
+<div align="right">
+  <strong>English</strong> | <a href="./README.md">简体中文</a>
+</div>
 
-![Platform](https://img.shields.io/badge/platform-Android-green)
-![Language](https://img.shields.io/badge/language-Kotlin-blue)
-![UI](https://img.shields.io/badge/UI-Jetpack%20Compose-orange)
-![Material](https://img.shields.io/badge/Material-3%20Expressive-purple)
+<div align="center">
+  <img src="app/src/main/res/drawable/about.png" alt="HeartRateMonitor" width="128" />
 
-[中文文档](README.md) | **English**
+  <h1>❤️ Heart Rate Monitor</h1>
 
-> An Android heart rate monitoring app based on BLE (Bluetooth Low Energy) technology, following Material 3 design guidelines.
+  <p><strong>Make Android heart-rate monitoring elegant.</strong></p>
+
+  <p>An Android heart rate monitoring app based on BLE (Bluetooth Low Energy) technology, following Material 3 design guidelines.</p>
+
+  <p>
+    <a href="./LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License: MIT" /></a>
+    <img src="https://img.shields.io/badge/platform-Android-green?logo=android&logoColor=white" alt="Platform" />
+    <img src="https://img.shields.io/badge/Kotlin-2.3.10-7F52FF?logo=kotlin&logoColor=white" alt="Kotlin" />
+    <img src="https://img.shields.io/badge/UI-Jetpack%20Compose-orange?logo=jetpackcompose&logoColor=white" alt="UI" />
+    <img src="https://img.shields.io/badge/Material-3%20Expressive-purple" alt="Material" />
+    <img src="https://img.shields.io/badge/minSdk-24-green" alt="minSdk" />
+    <img src="https://img.shields.io/badge/targetSdk-37-green" alt="targetSdk" />
+    <a href="https://github.com/XiaochangXu/HeartRateMonitor-composeui/releases/latest"><img src="https://img.shields.io/github/v/release/XiaochangXu/HeartRateMonitor-composeui?label=release&color=orange" alt="Latest release" /></a>
+    <a href="https://github.com/XiaochangXu/HeartRateMonitor-composeui/commits/main"><img src="https://img.shields.io/github/last-commit/XiaochangXu/HeartRateMonitor-composeui" alt="Last commit" /></a>
+  </p>
+</div>
 
 -----
 
@@ -30,11 +45,13 @@
 
 ## 🖼️ Screenshots
 
-<div style="display: flex; justify-content: center; gap: 12px; flex-wrap: wrap;">
-  <img src="images/1.jpg" width="270"/>
-  <img src="images/2.jpg" width="270"/>
-  <img src="images/3.jpg" width="270"/>
-</div>
+<table>
+  <tr>
+    <td align="center"><img src="images/1.jpg" width="270"/><br/><sub>Real-time heart rate monitoring</sub></td>
+    <td align="center"><img src="images/2.jpg" width="270"/><br/><sub>History & chart analysis</sub></td>
+    <td align="center"><img src="images/3.jpg" width="270"/><br/><sub>Personalization & floating window</sub></td>
+  </tr>
+</table>
 
 -----
 
@@ -70,5 +87,44 @@
 
 ## 🙏 Acknowledgements
 
-- Chart library: [Vico](https://github.com/patrykandpatrick/vico)
-- Bluetooth library: [Kable](https://github.com/JuulLabs/kable)
+**Core Dependencies**
+
+- UI Framework: [Jetpack Compose](https://developer.android.com/jetpack/compose) · [Material 3](https://m3.material.io/)
+- Bluetooth: [Kable](https://github.com/JuulLabs/kable)
+- Charts: [Vico](https://github.com/patrykandpatrick/vico)
+- Database: [Room](https://developer.android.com/training/data-storage/room)
+- Dynamic Color: [MaterialKolor](https://github.com/jordond/MaterialKolor)
+- HTTP/WebSocket Server: [NanoHTTPD](https://github.com/NanoHttpd/nanohttpd)
+- Permissions: [PermissionX](https://github.com/guolindev/PermissionX)
+
+-----
+
+## 🗺️ Roadmap
+
+### ✅ Core Features
+
+- [x] BLE heart-rate device scanning & connection
+- [x] Heart-rate history & chart analysis
+- [x] Floating window / status-bar persistent heart rate
+- [x] HTTP / WebSocket / Webhook data interfaces
+- [x] Heart-rate alert + posture detection
+- [x] Material 3 dynamic color
+- [x] Self-drawn HSV color picker
+
+-----
+
+## ⭐ Star History
+
+<a href="https://www.star-history.com/?repos=XiaochangXu/HeartRateMonitor-composeui&type=date">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=XiaochangXu/HeartRateMonitor-composeui&type=date&theme=dark" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=XiaochangXu/HeartRateMonitor-composeui&type=date" />
+   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=XiaochangXu/HeartRateMonitor-composeui&type=date" />
+ </picture>
+</a>
+
+-----
+
+## 📄 License
+
+[MIT](./LICENSE) © 2026 XiaochangXu

@@ -1,0 +1,2 @@
+1.修复 Android 8.0（API 26）以下设备启动时因 NotificationChannel 类不存在导致的 NoClassDefFoundError 闪退问题。
+2.为 BleService 、 HeartRateAlarmService 、 StatusBarResidentService 中的通知渠道创建添加 Build.VERSION.SDK_INT >= Build.VERSION_CODES.O 版本判断。

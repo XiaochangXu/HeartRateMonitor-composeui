@@ -126,30 +126,32 @@ class HeartRateAlarmService : Service() {
      * 一次性创建所有通知通道（系统幂等,但避免每次报警重复构造 NotificationChannel 对象）
      */
     private fun createNotificationChannels() {
-        val notificationManager = getSystemService(NotificationManager::class.java)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val notificationManager = getSystemService(NotificationManager::class.java)
 
-        val alarmChannel = NotificationChannel(
-            ALARM_CHANNEL_ID,
-            getString(R.string.alarm_channel_name),
-            NotificationManager.IMPORTANCE_HIGH
-        ).apply {
-            description = getString(R.string.alarm_channel_desc)
-            enableVibration(true)
-            vibrationPattern = VIBRATION_PATTERN
-            setShowBadge(true)
+            val alarmChannel = NotificationChannel(
+                ALARM_CHANNEL_ID,
+                getString(R.string.alarm_channel_name),
+                NotificationManager.IMPORTANCE_HIGH
+            ).apply {
+                description = getString(R.string.alarm_channel_desc)
+                enableVibration(true)
+                vibrationPattern = VIBRATION_PATTERN
+                setShowBadge(true)
+            }
+
+            val residentChannel = NotificationChannel(
+                RESIDENT_CHANNEL_ID,
+                getString(R.string.alarm_resident_channel_name),
+                NotificationManager.IMPORTANCE_LOW
+            ).apply {
+                description = getString(R.string.alarm_resident_channel_desc)
+                setShowBadge(false)
+            }
+
+            notificationManager.createNotificationChannel(alarmChannel)
+            notificationManager.createNotificationChannel(residentChannel)
         }
-
-        val residentChannel = NotificationChannel(
-            RESIDENT_CHANNEL_ID,
-            getString(R.string.alarm_resident_channel_name),
-            NotificationManager.IMPORTANCE_LOW
-        ).apply {
-            description = getString(R.string.alarm_resident_channel_desc)
-            setShowBadge(false)
-        }
-
-        notificationManager.createNotificationChannel(alarmChannel)
-        notificationManager.createNotificationChannel(residentChannel)
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {

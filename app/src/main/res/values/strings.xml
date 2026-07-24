@@ -93,7 +93,7 @@
 
     <!-- SettingsScreen - Floating Window -->
     <string name="floating_window_style">悬浮窗样式</string>
-    <string name="floating_window_tip">长按悬浮窗开启触摸穿透，开启后触摸直接传递给下方应用，不影响手机其他操作。再次长按悬浮窗或点击通知栏按钮关闭</string>
+    <string name="floating_window_tip">长按悬浮窗开启触摸穿透，开启后整个悬浮窗区域均不再拦截触摸，事件直接传递给下方应用。点击通知栏"关闭触摸穿透"按钮恢复拖动</string>
     <string name="display_bpm_text">显示 BPM 文字</string>
     <string name="subtitle_display_bpm_text">在悬浮窗中显示心率数值</string>
     <string name="display_heart_icon">显示心形图标</string>
@@ -135,8 +135,8 @@
     <string name="privacy_bluetooth_desc">访问蓝牙以扫描、连接心率监测设备。读取设备名称、MAC 地址（仅用于设备识别与自动重连），不收集设备厂商等其他信息。</string>
     <string name="privacy_heart_rate_title">心率数据</string>
     <string name="privacy_heart_rate_desc">实时读取心率值与 RR 间期，记录并保存到本地数据库，用于历史查看与统计分析。数据仅保存在本设备，不会上传。</string>
-    <string name="privacy_location_title">位置信息（GPS）</string>
-    <string name="privacy_location_desc">为记录运动轨迹与心率关联，可选择开启 GPS 记录位置数据。此功能默认关闭，需您手动授权并开启，数据仅保存在本地。</string>
+    <string name="privacy_location_title">位置信息</string>
+    <string name="privacy_location_desc">为统计运动速度，可选择开启 GPS 记录位置数据。此功能默认关闭，需您手动授权并开启，数据仅保存在本地。</string>
     <string name="privacy_storage_title">本地存储</string>
     <string name="privacy_storage_desc">将心率历史记录、设置项等保存到本地数据库与文件，确保应用关闭后数据不丢失。</string>
     <string name="privacy_notification_title">通知权限</string>
@@ -358,12 +358,12 @@
     <string name="status_bar_notification_text">状态栏心率显示运行中</string>
 
     <!-- Floating Window Service notifications -->
-    <string name="toast_touch_through_enabled">触摸穿透已开启，长按悬浮窗或点击通知关闭</string>
+    <string name="toast_touch_through_enabled">触摸穿透已开启，点击通知栏按钮关闭</string>
     <string name="toast_touch_through_disabled">触摸穿透已关闭，可拖动悬浮窗</string>
     <string name="touch_through_channel_name">悬浮窗触摸穿透</string>
     <string name="touch_through_channel_desc">悬浮窗触摸穿透状态提醒</string>
     <string name="touch_through_notification_title">触摸穿透已开启</string>
-    <string name="touch_through_notification_text">长按悬浮窗或点击下方按钮关闭</string>
+    <string name="touch_through_notification_text">点击下方按钮关闭触摸穿透</string>
     <string name="touch_through_disable_action">关闭触摸穿透</string>
 
     <!-- ThemeSettings -->

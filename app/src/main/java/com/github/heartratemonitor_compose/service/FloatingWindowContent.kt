@@ -9,9 +9,11 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -20,11 +22,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.github.heartratemonitor_compose.R
 import kotlin.math.roundToInt
 
 /**
@@ -76,6 +81,7 @@ fun FloatingWindowContent(
     appearance: FloatingWindowAppearance
 ) {
     val heartScale = remember { Animatable(1f) }
+    val iconSizeDp = with(LocalDensity.current) { appearance.iconSize.toDp() }
     LaunchedEffect(bpm, isAnimationEnabled, isConnected) {
         if (isAnimationEnabled && bpm > 30 && isConnected) {
             val durationMs = (60000f / bpm).roundToInt()
@@ -100,11 +106,12 @@ fun FloatingWindowContent(
             verticalAlignment = Alignment.CenterVertically
         ) {
             if (appearance.isHeartIconEnabled) {
-                Text(
-                    text = "❤️",
-                    fontSize = appearance.iconSize,
-                    color = appearance.textColor,
+                Icon(
+                    painter = painterResource(R.drawable.ic_heart),
+                    contentDescription = null,
+                    tint = appearance.textColor,
                     modifier = Modifier
+                        .size(iconSizeDp)
                         .scale(heartScale.value)
                         .padding(start = 1.dp)
                 )

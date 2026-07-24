@@ -250,15 +250,17 @@ class StatusBarResidentService : Service() {
      */
     private fun createResidentNotification(): Notification {
         val notificationManager = getSystemService(NotificationManager::class.java)
-        val channel = NotificationChannel(
-            RESIDENT_CHANNEL_ID,
-            getString(R.string.status_bar_channel_name),
-            NotificationManager.IMPORTANCE_LOW
-        ).apply {
-            description = getString(R.string.status_bar_channel_desc)
-            setShowBadge(false)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(
+                RESIDENT_CHANNEL_ID,
+                getString(R.string.status_bar_channel_name),
+                NotificationManager.IMPORTANCE_LOW
+            ).apply {
+                description = getString(R.string.status_bar_channel_desc)
+                setShowBadge(false)
+            }
+            notificationManager.createNotificationChannel(channel)
         }
-        notificationManager.createNotificationChannel(channel)
         return Notification.Builder(this, RESIDENT_CHANNEL_ID)
             .setContentTitle(getString(R.string.status_bar_notification_title))
             .setContentText(getString(R.string.status_bar_notification_text))

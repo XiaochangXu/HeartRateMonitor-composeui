@@ -140,10 +140,11 @@ class BleService : Service(), FairMemoryReceiver.MemoryListener {
         val channelId = "BleServiceChannel"
         val channelName = getString(R.string.notification_channel_name)
 
-        // 修复：移除 Android 8.0+ 的冗余检查 (minSdk >= 27)
-        val chan = NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_LOW)
-        val manager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
-        manager.createNotificationChannel(chan)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val chan = NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_LOW)
+            val manager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+            manager.createNotificationChannel(chan)
+        }
 
         val notification = NotificationCompat.Builder(this, channelId)
             .setContentTitle(getString(R.string.app_name))

@@ -93,7 +93,7 @@
 
     <!-- SettingsScreen - Floating Window -->
     <string name="floating_window_style">Floating Window Style</string>
-    <string name="floating_window_tip">Long-press the floating window to enable touch pass-through. When enabled, touches are passed to the app below. Long-press again or tap the notification button to disable</string>
+    <string name="floating_window_tip">Long-press the floating window to enable touch pass-through. When enabled, the entire floating window stops intercepting touches and passes them to the app below. Tap the "Disable Touch Pass-through" notification button to resume dragging</string>
     <string name="display_bpm_text">Display BPM Text</string>
     <string name="subtitle_display_bpm_text">Show heart rate value in floating window</string>
     <string name="display_heart_icon">Display Heart Icon</string>
@@ -135,7 +135,7 @@
     <string name="privacy_bluetooth_desc">Access Bluetooth to scan and connect heart rate monitor devices. Reads device name and MAC address (for device identification and auto-reconnect only). No other device info is collected.</string>
     <string name="privacy_heart_rate_title">Heart Rate Data</string>
     <string name="privacy_heart_rate_desc">Reads real-time heart rate and RR intervals, saves to local database for history and statistics. Data stays on this device and is never uploaded.</string>
-    <string name="privacy_location_title">Location (GPS)</string>
+    <string name="privacy_location_title">Location</string>
     <string name="privacy_location_desc">Optional feature to record exercise trajectory correlated with heart rate. Disabled by default; requires manual permission and enablement. Data stored locally only.</string>
     <string name="privacy_storage_title">Local Storage</string>
     <string name="privacy_storage_desc">Saves heart rate history and settings to local database and files, ensuring data persists after app closure.</string>
@@ -358,12 +358,12 @@
     <string name="status_bar_notification_text">Status bar heart rate display running</string>
 
     <!-- Floating Window Service notifications -->
-    <string name="toast_touch_through_enabled">Touch pass-through enabled. Long-press floating window or tap notification to close</string>
+    <string name="toast_touch_through_enabled">Touch pass-through enabled. Tap the notification button to disable</string>
     <string name="toast_touch_through_disabled">Touch pass-through disabled. You can drag the floating window</string>
     <string name="touch_through_channel_name">Floating Window Touch Pass-through</string>
     <string name="touch_through_channel_desc">Floating window touch pass-through status reminder</string>
     <string name="touch_through_notification_title">Touch Pass-through Enabled</string>
-    <string name="touch_through_notification_text">Long-press floating window or tap button below to close</string>
+    <string name="touch_through_notification_text">Tap the button below to disable touch pass-through</string>
     <string name="touch_through_disable_action">Disable Touch Pass-through</string>
 
     <!-- ThemeSettings -->

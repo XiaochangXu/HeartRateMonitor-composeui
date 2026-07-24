@@ -58,27 +58,27 @@ object FairMemoryNotifier {
     }
 
     private fun createNotificationChannels(context: Context) {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
-        val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            val heapChannel = NotificationChannel(
+                HEAP_CHANNEL_ID,
+                context.getString(R.string.fair_memory_heap_channel_title),
+                NotificationManager.IMPORTANCE_HIGH
+            ).apply {
+                description = context.getString(R.string.fair_memory_heap_channel_desc)
+            }
 
-        val heapChannel = NotificationChannel(
-            HEAP_CHANNEL_ID,
-            context.getString(R.string.fair_memory_heap_channel_title),
-            NotificationManager.IMPORTANCE_HIGH
-        ).apply {
-            description = context.getString(R.string.fair_memory_heap_channel_desc)
+            val pssChannel = NotificationChannel(
+                PSS_CHANNEL_ID,
+                context.getString(R.string.fair_memory_pss_channel_title),
+                NotificationManager.IMPORTANCE_HIGH
+            ).apply {
+                description = context.getString(R.string.fair_memory_pss_channel_desc)
+            }
+
+            manager.createNotificationChannels(listOf(heapChannel, pssChannel))
         }
-
-        val pssChannel = NotificationChannel(
-            PSS_CHANNEL_ID,
-            context.getString(R.string.fair_memory_pss_channel_title),
-            NotificationManager.IMPORTANCE_HIGH
-        ).apply {
-            description = context.getString(R.string.fair_memory_pss_channel_desc)
-        }
-
-        manager.createNotificationChannels(listOf(heapChannel, pssChannel))
     }
 
     private fun registerActionReceiver(context: Context) {

@@ -1,13 +1,28 @@
-# ❤️ 心率监控器 - HeartRateMonitor
+<div align="right">
+  <a href="./README_EN.md">English</a> | <strong>简体中文</strong>
+</div>
 
-![Platform](https://img.shields.io/badge/platform-Android-green)
-![Language](https://img.shields.io/badge/language-Kotlin-blue)
-![UI](https://img.shields.io/badge/UI-Jetpack%20Compose-orange)
-![Material](https://img.shields.io/badge/Material-3%20Expressive-purple)
+<div align="center">
+  <img src="app/src/main/res/drawable/about.png" alt="HeartRateMonitor" width="128" />
 
-**中文** | [English](README_EN.md)
+  <h1>❤️ 心率监控器 - HeartRateMonitor</h1>
 
-> 基于 BLE（蓝牙低功耗）技术的 Android 心率监测应用，采用 Material 3 设计规范。
+  <p><strong>让 Android 心率监测更优雅。</strong></p>
+
+  <p>基于 BLE（蓝牙低功耗）技术的 Android 心率监测应用，采用 Material 3 设计规范。</p>
+
+  <p>
+    <a href="./LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License: MIT" /></a>
+    <img src="https://img.shields.io/badge/platform-Android-green?logo=android&logoColor=white" alt="Platform" />
+    <img src="https://img.shields.io/badge/Kotlin-2.3.10-7F52FF?logo=kotlin&logoColor=white" alt="Kotlin" />
+    <img src="https://img.shields.io/badge/UI-Jetpack%20Compose-orange?logo=jetpackcompose&logoColor=white" alt="UI" />
+    <img src="https://img.shields.io/badge/Material-3%20Expressive-purple" alt="Material" />
+    <img src="https://img.shields.io/badge/minSdk-24-green" alt="minSdk" />
+    <img src="https://img.shields.io/badge/targetSdk-37-green" alt="targetSdk" />
+    <a href="https://github.com/XiaochangXu/HeartRateMonitor-composeui/releases/latest"><img src="https://img.shields.io/github/v/release/XiaochangXu/HeartRateMonitor-composeui?label=release&color=orange" alt="Latest release" /></a>
+    <a href="https://github.com/XiaochangXu/HeartRateMonitor-composeui/commits/main"><img src="https://img.shields.io/github/last-commit/XiaochangXu/HeartRateMonitor-composeui" alt="Last commit" /></a>
+  </p>
+</div>
 
 -----
 
@@ -30,11 +45,13 @@
 
 ## 🖼️ 截图展示
 
-<div style="display: flex; justify-content: center; gap: 12px; flex-wrap: wrap;">
-  <img src="images/1.jpg" width="270"/>
-  <img src="images/2.jpg" width="270"/>
-  <img src="images/3.jpg" width="270"/>
-</div>
+<table>
+  <tr>
+    <td align="center"><img src="images/1.jpg" width="270"/><br/><sub>实时心率监测主页</sub></td>
+    <td align="center"><img src="images/2.jpg" width="270"/><br/><sub>心率历史与图表分析</sub></td>
+    <td align="center"><img src="images/3.jpg" width="270"/><br/><sub>个性化设置与悬浮窗</sub></td>
+  </tr>
+</table>
 
 -----
 
@@ -70,5 +87,44 @@
 
 ## 🙏 致谢
 
-- 图表库：[Vico](https://github.com/patrykandpatrick/vico)
-- 蓝牙库：[Kable](https://github.com/JuulLabs/kable)
+**核心依赖**
+
+- UI 框架：[Jetpack Compose](https://developer.android.com/jetpack/compose) · [Material 3](https://m3.material.io/)
+- 蓝牙：[Kable](https://github.com/JuulLabs/kable)
+- 图表：[Vico](https://github.com/patrykandpatrick/vico)
+- 数据库：[Room](https://developer.android.com/training/data-storage/room)
+- 动态取色：[MaterialKolor](https://github.com/jordond/MaterialKolor)
+- HTTP/WebSocket 服务：[NanoHTTPD](https://github.com/NanoHttpd/nanohttpd)
+- 权限：[PermissionX](https://github.com/guolindev/PermissionX)
+
+-----
+
+## 🗺️ Roadmap
+
+### ✅ 核心功能
+
+- [x] BLE 心率设备扫描与连接
+- [x] 心率历史记录与图表分析
+- [x] 悬浮窗 / 状态栏常驻心率
+- [x] HTTP / WebSocket / Webhook 数据接口
+- [x] 心率预警 + 姿态检测
+- [x] Material 3 动态取色
+- [x] 自绘 HSV 颜色选择器
+
+-----
+
+## ⭐ Star History
+
+<a href="https://www.star-history.com/?repos=XiaochangXu/HeartRateMonitor-composeui&type=date">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=XiaochangXu/HeartRateMonitor-composeui&type=date&theme=dark" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=XiaochangXu/HeartRateMonitor-composeui&type=date" />
+   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=XiaochangXu/HeartRateMonitor-composeui&type=date" />
+ </picture>
+</a>
+
+-----
+
+## 📄 License
+
+[MIT](./LICENSE) © 2026 XiaochangXu
