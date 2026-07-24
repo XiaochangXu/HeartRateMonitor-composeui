@@ -19,6 +19,7 @@
     <string name="no_available_devices">No devices found. Tap search in the top right corner</string>
     <string name="enter_fullscreen">Enter Fullscreen Mode</string>
     <string name="disconnect">Disconnect</string>
+    <string name="please_disconnect_first">Please disconnect the device first</string>
     <string name="speed">Speed</string>
     <string name="cd_favorite">Favorite</string>
     <string name="bpm_unit">BPM</string>
@@ -35,7 +36,7 @@
     <string name="performance_warning">Performance Warning</string>
     <string name="history_warning_message">Enabling history recording will continuously write data to storage, which may increase battery consumption. Are you sure you want to enable it?</string>
     <string name="heartbeat_animation">Heartbeat Animation</string>
-    <string name="subtitle_heartbeat_animation">Show real-time heartbeat animation on home screen</string>
+    <string name="subtitle_heartbeat_animation">Show real-time heartbeat animation</string>
     <string name="display_speed_gps">Display Speed (GPS)</string>
     <string name="subtitle_display_speed_gps">Get current speed via GPS</string>
     <string name="enable_speed_title">Enable Speed Display</string>
@@ -92,7 +93,7 @@
 
     <!-- SettingsScreen - Floating Window -->
     <string name="floating_window_style">Floating Window Style</string>
-    <string name="floating_window_tip">Long-press the floating window to enable touch pass-through. When enabled, touches are passed to the app below. Long-press again or tap the notification button to disable.</string>
+    <string name="floating_window_tip">Long-press the floating window to enable touch pass-through. When enabled, touches are passed to the app below. Long-press again or tap the notification button to disable</string>
     <string name="display_bpm_text">Display BPM Text</string>
     <string name="subtitle_display_bpm_text">Show heart rate value in floating window</string>
     <string name="display_heart_icon">Display Heart Icon</string>
@@ -111,11 +112,17 @@
 
     <!-- SettingsScreen - About -->
     <string name="about">About</string>
+    <string name="about_details">Details</string>
+    <string name="subtitle_about_details">View version, licenses and project repository</string>
+    <string name="about_details_title">Details</string>
+    <string name="app_intro">Real-time heart rate monitoring with history recording</string>
     <string name="version">Version</string>
+    <string name="version_format">Version %1$s</string>
+    <string name="version_copied">Version number copied</string>
     <string name="unknown_version">Unknown</string>
     <string name="checking_update">Checking...</string>
     <string name="check_update">Check for Updates</string>
-    <string name="subtitle_check_update">Get latest version info from GitHub</string>
+    <string name="subtitle_check_update">Get latest version info from Gitee</string>
     <string name="open_source_license">Open Source License</string>
     <string name="subtitle_open_source_license">MIT License</string>
     <string name="license_title">Open Source License</string>
@@ -307,6 +314,10 @@
     <string name="toast_auto_reconnecting">Disconnected, trying to auto-reconnect...</string>
     <string name="toast_reconnect_failed">Reconnection failed</string>
     <string name="unknown_device">Unknown Device</string>
+    <string name="toast_permissions_denied">Some permissions were denied. Features may be limited!</string>
+    <string name="toast_permissions_denied_dialog">You need to grant these permissions manually in settings.</string>
+    <string name="permission_request_reason">App requires these permissions to find devices and calculate speed.</string>
+    <string name="permission_forward_title">Grant Permissions</string>
 
     <!-- BleService notification -->
     <string name="notification_channel_name">BLE Connection Status</string>
@@ -327,6 +338,33 @@
     <string name="update_api_error">Gitee API returned error code: %1$d</string>
     <string name="update_network_error">Network error: %1$s</string>
     <string name="update_no_valid_release">No valid official release found</string>
+
+    <!-- Heart Rate Alarm Service notifications -->
+    <string name="alarm_notification_body">Heart rate %1$d BPM %2$s %3$d, please pay attention</string>
+    <string name="alarm_channel_name">Heart Rate Alert</string>
+    <string name="alarm_channel_desc">Alert notification when heart rate exceeds set range</string>
+    <string name="alarm_resident_channel_name">Heart Rate Alert Resident</string>
+    <string name="alarm_resident_channel_desc">Keeps heart rate alert service alive</string>
+    <string name="alarm_exceeded_high">Exceeds upper limit</string>
+    <string name="alarm_below_low">Below lower limit</string>
+    <string name="alarm_notification_title">Heart Rate Alert</string>
+    <string name="alarm_resident_notification_title">Heart Rate Alert</string>
+    <string name="alarm_resident_notification_text">Heart rate alert service running</string>
+
+    <!-- Status Bar Resident Service notifications -->
+    <string name="status_bar_channel_name">Status Bar Heart Rate</string>
+    <string name="status_bar_channel_desc">Keeps status bar heart rate display service alive</string>
+    <string name="status_bar_notification_title">Heart Rate in Status Bar</string>
+    <string name="status_bar_notification_text">Status bar heart rate display running</string>
+
+    <!-- Floating Window Service notifications -->
+    <string name="toast_touch_through_enabled">Touch pass-through enabled. Long-press floating window or tap notification to close</string>
+    <string name="toast_touch_through_disabled">Touch pass-through disabled. You can drag the floating window</string>
+    <string name="touch_through_channel_name">Floating Window Touch Pass-through</string>
+    <string name="touch_through_channel_desc">Floating window touch pass-through status reminder</string>
+    <string name="touch_through_notification_title">Touch Pass-through Enabled</string>
+    <string name="touch_through_notification_text">Long-press floating window or tap button below to close</string>
+    <string name="touch_through_disable_action">Disable Touch Pass-through</string>
 
     <!-- ThemeSettings -->
     <string name="theme_settings">Theme</string>
@@ -357,4 +395,6 @@
     <string name="theme_variant_content">Content</string>
     <string name="theme_variant_rainbow">Rainbow</string>
     <string name="theme_variant_fruit_salad">Fruit Salad</string>
+
+    <string name="fairmemory">Xiaomi</string>
 </resources>

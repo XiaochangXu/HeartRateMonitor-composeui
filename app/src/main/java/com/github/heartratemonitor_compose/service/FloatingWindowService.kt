@@ -308,7 +308,7 @@ class FloatingWindowService : Service() {
         }
         addTouchThroughCatcher()
         showTouchThroughNotification()
-        Toast.makeText(this, "触摸穿透已开启，长按悬浮窗或点击通知关闭", Toast.LENGTH_LONG).show()
+        Toast.makeText(this, R.string.toast_touch_through_enabled, Toast.LENGTH_LONG).show()
     }
 
     /**
@@ -329,7 +329,7 @@ class FloatingWindowService : Service() {
         }
         cancelTouchThroughNotification()
         if (wasEnabled) {
-            Toast.makeText(this, "触摸穿透已关闭，可拖动悬浮窗", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, R.string.toast_touch_through_disabled, Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -417,10 +417,10 @@ class FloatingWindowService : Service() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
                 TOUCH_THROUGH_CHANNEL_ID,
-                "悬浮窗触摸穿透",
+                getString(R.string.touch_through_channel_name),
                 NotificationManager.IMPORTANCE_LOW
             ).apply {
-                description = "悬浮窗触摸穿透状态提醒"
+                description = getString(R.string.touch_through_channel_desc)
                 setShowBadge(false)
             }
             val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
@@ -439,9 +439,9 @@ class FloatingWindowService : Service() {
 
         val notification = NotificationCompat.Builder(this, TOUCH_THROUGH_CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_heart)
-            .setContentTitle("触摸穿透已开启")
-            .setContentText("长按悬浮窗或点击下方按钮关闭")
-            .addAction(R.drawable.ic_floating_window_on, "关闭触摸穿透", disablePendingIntent)
+            .setContentTitle(getString(R.string.touch_through_notification_title))
+            .setContentText(getString(R.string.touch_through_notification_text))
+            .addAction(R.drawable.ic_floating_window_on, getString(R.string.touch_through_disable_action), disablePendingIntent)
             .setOngoing(true)
             .setPriority(NotificationCompat.PRIORITY_LOW)
             .build()

@@ -206,7 +206,7 @@ fun FairMemoryScreen(
                     url = "https://dev.vivo.com.cn/wap/documentCenter/doc/1013"
                 )
                 DocumentationLinkCard(
-                    title = "小米",
+                    title = stringResource(R.string.fairmemory),
                     description = stringResource(R.string.xiaomi_desc),
                     url = "https://dev.mi.com/xiaomihyperos/documentation/detail?pId=2304"
                 )

@@ -61,7 +61,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
-import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
@@ -108,7 +107,9 @@ import com.github.heartratemonitor_compose.ui.theme.ThemeSettingsScreen
 import com.github.heartratemonitor_compose.ui.webhook.WebhookScreen
 import com.github.heartratemonitor_compose.util.settingsRepository
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 
@@ -125,8 +126,6 @@ private const val TAB_SLIDE_DURATION = 200
 private const val SECONDARY_SLIDE_DURATION = 350
 // 进入二级页面时底层 Tab 层向左位移比例（视差效果）
 private const val BACKGROUND_PARALLAX_RATIO = 0.2f
-// 二级页面进入时原背景遮罩最大不透明度
-private const val SECONDARY_BACKGROUND_DIM_ALPHA = 0.4f
 
 // NavHost 占位路由：Tab 页在 NavHost 外部管理，此路由仅作为 startDestination
 private const val TAB_PLACEHOLDER = "tab_placeholder"
@@ -196,8 +195,7 @@ private fun String.toScreenRoute(): String = when (this) {
 }
 
 /**
- * 二级页面包装：卡片滑入时带圆角，贴合屏幕边缘时自动收缩为 0dp；
- * 仅在页面在返回栈中但非栈顶时绘制遮罩变暗，弹出页本身不变暗。
+ * 二级页面包装：卡片滑入时带圆角，贴合屏幕边缘时自动收缩为 0dp。
  */
 @Composable
 private fun SecondaryPageWrapper(
@@ -207,37 +205,41 @@ private fun SecondaryPageWrapper(
 ) {
     val backStack by navController.currentBackStack.collectAsStateWithLifecycle()
     val isCurrent = backStack.lastOrNull()?.destination?.route == route
-    val isInStack = backStack.any { it.destination.route == route }
-    val isInBackground = isInStack && !isCurrent
-    val dimAlpha by animateFloatAsState(
-        targetValue = if (isInBackground) SECONDARY_BACKGROUND_DIM_ALPHA else 0f,
-        animationSpec = tween(SECONDARY_SLIDE_DURATION, easing = FastOutSlowInEasing),
-        label = "secondary_page_dim"
-    )
-    // 圆角动画：当前页面展示时为 28dp，完全贴合屏幕时收缩为 0dp
-    val cornerRadius by animateDpAsState(
-        targetValue = if (isCurrent) 28.dp else 0.dp,
-        animationSpec = tween(SECONDARY_SLIDE_DURATION, easing = FastOutSlowInEasing),
-        label = "secondary_page_corner"
-    )
-    Box(modifier = Modifier.fillMaxSize()) {
-        Box(
-            modifier = Modifier
-                .matchParentSize()
-                .graphicsLayer {
-                    clip = true
-                    shape = RoundedCornerShape(cornerRadius)
-                }
-        ) {
-            content()
+
+    // 圆角动画：仅在页面首次入栈时触发，动画完成后关闭 clip
+    var roundCornerActive by remember { mutableStateOf(false) }
+
+    DisposableEffect(route) {
+        roundCornerActive = true
+        val job = Job()
+        CoroutineScope(job).launch {
+            delay(SECONDARY_SLIDE_DURATION.toLong())
+            roundCornerActive = false
         }
-        if (dimAlpha > 0f) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(MaterialTheme.colorScheme.scrim.copy(alpha = dimAlpha))
-            )
+        onDispose {
+            job.cancel()
+            roundCornerActive = false
         }
+    }
+
+    val animatingRoundCorner by animateDpAsState(
+        targetValue = if (roundCornerActive && isCurrent) 28.dp else 0.dp,
+        animationSpec = tween(
+            durationMillis = SECONDARY_SLIDE_DURATION,
+            easing = FastOutSlowInEasing
+        ),
+        label = "secondary_corner_radius"
+    )
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .graphicsLayer {
+                clip = roundCornerActive && isCurrent
+                shape = RoundedCornerShape(animatingRoundCorner)
+            }
+    ) {
+        content()
     }
 }
 
@@ -402,15 +404,6 @@ fun AppRoot(
     LaunchedEffect(isOnTab) {
         backgroundOffset.animateTo(
             targetValue = if (isOnTab) 0f else -BACKGROUND_PARALLAX_RATIO,
-            animationSpec = tween(SECONDARY_SLIDE_DURATION, easing = FastOutSlowInEasing)
-        )
-    }
-
-    // ── 原背景遮罩：进入二级页面时 Tab 层与导航栏逐渐变暗 ──
-    val backgroundDimAlpha = remember { Animatable(0f) }
-    LaunchedEffect(isOnTab) {
-        backgroundDimAlpha.animateTo(
-            targetValue = if (isOnTab) 0f else SECONDARY_BACKGROUND_DIM_ALPHA,
             animationSpec = tween(SECONDARY_SLIDE_DURATION, easing = FastOutSlowInEasing)
         )
     }
@@ -628,25 +621,11 @@ fun AppRoot(
             }
         }
 
-        // ── 原背景变暗遮罩：覆盖在 Tab 层与导航栏之上、二级页面之下 ──
-        // 使用 drawBehind 在绘制阶段读取 alpha，避免每帧都触发组合重组
-        val scrimColor = MaterialTheme.colorScheme.scrim
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .drawBehind {
-                    val alpha = backgroundDimAlpha.value
-                    if (alpha > 0f) {
-                        drawRect(color = scrimColor.copy(alpha = alpha))
-                    }
-                }
-        )
-
         // ── 上层：NavHost 管理二级页面（覆盖在 Tab 层和导航栏之上）──
         // 转场动画分两类：
         // 1. Tab→二级 / 二级→Tab：placeholder 透明，旧页面 slideOut 整页滑出（被新页面覆盖）
-        // 2. 二级→二级：旧页面作为"原背景"小幅左移 + fadeOut（模拟 Tab→二级 时 Tab 层的视差+变暗），
-        //    新页面从右滑入覆盖；返回时旧页面小幅右移 + fadeOut，新页面从左滑入
+        // 2. 二级→二级：旧页面作为"原背景"小幅左移，新页面从右滑入覆盖；
+        //    返回时旧页面小幅右移，新页面从左滑入
         NavHost(
             navController = navController,
             startDestination = TAB_PLACEHOLDER,
@@ -658,7 +637,7 @@ fun AppRoot(
                 val fromSecondary = initialState.destination.route != TAB_PLACEHOLDER
                 val toSecondary = targetState.destination.route != TAB_PLACEHOLDER
                 if (fromSecondary && toSecondary) {
-                    // 二级→二级：旧页面小幅左移，由 SecondaryPageWrapper 绘制遮罩实现变暗
+                    // 二级→二级：旧页面小幅左移
                     slideOutHorizontally(tween(SECONDARY_SLIDE_DURATION, easing = FastOutSlowInEasing)) { fullWidth -> -(fullWidth * BACKGROUND_PARALLAX_RATIO).toInt() }
                 } else {
                     slideOutHorizontally(tween(SECONDARY_SLIDE_DURATION, easing = FastOutSlowInEasing)) { fullWidth -> -fullWidth }

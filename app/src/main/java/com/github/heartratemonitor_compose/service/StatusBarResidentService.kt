@@ -252,16 +252,16 @@ class StatusBarResidentService : Service() {
         val notificationManager = getSystemService(NotificationManager::class.java)
         val channel = NotificationChannel(
             RESIDENT_CHANNEL_ID,
-            "状态栏心率常驻",
+            getString(R.string.status_bar_channel_name),
             NotificationManager.IMPORTANCE_LOW
         ).apply {
-            description = "保持状态栏心率显示服务存活"
+            description = getString(R.string.status_bar_channel_desc)
             setShowBadge(false)
         }
         notificationManager.createNotificationChannel(channel)
         return Notification.Builder(this, RESIDENT_CHANNEL_ID)
-            .setContentTitle("心率状态栏")
-            .setContentText("状态栏心率显示运行中")
+            .setContentTitle(getString(R.string.status_bar_notification_title))
+            .setContentText(getString(R.string.status_bar_notification_text))
             .setSmallIcon(R.drawable.ic_heart)
             .setOngoing(true)
             .build()

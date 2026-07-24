@@ -282,20 +282,20 @@ class MainActivity : FragmentActivity() {
             .onExplainRequestReason { scope, deniedList ->
                 scope.showRequestReasonDialog(
                     deniedList,
-                    "App requires these permissions to find devices and calculate speed.",
-                    "OK", "Cancel"
+                    getString(R.string.permission_request_reason),
+                    getString(R.string.confirm), getString(R.string.cancel)
                 )
             }
             .onForwardToSettings { scope, deniedList ->
                 scope.showForwardToSettingsDialog(
                     deniedList,
-                    "You need to grant these permissions manually in settings.",
-                    "OK", "Cancel"
+                    getString(R.string.toast_permissions_denied_dialog),
+                    getString(R.string.permission_forward_title), getString(R.string.cancel)
                 )
             }
             .request { allGranted, _, _ ->
                 if (!allGranted) {
-                    showToast("Some permissions were denied. Features may be limited!")
+                    showToast(getString(R.string.toast_permissions_denied))
                 } else {
                     ServiceController.startBleService(this)
                 }

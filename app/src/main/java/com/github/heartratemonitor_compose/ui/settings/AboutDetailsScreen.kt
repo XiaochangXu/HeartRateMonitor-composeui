@@ -4,7 +4,7 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
-import android.graphics.Bitmap
+
 import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -25,7 +25,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import com.github.heartratemonitor_compose.ui.utils.SquircleShape
+
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -50,15 +50,15 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.graphics.painter.BitmapPainter
+
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.platform.LocalDensity
+
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.github.heartratemonitor_compose.R
@@ -81,7 +81,7 @@ fun AboutDetailsScreen(
     val scope = rememberCoroutineScope()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
 
-    // 当前版本号（去除 'v' 前缀，用于与 Release tag 对比）
+    // 当前版本号
     val currentVersion = remember {
         try {
             val raw = context.packageManager
@@ -187,7 +187,7 @@ fun AboutDetailsScreen(
                 ) context.getString(R.string.checking_update) else stringResource(R.string.check_update)
             )
 
-            // 内容延伸到屏幕底部，末尾留出胶囊+系统导航栏空间
+            // 内容延伸到屏幕底部
             Spacer(Modifier.height(64.dp + 8.dp + WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()))
         }
     }
@@ -270,11 +270,7 @@ private fun AboutHeaderCard(
                     Image(
                         painter = appIcon,
                         contentDescription = appName,
-                        modifier = Modifier
-                            .size(84.dp)
-                            .clip(with(LocalDensity.current) {
-                                SquircleShape(24.dp.toPx().toInt(), cornerSmoothing = 0.67f)
-                            })
+                        modifier = Modifier.size(84.dp)
                     )
                 }
 
@@ -294,7 +290,9 @@ private fun AboutHeaderCard(
                     Text(
                         text = stringResource(R.string.app_intro),
                         style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth()
                     )
                 }
 
@@ -431,23 +429,9 @@ private fun UpdateAvailableDialog(
 }
 
 /**
- * 加载当前应用的启动图标作为 Painter。
- * adaptive-icon 资源无法直接用 painterResource 加载，
- * 因此通过 PackageManager 获取 Drawable 后转为 BitmapPainter。
+ * 加载 res/drawable/about.png 作为 Painter。
  */
 @Composable
-private fun rememberAppIconPainter(): Painter {
-    val context = LocalContext.current
-    return remember {
-        val drawable = context.applicationInfo.loadIcon(context.packageManager)
-        val width = drawable.intrinsicWidth.coerceAtLeast(1)
-        val height = drawable.intrinsicHeight.coerceAtLeast(1)
-        val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
-        val canvas = android.graphics.Canvas(bitmap)
-        drawable.setBounds(0, 0, canvas.width, canvas.height)
-        drawable.draw(canvas)
-        BitmapPainter(bitmap.asImageBitmap())
-    }
-}
+private fun rememberAppIconPainter(): Painter = painterResource(R.drawable.about)
 
 

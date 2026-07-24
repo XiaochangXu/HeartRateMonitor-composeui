@@ -93,7 +93,7 @@
 
     <!-- SettingsScreen - Floating Window -->
     <string name="floating_window_style">悬浮窗样式</string>
-    <string name="floating_window_tip">长按悬浮窗开启触摸穿透，开启后触摸直接传递给下方应用，不影响手机其他操作。再次长按悬浮窗或点击通知栏按钮关闭。</string>
+    <string name="floating_window_tip">长按悬浮窗开启触摸穿透，开启后触摸直接传递给下方应用，不影响手机其他操作。再次长按悬浮窗或点击通知栏按钮关闭</string>
     <string name="display_bpm_text">显示 BPM 文字</string>
     <string name="subtitle_display_bpm_text">在悬浮窗中显示心率数值</string>
     <string name="display_heart_icon">显示心形图标</string>
@@ -314,6 +314,10 @@
     <string name="toast_auto_reconnecting">连接已断开，正在尝试自动重连...</string>
     <string name="toast_reconnect_failed">重连失败</string>
     <string name="unknown_device">未知设备</string>
+    <string name="toast_permissions_denied">部分权限被拒绝，功能可能受限</string>
+    <string name="toast_permissions_denied_dialog">请在设置中手动授予以下权限</string>
+    <string name="permission_request_reason">应用需要这些权限才能查找设备和计算速度</string>
+    <string name="permission_forward_title">授予权限</string>
 
     <!-- BleService notification -->
     <string name="notification_channel_name">BLE 连接状态</string>
@@ -334,6 +338,33 @@
     <string name="update_api_error">Gitee API 返回错误码：%1$d</string>
     <string name="update_network_error">网络错误：%1$s</string>
     <string name="update_no_valid_release">未找到有效的正式 Release</string>
+
+    <!-- Heart Rate Alarm Service notifications -->
+    <string name="alarm_notification_body">心率 %1$d BPM %2$s %3$d，请关注</string>
+    <string name="alarm_channel_name">心率预警</string>
+    <string name="alarm_channel_desc">心率超出设定区间时发出预警通知</string>
+    <string name="alarm_resident_channel_name">心率预警常驻</string>
+    <string name="alarm_resident_channel_desc">保持心率预警服务存活</string>
+    <string name="alarm_exceeded_high">超过高限</string>
+    <string name="alarm_below_low">低于低限</string>
+    <string name="alarm_notification_title">心率预警</string>
+    <string name="alarm_resident_notification_title">心率预警</string>
+    <string name="alarm_resident_notification_text">心率预警服务运行中</string>
+
+    <!-- Status Bar Resident Service notifications -->
+    <string name="status_bar_channel_name">状态栏心率常驻</string>
+    <string name="status_bar_channel_desc">保持状态栏心率显示服务存活</string>
+    <string name="status_bar_notification_title">心率状态栏</string>
+    <string name="status_bar_notification_text">状态栏心率显示运行中</string>
+
+    <!-- Floating Window Service notifications -->
+    <string name="toast_touch_through_enabled">触摸穿透已开启，长按悬浮窗或点击通知关闭</string>
+    <string name="toast_touch_through_disabled">触摸穿透已关闭，可拖动悬浮窗</string>
+    <string name="touch_through_channel_name">悬浮窗触摸穿透</string>
+    <string name="touch_through_channel_desc">悬浮窗触摸穿透状态提醒</string>
+    <string name="touch_through_notification_title">触摸穿透已开启</string>
+    <string name="touch_through_notification_text">长按悬浮窗或点击下方按钮关闭</string>
+    <string name="touch_through_disable_action">关闭触摸穿透</string>
 
     <!-- ThemeSettings -->
     <string name="theme_settings">主题设置</string>
@@ -364,4 +395,6 @@
     <string name="theme_variant_content">内容</string>
     <string name="theme_variant_rainbow">彩虹</string>
     <string name="theme_variant_fruit_salad">水果沙拉</string>
+
+    <string name="fairmemory">小米</string>
 </resources>

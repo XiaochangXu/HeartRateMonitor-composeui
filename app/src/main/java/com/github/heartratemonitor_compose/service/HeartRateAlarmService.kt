@@ -130,10 +130,10 @@ class HeartRateAlarmService : Service() {
 
         val alarmChannel = NotificationChannel(
             ALARM_CHANNEL_ID,
-            "心率预警",
+            getString(R.string.alarm_channel_name),
             NotificationManager.IMPORTANCE_HIGH
         ).apply {
-            description = "心率超出设定区间时发出预警通知"
+            description = getString(R.string.alarm_channel_desc)
             enableVibration(true)
             vibrationPattern = VIBRATION_PATTERN
             setShowBadge(true)
@@ -141,10 +141,10 @@ class HeartRateAlarmService : Service() {
 
         val residentChannel = NotificationChannel(
             RESIDENT_CHANNEL_ID,
-            "心率预警常驻",
+            getString(R.string.alarm_resident_channel_name),
             NotificationManager.IMPORTANCE_LOW
         ).apply {
-            description = "保持心率预警服务存活"
+            description = getString(R.string.alarm_resident_channel_desc)
             setShowBadge(false)
         }
 
@@ -314,8 +314,8 @@ class HeartRateAlarmService : Service() {
     }
 
     private fun triggerAlarm(rate: Int, isHigh: Boolean, posture: PostureType, threshold: Int) {
-        val direction = if (isHigh) "超过高限" else "低于低限"
-        val body = "心率 ${rate} BPM ${direction} ${threshold}（${getString(posture.labelRes)}状态），请关注"
+        val direction = if (isHigh) getString(R.string.alarm_exceeded_high) else getString(R.string.alarm_below_low)
+        val body = getString(R.string.alarm_notification_body, rate, direction, threshold, getString(posture.labelRes))
         showAlarmNotification(body)
         vibrate()
     }
@@ -324,7 +324,7 @@ class HeartRateAlarmService : Service() {
         val notificationManager = getSystemService(NotificationManager::class.java)
 
         val notification = NotificationCompat.Builder(this, ALARM_CHANNEL_ID)
-            .setContentTitle("心率预警")
+            .setContentTitle(getString(R.string.alarm_notification_title))
             .setContentText(body)
             .setSmallIcon(R.drawable.ic_heart)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
@@ -385,8 +385,8 @@ class HeartRateAlarmService : Service() {
      */
     private fun createResidentNotification(): Notification {
         return NotificationCompat.Builder(this, RESIDENT_CHANNEL_ID)
-            .setContentTitle("心率预警")
-            .setContentText("心率预警服务运行中")
+            .setContentTitle(getString(R.string.alarm_resident_notification_title))
+            .setContentText(getString(R.string.alarm_resident_notification_text))
             .setSmallIcon(R.drawable.ic_heart)
             .setOngoing(true)
             .build()
