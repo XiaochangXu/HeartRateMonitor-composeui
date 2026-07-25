@@ -35,9 +35,9 @@ jobs:
           KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
         run: |
           mkdir -p .key
-          printf '%s' "$KEYSTORE_BASE64" | base64 -d > .key/key
-          ls -l .key/key
-          file .key/key
+          printf '%s' "$KEYSTORE_BASE64" | base64 -d > .key/app-release.jks
+          ls -l .key/app-release.jks
+          file .key/app-release.jks
 
       - name: Build release
         run: ./gradlew assembleRelease
