@@ -15,8 +15,6 @@ app/build/
 .icon/
 
 local.properties
-*.jks
-*.keystore
 
 .DS_Store
 git推送命令.txt
