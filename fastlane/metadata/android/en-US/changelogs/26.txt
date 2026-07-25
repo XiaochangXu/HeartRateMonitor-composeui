@@ -1,0 +1,3 @@
+1. Add heart rate tone in full screen mode
+
+2. optimization specific

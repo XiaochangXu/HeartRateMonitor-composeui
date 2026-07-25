@@ -1,0 +1,400 @@
+<resources>
+    <string name="app_name">心率监控器</string>
+
+    <!-- Navigation -->
+    <string name="nav_home">首页</string>
+    <string name="nav_settings">设置</string>
+    <string name="cd_toggle_floating_window">切换悬浮窗</string>
+    <string name="cd_back">返回</string>
+
+    <!-- HomeScreen -->
+    <string name="cd_view_history">查看历史记录</string>
+    <string name="cd_search_bluetooth">搜索蓝牙设备</string>
+    <string name="search_tip_title">注意事项</string>
+    <string name="search_tip_message">请先打开设备的心率广播，再点击搜索，否则找不到设备。</string>
+    <string name="got_it">我知道了</string>
+    <string name="cancel">取消</string>
+    <string name="confirm">确认</string>
+    <string name="available_devices">可用设备</string>
+    <string name="no_available_devices">暂无可用设备，请点击右上角搜索</string>
+    <string name="enter_fullscreen">进入全屏模式</string>
+    <string name="disconnect">断开连接</string>
+    <string name="please_disconnect_first">请先断开设备</string>
+    <string name="speed">速度</string>
+    <string name="cd_favorite">收藏</string>
+    <string name="bpm_unit">次/分</string>
+    <string name="fullscreen_exit_hint">点击屏幕或按返回键退出</string>
+    <string name="history_not_enabled">未开启历史记录</string>
+    <string name="device_not_connected">未连接设备</string>
+    <string name="connected_device">已连接设备</string>
+
+    <!-- SettingsScreen - General -->
+    <string name="settings">设置</string>
+    <string name="general">常规</string>
+    <string name="record_history">记录历史数据</string>
+    <string name="subtitle_record_history">将心率数据保存到历史</string>
+    <string name="performance_warning">性能警告</string>
+    <string name="history_warning_message">开启历史记录将持续写入数据到存储，可能会增加耗电量。确认开启吗？</string>
+    <string name="heartbeat_animation">心跳动画效果</string>
+    <string name="subtitle_heartbeat_animation">显示实时心跳动画</string>
+    <string name="display_speed_gps">显示时速 (GPS)</string>
+    <string name="subtitle_display_speed_gps">通过 GPS 获取当前移动速度</string>
+    <string name="enable_speed_title">开启速度显示</string>
+    <string name="speed_gps_warning">该功能使用 GPS 计算速度，可能会增加耗电量并需要定位权限。确认开启吗？</string>
+    <string name="hide_from_recents">退出应用隐藏后台</string>
+    <string name="subtitle_hide_from_recents">在多任务界面隐藏应用预览</string>
+    <string name="fullscreen_sound">全屏模式</string>
+    <string name="subtitle_fullscreen_sound">全屏时根据心率播报提示音</string>
+    <string name="sound_settings">声音设置</string>
+    <string name="fullscreen_sound_off">关闭语音</string>
+    <string name="subtitle_fullscreen_sound_off">在心率监测时静音</string>
+    <string name="fullscreen_sound_cn">中文语音</string>
+    <string name="subtitle_fullscreen_sound_cn">使用中文语音播报</string>
+    <string name="fullscreen_sound_en">英文语音</string>
+    <string name="subtitle_fullscreen_sound_en">使用英文语音播报</string>
+    <string name="sound_preview">声音试听</string>
+    <string name="start_preview">开始试听</string>
+    <string name="subtitle_start_preview">试听当前语音提示音效</string>
+    <string name="enable_voice_first">请先开启语音</string>
+    <string name="favorite_devices">收藏设备</string>
+    <string name="subtitle_favorite_devices">管理已收藏的蓝牙设备</string>
+    <string name="heart_rate_alarm">心率预警</string>
+    <string name="subtitle_heart_rate_alarm">设置心率异常自动告警阈值</string>
+
+    <!-- SettingsScreen - Bluetooth -->
+    <string name="bluetooth">蓝牙</string>
+    <string name="auto_connect_favorite">启动时自动连接收藏设备</string>
+    <string name="subtitle_auto_connect_favorite">自动连接设备</string>
+    <string name="auto_reconnect">断开后自动重连</string>
+    <string name="subtitle_auto_reconnect">连接断开后自动尝试重新连接</string>
+
+    <!-- SettingsScreen - Integration -->
+    <string name="integration">集成 &amp; 外部访问</string>
+    <string name="http_websocket_server">HTTP &amp; WebSocket 服务器</string>
+    <string name="subtitle_http_websocket_server">通过局域网共享心率数据</string>
+    <string name="webhook_settings">Webhook 设置</string>
+    <string name="subtitle_webhook_settings">将心率数据推送到远程服务器</string>
+
+    <!-- SettingsScreen - Status Bar -->
+    <string name="status_bar_resident">状态栏常驻</string>
+    <string name="status_bar_heart_rate">状态栏常驻心率</string>
+    <string name="subtitle_status_bar_heart_rate">在状态栏显示实时心率数值</string>
+    <string name="display_bpm_unit">显示 BPM 单位</string>
+    <string name="subtitle_display_bpm_unit">在数值后方显示 BPM 单位</string>
+    <string name="horizontal_position">水平位置</string>
+    <string name="vertical_adjust">垂直微调</string>
+    <string name="overall_size">整体大小</string>
+    <string name="text_thickness">文字粗细</string>
+    <string name="text_color">文字颜色</string>
+    <string name="black">黑色</string>
+    <string name="white">白色</string>
+    <string name="custom_color">自定义</string>
+
+
+    <!-- SettingsScreen - Floating Window -->
+    <string name="floating_window_style">悬浮窗样式</string>
+    <string name="floating_window_tip">长按悬浮窗开启触摸穿透，开启后整个悬浮窗区域均不再拦截触摸，事件直接传递给下方应用。点击通知栏"关闭触摸穿透"按钮恢复拖动</string>
+    <string name="display_bpm_text">显示 BPM 文字</string>
+    <string name="subtitle_display_bpm_text">在悬浮窗中显示心率数值</string>
+    <string name="display_heart_icon">显示心形图标</string>
+    <string name="subtitle_display_heart_icon">在悬浮窗中显示心形图标</string>
+    <string name="icon_size">图标大小</string>
+    <string name="corner_radius">圆角半径</string>
+    <string name="bg_opacity">背景不透明度</string>
+    <string name="border_opacity">边框不透明度</string>
+    <string name="color_picker">颜色选择</string>
+    <string name="text_label">文本</string>
+    <string name="background_label">背景</string>
+    <string name="border_label">边框</string>
+    <string name="text_color_picker">文本颜色</string>
+    <string name="bg_color_picker">背景颜色</string>
+    <string name="border_color_picker">边框颜色</string>
+
+    <!-- SettingsScreen - About -->
+    <string name="about">关于</string>
+    <string name="about_details">详细信息</string>
+    <string name="subtitle_about_details">查看版本、协议与项目仓库</string>
+    <string name="about_details_title">详细信息</string>
+    <string name="app_intro">实时监测心率并记录历史数据</string>
+    <string name="version">版本</string>
+    <string name="version_format">版本 %1$s</string>
+    <string name="version_copied">版本号已复制</string>
+    <string name="unknown_version">未知</string>
+    <string name="checking_update">正在检查...</string>
+    <string name="check_update">检查更新</string>
+    <string name="subtitle_check_update">从 Gitee 获取最新版本信息</string>
+    <string name="open_source_license">查看开源协议</string>
+    <string name="subtitle_open_source_license">MIT 开源许可证</string>
+    <string name="license_title">开源协议</string>
+    <string name="license_load_error">协议内容加载失败</string>
+    <string name="privacy_policy">隐私政策</string>
+    <string name="subtitle_privacy_policy">查看应用数据访问与使用说明</string>
+    <string name="privacy_title">隐私政策</string>
+    <string name="privacy_intro">本应用注重您的隐私保护。以下是应用可能访问的数据及其用途说明。所有数据均存储在本地设备，不会上传到任何服务器。</string>
+    <string name="privacy_bluetooth_title">蓝牙设备信息</string>
+    <string name="privacy_bluetooth_desc">访问蓝牙以扫描、连接心率监测设备。读取设备名称、MAC 地址（仅用于设备识别与自动重连），不收集设备厂商等其他信息。</string>
+    <string name="privacy_heart_rate_title">心率数据</string>
+    <string name="privacy_heart_rate_desc">实时读取心率值与 RR 间期，记录并保存到本地数据库，用于历史查看与统计分析。数据仅保存在本设备，不会上传。</string>
+    <string name="privacy_location_title">位置信息</string>
+    <string name="privacy_location_desc">为统计运动速度，可选择开启 GPS 记录位置数据。此功能默认关闭，需您手动授权并开启，数据仅保存在本地。</string>
+    <string name="privacy_storage_title">本地存储</string>
+    <string name="privacy_storage_desc">将心率历史记录、设置项等保存到本地数据库与文件，确保应用关闭后数据不丢失。</string>
+    <string name="privacy_notification_title">通知权限</string>
+    <string name="privacy_notification_desc">在心率超出预设阈值或设备断开时发送通知提醒，便于您及时关注健康状态。</string>
+    <string name="privacy_network_title">网络访问</string>
+    <string name="privacy_network_desc">用于检查应用更新、访问项目仓库；可选启用的 HTTP/WebSocket 服务器与 Webhook 推送功能也使用网络。不会上传您的个人数据。</string>
+    <string name="privacy_foreground_service_title">前台服务</string>
+    <string name="privacy_foreground_service_desc">使用前台服务在后台持续监测心率，保证屏幕关闭时数据记录不中断，并以通知形式显示运行状态。</string>
+    <string name="privacy_clipboard_title">剪贴板</string>
+    <string name="privacy_clipboard_desc">仅在您长按版本号时将版本号复制到剪贴板，不会自动读取或上传剪贴板内容。</string>
+    <string name="privacy_conclusion_title">数据安全说明</string>
+    <string name="privacy_conclusion_desc">本应用不收集、不上传、不分享任何可识别您个人身份的信息。所有数据均存储在本设备，卸载应用即彻底删除。</string>
+    <string name="up_to_date">当前已是最新版本（v%1$s）</string>
+    <string name="fair_memory">公平运行内存</string>
+    <string name="subtitle_fair_memory">查看应用内存使用详情</string>
+    <string name="github_repo">访问 GitHub 仓库</string>
+    <string name="subtitle_github_repo">访问项目源代码仓库</string>
+    <string name="new_version_found">发现新版本 v%1$s</string>
+    <string name="current_version_label">当前版本：v%1$s</string>
+    <string name="release_notes_title">更新内容：</string>
+    <string name="no_release_notes">暂无更新日志</string>
+    <string name="go_update">跳转更新</string>
+    <string name="update_check_title">检查更新</string>
+
+    <!-- Color Picker Dialog -->
+    <string name="brightness">亮度: %1$d%%</string>
+    <string name="initial_color">初始</string>
+    <string name="current_color">当前</string>
+
+    <!-- HistoryScreen -->
+    <string name="history_title">心率历史记录</string>
+    <string name="no_history">还没有任何历史记录</string>
+    <string name="confirm_delete">确认删除</string>
+    <string name="delete_history_confirm">确定要删除选中的 %1$d 条历史记录吗？此操作无法撤销。</string>
+    <string name="deleted_records">已删除 %1$d 条记录</string>
+    <string name="delete_failed">删除失败: %1$s</string>
+    <string name="confirm_text">确定</string>
+    <string name="selected_count">已选择 %1$d 项</string>
+    <string name="cd_select_all">全选</string>
+    <string name="cd_delete">删除</string>
+    <string name="in_progress">进行中</string>
+    <string name="stats_format">平均 %1$d · 最低 %2$d · 最高 %3$d · %4$d 条记录</string>
+
+    <!-- ChartScreen -->
+    <string name="chart_detail">心率详情</string>
+    <string name="cd_rotate_screen">切换方向</string>
+    <string name="no_heart_rate_data">没有心率数据可显示</string>
+    <string name="marker_heart_rate">心率: %1$d bpm\n时间: %2$s</string>
+
+    <!-- FavoriteDevicesScreen -->
+    <string name="cd_clear_all_favorites">清空所有收藏设备</string>
+    <string name="no_favorite_devices">暂无收藏设备</string>
+    <string name="delete_favorite_title">删除收藏设备</string>
+    <string name="delete_favorite_confirm">确定要删除「%1$s」的收藏记录吗？</string>
+    <string name="delete">删除</string>
+    <string name="clear_all_favorites_title">清空所有收藏</string>
+    <string name="clear_all_favorites_confirm">确定要删除全部 %1$d 个收藏设备吗？此操作不可撤销。</string>
+    <string name="delete_all">全部删除</string>
+
+    <!-- HeartRateAlarmScreen -->
+    <string name="alarm_title">心率预警</string>
+    <string name="posture_unknown">未检测</string>
+    <string name="sitting">静坐</string>
+    <string name="standing">站立</string>
+    <string name="exercise">运动</string>
+    <string name="calibrated_samples">已校准 ✓（%1$d 个样本）</string>
+    <string name="not_calibrated">未校准</string>
+    <string name="posture_calibration">姿态校准</string>
+    <string name="calibrating_format">正在校准%1$s…</string>
+    <string name="remaining_seconds">剩余 %1$d 秒</string>
+    <string name="calibrate_sitting">校准静坐</string>
+    <string name="calibrate_standing">校准站立</string>
+    <string name="calibration_status_format">静坐：%1$s\n站立：%2$s</string>
+    <string name="clear_calibration">清除校准</string>
+    <string name="alarm_settings">预警设置</string>
+    <string name="enable_alarm">启用心率预警</string>
+    <string name="exclude_posture_detection">排除姿态检测</string>
+    <string name="above_threshold">超过</string>
+    <string name="below_threshold">低于</string>
+    <string name="duration_label">持续</string>
+    <string name="seconds_suffix"> 秒</string>
+    <string name="repeat_alarm">重复报警</string>
+    <string name="alarm_interval">报警间隔</string>
+    <string name="minutes_suffix"> 分钟</string>
+
+    <!-- ServerScreen -->
+    <string name="server_settings">服务器设置</string>
+    <string name="not_connected_network">未连接网络</string>
+    <string name="http_server_passive">HTTP 服务器 (被动拉取)</string>
+    <string name="http_port_hint">HTTP 端口</string>
+    <string name="websocket_server_active">WebSocket 服务器 (主动推送)</string>
+    <string name="websocket_port_hint">WebSocket 端口</string>
+    <string name="server_status">服务器状态</string>
+    <string name="enable_server_format">启用 %1$s 服务器</string>
+    <string name="access_url_format">访问地址: %1$s://%2$s:%3$s</string>
+    <string name="http_enabled_status">HTTP 服务器已启用</string>
+    <string name="http_disabled_status">HTTP 服务器已禁用</string>
+    <string name="http_access_url">访问地址: http://%1$s:%2$d/heartrate</string>
+    <string name="ws_enabled_status">WebSocket 服务器已启用</string>
+    <string name="ws_disabled_status">WebSocket 服务器已禁用</string>
+    <string name="ws_access_url">访问地址: ws://%1$s:%2$d</string>
+
+    <!-- WebhookScreen -->
+    <string name="webhook_title">Webhook 设置</string>
+    <string name="cd_add_webhook">新增 Webhook</string>
+    <string name="no_webhooks">暂无 Webhook，点击 + 添加</string>
+    <string name="new_webhook">新的 Webhook</string>
+    <string name="ok">好的</string>
+    <string name="webhook_test_response">Webhook 测试响应</string>
+    <string name="close">关闭</string>
+    <string name="cd_edit">编辑</string>
+    <string name="enable_this_webhook">启用此 Webhook</string>
+    <string name="trigger_types">触发器类型 (可多选)</string>
+    <string name="name_label">名称</string>
+    <string name="test_send">测试发送 (心率: 88)</string>
+    <string name="save">保存</string>
+    <string name="trigger_heart_rate_updated">心率刷新时</string>
+    <string name="trigger_connected">设备连接时</string>
+    <string name="trigger_disconnected">设备断开时</string>
+
+    <!-- FairMemoryScreen -->
+    <string name="fair_memory_title">公平运行内存</string>
+    <string name="overview">概述</string>
+    <string name="fair_memory_overview">公平运行内存机制是由金标联盟理事长成员（vivo、小米、OPPO、荣耀）联合倡导的安卓内存管理规范。该机制旨在通过标准化的系统广播，让应用在内存紧张时主动配合系统进行资源释放，从而提升设备整体运行体验与稳定性，减少后台应用被强制杀死的概率。</string>
+    <string name="how_it_works">工作原理</string>
+    <string name="fair_memory_how_it_works">当系统内存资源紧张时，设备 ROM 会向已注册的应用发送特定的广播通知。应用接收到广播后，可以根据广播类型执行相应的内存优化操作，包括释放非关键缓存、停止低优先级任务、保存当前状态等。这种主动配合的方式比系统直接杀死进程更加平滑，能够有效降低应用重启带来的体验中断。</string>
+    <string name="broadcast_actions">监听的广播 Action</string>
+    <string name="memory_warning_title">1. 内存预警</string>
+    <string name="memory_warning_desc">Action: itgsa.intent.action.TRIM\n系统内存紧张时发送。应用收到后应主动释放非关键内存，如清理图片缓存、停止非必要的后台任务、触发垃圾回收等。</string>
+    <string name="app_kill_title">2. 应用查杀</string>
+    <string name="app_kill_desc">Action: itgsa.intent.action.KILL\n系统即将查杀本应用时发送。应用收到后应保存关键状态数据、释放所有可释放的资源，为进程终止做好准备。</string>
+    <string name="app_adaptation">本应用的适配</string>
+    <string name="fair_memory_adaptation">本应用已按照金标联盟官方文档完成公平运行内存机制适配：\n\n• 在 Application 启动时动态注册广播接收器，使用 RECEIVER_EXPORTED 标志接收系统广播\n• 收到广播后解析 Intent 中的 common 和 extra 两个 Bundle，提取异常类型（物理内存/Java堆内存）、内存用量、回调 IBinder 等信息\n• TRIM 广播：按 notifyType 差异化释放——物理内存异常(1000)清空整个图表缓存，Java堆异常(2000)降采样保留最近 500 点；均清空扫描结果并触发 System.gc()，在 3 秒内通过 IBinder 回调通知系统处理结果\n• TRIM 广播前台提示：当应用位于前台且达到查杀条件时，主动推送通知提醒用户。Java堆异常提供“关闭应用”和“忽略”；物理内存异常提供“重新打开”\n• KILL 广播：通知 MainViewModel 保存状态（心率数据已通过 Room 数据库持久化），在 3 秒内通过 IBinder 回调通知系统\n• 通过 MemoryListener 接口（WeakReference 持有）将释放逻辑委托给 MainViewModel，避免内存泄漏\n• 实现 IBinder.DeathRecipient 监听系统服务异常死亡，确保 Binder 连接可靠\n• 使用独立 HandlerThread 处理广播，避免阻塞主线程\n\n蓝牙心率服务（BleService）作为前台服务持续运行，不会因内存预警而被中断。状态栏常驻服务和悬浮窗服务在内存极端紧张时可能被系统回收，应用会在下次启动时自动恢复。</string>
+    <string name="reference_docs">参考文档</string>
+    <string name="oppo_desc">公平运行内存适配指南</string>
+    <string name="vivo_desc">公平运行内存机制适配</string>
+    <string name="xiaomi_desc">公平运行内存适配：开发者文档</string>
+
+    <!-- FairMemory notifications -->
+    <string name="fair_memory_heap_channel_title">Java 堆内存异常</string>
+    <string name="fair_memory_heap_channel_desc">应用 Java 堆内存使用异常时的用户提示</string>
+    <string name="fair_memory_pss_channel_title">物理内存异常</string>
+    <string name="fair_memory_pss_channel_desc">应用物理内存使用异常导致被关闭时的用户提示</string>
+    <string name="fair_memory_heap_notification_title">运行内存异常</string>
+    <string name="fair_memory_heap_notification_text">应用运行内存异常，可能影响设备流畅度。建议关闭应用后重新打开，以确保流畅体验。</string>
+    <string name="fair_memory_pss_notification_title">运行内存异常</string>
+    <string name="fair_memory_pss_notification_text">检测到严重的运行内存异常，为保障设备稳定运行，已关闭当前应用，可重新打开该应用继续使用。</string>
+    <string name="fair_memory_close_app">关闭应用</string>
+    <string name="fair_memory_ignore">忽略</string>
+    <string name="fair_memory_reopen_app">重新打开</string>
+
+    <!-- BleState messages -->
+    <string name="ble_idle">点击右上角按钮扫描设备</string>
+    <string name="ble_scanning">正在扫描设备...</string>
+    <string name="ble_scan_results">请选择要连接的设备</string>
+    <string name="ble_connecting">正在连接...</string>
+    <string name="ble_auto_connecting">正在尝试连接收藏的设备...</string>
+    <string name="ble_auto_reconnecting">正在自动重连...</string>
+
+    <!-- BleService dynamic messages -->
+    <string name="ble_scan_finished">扫描结束</string>
+    <string name="ble_no_devices_found">未找到任何设备</string>
+    <string name="ble_auto_connect_failed">自动连接失败: 未找到设备</string>
+    <string name="ble_connect_timeout">连接超时</string>
+    <string name="ble_connect_cancelled">连接已取消: %1$s</string>
+    <string name="ble_connect_failed">连接失败: %1$s</string>
+    <string name="ble_connected_to">已连接到 %1$s</string>
+    <string name="ble_disconnecting">正在断开...</string>
+    <string name="ble_manual_disconnect">已手动断开</string>
+    <string name="ble_device_disconnected">设备连接已断开</string>
+    <string name="ble_max_reconnect">自动重连已达最大尝试次数（%1$d），请手动重连</string>
+
+    <!-- MainActivity Toast messages -->
+    <string name="toast_connected">已连接</string>
+    <string name="toast_auto_reconnecting">连接已断开，正在尝试自动重连...</string>
+    <string name="toast_reconnect_failed">重连失败</string>
+    <string name="unknown_device">未知设备</string>
+    <string name="toast_permissions_denied">部分权限被拒绝，功能可能受限</string>
+    <string name="toast_permissions_denied_dialog">请在设置中手动授予以下权限</string>
+    <string name="permission_request_reason">应用需要这些权限才能查找设备和计算速度</string>
+    <string name="permission_forward_title">授予权限</string>
+
+    <!-- BleService notification -->
+    <string name="notification_channel_name">BLE 连接状态</string>
+    <string name="notification_content">服务正在后台运行</string>
+
+    <!-- WebhookManager -->
+    <string name="webhook_send_failed_headers">发送失败: Headers不是有效的JSON格式: %1$s</string>
+    <string name="webhook_send_error">发送时发生未知错误: %1$s</string>
+    <string name="webhook_sent">Webhook 已发送</string>
+    <string name="webhook_resp_name">名称</string>
+    <string name="webhook_resp_trigger">触发于</string>
+    <string name="webhook_resp_status">状态码</string>
+    <string name="webhook_resp_body">响应体</string>
+
+    <!-- UpdateChecker -->
+    <string name="update_no_release">未找到任何 Release，请先在 Gitee 上发布一个版本</string>
+    <string name="update_api_rate_limit">Gitee API 限流，请稍后再试</string>
+    <string name="update_api_error">Gitee API 返回错误码：%1$d</string>
+    <string name="update_network_error">网络错误：%1$s</string>
+    <string name="update_no_valid_release">未找到有效的正式 Release</string>
+
+    <!-- Heart Rate Alarm Service notifications -->
+    <string name="alarm_notification_body">心率 %1$d BPM %2$s %3$d，请关注</string>
+    <string name="alarm_channel_name">心率预警</string>
+    <string name="alarm_channel_desc">心率超出设定区间时发出预警通知</string>
+    <string name="alarm_resident_channel_name">心率预警常驻</string>
+    <string name="alarm_resident_channel_desc">保持心率预警服务存活</string>
+    <string name="alarm_exceeded_high">超过高限</string>
+    <string name="alarm_below_low">低于低限</string>
+    <string name="alarm_notification_title">心率预警</string>
+    <string name="alarm_resident_notification_title">心率预警</string>
+    <string name="alarm_resident_notification_text">心率预警服务运行中</string>
+
+    <!-- Status Bar Resident Service notifications -->
+    <string name="status_bar_channel_name">状态栏心率常驻</string>
+    <string name="status_bar_channel_desc">保持状态栏心率显示服务存活</string>
+    <string name="status_bar_notification_title">心率状态栏</string>
+    <string name="status_bar_notification_text">状态栏心率显示运行中</string>
+
+    <!-- Floating Window Service notifications -->
+    <string name="toast_touch_through_enabled">触摸穿透已开启，点击通知栏按钮关闭</string>
+    <string name="toast_touch_through_disabled">触摸穿透已关闭，可拖动悬浮窗</string>
+    <string name="touch_through_channel_name">悬浮窗触摸穿透</string>
+    <string name="touch_through_channel_desc">悬浮窗触摸穿透状态提醒</string>
+    <string name="touch_through_notification_title">触摸穿透已开启</string>
+    <string name="touch_through_notification_text">点击下方按钮关闭触摸穿透</string>
+    <string name="touch_through_disable_action">关闭触摸穿透</string>
+
+    <!-- ThemeSettings -->
+    <string name="theme_settings">主题设置</string>
+    <string name="subtitle_theme_settings">自定义应用配色方案</string>
+    <string name="theme_color">主题色彩</string>
+    <string name="theme_custom">自定义主题</string>
+    <string name="theme_mode">主题模式</string>
+    <string name="theme_mode_system">跟随系统</string>
+    <string name="theme_mode_light">亮色</string>
+    <string name="theme_mode_dark">暗色</string>
+    <string name="theme_preset_seeds">预设色卡</string>
+    <string name="theme_custom_seed">自定义主题色</string>
+    <string name="theme_variant">色调风格</string>
+    <string name="theme_seed_red">红色</string>
+    <string name="theme_seed_orange">橙色</string>
+    <string name="theme_seed_yellow">黄色</string>
+    <string name="theme_seed_green">绿色</string>
+    <string name="theme_seed_teal">青色</string>
+    <string name="theme_seed_blue">蓝色</string>
+    <string name="theme_seed_purple">紫色</string>
+    <string name="theme_seed_pink">粉色</string>
+    <string name="theme_variant_tonal_spot">色调点位</string>
+    <string name="theme_variant_vibrant">鲜艳</string>
+    <string name="theme_variant_expressive">表现力</string>
+    <string name="theme_variant_neutral">中性</string>
+    <string name="theme_variant_monochrome">单色</string>
+    <string name="theme_variant_fidelity">保真</string>
+    <string name="theme_variant_content">内容</string>
+    <string name="theme_variant_rainbow">彩虹</string>
+    <string name="theme_variant_fruit_salad">水果沙拉</string>
+
+    <string name="fairmemory">小米</string>
+</resources>
