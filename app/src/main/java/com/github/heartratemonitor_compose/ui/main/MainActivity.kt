@@ -311,14 +311,15 @@ class MainActivity : FragmentActivity() {
     private fun setExcludeFromRecentsFlag(exclude: Boolean) {
         try {
             val am = getSystemService(Context.ACTIVITY_SERVICE) as android.app.ActivityManager
-            val myTaskId = taskId
+            // 用 baseIntent 包名匹配代替 taskInfo.taskId，兼容 Android 7+ 全版本
+            // (TaskInfo.taskId 字段从 API 29 起才存在，低版本访问会抛 NoSuchFieldError)
             for (task in am.appTasks) {
-                if (task.taskInfo?.taskId == myTaskId) {
+                if (task.taskInfo?.baseIntent?.component?.packageName == packageName) {
                     task.setExcludeFromRecents(exclude)
                     break
                 }
             }
-        } catch (_: Exception) { }
+        } catch (_: Throwable) { }
     }
 
     private fun showToast(message: String) {
