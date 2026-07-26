@@ -46,7 +46,7 @@ import kotlinx.coroutines.launch
 /**
  * 状态栏常驻心率服务。
  *
- * 在顶部状态栏区域以 TYPE_APPLICATION_OVERLAY 叠加层绘制紧凑心率条（心形 + BPM）。
+ * 在顶部状态栏区域以 TYPE_APPLICATION_OVERLAY 叠加层绘制紧凑心率条（心形 + bpm）。
  * 独立于 FloatingWindowService，由设置页开关 startService / stopService 控制。
  * 仅 bindService(BleService) 获取心率数据，依赖同进程 BleService 前台档位保持存活。
  *
@@ -99,6 +99,7 @@ class StatusBarResidentService : Service() {
             relayout()
         }
 
+        @Suppress("OVERRIDE_DEPRECATION")
         override fun onLowMemory() {}
         override fun onTrimMemory(level: Int) {}
     }

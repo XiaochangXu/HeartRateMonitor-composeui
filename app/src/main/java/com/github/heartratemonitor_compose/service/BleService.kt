@@ -28,7 +28,6 @@ import com.github.heartratemonitor_compose.service.server.ServerHost
 import com.juul.kable.Advertisement
 import com.juul.kable.Peripheral
 import com.juul.kable.State
-import com.juul.kable.peripheral
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import org.json.JSONObject
@@ -273,7 +272,7 @@ class BleService : Service(), FairMemoryReceiver.MemoryListener {
         connectionJob = serviceScope.launch {
             var peripheral: Peripheral? = null
             try {
-                peripheral = serviceScope.peripheral(identifier)
+                peripheral = Peripheral(identifier)
                 connectedPeripheral = peripheral
                 lastConnectedDeviceId = identifier
 
@@ -324,6 +323,7 @@ class BleService : Service(), FairMemoryReceiver.MemoryListener {
                 }
             }
             is State.Connected -> {
+                @OptIn(com.juul.kable.ExperimentalKableApi::class)
                 val deviceName = peripheral.name ?: getString(R.string.unknown_device)
                 lastConnectedDeviceName = deviceName
                 // 同步当前已连接设备信息（id + name）供 UI 显示
@@ -440,6 +440,13 @@ class BleService : Service(), FairMemoryReceiver.MemoryListener {
                 startForegroundService()
                 broadcastWebSocketState()
             }
+            PrefsKeys.HISTORY_RECORDING_ENABLED -> {
+                // 关闭历史记录开关时，立即结束当前正在进行的 session，
+                // 避免 endTime 一直为 NULL 导致 UI 显示「进行中」直到下次启动。
+                if (!sharedPreferences.getBoolean(PrefsKeys.HISTORY_RECORDING_ENABLED, false)) {
+                    serviceScope.launch { heartRateRecorder.endSession() }
+                }
+            }
         }
     }
 
@@ -457,10 +464,11 @@ class BleService : Service(), FairMemoryReceiver.MemoryListener {
     override fun onDestroy() {
         super.onDestroy()
         FairMemoryReceiver.getInstance().removeMemoryListener(this)
-        // 刷新未写入的批量心率记录：在现有 IO scope 中以 NonCancellable 启动，
-        // 既避免阻塞主线程，也避免创建独立线程导致数据竞争。
+        // 刷新未写入的批量心率记录：onDestroy 中同步落盘，确保数据不丢失。
+        // runBlocking 短暂阻塞主线程，但 flushPendingRecords 是有界操作（单次批量 insert），
+        // 实际耗时通常 <100ms，不会触发 ANR。
         heartRateRecorder.cancelFlushLoop()
-        serviceScope.launch(NonCancellable) { heartRateRecorder.flushPendingRecords() }
+        runBlocking { heartRateRecorder.flushPendingRecords() }
         serviceScope.cancel()
         speedProvider.stop()
         serverHost.stop()

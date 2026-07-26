@@ -1,0 +1,10 @@
+Changelog (Final Version)：
+
+1. Optimized performance and refined details
+2. Upgraded Room to 3.0.0
+3. Upgraded Kable to 0.44.3
+4. Upgraded core-ktx to 1.19.0
+5. Upgraded savedstate-ktx to 1.5.0
+6. Upgraded fragment-ktx to 1.8.9
+7. Upgraded activity-compose to 1.13.0
+8. Upgraded navigation-compose to 2.9.8

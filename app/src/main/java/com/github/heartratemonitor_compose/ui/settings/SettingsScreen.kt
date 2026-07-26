@@ -12,7 +12,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -138,7 +137,7 @@ private fun GeneralSection(
     val showSpeedDialog = remember { mutableStateOf(false) }
 
     // Icon Container: 常规功能使用蓝色系
-    val containerColor = lerp(MaterialTheme.colorScheme.primaryContainer, MaterialTheme.colorScheme.surfaceContainer, 0.4f)
+    val containerColor = MaterialTheme.colorScheme.primaryContainer
     val iconTint = MaterialTheme.colorScheme.onPrimaryContainer
 
     SectionTitle(stringResource(R.string.general))
@@ -283,7 +282,7 @@ private fun BluetoothSection(settings: SettingsRepository) {
     var isAutoReconnectEnabled by remember { mutableStateOf(settings.getBoolean(PrefsKeys.AUTO_RECONNECT_ENABLED, true)) }
 
     // Icon Container: 蓝牙使用蓝色系（与常规功能统一）
-    val containerColor = lerp(MaterialTheme.colorScheme.primaryContainer, MaterialTheme.colorScheme.surfaceContainer, 0.4f)
+    val containerColor = MaterialTheme.colorScheme.primaryContainer
     val iconTint = MaterialTheme.colorScheme.onPrimaryContainer
 
     SectionTitle(stringResource(R.string.bluetooth))
@@ -326,7 +325,7 @@ private fun IntegrationSection(
     settings: SettingsRepository
 ) {
     // Icon Container: 集成功能使用蓝色系（与常规功能统一）
-    val containerColor = lerp(MaterialTheme.colorScheme.primaryContainer, MaterialTheme.colorScheme.surfaceContainer, 0.4f)
+    val containerColor = MaterialTheme.colorScheme.primaryContainer
     val iconTint = MaterialTheme.colorScheme.onPrimaryContainer
 
     SectionTitle(stringResource(R.string.integration))
@@ -354,12 +353,7 @@ private fun StatusBarSection(
     val statusBarTextColor by settings.observeInt(PrefsKeys.STATUS_BAR_TEXT_COLOR, android.graphics.Color.BLACK)
         .collectAsState()
 
-    // Icon Container: 状态栏使用紫蓝色系
-    val containerColor = lerp(
-        lerp(MaterialTheme.colorScheme.primaryContainer, MaterialTheme.colorScheme.secondaryContainer, 0.6f),
-        MaterialTheme.colorScheme.surfaceContainer,
-        0.4f
-    )
+    val containerColor = MaterialTheme.colorScheme.primaryContainer
     val iconTint = MaterialTheme.colorScheme.onPrimaryContainer
 
     SectionTitle(stringResource(R.string.status_bar_resident))
@@ -594,7 +588,7 @@ private fun FloatingWindowSection(
     val floatingBorderColor by settings.observeInt(PrefsKeys.FLOATING_BORDER_COLOR, android.graphics.Color.GRAY)
         .collectAsState()
     // Icon Container: 悬浮窗使用蓝色系（与常规功能统一）
-    val containerColor = lerp(MaterialTheme.colorScheme.primaryContainer, MaterialTheme.colorScheme.surfaceContainer, 0.4f)
+    val containerColor = MaterialTheme.colorScheme.primaryContainer
     val iconTint = MaterialTheme.colorScheme.onPrimaryContainer
 
     SectionTitle(stringResource(R.string.floating_window_style))
@@ -761,7 +755,7 @@ private fun AboutSection(
     onNavigate: (String) -> Unit
 ) {
     // Icon Container: 关于使用蓝色系（与常规功能统一）
-    val containerColor = lerp(MaterialTheme.colorScheme.primaryContainer, MaterialTheme.colorScheme.surfaceContainer, 0.4f)
+    val containerColor = MaterialTheme.colorScheme.primaryContainer
     val iconTint = MaterialTheme.colorScheme.onPrimaryContainer
 
     SectionTitle(stringResource(R.string.about))

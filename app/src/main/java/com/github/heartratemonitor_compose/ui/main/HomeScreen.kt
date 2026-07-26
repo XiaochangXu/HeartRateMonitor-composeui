@@ -1,5 +1,6 @@
 package com.github.heartratemonitor_compose.ui.main
 
+import android.app.Activity
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -84,6 +85,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -91,6 +93,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.github.heartratemonitor_compose.R
@@ -116,6 +120,7 @@ import com.patrykandpatrick.vico.compose.cartesian.axis.VerticalAxis
 import com.patrykandpatrick.vico.compose.cartesian.data.CartesianChartModelProducer
 import com.patrykandpatrick.vico.compose.cartesian.data.CartesianLayerRangeProvider
 import com.patrykandpatrick.vico.compose.cartesian.data.CartesianValueFormatter
+import com.patrykandpatrick.vico.compose.cartesian.data.lineModel
 import com.patrykandpatrick.vico.compose.cartesian.data.lineSeries
 import com.patrykandpatrick.vico.compose.common.Fill
 import com.github.heartratemonitor_compose.util.SoundManager
@@ -529,7 +534,7 @@ private fun HeartRateCard(
                 )
             }
 
-            // BPM 数值（文字不跳动）
+            // bpm 数值（文字不跳动）
             Row(
                 modifier = Modifier.align(Alignment.Center),
                 verticalAlignment = Alignment.Bottom
@@ -542,7 +547,7 @@ private fun HeartRateCard(
                 )
                 Spacer(Modifier.width(4.dp))
                 Text(
-                    text = "BPM",
+                    text = "bpm",
                     color = contentColor.copy(alpha = 0.9f),
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Medium,
@@ -605,7 +610,7 @@ private fun SpeedCard(
  * - [MainViewModel.chartDataSnapshot] (ChartDataSnapshot?) 由 ViewModel 维护的已格式化坐标快照
  *
  * 渲染特点（向心电图风格靠拢）:
- * - 逐拍数据:RR-Interval 累加时间戳 + 瞬时心率,分辨率高于 1Hz 平均 BPM
+ * - 逐拍数据:RR-Interval 累加时间戳 + 瞬时心率,分辨率高于 1Hz 平均 bpm
  * - 三次贝塞尔插值 (cubic) + 心率红渐变填充,曲线平滑有节律感
  * - 固定 Y 轴生理范围 (40–180 bpm),配合默认网格线,类似 ECG 刻度网格
  *
@@ -625,7 +630,7 @@ private fun RealtimeChart(
         val snapshot = chartDataSnapshot ?: return@LaunchedEffect
         if (appStatus != AppStatus.CONNECTED || snapshot.xValues.isEmpty()) return@LaunchedEffect
         modelProducer.runTransaction {
-            lineSeries {
+            lineModel {
                 series(x = snapshot.xValues, y = snapshot.yValues)
             }
         }
@@ -889,6 +894,22 @@ internal fun FullScreenHeartRate(
 
     // 爱心光晕：QRS 波峰时最亮；alpha 计算移到 graphicsLayer 绘制阶段，避免每帧重组
     val rPeakPhase = 0.2f
+
+    // 全屏沉浸模式：隐藏状态栏/导航栏 + 保持屏幕常亮，退出时恢复
+    val fullscreenView = LocalView.current
+    DisposableEffect(fullscreenView) {
+        val window = (fullscreenView.context as? Activity)?.window
+        val controller = window?.let { WindowInsetsControllerCompat(it, fullscreenView) }
+        controller?.hide(WindowInsetsCompat.Type.systemBars())
+        controller?.systemBarsBehavior =
+            WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+        fullscreenView.keepScreenOn = true
+
+        onDispose {
+            controller?.show(WindowInsetsCompat.Type.systemBars())
+            fullscreenView.keepScreenOn = false
+        }
+    }
 
     BackHandler { onExit() }
 

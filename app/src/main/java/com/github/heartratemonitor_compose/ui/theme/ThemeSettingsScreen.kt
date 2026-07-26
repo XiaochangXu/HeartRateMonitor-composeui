@@ -18,9 +18,9 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -234,7 +234,7 @@ private fun HeaderRow() {
         Surface(
             modifier = Modifier.size(40.dp),
             shape = CircleShape,
-            color = lerp(MaterialTheme.colorScheme.primaryContainer, MaterialTheme.colorScheme.surfaceContainer, 0.4f)
+            color = MaterialTheme.colorScheme.primaryContainer
         ) {
             Box(contentAlignment = Alignment.Center) {
                 Icon(
@@ -430,11 +430,15 @@ private fun PresetSeedCard(
         value = ThemePreviewCache.get(preset.argb, style)
     }
     val borderColor = if (selected) MaterialTheme.colorScheme.primary else Color.Transparent
+    val cardShape = RoundedCornerShape(16.dp)
     Surface(
         modifier = modifier
             .aspectRatio(1f)
+            // 先 clip 成卡片形状，再挂 clickable，
+            // 否则 ripple / 长按激活范围会超出圆角变成矩形
+            .clip(cardShape)
             .clickable(enabled = enabled, onClick = onClick),
-        shape = RoundedCornerShape(16.dp),
+        shape = cardShape,
         color = previewScheme.surfaceContainer,
         border = androidx.compose.foundation.BorderStroke(2.dp, borderColor)
     ) {
@@ -522,11 +526,15 @@ private fun CustomSeedRow(
             modifier = Modifier.weight(1f)
         )
         Spacer(Modifier.width(16.dp))
+        val seedShape = RoundedCornerShape(8.dp)
         Surface(
             modifier = Modifier
                 .size(40.dp)
+                // 先 clip 成卡片形状，再挂 clickable，
+                // 否则 ripple / 长按激活范围会超出圆角变成矩形
+                .clip(seedShape)
                 .clickable(enabled = enabled, onClick = onClick),
-            shape = RoundedCornerShape(8.dp),
+            shape = seedShape,
             color = Color(seedArgb),
             border = androidx.compose.foundation.BorderStroke(
                 1.dp,

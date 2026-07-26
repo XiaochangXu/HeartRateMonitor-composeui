@@ -9,10 +9,10 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onCompletion
-import java.util.UUID
 import java.util.concurrent.CancellationException
 
-fun String.toUuid(): UUID = UUID.fromString(this)
+@OptIn(kotlin.uuid.ExperimentalUuidApi::class)
+fun String.toKableUuid() = kotlin.uuid.Uuid.parse(this)
 
 
 class BleManager {
@@ -26,9 +26,10 @@ class BleManager {
 
    
     fun observeHeartRate(peripheral: Peripheral): Flow<HeartRateMeasurement> {
+        @OptIn(kotlin.uuid.ExperimentalUuidApi::class)
         val characteristic = characteristicOf(
-            service = BleConstants.HEART_RATE_SERVICE_UUID,
-            characteristic = BleConstants.HEART_RATE_MEASUREMENT_CHARACTERISTIC_UUID
+            service = BleConstants.HEART_RATE_SERVICE_UUID.toKableUuid(),
+            characteristic = BleConstants.HEART_RATE_MEASUREMENT_CHARACTERISTIC_UUID.toKableUuid()
         )
 
         return peripheral.observe(characteristic)
@@ -56,7 +57,7 @@ class BleManager {
      * - (可选) RR-Interval: UINT16 序列, 单位 1/1024 秒 (相邻 R 波峰的时间间隔)
      *
      * RR-Interval 是逐拍 (beat-to-beat) 数据,可据此计算瞬时心率与 HRV,
-     * 比设备上报的平均 BPM 分辨率更高。早期实现仅解析 BPM,丢失了 RR 数据。
+     * 比设备上报的平均 bpm 分辨率更高。早期实现仅解析 bpm,丢失了 RR 数据。
      */
     internal fun parseHeartRateMeasurement(data: ByteArray): HeartRateMeasurement {
         if (data.isEmpty()) return HeartRateMeasurement.EMPTY

@@ -246,14 +246,18 @@ private fun SessionCard(
         label = "cardBg"
     )
 
+    val cardShape = RoundedCornerShape(28.dp)
     Card(
         modifier = Modifier
             .fillMaxWidth()
+            // 先 clip 成卡片形状，再挂 combinedClickable，
+            // 否则 ripple / 长按激活范围会超出圆角变成矩形
+            .clip(cardShape)
             .combinedClickable(
                 onClick = onClick,
                 onLongClick = onLongClick
             ),
-        shape = RoundedCornerShape(28.dp),
+        shape = cardShape,
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceContainer
         ),

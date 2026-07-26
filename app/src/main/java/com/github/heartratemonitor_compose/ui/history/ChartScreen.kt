@@ -1,14 +1,26 @@
 package com.github.heartratemonitor_compose.ui.history
 
 import android.content.pm.ActivityInfo
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ScreenRotation
@@ -35,6 +47,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import com.github.heartratemonitor_compose.R
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -44,6 +57,7 @@ import com.github.heartratemonitor_compose.data.db.HeartRateRecord
 import com.github.heartratemonitor_compose.ui.theme.findActivity
 import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
 import com.patrykandpatrick.vico.compose.cartesian.axis.rememberAxisGuidelineComponent
+import com.patrykandpatrick.vico.compose.cartesian.rememberVicoScrollState
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLineCartesianLayer
 import com.patrykandpatrick.vico.compose.cartesian.rememberCartesianChart
 import com.patrykandpatrick.vico.compose.cartesian.marker.rememberDefaultCartesianMarker
@@ -53,6 +67,7 @@ import com.patrykandpatrick.vico.compose.cartesian.axis.HorizontalAxis
 import com.patrykandpatrick.vico.compose.cartesian.axis.VerticalAxis
 import com.patrykandpatrick.vico.compose.cartesian.data.CartesianChartModelProducer
 import com.patrykandpatrick.vico.compose.cartesian.data.CartesianValueFormatter
+import com.patrykandpatrick.vico.compose.cartesian.data.lineModel
 import com.patrykandpatrick.vico.compose.cartesian.data.lineSeries
 import com.patrykandpatrick.vico.compose.cartesian.marker.CartesianMarker
 import com.patrykandpatrick.vico.compose.cartesian.marker.DefaultCartesianMarker
@@ -66,6 +81,7 @@ import com.patrykandpatrick.vico.compose.common.component.TextComponent
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import kotlinx.coroutines.delay
 
 /**
  * 心率历史详情图表 Composable。
@@ -159,28 +175,132 @@ fun ChartScreen(
             )
         }
     ) { padding ->
-        Box(
+        BoxWithConstraints(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(top = padding.calculateTopPadding())
         ) {
             if (records.isEmpty()) {
-                Text(
-                    text = stringResource(R.string.no_heart_rate_data),
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.align(Alignment.Center)
-                )
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = stringResource(R.string.no_heart_rate_data),
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
             } else {
-                HeartRateChart(
-                    records = records,
-                    startTime = startTime,
-                    timeFormat = timeFormat,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(16.dp)
-                        .padding(bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding())
-                )
+                // 从已加载记录计算统计摘要，无需额外查库。
+                // 单次遍历计算 sum/min/max，避免 map+average+min+max 多次遍历开销。
+                val stats = remember(records) {
+                    var sum = 0
+                    var min = Int.MAX_VALUE
+                    var max = Int.MIN_VALUE
+                    for (record in records) {
+                        val hr = record.heartRate
+                        sum += hr
+                        if (hr < min) min = hr
+                        if (hr > max) max = hr
+                    }
+                    ChartStats(
+                        avg = if (records.isEmpty()) 0 else sum / records.size,
+                        min = min,
+                        max = max,
+                        startTime = records.first().timestamp,
+                        endTime = records.last().timestamp
+                    )
+                }
+
+                // 图表渲染延迟，避免首次初始化与导航转场动画争抢主线程。
+                // records 非空后延迟 350ms（= SECONDary_SLIDE_DURATION 二级页面转场时长）再显示图表，
+                // 期间显示骨架屏。横竖屏切换不触发（key 不变），chartReady 保持 true。
+                var chartReady by remember { mutableStateOf(false) }
+                LaunchedEffect(records.isNotEmpty()) {
+                    if (records.isNotEmpty()) {
+                        delay(350)
+                        chartReady = true
+                    } else {
+                        chartReady = false
+                    }
+                }
+
+                if (maxWidth > maxHeight) {
+                    // 横屏：可滚动，图表占满视口高度，下滑显示统计卡片
+                    val viewportHeight = maxHeight
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .verticalScroll(rememberScrollState())
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(viewportHeight)
+                                .padding(16.dp)
+                        ) {
+                            Crossfade(
+                                targetState = chartReady,
+                                animationSpec = tween(200),
+                                label = "chart_crossfade"
+                            ) { ready ->
+                                if (ready) {
+                                    HeartRateChart(
+                                        records = records,
+                                        startTime = startTime,
+                                        timeFormat = timeFormat,
+                                        modifier = Modifier.fillMaxSize()
+                                    )
+                                } else {
+                                    ChartSkeleton(modifier = Modifier.fillMaxSize())
+                                }
+                            }
+                        }
+                        SessionStatsCard(
+                            stats = stats,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp)
+                                .padding(bottom = 16.dp + WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding())
+                        )
+                    }
+                } else {
+                    // 竖屏：图表 weight(1f) + 统计卡片固定底部
+                    Column(
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .padding(16.dp)
+                        ) {
+                            Crossfade(
+                                targetState = chartReady,
+                                animationSpec = tween(200),
+                                label = "chart_crossfade"
+                            ) { ready ->
+                                if (ready) {
+                                    HeartRateChart(
+                                        records = records,
+                                        startTime = startTime,
+                                        timeFormat = timeFormat,
+                                        modifier = Modifier.fillMaxSize()
+                                    )
+                                } else {
+                                    ChartSkeleton(modifier = Modifier.fillMaxSize())
+                                }
+                            }
+                        }
+                        SessionStatsCard(
+                            stats = stats,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp)
+                                .padding(bottom = 16.dp + WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding())
+                        )
+                    }
+                }
             }
         }
     }
@@ -211,7 +331,7 @@ private fun HeartRateChart(
     LaunchedEffect(records) {
         if (records.isNotEmpty()) {
             modelProducer.runTransaction {
-                lineSeries {
+                lineModel {
                     series(
                         x = records.indices.map { it.toDouble() },
                         y = records.map { it.heartRate.toDouble() }
@@ -263,7 +383,10 @@ private fun HeartRateChart(
             marker = marker
         ),
         modelProducer = modelProducer,
-        modifier = modifier
+        modifier = modifier,
+        // 禁用水平滚动：让图表自动将全部心率数据压缩适配到视口宽度，
+        // 进入详情页即可看到完整曲线，无需手动滑动。
+        scrollState = rememberVicoScrollState(scrollEnabled = false)
     )
 }
 
@@ -312,4 +435,120 @@ private fun rememberMarker(
         indicatorSize = 36.dp,
         guideline = guideline,
     )
+}
+
+/**
+ * 图表页统计摘要（从已加载记录计算，无需额外查库）。
+ */
+private data class ChartStats(
+    val avg: Int,
+    val min: Int,
+    val max: Int,
+    val startTime: Long,
+    val endTime: Long
+)
+
+/**
+ * 统计卡片：2×2 网格显示平均/最低/最高/时间。
+ * 28dp 圆角 + surfaceContainer 背景，与设置页卡片风格统一。
+ * 时间用 HH:mm 紧凑格式（去掉秒），避免竖屏半屏宽度放不下起止时间。
+ */
+@Composable
+private fun SessionStatsCard(
+    stats: ChartStats,
+    modifier: Modifier = Modifier
+) {
+    val compactTimeFormat = remember { SimpleDateFormat("HH:mm", Locale.getDefault()) }
+    val startTimeStr = remember(stats.startTime, compactTimeFormat) {
+        compactTimeFormat.format(Date(stats.startTime))
+    }
+    val endTimeStr = remember(stats.endTime, compactTimeFormat) {
+        compactTimeFormat.format(Date(stats.endTime))
+    }
+
+    Surface(
+        modifier = modifier,
+        shape = RoundedCornerShape(28.dp),
+        color = MaterialTheme.colorScheme.surfaceContainer
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                StatCell(
+                    label = stringResource(R.string.stat_avg),
+                    value = stringResource(R.string.stat_bpm_value, stats.avg),
+                    modifier = Modifier.weight(1f)
+                )
+                StatCell(
+                    label = stringResource(R.string.stat_min),
+                    value = stringResource(R.string.stat_bpm_value, stats.min),
+                    modifier = Modifier.weight(1f)
+                )
+            }
+            Spacer(Modifier.height(16.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                StatCell(
+                    label = stringResource(R.string.stat_max),
+                    value = stringResource(R.string.stat_bpm_value, stats.max),
+                    modifier = Modifier.weight(1f)
+                )
+                StatCell(
+                    label = stringResource(R.string.stat_time),
+                    value = stringResource(R.string.stat_time_range, startTimeStr, endTimeStr),
+                    modifier = Modifier.weight(1f)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun StatCell(
+    label: String,
+    value: String,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.Start
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Spacer(Modifier.height(4.dp))
+        Text(
+            text = value,
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onSurface,
+            fontWeight = FontWeight.Medium,
+            maxLines = 1
+        )
+    }
+}
+
+/**
+ * 图表加载骨架屏。
+ *
+ * 进入详情页时短暂显示，避免 Vico 图表首次初始化与导航转场动画争抢主线程。
+ * 用 surfaceVariant 半透明背景 + 16dp 圆角模拟图表区域外观，无需额外动画依赖。
+ * 323 条本地数据查询通常 < 50ms，骨架屏一闪而过，用户基本无感。
+ */
+@Composable
+private fun ChartSkeleton(modifier: Modifier = Modifier) {
+    Surface(
+        modifier = modifier,
+        shape = RoundedCornerShape(16.dp),
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+    ) {}
 }

@@ -1,4 +1,4 @@
-﻿# ============================================================================
+# ============================================================================
 # ProGuard / R8 规则配置
 # 项目：HeartRateMonitorMobile
 # 目标：开启 isMinifyEnabled + isShrinkResources 后保证运行时稳定
@@ -16,9 +16,9 @@
 
 # ----------------------------------------------------------------------------
 # 2. Kotlin 元数据保留（Kotlin 反射 / 协程内部依赖）
+#    - kotlin.Metadata：R8 默认保留（mapping.txt 已验证未改名）
+#    - **$$serializer：仅 kotlinx.serialization 需要，本项目未使用
 # ----------------------------------------------------------------------------
--keep class kotlin.Metadata { *; }
--keepclassmembers class **$$serializer { *; }
 -keepclassmembers class kotlin.** { *; }
 -dontwarn kotlin.**
 
@@ -28,28 +28,27 @@
 -dontwarn kotlinx.coroutines.**
 
 # ----------------------------------------------------------------------------
-# 3. Room 数据库（关键：实体字段名被生成的 _Impl 类按名访问）
+# 3. Room 3 数据库（关键：实体字段名被生成的 _Impl 类按名访问）
 #    包路径：com.github.heartratemonitor_compose.data.db
 # ----------------------------------------------------------------------------
 -keep class com.github.heartratemonitor_compose.data.db.** { *; }
--keep class androidx.room.** { *; }
--keep class * extends androidx.room.RoomDatabase { *; }
--keep @androidx.room.Entity class * { *; }
--keep @androidx.room.Dao class * { *; }
+-keep class androidx.room3.** { *; }
+-keep class * extends androidx.room3.RoomDatabase { *; }
+-keep @androidx.room3.Entity class * { *; }
+-keep @androidx.room3.Dao class * { *; }
 -keepclassmembers class * {
-    @androidx.room.* <fields>;
-    @androidx.room.* <methods>;
+    @androidx.room3.* <fields>;
+    @androidx.room3.* <methods>;
 }
--dontwarn androidx.room.paging.**
+-dontwarn androidx.room3.paging.**
 
 # ----------------------------------------------------------------------------
 # 4. NanoHTTPD（内置 HTTP 服务器）
+#    NanoHTTPD 2.3.1 实际包名为 fi.iki.elonen（org.nanohttpd 仅是 Maven 坐标，
+#    运行时不存在该包；已通过 mapping.txt 验证 0 匹配）。
 # ----------------------------------------------------------------------------
--keep class org.nanohttpd.** { *; }
 -keep class fi.iki.elonen.** { *; }
--keepclassmembers class org.nanohttpd.** { *; }
 -keepclassmembers class fi.iki.elonen.** { *; }
--dontwarn org.nanohttpd.**
 -dontwarn fi.iki.elonen.**
 
 # ----------------------------------------------------------------------------
@@ -76,17 +75,14 @@
 
 # ----------------------------------------------------------------------------
 # 9. 项目数据类：Webhook / WebhookTrigger
-#    原因：使用 org.json.JSONObject put/get 显式按字段名访问，
-#          虽非反射，但保留字段名更稳妥，避免与 SharedPreferences 中
-#          已存的 JSON 字符串不匹配。
+#    - Webhook：通过 org.json.JSONObject put/get 显式按字符串字面量访问
+#      （put("name", name) / getString("name")），字段名被混淆不影响 JSON
+#      key（key 是源码中的字符串字面量）。无需 keep 字段。
+#    - WebhookTrigger：valueOf(String) 和 .name 走反射，必须保留枚举常量名。
 # ----------------------------------------------------------------------------
--keep class com.github.heartratemonitor_compose.data.Webhook { *; }
 -keep class com.github.heartratemonitor_compose.data.WebhookTrigger { *; }
--keepclassmembers class com.github.heartratemonitor_compose.data.Webhook {
-    <fields>;
-}
 -keepclassmembers enum com.github.heartratemonitor_compose.data.WebhookTrigger {
-    *;
+    <fields>;
 }
 
 # ----------------------------------------------------------------------------
@@ -164,6 +160,6 @@
 
 # ----------------------------------------------------------------------------
 # 16. R 文件（资源 ID 引用）
+#     R8 默认会将 R 字段内联为编译期常量并移除 R 类本身（mapping.txt 已验证
+#     heartratemonitor_compose.R 不存在）。无需手动 keep。
 # ----------------------------------------------------------------------------
--keep class com.github.heartratemonitor_compose.R { *; }
--keep class com.github.heartratemonitor_compose.R$* { *; }

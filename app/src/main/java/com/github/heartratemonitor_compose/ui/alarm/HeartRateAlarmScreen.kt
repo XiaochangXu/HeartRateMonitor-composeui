@@ -15,10 +15,10 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -457,7 +457,7 @@ private fun AlarmSettingsCard(
                     value = highThreshold,
                     onValueChange = onHighThresholdChange,
                     range = maxOf(HIGH_THRESHOLD_MIN, lowThreshold + 1)..HIGH_THRESHOLD_MAX,
-                    suffix = " BPM",
+                    suffix = " bpm",
                     leadingIcon = painterResource(R.drawable.ic_trending_up)
                 )
             }
@@ -469,7 +469,7 @@ private fun AlarmSettingsCard(
                     value = lowThreshold,
                     onValueChange = onLowThresholdChange,
                     range = LOW_THRESHOLD_MIN..minOf(LOW_THRESHOLD_MAX, highThreshold - 1),
-                    suffix = " BPM",
+                    suffix = " bpm",
                     leadingIcon = painterResource(R.drawable.ic_trending_down)
                 )
             }
@@ -553,7 +553,9 @@ private fun AlarmItem(
     Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier),
+            // 先 clip 成卡片形状，再挂 clickable，
+            // 否则 ripple / 长按激活范围会超出圆角变成矩形
+            .then(if (onClick != null) Modifier.clip(shape).clickable(onClick = onClick) else Modifier),
         shape = shape,
         color = MaterialTheme.colorScheme.surfaceContainer,
         contentColor = MaterialTheme.colorScheme.onSurface
@@ -588,7 +590,7 @@ private fun AlarmSwitch(
             Surface(
                 modifier = Modifier.size(40.dp),
                 shape = CircleShape,
-                color = lerp(MaterialTheme.colorScheme.primaryContainer, MaterialTheme.colorScheme.surfaceContainer, 0.4f)
+                color = MaterialTheme.colorScheme.primaryContainer
             ) {
                 Box(contentAlignment = Alignment.Center) {
                     Icon(
@@ -643,7 +645,7 @@ private fun AlarmDragSlider(
                 Surface(
                     modifier = Modifier.size(40.dp),
                     shape = CircleShape,
-                    color = lerp(MaterialTheme.colorScheme.primaryContainer, MaterialTheme.colorScheme.surfaceContainer, 0.4f)
+                    color = MaterialTheme.colorScheme.primaryContainer
                 ) {
                     Box(contentAlignment = Alignment.Center) {
                         Icon(

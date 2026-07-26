@@ -290,7 +290,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application),
                 newPoints.add(point)
             }
         } else {
-            // 设备不支持 RR:回退到 BPM + 墙钟时间戳,同步 lastChartTimeSec
+            // 设备不支持 RR:回退到 bpm + 墙钟时间戳,同步 lastChartTimeSec
             val timeDiffSeconds = (System.currentTimeMillis() - chartStartTime) / 1000f
             val point = HeartRatePoint(timeDiffSeconds, measurement.bpm.toFloat())
             appendPoint(point)

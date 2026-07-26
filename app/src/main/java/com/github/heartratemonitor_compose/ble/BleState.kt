@@ -11,7 +11,7 @@ import com.juul.kable.Advertisement
  *
  * @param messageRes 要在UI上显示给用户的状态文本资源 ID（0 表示使用动态消息）。
  */
-sealed class BleState(@StringRes val messageRes: Int) {
+sealed class BleState(@param:StringRes val messageRes: Int) {
     object Idle : BleState(R.string.ble_idle)
 
     object Scanning : BleState(R.string.ble_scanning)

@@ -50,7 +50,8 @@
     <td align="center"><img src="images/1.jpg" width="270"/><br/><sub>实时心率监测主页</sub></td>
     <td align="center"><img src="images/2.jpg" width="270"/><br/><sub>心率历史与图表分析</sub></td>
     <td align="center"><img src="images/3.jpg" width="270"/><br/><sub>个性化设置与悬浮窗</sub></td>
-  </tr>
+    <td align="center"><img src="images/4.jpg" width="270"/><br/><sub>版本与详细信息</sub></td>
+   </tr>
 </table>
 
 -----

@@ -22,7 +22,7 @@
     <string name="please_disconnect_first">Please disconnect the device first</string>
     <string name="speed">Speed</string>
     <string name="cd_favorite">Favorite</string>
-    <string name="bpm_unit">BPM</string>
+    <string name="bpm_unit">bpm</string>
     <string name="fullscreen_exit_hint">Tap screen or press back to exit</string>
     <string name="history_not_enabled">History Not Enabled</string>
     <string name="device_not_connected">Device Not Connected</string>
@@ -79,8 +79,8 @@
     <string name="status_bar_resident">Status Bar Resident</string>
     <string name="status_bar_heart_rate">Status Bar Heart Rate</string>
     <string name="subtitle_status_bar_heart_rate">Show real-time heart rate in status bar</string>
-    <string name="display_bpm_unit">Display BPM Unit</string>
-    <string name="subtitle_display_bpm_unit">Show BPM unit suffix after the value</string>
+    <string name="display_bpm_unit">Display bpm Unit</string>
+    <string name="subtitle_display_bpm_unit">Show bpm unit suffix after the value</string>
     <string name="horizontal_position">Horizontal Position</string>
     <string name="vertical_adjust">Vertical Adjust</string>
     <string name="overall_size">Overall Size</string>
@@ -94,7 +94,7 @@
     <!-- SettingsScreen - Floating Window -->
     <string name="floating_window_style">Floating Window Style</string>
     <string name="floating_window_tip">Long-press the floating window to enable touch pass-through. When enabled, the entire floating window stops intercepting touches and passes them to the app below. Tap the "Disable Touch Pass-through" notification button to resume dragging</string>
-    <string name="display_bpm_text">Display BPM Text</string>
+    <string name="display_bpm_text">Display bpm Text</string>
     <string name="subtitle_display_bpm_text">Show heart rate value in floating window</string>
     <string name="display_heart_icon">Display Heart Icon</string>
     <string name="subtitle_display_heart_icon">Show heart icon in floating window</string>
@@ -185,6 +185,12 @@
     <string name="cd_rotate_screen">Rotate screen</string>
     <string name="no_heart_rate_data">No heart rate data to display</string>
     <string name="marker_heart_rate">HR: %1$d bpm\nTime: %2$s</string>
+    <string name="stat_avg">Average</string>
+    <string name="stat_min">Min</string>
+    <string name="stat_max">Max</string>
+    <string name="stat_time">Time</string>
+    <string name="stat_bpm_value">%1$d bpm</string>
+    <string name="stat_time_range">%1$s - %2$s</string>
 
     <!-- FavoriteDevicesScreen -->
     <string name="cd_clear_all_favorites">Clear all favorite devices</string>
@@ -340,7 +346,7 @@
     <string name="update_no_valid_release">No valid official release found</string>
 
     <!-- Heart Rate Alarm Service notifications -->
-    <string name="alarm_notification_body">Heart rate %1$d BPM %2$s %3$d, please pay attention</string>
+    <string name="alarm_notification_body">Heart rate %1$d bpm %2$s %3$d, please pay attention</string>
     <string name="alarm_channel_name">Heart Rate Alert</string>
     <string name="alarm_channel_desc">Alert notification when heart rate exceeds set range</string>
     <string name="alarm_resident_channel_name">Heart Rate Alert Resident</string>

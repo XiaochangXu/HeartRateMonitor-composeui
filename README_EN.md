@@ -50,6 +50,8 @@
     <td align="center"><img src="images/1.jpg" width="270"/><br/><sub>Real-time heart rate monitoring</sub></td>
     <td align="center"><img src="images/2.jpg" width="270"/><br/><sub>History & chart analysis</sub></td>
     <td align="center"><img src="images/3.jpg" width="270"/><br/><sub>Personalization & floating window</sub></td>
+    <td align="center"><img src="images/4.jpg" width="270"/><br/
+    ><sub>About and details</sub></td>
   </tr>
 </table>
 

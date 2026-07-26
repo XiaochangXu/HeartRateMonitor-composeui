@@ -159,7 +159,11 @@ fun HeartRateMonitorMobileTheme(
             val activity = view.context.findActivity()
             if (activity != null) {
                 val window = activity.window
+                // statusBarColor/navigationBarColor 在 API 35 被弃用（edge-to-edge 默认强制），
+                // 但旧版本仍需设置透明色实现沉浸式效果
+                @Suppress("DEPRECATION")
                 window.statusBarColor = android.graphics.Color.TRANSPARENT
+                @Suppress("DEPRECATION")
                 window.navigationBarColor = android.graphics.Color.TRANSPARENT
                 val isLight = colorScheme.surface.brightness() > 0.5
                 WindowCompat.getInsetsController(window, view).apply {

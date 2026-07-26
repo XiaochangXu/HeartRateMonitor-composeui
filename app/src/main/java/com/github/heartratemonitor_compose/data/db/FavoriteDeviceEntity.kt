@@ -1,7 +1,7 @@
-﻿package com.github.heartratemonitor_compose.data.db
+package com.github.heartratemonitor_compose.data.db
 
-import androidx.room.Entity
-import androidx.room.PrimaryKey
+import androidx.room3.Entity
+import androidx.room3.PrimaryKey
 
 /**
  * 收藏设备实体（替代原 SharedPreferences JSON 数组存储）。

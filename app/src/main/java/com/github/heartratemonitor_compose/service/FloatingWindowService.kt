@@ -221,6 +221,8 @@ class FloatingWindowService : Service() {
     }
 
     private fun initLayoutParams() {
+        // TYPE_PHONE 在 API 26 已被 TYPE_APPLICATION_OVERLAY 取代，旧设备仍需 fallback
+        @Suppress("DEPRECATION")
         val type = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY else WindowManager.LayoutParams.TYPE_PHONE
         layoutParams = WindowManager.LayoutParams(
             WindowManager.LayoutParams.WRAP_CONTENT,
