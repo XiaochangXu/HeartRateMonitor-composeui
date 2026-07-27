@@ -200,11 +200,9 @@ fun FullscreenSoundScreen(
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 16.dp)
         ) {
-            Spacer(Modifier.height(8.dp))
+            Spacer(Modifier.height(16.dp))
 
             // ── 语音选项 ──
-            SectionTitle(stringResource(R.string.sound_settings))
-
             SettingsGroupCard {
                 SettingsItem(isFirst = true) {
                     SoundSwitchRow(
@@ -247,8 +245,6 @@ fun FullscreenSoundScreen(
             Spacer(Modifier.height(24.dp))
 
             // ── 声音试听 ──
-            SectionTitle(stringResource(R.string.sound_preview))
-
             SettingsGroupCard {
                 // 开始试听
                 SettingsItem(isFirst = true) {

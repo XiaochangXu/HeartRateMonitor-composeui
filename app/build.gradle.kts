@@ -25,8 +25,8 @@ android {
         applicationId = "com.github.heartratemonitor_compose"
         minSdk = 24
         targetSdk = 37
-        versionCode = 35
-        versionName = "4.1"
+        versionCode = 36
+        versionName = "4.2"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -120,4 +120,7 @@ dependencies {
     implementation(libs.nanohttpd.websocket)
 
     implementation(libs.materialkolor)
+
+    implementation(libs.backdrop)
+    implementation(libs.capsule)
 }

@@ -44,7 +44,6 @@ import androidx.compose.material.icons.filled.BluetoothDisabled
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.HeartBroken
 import androidx.compose.material.icons.filled.Fullscreen
-import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.StarBorder
@@ -89,6 +88,7 @@ import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -103,6 +103,8 @@ import com.github.heartratemonitor_compose.data.repository.SettingsRepository
 import com.github.heartratemonitor_compose.util.settingsRepository
 import com.juul.kable.Advertisement
 import kotlin.math.abs
+import kotlin.math.ceil
+import kotlin.math.floor
 import kotlin.math.min
 import kotlin.math.sin
 import kotlin.math.PI
@@ -123,6 +125,13 @@ import com.patrykandpatrick.vico.compose.cartesian.data.CartesianValueFormatter
 import com.patrykandpatrick.vico.compose.cartesian.data.lineModel
 import com.patrykandpatrick.vico.compose.cartesian.data.lineSeries
 import com.patrykandpatrick.vico.compose.common.Fill
+import com.patrykandpatrick.vico.compose.common.data.ExtraStore
+import com.patrykandpatrick.vico.compose.cartesian.decoration.HorizontalLine
+import com.patrykandpatrick.vico.compose.common.Insets
+import com.patrykandpatrick.vico.compose.common.Position
+import com.patrykandpatrick.vico.compose.common.component.rememberLineComponent
+import com.patrykandpatrick.vico.compose.common.component.rememberShapeComponent
+import com.patrykandpatrick.vico.compose.common.component.rememberTextComponent
 import com.github.heartratemonitor_compose.util.SoundManager
 import com.github.heartratemonitor_compose.ui.settings.resolveSoundMode
 import kotlinx.coroutines.delay
@@ -141,14 +150,14 @@ private enum class FullscreenHrState { HIGH, LOW }
  *
  * 内部实时图表用 Vico [CartesianChartHost]（阶段 4 已从 AndroidView{LineChart} 迁移）。
  *
- * @param onOpenHistory 跳转历史页（仍是独立 Activity，阶段6后改 nav route）
+ * @param onToggleFloatingWindow 切换悬浮窗（顶部按钮，原历史入口位置）
  * @param onEnterFullScreen 进入全屏心率模式
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     viewModel: MainViewModel,
-    onOpenHistory: () -> Unit,
+    onToggleFloatingWindow: () -> Unit,
     onNavigateToDevices: () -> Unit,
     onEnterFullScreen: () -> Unit,
     isActive: Boolean = true
@@ -174,6 +183,9 @@ fun HomeScreen(
         .collectWhenActive(isActive, initial = false)
     val isAnimationEnabled by settings.observeBoolean(PrefsKeys.HEARTBEAT_ANIMATION_ENABLED, true)
         .collectWhenActive(isActive, initial = true)
+    // 悬浮窗开关状态（顶部按钮图标切换）
+    val floatingWindowEnabled by settings.observeBoolean(PrefsKeys.FLOATING_WINDOW_ENABLED, false)
+        .collectWhenActive(isActive, initial = false)
 
     val isConnected = appStatus == AppStatus.CONNECTED
 
@@ -188,17 +200,23 @@ fun HomeScreen(
                     )
                 },
                 actions = {
-                    IconButton(onClick = onOpenHistory) {
+                    IconButton(onClick = onToggleFloatingWindow) {
                         Surface(
                             modifier = Modifier.size(40.dp),
                             shape = CircleShape,
-                            color = MaterialTheme.colorScheme.surfaceContainer
+                            color = if (floatingWindowEnabled) MaterialTheme.colorScheme.primary
+                            else MaterialTheme.colorScheme.surfaceContainer
                         ) {
                             Box(contentAlignment = Alignment.Center) {
                                 Icon(
-                                    imageVector = Icons.Filled.History,
-                                    contentDescription = stringResource(R.string.cd_view_history),
-                                    tint = MaterialTheme.colorScheme.onSurface
+                                    painter = painterResource(
+                                        if (floatingWindowEnabled) R.drawable.ic_floating_window_on
+                                        else R.drawable.ic_floating_window_off
+                                    ),
+                                    contentDescription = stringResource(R.string.cd_toggle_floating_window),
+                                    tint = if (floatingWindowEnabled) MaterialTheme.colorScheme.onPrimary
+                                    else MaterialTheme.colorScheme.onSurface,
+                                    modifier = Modifier.size(24.dp)
                                 )
                             }
                         }
@@ -612,9 +630,10 @@ private fun SpeedCard(
  * 渲染特点（向心电图风格靠拢）:
  * - 逐拍数据:RR-Interval 累加时间戳 + 瞬时心率,分辨率高于 1Hz 平均 bpm
  * - 三次贝塞尔插值 (cubic) + 心率红渐变填充,曲线平滑有节律感
- * - 固定 Y 轴生理范围 (40–180 bpm),配合默认网格线,类似 ECG 刻度网格
+ * - 动态 Y 轴范围（数据 min/max ±10，取整到 10 的倍数），配合每 10 bpm 网格线
+ * - 最高/最低极值 HorizontalLine 标注（Max/Min + 数值）
  *
- * 可视窗口:最近 300 秒（scroll 到末尾实现自动跟随）
+ * 可视窗口:最近 60 秒（scroll 到末尾实现自动跟随）
  */
 @Composable
 private fun RealtimeChart(
@@ -647,6 +666,57 @@ private fun RealtimeChart(
     // 心率红主色,ECG 风格
     val lineColor = ComposeColor(0xFFE53935)
 
+    // 计算 1 分钟窗口内的极值，用于 HorizontalLine 标注
+    val maxY = chartDataSnapshot?.yValues?.maxOrNull() ?: 0.0
+    val minY = chartDataSnapshot?.yValues?.minOrNull() ?: 0.0
+
+    // 极值参考线 + 标签组件（微型圆角背景，提升可读性）
+    val extremaLineColor = lineColor.copy(alpha = 0.35f)
+    val extremaLineComp = rememberLineComponent(fill = Fill(extremaLineColor), thickness = 1.dp)
+    val extremaLabelBg = rememberShapeComponent(
+        fill = Fill(MaterialTheme.colorScheme.surfaceContainer),
+        shape = RoundedCornerShape(4.dp)
+    )
+    val extremaLabelStyle = TextStyle(color = lineColor, fontSize = 10.sp)
+    val maxLabelComp = rememberTextComponent(
+        extremaLabelStyle,
+        margins = Insets(start = 6.dp),
+        padding = Insets(start = 6.dp, top = 2.dp, end = 6.dp, bottom = 2.dp),
+        background = extremaLabelBg
+    )
+    val minLabelComp = rememberTextComponent(
+        extremaLabelStyle,
+        margins = Insets(start = 6.dp),
+        padding = Insets(start = 6.dp, top = 2.dp, end = 6.dp, bottom = 2.dp),
+        background = extremaLabelBg
+    )
+    val decorations = remember(maxY, minY) {
+        buildList {
+            if (maxY > 0) {
+                add(
+                    HorizontalLine(
+                        y = { maxY },
+                        line = extremaLineComp,
+                        labelComponent = maxLabelComp,
+                        label = { "Max ${maxY.toInt()}" },
+                        verticalLabelPosition = Position.Vertical.Top
+                    )
+                )
+                if (minY > 0 && minY != maxY) {
+                    add(
+                        HorizontalLine(
+                            y = { minY },
+                            line = extremaLineComp,
+                            labelComponent = minLabelComp,
+                            label = { "Min ${minY.toInt()}" },
+                            verticalLabelPosition = Position.Vertical.Bottom
+                        )
+                    )
+                }
+            }
+        }
+    }
+
     // 圆角卡片容器包裹心率图表，使用主题色适配深色/浅色模式，与 SpeedCard 视觉风格保持一致
     Surface(
         modifier = modifier,
@@ -670,17 +740,26 @@ private fun RealtimeChart(
                             interpolator = LineCartesianLayer.Interpolator.cubic()
                         )
                     ),
-                    // 固定生理范围 Y 轴,稳定刻度便于读数 (类似 ECG 固定网格)
-                    rangeProvider = CartesianLayerRangeProvider.fixed(minY = 40.0, maxY = 180.0)
+                    // 动态 Y 轴范围：数据 min - 10 / max + 10，取整到 10 的倍数，保证网格线落在整数刻度
+                    rangeProvider = remember {
+                        object : CartesianLayerRangeProvider {
+                            override fun getMinY(minY: Double, maxY: Double, extraStore: ExtraStore) =
+                                floor((minY - 10.0) / 10.0) * 10.0
+                            override fun getMaxY(minY: Double, maxY: Double, extraStore: ExtraStore) =
+                                ceil((maxY + 10.0) / 10.0) * 10.0
+                        }
+                    }
                 ),
                 startAxis = VerticalAxis.rememberStart(
-                    // 固定每 20 bpm 一条网格线 (40/60/80/100/120/140/160/180),ECG 风格刻度
-                    itemPlacer = VerticalAxis.ItemPlacer.step({ 20.0 }),
+                    // 每 10 bpm 一条网格线，配合动态范围显示中间刻度
+                    itemPlacer = VerticalAxis.ItemPlacer.step({ 10.0 }),
                     valueFormatter = CartesianValueFormatter { _, value, _ ->
                         value.toInt().toString()
                     }
                 ),
                 bottomAxis = HorizontalAxis.rememberBottom(
+                    // 采样频率低，降低标签密度：每 ~20 个数据点显示一个时间标签（约 3~4 个）
+                    itemPlacer = HorizontalAxis.ItemPlacer.aligned(spacing = { 20 }),
                     valueFormatter = CartesianValueFormatter { _, value, _ ->
                         // value 是整数毫秒（x 值已量化），转回分:秒显示
                         val totalSec = (value / 1000.0).toLong()
@@ -688,21 +767,26 @@ private fun RealtimeChart(
                         val seconds = totalSec % 60
                         String.format("%02d:%02d", minutes, seconds)
                     }
-                )
+                ),
+                decorations = decorations
             ),
             modelProducer = modelProducer,
             modifier = Modifier
                 .fillMaxSize()
                 .padding(8.dp),
-            // 实时图表自动跟随最新数据:模型增长时自动滚动到末尾
+            // 实时图表自动跟随最新数据：每次模型变更都滚动到末尾
+            // OnModelGrowth 仅在数据宽度增加时触发，但 60 秒窗口会同步裁剪旧数据，宽度不变 → 不触发
             scrollState = rememberVicoScrollState(
                 scrollEnabled = true,
-                autoScrollCondition = AutoScrollCondition.OnModelGrowth
+                autoScrollCondition = AutoScrollCondition { _, _ -> true }
             ),
             zoomState = rememberVicoZoomState(
                 zoomEnabled = true,
                 initialZoom = Zoom.Content
-            )
+            ),
+            // 禁用 diff 动画与初始生长动画，避免曲线从下往上长
+            animationSpec = null,
+            animateIn = false
         )
     }
 }

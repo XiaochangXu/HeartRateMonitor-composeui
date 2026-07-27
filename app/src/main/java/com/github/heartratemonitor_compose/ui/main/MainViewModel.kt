@@ -103,7 +103,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application),
      * 首页实时图表只保留最近 N 秒的数据，避免长时间连接后内存和渲染开销线性增长。
      * 超过该窗口的旧点会随新点到达被移除；完整历史数据仍由 Room 持久化（历史记录开启时）。
      */
-    private val MAX_CHART_WINDOW_SECONDS = 300f
+    private val MAX_CHART_WINDOW_SECONDS = 60f
 
     /**
      * TRIM 内存预警时图表降采样后保留的最近点数。
@@ -210,6 +210,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application),
                     if (_appStatus.value == AppStatus.CONNECTED && newStatus != AppStatus.CONNECTED) {
                         _sessionMaxHr.value = 0
                         _sessionMinHr.value = 0
+                        // 断开时立即清空图表数据 + snapshot，避免重连时残留旧曲线
+                        clearChartData()
                     }
 
                     if (newStatus != AppStatus.CONNECTING) {
@@ -236,6 +238,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application),
     private fun initializeChart() {
         chartStartTime = System.currentTimeMillis()
         chartDataPoints.clear()
+        // 兜底：清空 X/Y 双端队列与 snapshot，防止断开事件丢失时重连残留旧数据
+        chartXValues.clear()
+        chartYValues.clear()
+        _chartDataSnapshot.value = null
         lastChartTimeSec = 0f
         _sessionMaxHr.value = 0
         _sessionMinHr.value = 0

@@ -175,7 +175,7 @@ fun HeartRateAlarmScreen(
                 .padding(top = padding.calculateTopPadding())
                 .verticalScroll(rememberScrollState())
                 .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
             if (!excludePostureDetection) {
                 PostureCard(
@@ -351,13 +351,6 @@ private fun CalibrationCard(
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            Text(
-                text = stringResource(R.string.posture_calibration),
-                style = MaterialTheme.typography.labelLarge,
-                color = MaterialTheme.colorScheme.primary
-            )
-            Spacer(Modifier.height(12.dp))
-
             if (isCalibrating) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(
@@ -424,13 +417,6 @@ private fun AlarmSettingsCard(
     onRepeatIntervalChange: (Int) -> Unit
 ) {
     Column {
-        Text(
-            text = stringResource(R.string.alarm_settings),
-            style = MaterialTheme.typography.labelLarge,
-            color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.padding(bottom = 12.dp)
-        )
-
         AlarmGroupCard {
             AlarmItem(isFirst = true) {
                 AlarmSwitch(

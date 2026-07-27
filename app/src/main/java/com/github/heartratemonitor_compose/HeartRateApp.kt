@@ -5,6 +5,7 @@ import com.github.heartratemonitor_compose.data.di.AppContainer
 import com.github.heartratemonitor_compose.service.FairMemoryNotifier
 import com.github.heartratemonitor_compose.service.FairMemoryReceiver
 import com.github.heartratemonitor_compose.service.MemoryDiagnostics
+import com.github.heartratemonitor_compose.ui.theme.LiquidGlassState
 import com.github.heartratemonitor_compose.ui.theme.ThemePreviewCache
 import com.github.heartratemonitor_compose.ui.theme.ThemeState
 import kotlinx.coroutines.CoroutineScope
@@ -39,6 +40,7 @@ class HeartRateApp : Application() {
     override fun onCreate() {
         super.onCreate()
         ThemeState.init(settingsRepository)
+        LiquidGlassState.init(settingsRepository)
         FairMemoryReceiver.getInstance().initialize(this)
         // 公平运行内存用户提示：创建通知渠道并注册关闭应用广播接收器
         FairMemoryNotifier.initialize(this)

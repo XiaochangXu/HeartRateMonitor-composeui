@@ -78,7 +78,7 @@ fun WebhookScreen(
                 .padding(top = padding.calculateTopPadding())
                 .verticalScroll(rememberScrollState())
                 .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
             if (webhooks.isEmpty()) {
                 Box(

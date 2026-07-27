@@ -25,7 +25,8 @@ import com.github.heartratemonitor_compose.data.db.FavoriteDeviceEntity
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FavoriteDevicesScreen(
-    onNavigateBack: () -> Unit
+    onNavigateBack: () -> Unit,
+    isInTab: Boolean = false
 ) {
     val viewModel: FavoriteDevicesViewModel = viewModel()
     val devices by viewModel.favorites.collectAsStateWithLifecycle()
@@ -43,14 +44,17 @@ fun FavoriteDevicesScreen(
             TopAppBar(
                 title = { Text(stringResource(R.string.favorite_devices), style = MaterialTheme.typography.headlineSmall) },
                 navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
-                        Surface(
-                            modifier = Modifier.size(40.dp),
-                            shape = CircleShape,
-                            color = MaterialTheme.colorScheme.surfaceContainer
-                        ) {
-                            Box(contentAlignment = Alignment.Center) {
-                                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.cd_back))
+                    // Tab 模式下不显示返回按钮
+                    if (!isInTab) {
+                        IconButton(onClick = onNavigateBack) {
+                            Surface(
+                                modifier = Modifier.size(40.dp),
+                                shape = CircleShape,
+                                color = MaterialTheme.colorScheme.surfaceContainer
+                            ) {
+                                Box(contentAlignment = Alignment.Center) {
+                                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.cd_back))
+                                }
                             }
                         }
                     }

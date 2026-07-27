@@ -25,7 +25,6 @@ import com.github.heartratemonitor_compose.data.system.OverlayPermissionProvider
 import com.github.heartratemonitor_compose.service.ServiceController
 import com.github.heartratemonitor_compose.ui.main.MainActivity
 
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
@@ -65,33 +64,34 @@ fun SettingsScreen(
                 .padding(horizontal = 16.dp),
             verticalArrangement = Arrangement.spacedBy(0.dp)
         ) {
+            Spacer(Modifier.height(16.dp))
             GeneralSection(settings, onNavigate, showToast)
-            Spacer(Modifier.height(24.dp))
+            Spacer(Modifier.height(32.dp))
             BluetoothSection(settings)
-            Spacer(Modifier.height(24.dp))
+            Spacer(Modifier.height(32.dp))
             IntegrationSection(onNavigate, settings)
-            Spacer(Modifier.height(24.dp))
+            Spacer(Modifier.height(32.dp))
             StatusBarSection(
                 settings = settings,
                 onShowColorPicker = { prefKey, title, defaultColor ->
                     colorPickerRequest = ColorPickerRequest(prefKey, title, defaultColor)
                 }
             )
-            Spacer(Modifier.height(24.dp))
+            Spacer(Modifier.height(32.dp))
             FloatingWindowSection(
                 settings = settings,
                 onShowColorPicker = { prefKey, title, defaultColor ->
                     colorPickerRequest = ColorPickerRequest(prefKey, title, defaultColor)
                 }
             )
-            Spacer(Modifier.height(24.dp))
+            Spacer(Modifier.height(32.dp))
             AboutSection(onNavigate)
-            // 内容延伸到屏幕底部（iOS 风格），末尾留出胶囊+系统导航栏空间
+            // 内容延伸到屏幕底部
             Spacer(Modifier.height(64.dp + 8.dp + WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()))
         }
     }
 
-    // Compose ColorPickerDialog（替代原 ColorPickerView 依赖）
+    // Compose ColorPickerDialog
     colorPickerRequest?.let { request ->
         ColorPickerDialog(
             title = request.title,
@@ -114,14 +114,6 @@ private data class ColorPickerRequest(
     val defaultColor: Int
 )
 
-// ──────────────────────────────────────────────
-// 设置项组件
-// ──────────────────────────────────────────────
-
-// ──────────────────────────────────────────────
-// 各分组实现
-// ──────────────────────────────────────────────
-
 @Composable
 private fun GeneralSection(
     settings: SettingsRepository,
@@ -136,11 +128,10 @@ private fun GeneralSection(
     val showWarningDialog = remember { mutableStateOf(false) }
     val showSpeedDialog = remember { mutableStateOf(false) }
 
-    // Icon Container: 常规功能使用蓝色系
+    // Icon Container
     val containerColor = MaterialTheme.colorScheme.primaryContainer
     val iconTint = MaterialTheme.colorScheme.onPrimaryContainer
 
-    SectionTitle(stringResource(R.string.general))
     SettingsGroupCard {
         SettingsItem(isFirst = true) {
             SettingsSwitch(
@@ -262,9 +253,9 @@ private fun GeneralSection(
                 leadingIconContainerColor = containerColor, leadingIconTint = iconTint)
         }
 
-        SettingsItem(onClick = { onNavigate("favorite") }) {
-            SettingsLink(title = stringResource(R.string.favorite_devices), subtitle = stringResource(R.string.subtitle_favorite_devices),
-                leadingIcon = painterResource(R.drawable.ic_star),
+        SettingsItem(onClick = { onNavigate("nav_style") }) {
+            SettingsLink(title = stringResource(R.string.nav_style), subtitle = stringResource(R.string.subtitle_nav_style),
+                leadingIcon = painterResource(R.drawable.ic_nav_options),
                 leadingIconContainerColor = containerColor, leadingIconTint = iconTint)
         }
 
@@ -285,7 +276,6 @@ private fun BluetoothSection(settings: SettingsRepository) {
     val containerColor = MaterialTheme.colorScheme.primaryContainer
     val iconTint = MaterialTheme.colorScheme.onPrimaryContainer
 
-    SectionTitle(stringResource(R.string.bluetooth))
     SettingsGroupCard {
         SettingsItem(isFirst = true) {
             SettingsSwitch(
@@ -328,7 +318,6 @@ private fun IntegrationSection(
     val containerColor = MaterialTheme.colorScheme.primaryContainer
     val iconTint = MaterialTheme.colorScheme.onPrimaryContainer
 
-    SectionTitle(stringResource(R.string.integration))
     SettingsGroupCard {
         SettingsItem(isFirst = true, onClick = { onNavigate("server") }) {
             SettingsLink(title = stringResource(R.string.http_websocket_server), subtitle = stringResource(R.string.subtitle_http_websocket_server),
@@ -356,7 +345,6 @@ private fun StatusBarSection(
     val containerColor = MaterialTheme.colorScheme.primaryContainer
     val iconTint = MaterialTheme.colorScheme.onPrimaryContainer
 
-    SectionTitle(stringResource(R.string.status_bar_resident))
     SettingsGroupCard {
         StatusBarResidentItem(settings, isFirst = true, containerColor = containerColor, iconTint = iconTint)
 
@@ -591,7 +579,6 @@ private fun FloatingWindowSection(
     val containerColor = MaterialTheme.colorScheme.primaryContainer
     val iconTint = MaterialTheme.colorScheme.onPrimaryContainer
 
-    SectionTitle(stringResource(R.string.floating_window_style))
     SettingsGroupCard {
         SettingsItem(isFirst = true) {
             Text(
@@ -758,7 +745,6 @@ private fun AboutSection(
     val containerColor = MaterialTheme.colorScheme.primaryContainer
     val iconTint = MaterialTheme.colorScheme.onPrimaryContainer
 
-    SectionTitle(stringResource(R.string.about))
     SettingsGroupCard {
         SettingsItem(isFirst = true, onClick = { onNavigate("about_details") }) {
             SettingsLink(

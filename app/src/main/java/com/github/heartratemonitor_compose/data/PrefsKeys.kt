@@ -69,6 +69,12 @@ object PrefsKeys {
     const val THEME_CUSTOM_SEED = "theme_custom_seed"
     const val THEME_PALETTE_STYLE = "theme_palette_style"
 
+    // ── 液态玻璃（底部导航栏）──
+    // blur 需 API 31+，lens（扭曲）需 API 33+，低版本静默失效
+    const val LIQUID_GLASS_ENABLED = "liquid_glass_enabled"
+    const val LIQUID_GLASS_BLUR = "liquid_glass_blur"            // Float，dp
+    const val LIQUID_GLASS_DISTORTION = "liquid_glass_distortion" // Float，dp
+
     // ── 公平运行内存 / KILL 现场保存 ──
     const val KILL_STATE_SAVED = "kill_state_saved"
     const val KILL_STATE_ROUTE = "kill_state_route"

@@ -8,27 +8,16 @@ import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContentTransitionScope
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.expandHorizontally
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -41,12 +30,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -57,21 +44,16 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
-import androidx.compose.ui.input.nestedscroll.NestedScrollSource
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -102,26 +84,25 @@ import com.github.heartratemonitor_compose.ui.main.MainViewModel
 import com.github.heartratemonitor_compose.ui.server.ServerScreen
 import com.github.heartratemonitor_compose.ui.settings.FairMemoryScreen
 import com.github.heartratemonitor_compose.ui.settings.FullscreenSoundScreen
+import com.github.heartratemonitor_compose.ui.settings.NavStyleScreen
 import com.github.heartratemonitor_compose.ui.settings.SettingsScreen
+import com.github.heartratemonitor_compose.ui.theme.LiquidGlassState
 import com.github.heartratemonitor_compose.ui.theme.ThemeSettingsScreen
 import com.github.heartratemonitor_compose.ui.webhook.WebhookScreen
+import com.github.heartratemonitor_compose.ui.widgets.FloatingBottomBar
+import com.github.heartratemonitor_compose.ui.widgets.GlassTabItem
 import com.github.heartratemonitor_compose.util.settingsRepository
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.delay
+import com.kyant.backdrop.backdrops.layerBackdrop
+import com.kyant.backdrop.backdrops.rememberLayerBackdrop
+import com.kyant.capsule.ContinuousCapsule
 import kotlinx.coroutines.launch
 
 
 private const val FLOATING_NAV_HEIGHT = 64
-private const val FLOATING_NAV_BOTTOM_MARGIN = 0
+private const val FLOATING_NAV_BOTTOM_MARGIN = 12
 private const val NAV_ITEM_DURATION = 200
-private val NAV_INDICATOR_HEIGHT = 40.dp
-private val NAV_INDICATOR_CORNER = 20.dp
 private val NAV_ICON_SIZE = 24.dp
 
-// Tab 页切换动画时长
-private const val TAB_SLIDE_DURATION = 200
 // 二级页面 NavHost 转场动画时长
 private const val SECONDARY_SLIDE_DURATION = 350
 // 进入二级页面时底层 Tab 层向左位移比例（视差效果）
@@ -129,27 +110,6 @@ private const val BACKGROUND_PARALLAX_RATIO = 0.2f
 
 // NavHost 占位路由：Tab 页在 NavHost 外部管理，此路由仅作为 startDestination
 private const val TAB_PLACEHOLDER = "tab_placeholder"
-
-// ── 悬浮胶囊导航栏动画规格 ──
-// spring 物理弹簧：短距离自动快速完成，长距离平滑过渡，方向切换即时响应
-private val navBarHideSpec: AnimationSpec<Float> = spring(
-    dampingRatio = Spring.DampingRatioMediumBouncy,
-    stiffness = 600f
-)
-private val navBarShowSpec: AnimationSpec<Float> = spring(
-    dampingRatio = Spring.DampingRatioMediumBouncy,
-    stiffness = 600f
-)
-// 底部导航栏隐藏/显示触发的最小滚动距离（px），过滤手指轻微抖动
-private const val NAV_BAR_SCROLL_THRESHOLD = 8f
-
-/** 导航栏 Channel 消息：串行化 scroll 追踪和 fling 动画，消除竞态 */
-private sealed class NavBarMsg {
-    /** 滚动跟踪：立即 snapTo 到该位置 */
-    data class Track(val progress: Float) : NavBarMsg()
-    /** Fling 结束：平滑动画到目标位置 */
-    data class AnimateTo(val target: Float, val spec: AnimationSpec<Float>) : NavBarMsg()
-}
 
 /**
  * 路由定义。使用 Navigation Compose 管理页面栈，替代原来的手动 secondaryStack。
@@ -167,6 +127,7 @@ sealed class Screen(val route: String) {
     object Webhook : Screen("webhook")
     object FairMemory : Screen("fair_memory")
     object Theme : Screen("theme")
+    object NavStyle : Screen("nav_style")
     object Devices : Screen("devices")
     object FullscreenSound : Screen("fullscreen_sound")
     object License : Screen("license")
@@ -174,18 +135,18 @@ sealed class Screen(val route: String) {
     object AboutDetails : Screen("about_details")
 }
 
-/** 底部导航 Tab 页 */
-private fun Screen.isTab(): Boolean = this is Screen.Home || this is Screen.Settings
+/** 底部导航 Tab 页：Home / History / Favorite / Settings 均为 Tab */
+private fun Screen.isTab(): Boolean =
+    this is Screen.Home || this is Screen.History || this is Screen.Favorite || this is Screen.Settings
 
 /** SettingsScreen 用字符串路由映射到 Navigation Compose 路由 */
 private fun String.toScreenRoute(): String = when (this) {
-    "favorite" -> Screen.Favorite.route
     "alarm" -> Screen.Alarm.route
     "server" -> Screen.Server.route
     "webhook" -> Screen.Webhook.route
     "fair_memory" -> Screen.FairMemory.route
-    "history" -> Screen.History.route
     "theme" -> Screen.Theme.route
+    "nav_style" -> Screen.NavStyle.route
     "devices" -> Screen.Devices.route
     "fullscreen_sound" -> Screen.FullscreenSound.route
     "license" -> Screen.License.route
@@ -194,55 +155,14 @@ private fun String.toScreenRoute(): String = when (this) {
     else -> Screen.Home.route
 }
 
-/**
- * 二级页面包装：卡片滑入时带圆角，贴合屏幕边缘时自动收缩为 0dp。
- */
-@Composable
-private fun SecondaryPageWrapper(
-    navController: NavController,
-    route: String,
-    content: @Composable () -> Unit
-) {
-    val backStack by navController.currentBackStack.collectAsStateWithLifecycle()
-    val isCurrent = backStack.lastOrNull()?.destination?.route == route
-
-    // 圆角动画：仅在页面首次入栈时触发，动画完成后关闭 clip
-    var roundCornerActive by remember { mutableStateOf(false) }
-
-    DisposableEffect(route) {
-        roundCornerActive = true
-        val job = Job()
-        CoroutineScope(job).launch {
-            delay(SECONDARY_SLIDE_DURATION.toLong())
-            roundCornerActive = false
-        }
-        onDispose {
-            job.cancel()
-            roundCornerActive = false
-        }
-    }
-
-    val animatingRoundCorner by animateDpAsState(
-        targetValue = if (roundCornerActive && isCurrent) 28.dp else 0.dp,
-        animationSpec = tween(
-            durationMillis = SECONDARY_SLIDE_DURATION,
-            easing = FastOutSlowInEasing
-        ),
-        label = "secondary_corner_radius"
-    )
-
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .graphicsLayer {
-                clip = roundCornerActive && isCurrent
-                shape = RoundedCornerShape(animatingRoundCorner)
-            }
-    ) {
-        content()
-    }
+/** Tab 索引 → Screen 映射（4 Tab：0=Home, 1=History, 2=Favorite, 3=Settings） */
+private fun tabScreenAt(index: Int): Screen = when (index) {
+    0 -> Screen.Home
+    1 -> Screen.History
+    2 -> Screen.Favorite
+    3 -> Screen.Settings
+    else -> Screen.Home
 }
-
 
 @Composable
 fun AppRoot(
@@ -304,15 +224,11 @@ fun AppRoot(
     // 与 MainActivity.onServiceConnected 中 ViewModelProvider(this) 获取的是同一实例。
     val mainViewModel: MainViewModel = viewModel()
 
-    // ── Tab 页状态：Home / Settings 始终在组合树中，通过 graphicsLayer 位移切换 ──
-    var currentTab by remember { mutableStateOf<Screen>(Screen.Home) }
-    val tabOffset = remember { Animatable(0f) } // 0 = Home, 1 = Settings
-    LaunchedEffect(currentTab) {
-        tabOffset.animateTo(
-            targetValue = if (currentTab is Screen.Settings) 1f else 0f,
-            animationSpec = tween(TAB_SLIDE_DURATION, easing = FastOutSlowInEasing)
-        )
-    }
+    // ── Tab 页状态：HorizontalPager 管理 4 Tab（Home / History / Favorite / Settings）──
+    // beyondViewportPageCount = 2 预加载左右各 2 页，4 Tab 全部常驻组合树
+    val pagerState = rememberPagerState(initialPage = 0) { 4 }
+    val currentTab: Screen = tabScreenAt(pagerState.currentPage)
+    val scope = rememberCoroutineScope()
 
     // ── 全屏心率模式 ──
     // 心率订阅下放到 FullScreenHeartRate 内部，避免 AppRoot 根层级随每次心跳重组整棵树
@@ -327,10 +243,6 @@ fun AppRoot(
             }
         }
     }
-
-    // ── 悬浮窗开关状态（底部圆形按钮）──
-    val floatingWindowEnabled by settings.observeBoolean(PrefsKeys.FLOATING_WINDOW_ENABLED, false)
-        .collectAsStateWithLifecycle()
 
     DisposableEffect(isFullScreenMode) {
         val activity = context as? Activity
@@ -355,8 +267,6 @@ fun AppRoot(
     }
     // Tab 页在 NavHost 外部管理，NavHost 在 placeholder 时表示当前在 Tab 页
     val isOnTab = lastKnownRoute == TAB_PLACEHOLDER
-    val isHomeVisible = isOnTab && currentTab == Screen.Home
-    val isSettingsVisible = isOnTab && currentTab == Screen.Settings
 
     // ── KILL 现场状态保存：关键状态变化时更新内存快照 ──
     fun pushKillStateSnapshot() {
@@ -384,9 +294,14 @@ fun AppRoot(
         val saved = KillStateSaver.read(context) ?: return@LaunchedEffect
         KillStateSaver.clear(context)
         if (isOnTab) {
-            if (saved.tab == Screen.Settings.route) {
-                currentTab = Screen.Settings
+            // 恢复 Tab 索引：Home=0, History=1, Favorite=2, Settings=3
+            val restoreIndex = when (saved.tab) {
+                Screen.History.route -> 1
+                Screen.Favorite.route -> 2
+                Screen.Settings.route -> 3
+                else -> 0
             }
+            scope.launch { pagerState.scrollToPage(restoreIndex) }
             if (saved.isFullScreen && mainViewModel.appStatus.value == AppStatus.CONNECTED) {
                 isFullScreenMode = true
             }
@@ -411,90 +326,37 @@ fun AppRoot(
     // ── 系统手势条/导航栏 inset ──
     val navBarBottomInset = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
 
-    // ── 胶囊导航栏显隐：向下滚动隐藏，向上滚动显示 ──
-    val navBarHideProgress = remember { Animatable(0f) }
-    val totalHideDistance = with(LocalDensity.current) {
-        (FLOATING_NAV_HEIGHT.dp + FLOATING_NAV_BOTTOM_MARGIN.dp + navBarBottomInset).toPx()
-    }
-    // 离开 Settings Tab 时立即恢复导航栏（进入二级页面不干预，保持当前隐藏/显示状态）
-    LaunchedEffect(currentTab) {
-        if (currentTab !is Screen.Settings && navBarHideProgress.value != 0f) {
-            navBarHideProgress.snapTo(0f)
+    // ── 液态玻璃效果（底部导航栏）──
+    // blur 需 API 31+，lens（扭曲）需 API 33+，低版本库内部静默 no-op
+    val liquidGlassConfig by LiquidGlassState.config.collectAsStateWithLifecycle()
+    // blur 需 API 31+ (Android 12)，更低版本即使用户开启设置也回退到简单 Surface 模式，
+    // 避免 drawBackdrop 仍以半透明采样但 blur 静默 no-op 导致"半个液态玻璃"的异常外观。
+    val liquidGlassEnabled = liquidGlassConfig.enabled &&
+        Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
+    // layerBackdrop 录制 Tab 内容层供导航栏采样。
+    // 先画背景色再画内容，避免玻璃外区域透明（见 Backdrop glass-bottom-bar 教程）。
+    // onDraw 用 remember 稳定化，防止 AppRoot 重组时频繁重建 LayerBackdrop。
+    val liquidBackdropBgColor = MaterialTheme.colorScheme.surfaceDim
+    val liquidBackdropOnDraw: androidx.compose.ui.graphics.drawscope.ContentDrawScope.() -> Unit =
+        remember(liquidBackdropBgColor) {
+            { drawRect(liquidBackdropBgColor); drawContent() }
         }
-    }
-
-    // 使用 CONFLATED Channel 串行化动画请求。
-    // animateTo 放入独立协程，新方向到达时可立即取消当前动画。
-    val navBarChannel = remember { Channel<NavBarMsg>(Channel.CONFLATED) }
-    LaunchedEffect(navBarChannel) {
-        var flingJob: Job? = null
-        for (msg in navBarChannel) {
-            when (msg) {
-                is NavBarMsg.AnimateTo -> {
-                    flingJob?.cancel()
-                    flingJob = launch {
-                        Log.d("AppRoot", "animateTo: target=${msg.target.toInt()} from=${"%.2f".format(navBarHideProgress.value)}")
-                        navBarHideProgress.animateTo(msg.target, msg.spec)
-                        Log.d("AppRoot", "animateTo done: target=${msg.target.toInt()}")
-                    }
-                }
-                else -> {} // Track 消息已废弃，忽略
-            }
-        }
-    }
-
-    val nestedScrollConnection = remember(currentTab, isOnTab) {
-        object : NestedScrollConnection {
-            // 检测滑动方向，立即触发完整动画（不再渐进式追踪位置）
-            override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
-                if (currentTab !is Screen.Settings || !isOnTab) return Offset.Zero
-                if (source == NestedScrollSource.SideEffect) return Offset.Zero
-                val absY = kotlin.math.abs(available.y)
-                if (absY < NAV_BAR_SCROLL_THRESHOLD) return Offset.Zero
-                if (available.y > 0f && navBarHideProgress.targetValue != 0f) {
-                    navBarChannel.trySend(NavBarMsg.AnimateTo(0f, navBarShowSpec))
-                } else if (available.y < 0f && navBarHideProgress.targetValue != 1f) {
-                    navBarChannel.trySend(NavBarMsg.AnimateTo(1f, navBarHideSpec))
-                }
-                return Offset.Zero
-            }
-
-            override fun onPostScroll(
-                consumed: Offset,
-                available: Offset,
-                source: NestedScrollSource
-            ): Offset {
-                if (currentTab !is Screen.Settings || !isOnTab) return Offset.Zero
-                if (source == NestedScrollSource.SideEffect) return Offset.Zero
-                val absY = kotlin.math.abs(available.y)
-                if (absY < NAV_BAR_SCROLL_THRESHOLD) return Offset.Zero
-                if (available.y > 0f && navBarHideProgress.targetValue != 0f) {
-                    navBarChannel.trySend(NavBarMsg.AnimateTo(0f, navBarShowSpec))
-                } else if (available.y < 0f && navBarHideProgress.targetValue != 1f) {
-                    navBarChannel.trySend(NavBarMsg.AnimateTo(1f, navBarHideSpec))
-                }
-                return Offset.Zero
-            }
-        }
-    }
+    val liquidBackdrop = rememberLayerBackdrop(onDraw = liquidBackdropOnDraw)
 
     // 在二级页面拦截返回键，Tab 页让系统处理（退出应用）
     BackHandler(enabled = !isOnTab) {
         safePopBack()
     }
 
-    val navigateToTab = remember(navController, currentTab, isOnTab) {
-        tab@{ route: String ->
-            val newTab = when (route) {
-                Screen.Settings.route -> Screen.Settings
-                else -> Screen.Home
-            }
+    // 切换 Tab：若在二级页面先 pop 回 placeholder，再 animateScrollToPage 到目标 Tab
+    val navigateToTab = remember(navController, currentTab, isOnTab, scope) {
+        tab@{ pageIndex: Int ->
+            val newTab = tabScreenAt(pageIndex)
             if (currentTab == newTab && isOnTab) return@tab
-            // 若在二级页面，先 pop 回 placeholder 露出 Tab 层
             if (!isOnTab) {
                 navController.popBackStack(TAB_PLACEHOLDER, inclusive = false)
             }
-            currentTab = newTab
+            scope.launch { pagerState.animateScrollToPage(pageIndex) }
         }
     }
 
@@ -504,118 +366,141 @@ fun AppRoot(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.surfaceDim)
-            .nestedScroll(nestedScrollConnection)
     ) {
-        // ── 底层：Tab 页（始终在组合树中，通过 graphicsLayer 位移切换，零组合开销）──
+        // ── 底层：Tab 页（HorizontalPager 管理 4 Tab，beyondViewportPageCount=2 全部常驻）──
+        // layerBackdrop 必须在 graphicsLayer 视差位移的外层，否则进入/退出二级页面时
+        // 视差动画会使 backdrop 坐标系紊乱，导致 drawBackdrop 采样错位、玻璃扭曲
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .clipToBounds()
-                .graphicsLayer { translationX = backgroundOffset.value * size.width }
+                // 仅在液态玻璃开启时录制本层，供底部导航栏 drawBackdrop 采样
+                .then(if (liquidGlassEnabled) Modifier.layerBackdrop(liquidBackdrop) else Modifier)
         ) {
-            // Home 页（offset=0 时可见，向左滑出）
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .graphicsLayer { translationX = -tabOffset.value * size.width }
+                    .clipToBounds()
+                    .graphicsLayer { translationX = backgroundOffset.value * size.width }
             ) {
-                val onOpenHistory = remember(safeNavigate) { { safeNavigate(Screen.History.route) } }
-                val onNavigateToDevices = remember(safeNavigate) { { safeNavigate(Screen.Devices.route) } }
-                val onEnterFullScreen = remember { { isFullScreenMode = true } }
-                HomeScreen(
-                    viewModel = mainViewModel,
-                    isActive = isHomeVisible,
-                    onOpenHistory = onOpenHistory,
-                    onNavigateToDevices = onNavigateToDevices,
-                    onEnterFullScreen = onEnterFullScreen
-                )
-            }
-            // Settings 页（offset=1 时可见，从右侧滑入）
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .graphicsLayer { translationX = (1f - tabOffset.value) * size.width }
-            ) {
-                val onSettingsNavigate = remember(safeNavigate) { { route: String -> safeNavigate(route.toScreenRoute()) } }
-                val showToast = remember(context) { { message: String -> Toast.makeText(context, message, Toast.LENGTH_SHORT).show() } }
-                SettingsScreen(
-                    settings = settings,
-                    isActive = isSettingsVisible,
-                    onNavigate = onSettingsNavigate,
-                    onOpenExternal = onOpenExternalStable,
-                    showToast = showToast
-                )
+                HorizontalPager(
+                    state = pagerState,
+                    modifier = Modifier.fillMaxSize(),
+                    beyondViewportPageCount = 3,
+                    // 二级页面覆盖时禁用 Tab 滑动，避免误触
+                    userScrollEnabled = isOnTab
+                ) { page ->
+                    val isActive = isOnTab && pagerState.currentPage == page
+                    when (page) {
+                        0 -> {
+                            val onToggleFloatingWindowStable = remember(onToggleFloatingWindow) { onToggleFloatingWindow }
+                            val onNavigateToDevices = remember(safeNavigate) { { safeNavigate(Screen.Devices.route) } }
+                            val onEnterFullScreen = remember { { isFullScreenMode = true } }
+                            HomeScreen(
+                                viewModel = mainViewModel,
+                                isActive = isActive,
+                                onToggleFloatingWindow = onToggleFloatingWindowStable,
+                                onNavigateToDevices = onNavigateToDevices,
+                                onEnterFullScreen = onEnterFullScreen
+                            )
+                        }
+                        1 -> {
+                            val onChart = remember(safeNavigate) { { sessionId: Long -> safeNavigate(Screen.Chart.createRoute(sessionId)) } }
+                            HistoryScreen(
+                                onNavigateBack = {},
+                                onNavigateToChart = onChart,
+                                isInTab = true
+                            )
+                        }
+                        2 -> {
+                            FavoriteDevicesScreen(
+                                onNavigateBack = {},
+                                isInTab = true
+                            )
+                        }
+                        3 -> {
+                            val onSettingsNavigate = remember(safeNavigate) { { route: String -> safeNavigate(route.toScreenRoute()) } }
+                            val showToast = remember(context) { { message: String -> Toast.makeText(context, message, Toast.LENGTH_SHORT).show() } }
+                            SettingsScreen(
+                                settings = settings,
+                                isActive = isActive,
+                                onNavigate = onSettingsNavigate,
+                                onOpenExternal = onOpenExternalStable,
+                                showToast = showToast
+                            )
+                        }
+                    }
+                }
             }
         }
 
-        // ── 中层：悬浮胶囊式底部导航（始终渲染，保持在原位，由上层 NavHost 滑入覆盖）──
+        // ── 中层：悬浮胶囊式底部导航（液态玻璃三层结构 / 简单回退）──
         if (!isFullScreenMode) {
-            Row(
+            Box(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .fillMaxWidth()
-                    .graphicsLayer {
-                        val p = navBarHideProgress.value
-                        translationY = p * totalHideDistance
-                        alpha = 1f - p
-                        scaleX = 1f - 0.06f * p
-                        scaleY = 1f - 0.06f * p
-                    }
                     .padding(horizontal = 16.dp)
-                    .padding(bottom = navBarBottomInset + FLOATING_NAV_BOTTOM_MARGIN.dp),
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically
+                    .padding(bottom = navBarBottomInset + FLOATING_NAV_BOTTOM_MARGIN.dp)
             ) {
-                Surface(
-                    modifier = Modifier.weight(1f).height(FLOATING_NAV_HEIGHT.dp),
-                    shape = RoundedCornerShape(32.dp),
-                    color = MaterialTheme.colorScheme.surfaceContainerHigh
-                ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceEvenly,
-                        verticalAlignment = Alignment.CenterVertically
+                if (liquidGlassEnabled) {
+                    // 三层液态玻璃：背景 + 透明录制层 + 滑动指示器（含拖拽切换、跟随高光、速度形变）
+                    FloatingBottomBar(
+                        backdrop = liquidBackdrop,
+                        selectedTabIndex = { pagerState.targetPage },
+                        onTabSelected = { index -> navigateToTab(index) },
+                        tabs = listOf(
+                            GlassTabItem(R.drawable.ic_tab_home, stringResource(R.string.nav_home)),
+                            GlassTabItem(R.drawable.ic_tab_history, stringResource(R.string.nav_history)),
+                            GlassTabItem(R.drawable.ic_tab_favorite, stringResource(R.string.nav_favorite)),
+                            GlassTabItem(R.drawable.ic_tab_settings, stringResource(R.string.nav_settings))
+                        ),
+                        config = liquidGlassConfig
+                    )
+                } else {
+                    // 简单回退：普通 Surface + 常驻 label
+                    Surface(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(FLOATING_NAV_HEIGHT.dp),
+                        shape = ContinuousCapsule,
+                        color = MaterialTheme.colorScheme.surfaceContainerHigh
                     ) {
-                        val onHomeClick = remember(navigateToTab) { { navigateToTab(Screen.Home.route) } }
-                        val onSettingsClick = remember(navigateToTab) { { navigateToTab(Screen.Settings.route) } }
-                        CapsuleNavItem(
-                            selected = currentTab is Screen.Home,
-                            onClick = onHomeClick,
-                            iconRes = R.drawable.ic_home_symbol,
-                            label = stringResource(R.string.nav_home),
-                            modifier = Modifier.weight(1f)
-                        )
-                        CapsuleNavItem(
-                            selected = currentTab is Screen.Settings,
-                            onClick = onSettingsClick,
-                            iconRes = R.drawable.ic_settings_symbol,
-                            label = stringResource(R.string.nav_settings),
-                            modifier = Modifier.weight(1f)
-                        )
-                    }
-                }
-
-                Spacer(Modifier.width(8.dp))
-
-                val onToggleFloatingWindowStable = remember(onToggleFloatingWindow) { onToggleFloatingWindow }
-                Surface(
-                    modifier = Modifier.size(FLOATING_NAV_HEIGHT.dp),
-                    shape = CircleShape,
-                    color = if (floatingWindowEnabled) MaterialTheme.colorScheme.primary
-                    else MaterialTheme.colorScheme.surfaceContainerHigh,
-                    onClick = onToggleFloatingWindowStable
-                ) {
-                    Box(contentAlignment = Alignment.Center) {
-                        Icon(
-                            painter = painterResource(
-                                if (floatingWindowEnabled) R.drawable.ic_floating_window_on
-                                else R.drawable.ic_floating_window_off
-                            ),
-                            contentDescription = stringResource(R.string.cd_toggle_floating_window),
-                            tint = if (floatingWindowEnabled) MaterialTheme.colorScheme.onPrimary
-                            else MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.size(24.dp)
-                        )
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceEvenly,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            // 用 targetPage 让选中状态立即响应（与玻璃模式一致），避免 currentPage 延迟导致闪烁
+                            val selectedPage = pagerState.targetPage
+                            CapsuleNavItem(
+                                selected = selectedPage == 0,
+                                onClick = remember(navigateToTab) { { navigateToTab(0) } },
+                                iconRes = R.drawable.ic_tab_home,
+                                label = stringResource(R.string.nav_home),
+                                modifier = Modifier.weight(1f)
+                            )
+                            CapsuleNavItem(
+                                selected = selectedPage == 1,
+                                onClick = remember(navigateToTab) { { navigateToTab(1) } },
+                                iconRes = R.drawable.ic_tab_history,
+                                label = stringResource(R.string.nav_history),
+                                modifier = Modifier.weight(1f)
+                            )
+                            CapsuleNavItem(
+                                selected = selectedPage == 2,
+                                onClick = remember(navigateToTab) { { navigateToTab(2) } },
+                                iconRes = R.drawable.ic_tab_favorite,
+                                label = stringResource(R.string.nav_favorite),
+                                modifier = Modifier.weight(1f)
+                            )
+                            CapsuleNavItem(
+                                selected = selectedPage == 3,
+                                onClick = remember(navigateToTab) { { navigateToTab(3) } },
+                                iconRes = R.drawable.ic_tab_settings,
+                                label = stringResource(R.string.nav_settings),
+                                modifier = Modifier.weight(1f)
+                            )
+                        }
                     }
                 }
             }
@@ -659,16 +544,6 @@ fun AppRoot(
             }
         ) {
             composable(TAB_PLACEHOLDER) { /* 透明占位，Tab 层在下方可见 */ }
-            composable(Screen.History.route) {
-                val onBack = remember(safePopBack) { { safePopBack() } }
-                val onChart = remember(safeNavigate) { { sessionId: Long -> safeNavigate(Screen.Chart.createRoute(sessionId)) } }
-                SecondaryPageWrapper(navController = navController, route = Screen.History.route) {
-                    HistoryScreen(
-                        onNavigateBack = onBack,
-                        onNavigateToChart = onChart
-                    )
-                }
-            }
             composable(
                 route = Screen.Chart.route,
                 arguments = listOf(
@@ -677,97 +552,73 @@ fun AppRoot(
             ) { backStackEntry ->
                 val sessionId = backStackEntry.arguments?.getLong("sessionId") ?: return@composable
                 val onBack = remember(safePopBack) { { safePopBack() } }
-                SecondaryPageWrapper(navController = navController, route = Screen.Chart.route) {
-                    ChartScreen(
-                        sessionId = sessionId,
-                        onNavigateBack = onBack
-                    )
-                }
-            }
-            composable(Screen.Favorite.route) {
-                val onBack = remember(safePopBack) { { safePopBack() } }
-                SecondaryPageWrapper(navController = navController, route = Screen.Favorite.route) {
-                    FavoriteDevicesScreen(onNavigateBack = onBack)
-                }
+                ChartScreen(
+                    sessionId = sessionId,
+                    onNavigateBack = onBack
+                )
             }
             composable(Screen.Alarm.route) {
                 val onBack = remember(safePopBack) { { safePopBack() } }
-                SecondaryPageWrapper(navController = navController, route = Screen.Alarm.route) {
-                    HeartRateAlarmScreen(
-                        settings = settings,
-                        onNavigateBack = onBack
-                    )
-                }
+                HeartRateAlarmScreen(
+                    settings = settings,
+                    onNavigateBack = onBack
+                )
             }
             composable(Screen.Server.route) {
                 val onBack = remember(safePopBack) { { safePopBack() } }
-                SecondaryPageWrapper(navController = navController, route = Screen.Server.route) {
-                    ServerScreen(
-                        onNavigateBack = onBack,
-                        settings = settings
-                    )
-                }
+                ServerScreen(
+                    onNavigateBack = onBack,
+                    settings = settings
+                )
             }
             composable(Screen.Webhook.route) {
                 val onBack = remember(safePopBack) { { safePopBack() } }
-                SecondaryPageWrapper(navController = navController, route = Screen.Webhook.route) {
-                    WebhookScreen(onNavigateBack = onBack)
-                }
+                WebhookScreen(onNavigateBack = onBack)
             }
             composable(Screen.FairMemory.route) {
                 val onBack = remember(safePopBack) { { safePopBack() } }
-                SecondaryPageWrapper(navController = navController, route = Screen.FairMemory.route) {
-                    FairMemoryScreen(onNavigateBack = onBack)
-                }
+                FairMemoryScreen(onNavigateBack = onBack)
             }
             composable(Screen.Theme.route) {
                 val onBack = remember(safePopBack) { { safePopBack() } }
-                SecondaryPageWrapper(navController = navController, route = Screen.Theme.route) {
-                    ThemeSettingsScreen(onNavigateBack = onBack)
-                }
+                ThemeSettingsScreen(onNavigateBack = onBack)
+            }
+            composable(Screen.NavStyle.route) {
+                val onBack = remember(safePopBack) { { safePopBack() } }
+                NavStyleScreen(onNavigateBack = onBack)
             }
             composable(Screen.Devices.route) {
                 val onBack = remember(safePopBack) { { safePopBack() } }
-                SecondaryPageWrapper(navController = navController, route = Screen.Devices.route) {
-                    DevicesScreen(
-                        viewModel = mainViewModel,
-                        onNavigateBack = onBack
-                    )
-                }
+                DevicesScreen(
+                    viewModel = mainViewModel,
+                    onNavigateBack = onBack
+                )
             }
             composable(Screen.FullscreenSound.route) {
                 val onBack = remember(safePopBack) { { safePopBack() } }
-                SecondaryPageWrapper(navController = navController, route = Screen.FullscreenSound.route) {
-                    FullscreenSoundScreen(
-                        settings = settings,
-                        onNavigateBack = onBack
-                    )
-                }
+                FullscreenSoundScreen(
+                    settings = settings,
+                    onNavigateBack = onBack
+                )
             }
             composable(Screen.License.route) {
                 val onBack = remember(safePopBack) { { safePopBack() } }
-                SecondaryPageWrapper(navController = navController, route = Screen.License.route) {
-                    LicenseScreen(onNavigateBack = onBack)
-                }
+                LicenseScreen(onNavigateBack = onBack)
             }
             composable(Screen.Privacy.route) {
                 val onBack = remember(safePopBack) { { safePopBack() } }
-                SecondaryPageWrapper(navController = navController, route = Screen.Privacy.route) {
-                    PrivacyScreen(onNavigateBack = onBack)
-                }
+                PrivacyScreen(onNavigateBack = onBack)
             }
             composable(Screen.AboutDetails.route) {
                 val onBack = remember(safePopBack) { { safePopBack() } }
                 val onDetailsNavigate = remember(safeNavigate) { { route: String -> safeNavigate(route.toScreenRoute()) } }
                 val showToast = remember(context) { { message: String -> Toast.makeText(context, message, Toast.LENGTH_SHORT).show() } }
-                SecondaryPageWrapper(navController = navController, route = Screen.AboutDetails.route) {
-                    AboutDetailsScreen(
-                        onNavigate = onDetailsNavigate,
-                        onNavigateBack = onBack,
-                        onOpenExternal = onOpenExternalStable,
-                        showToast = showToast
-                    )
-                }
+                AboutDetailsScreen(
+                    onNavigate = onDetailsNavigate,
+                    onNavigateBack = onBack,
+                    onOpenExternal = onOpenExternalStable,
+                    showToast = showToast
+                )
             }
         }
 
@@ -783,7 +634,8 @@ fun AppRoot(
 }
 
 /**
- * 悬浮胶囊内导航项（iOS 风格）。
+ * 悬浮胶囊内导航项（常驻 label + 按下缩放）。
+ * 垂直布局：Icon 在上，Text 在下，始终显示。按下时整体缩放 1.04x 提供触觉反馈。
  */
 @Composable
 private fun CapsuleNavItem(
@@ -793,39 +645,33 @@ private fun CapsuleNavItem(
     label: String,
     modifier: Modifier = Modifier
 ) {
-    val indicatorColor by animateColorAsState(
-        targetValue = if (selected) MaterialTheme.colorScheme.secondaryContainer
-        else Color.Transparent,
-        animationSpec = tween(NAV_ITEM_DURATION, easing = FastOutSlowInEasing),
-        label = "capsuleIndicatorColor"
-    )
     val iconColor by animateColorAsState(
         targetValue = if (selected) MaterialTheme.colorScheme.onSecondaryContainer
         else MaterialTheme.colorScheme.onSurfaceVariant,
         animationSpec = tween(NAV_ITEM_DURATION, easing = FastOutSlowInEasing),
         label = "capsuleItemColor"
     )
-
-    Box(
+    val textColor by animateColorAsState(
+        targetValue = if (selected) MaterialTheme.colorScheme.onSecondaryContainer
+        else MaterialTheme.colorScheme.onSurfaceVariant,
+        animationSpec = tween(NAV_ITEM_DURATION, easing = FastOutSlowInEasing),
+        label = "capsuleTextColor"
+    )
+    // Surface 仅负责 shape + 背景色，clickable 不带 ripple（避免多 Tab 同时显示激活反馈）
+    Surface(
         modifier = modifier
             .fillMaxHeight()
             .clickable(
-                interactionSource = remember { MutableInteractionSource() },
+                interactionSource = null,
                 indication = null,
                 onClick = onClick
             ),
-        contentAlignment = Alignment.Center
+        shape = ContinuousCapsule,
+        color = if (selected) MaterialTheme.colorScheme.secondaryContainer else Color.Transparent
     ) {
-        Row(
-            modifier = Modifier
-                .height(NAV_INDICATOR_HEIGHT)
-                .background(
-                    color = indicatorColor,
-                    shape = RoundedCornerShape(NAV_INDICATOR_CORNER)
-                )
-                .padding(horizontal = 16.dp),
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically
+        Column(
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Icon(
                 painter = painterResource(iconRes),
@@ -833,20 +679,12 @@ private fun CapsuleNavItem(
                 tint = iconColor,
                 modifier = Modifier.size(NAV_ICON_SIZE)
             )
-            AnimatedVisibility(
-                visible = selected,
-                enter = expandHorizontally(tween(NAV_ITEM_DURATION, easing = FastOutSlowInEasing)) +
-                    fadeIn(tween(NAV_ITEM_DURATION, easing = FastOutSlowInEasing)),
-                exit = shrinkHorizontally(tween(NAV_ITEM_DURATION, easing = FastOutSlowInEasing)) +
-                    fadeOut(tween(NAV_ITEM_DURATION, easing = FastOutSlowInEasing))
-            ) {
-                Text(
-                    text = " $label",
-                    style = MaterialTheme.typography.labelMedium,
-                    color = iconColor,
-                    maxLines = 1
-                )
-            }
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelSmall,
+                color = textColor,
+                maxLines = 1
+            )
         }
     }
 }

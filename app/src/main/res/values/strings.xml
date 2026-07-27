@@ -3,6 +3,8 @@
 
     <!-- Navigation -->
     <string name="nav_home">首页</string>
+    <string name="nav_history">历史</string>
+    <string name="nav_favorite">收藏</string>
     <string name="nav_settings">设置</string>
     <string name="cd_toggle_floating_window">切换悬浮窗</string>
     <string name="cd_back">返回</string>
@@ -401,6 +403,21 @@
     <string name="theme_variant_content">内容</string>
     <string name="theme_variant_rainbow">彩虹</string>
     <string name="theme_variant_fruit_salad">水果沙拉</string>
+
+    <!-- NavStyle (导航样式) -->
+    <string name="nav_style">导航样式</string>
+    <string name="subtitle_nav_style">导航栏与液态玻璃效果</string>
+
+    <!-- LiquidGlass (导航栏液态玻璃) -->
+    <string name="nav_settings_section">导航选项</string>
+    <string name="nav_settings_subtitle">导航栏效果</string>
+    <string name="liquid_glass_enable">开启液态玻璃效果</string>
+    <string name="liquid_glass_blur">模糊效果</string>
+    <string name="liquid_glass_distortion">扭曲效果</string>
+    <string name="liquid_glass_unsupported">当前系统版本不支持液态玻璃效果（需 Android 12+）</string>
+    <string name="liquid_glass_distortion_unsupported">扭曲效果需 Android 13+</string>
+    <string name="restore_default">重置</string>
+    <string name="liquid_glass_support_hint">Android 13 及以上支持液态玻璃</string>
 
     <string name="fairmemory">小米</string>
 </resources>

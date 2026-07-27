@@ -40,6 +40,7 @@
 - 🧠 **Fair Memory Management**: Adapted to domestic vendor memory management mechanisms
 - 🎨 **Color Picker**: Self-drawn HSV color wheel
 - ✨ **Smooth Transition Animations** real-time blur scaling
+- 🧊 **Liquid Glass Effect** for implementing the liquid glass effect in the bottom navigation bar
 - 🎯 **Material 3 Dynamic Color**
 
 -----
@@ -99,6 +100,8 @@
 - Dynamic Color: [MaterialKolor](https://github.com/jordond/MaterialKolor)
 - HTTP/WebSocket Server: [NanoHTTPD](https://github.com/NanoHttpd/nanohttpd)
 - Permissions: [PermissionX](https://github.com/guolindev/PermissionX)
+- Liquid Glass: [AndroidLiquidGlass](https://github.com/Kyant0/AndroidLiquidGlass)
+- G2 Capsule: [Capsule](https://github.com/Kyant0/Capsule)
 
 -----
 

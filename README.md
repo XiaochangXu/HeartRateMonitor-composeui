@@ -40,6 +40,7 @@
 - 🧠 **公平运行内存**：适配国产厂商内存管理机制
 - 🎨 **颜色选择器**：自绘 HSV 色轮
 - ✨ **流畅转场动画** 实时模糊缩放
+- 🧊 **液态玻璃效果** 实现底部导航栏的液态玻璃效果
 - 🎯 **Material 3 动态取色**
 
 -----
@@ -98,6 +99,8 @@
 - 动态取色：[MaterialKolor](https://github.com/jordond/MaterialKolor)
 - HTTP/WebSocket 服务：[NanoHTTPD](https://github.com/NanoHttpd/nanohttpd)
 - 权限：[PermissionX](https://github.com/guolindev/PermissionX)
+- 液态玻璃：[AndroidLiquidGlass](https://github.com/Kyant0/AndroidLiquidGlass)
+- G2圆角：[Capsule](https://github.com/Kyant0/Capsule)
 
 -----
 

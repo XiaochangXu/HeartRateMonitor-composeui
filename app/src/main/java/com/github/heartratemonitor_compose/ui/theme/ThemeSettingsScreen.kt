@@ -96,7 +96,8 @@ fun ThemeSettingsScreen(
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 16.dp)
         ) {
-            SectionTitle(stringResource(R.string.theme_color))
+            Spacer(Modifier.height(16.dp))
+
             SettingsGroupCard {
                 SettingsItem(isFirst = true) {
                     HeaderRow()
@@ -151,6 +152,7 @@ fun ThemeSettingsScreen(
                     )
                 }
             }
+
             // 末尾留出胶囊+系统导航栏空间
             Spacer(Modifier.height(64.dp + 8.dp + WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()))
         }
@@ -172,16 +174,6 @@ fun ThemeSettingsScreen(
 // ──────────────────────────────────────────────
 // 容器与通用组件（本文件自包含，与 SettingsScreen 风格一致）
 // ──────────────────────────────────────────────
-
-@Composable
-private fun SectionTitle(title: String) {
-    Text(
-        text = title,
-        style = MaterialTheme.typography.labelLarge,
-        color = MaterialTheme.colorScheme.primary,
-        modifier = Modifier.padding(bottom = 12.dp)
-    )
-}
 
 @Composable
 private fun SettingsGroupCard(content: @Composable ColumnScope.() -> Unit) {
@@ -591,3 +583,4 @@ private fun VariantSelectorRow(
         }
     }
 }
+

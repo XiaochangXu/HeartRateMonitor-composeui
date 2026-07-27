@@ -43,7 +43,8 @@ import java.util.*
 @Composable
 fun HistoryScreen(
     onNavigateBack: () -> Unit,
-    onNavigateToChart: (Long) -> Unit
+    onNavigateToChart: (Long) -> Unit,
+    isInTab: Boolean = false
 ) {
     val context = LocalContext.current
     val viewModel: HistoryViewModel = viewModel()
@@ -65,6 +66,7 @@ fun HistoryScreen(
                 isMultiSelectMode = isMultiSelectMode,
                 selectedCount = selectedIds.size,
                 totalCount = sessions.size,
+                isInTab = isInTab,
                 onNavigateBack = {
                     if (isMultiSelectMode) {
                         isMultiSelectMode = false
@@ -176,6 +178,7 @@ private fun HistoryTopBar(
     isMultiSelectMode: Boolean,
     selectedCount: Int,
     totalCount: Int,
+    isInTab: Boolean,
     onNavigateBack: () -> Unit,
     onSelectAll: () -> Unit,
     onDelete: () -> Unit,
@@ -189,14 +192,17 @@ private fun HistoryTopBar(
             )
         },
         navigationIcon = {
-            IconButton(onClick = onNavigateBack) {
-                Surface(
-                    modifier = Modifier.size(40.dp),
-                    shape = CircleShape,
-                    color = MaterialTheme.colorScheme.surfaceContainer
-                ) {
-                    Box(contentAlignment = Alignment.Center) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.cd_back))
+            // Tab 模式下非多选时不显示返回按钮；多选模式仍显示（用于退出多选）
+            if (isMultiSelectMode || !isInTab) {
+                IconButton(onClick = onNavigateBack) {
+                    Surface(
+                        modifier = Modifier.size(40.dp),
+                        shape = CircleShape,
+                        color = MaterialTheme.colorScheme.surfaceContainer
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.cd_back))
+                        }
                     }
                 }
             }

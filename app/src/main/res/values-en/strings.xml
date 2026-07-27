@@ -3,6 +3,8 @@
 
     <!-- Navigation -->
     <string name="nav_home">Home</string>
+    <string name="nav_history">History</string>
+    <string name="nav_favorite">Favorites</string>
     <string name="nav_settings">Settings</string>
     <string name="cd_toggle_floating_window">Toggle floating window</string>
     <string name="cd_back">Back</string>
@@ -401,6 +403,17 @@
     <string name="theme_variant_content">Content</string>
     <string name="theme_variant_rainbow">Rainbow</string>
     <string name="theme_variant_fruit_salad">Fruit Salad</string>
+
+    <!-- LiquidGlass (导航栏液态玻璃) -->
+    <string name="nav_settings_section">Navigation</string>
+    <string name="nav_settings_subtitle">Liquid glass and navigation effects</string>
+    <string name="liquid_glass_enable">Liquid glass effect</string>
+    <string name="liquid_glass_blur">Blur</string>
+    <string name="liquid_glass_distortion">Distortion</string>
+    <string name="liquid_glass_unsupported">Liquid glass requires Android 12+</string>
+    <string name="liquid_glass_distortion_unsupported">Distortion requires Android 13+</string>
+    <string name="restore_default">Reset</string>
+    <string name="liquid_glass_support_hint">Liquid glass requires Android 13+</string>
 
     <string name="fairmemory">Xiaomi</string>
 </resources>

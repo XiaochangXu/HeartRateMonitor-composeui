@@ -88,7 +88,6 @@ fun ServerScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
-            SectionTitle(stringResource(R.string.http_server_passive))
             ServerCard(
                 enabled = httpEnabled,
                 onEnabledChange = { httpEnabled = it },
@@ -101,7 +100,6 @@ fun ServerScreen(
                 leadingIcon = painterResource(R.drawable.ic_enable_http_server)
             )
 
-            SectionTitle(stringResource(R.string.websocket_server_active))
             ServerCard(
                 enabled = wsEnabled,
                 onEnabledChange = { wsEnabled = it },
@@ -114,7 +112,6 @@ fun ServerScreen(
                 leadingIcon = painterResource(R.drawable.ic_enable_websocket_server)
             )
 
-            SectionTitle(stringResource(R.string.server_status))
             ServerStatusCard(
                 httpEnabled = httpEnabled,
                 httpPort = httpPort.toIntOrNull() ?: 8000,
@@ -320,14 +317,4 @@ private fun ServerStatusCard(
             }
         }
     }
-}
-
-@Composable
-private fun SectionTitle(text: String) {
-    Text(
-        text = text,
-        style = MaterialTheme.typography.labelLarge,
-        color = MaterialTheme.colorScheme.primary,
-        modifier = Modifier.padding(start = 2.dp)
-    )
 }
