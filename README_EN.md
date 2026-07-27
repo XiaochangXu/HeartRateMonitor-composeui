@@ -28,7 +28,7 @@
 
 ## ✨ Features
 
--​ 🖥️ **FullScreen Mode**: Immersive heart rate display, turning your phone into a cardiac monitor.
+-​ 🖥️ **FullScreen Mode**: Immersive heart rate display, turning your phone into a cardiac monitor
 - 🔵 **Bluetooth Connection**: Scan and connect to BLE devices that support heart rate services
 - ⭐ **Device Management**: Favorite frequently used devices, with auto-connect and disconnect-reconnect support
 - ❤️ **Heartbeat Animation**: Dynamically changes based on heart rate
