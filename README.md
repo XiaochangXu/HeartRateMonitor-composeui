@@ -1,6 +1,6 @@
 <div align="right">
   <a href="./README_EN.md">English</a> | <strong>简体中文</strong>
-  - [项目规范](./SKILL.md)
+- [项目规范](./SKILL.md)
 </div>
  
 <div align="center">
