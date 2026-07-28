@@ -81,7 +81,7 @@
 ## 🧭 Usage Guide
 
 1. **Grant permissions**: Allow Bluetooth and location permissions on first launch
-2. **Connect a heart rate device**: Tap the scan button on the home page and select a device
+2. **Connect a heart rate device**: First enable heart rate broadcasting on the device, then tap the Scan button to select and connect to the device
 3. **View history**: Tap the history icon in the toolbar to open the list, then tap an entry to view charts
 4. **Use the floating window**: Toggle from the home toolbar, customize appearance in Settings
 5. **Status bar persistence**: Settings → Status Bar Heart Rate, enable to show heart rate in the status bar
