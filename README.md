@@ -5,7 +5,7 @@
 <div align="center">
   <img src="app/src/main/res/drawable/about.png" alt="HeartRateMonitor" width="128" />
 
-  <h1>❤️ 心率监控器 - HeartRateMonitor</h1>
+  <h1>心率监控器 - HeartRateMonitor</h1>
 
   <p><strong>让 Android 心率监测更优雅。</strong></p>
 
