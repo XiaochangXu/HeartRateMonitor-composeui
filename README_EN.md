@@ -1,5 +1,7 @@
 <div align="right">
   <strong>English</strong> | <a href="./README.md">简体中文</a>
+  <br>
+  <a href="./SKILL.md">Project Rules</a>
 </div>
 
 <div align="center">
