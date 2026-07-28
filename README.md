@@ -1,7 +1,9 @@
 <div align="right">
   <a href="./README_EN.md">English</a> | <strong>简体中文</strong>
 </div>
-                                        - [项目规范](./SKILL.md)
+
+- [项目规范](./SKILL.md)
+
 <div align="center">
   <img src="app/src/main/res/drawable/about.png" alt="HeartRateMonitor" width="128" />
 
