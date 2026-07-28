@@ -1,6 +1,8 @@
 ---
 name: "project-rules"
 description: "Applies project-wide rules and conventions for architecture, coding style, state management, data access, concurrency, configuration, comments, code modification, technical decisions, quality, and completion criteria. Invoke when working on any task in this project to ensure compliance with established standards."
+scope: project
+tags: [architecture, coding-rules, project-standard, code-quality]
 ---
 
 # Project Rules
