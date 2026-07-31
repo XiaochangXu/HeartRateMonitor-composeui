@@ -35,6 +35,8 @@ object PrefsKeys {
     const val FLOATING_BORDER_COLOR = "floating_border_color"
     const val BPM_TEXT_ENABLED = "bpm_text_enabled"
     const val HEART_ICON_ENABLED = "heart_icon_enabled"
+    const val FLOATING_X = "floating_x"
+    const val FLOATING_Y = "floating_y"
 
     // ── 状态栏常驻 ──
     const val STATUS_BAR_RESIDENT_ENABLED = "status_bar_resident_enabled"
@@ -62,6 +64,13 @@ object PrefsKeys {
     const val WEBSOCKET_SERVER_ENABLED = "websocket_server_enabled"
     const val WEBSOCKET_SERVER_PORT = "websocket_server_port"
     const val SERVER_ACCESS_TOKEN = "server_access_token"
+
+    // ── 局域网传输（mDNS 一键配对）──
+    // 临时 token：配对成功后由本机生成，电脑端用它连本机 WebSocket Server
+    // 空字符串表示当前未配对。每次新配对会覆盖旧值。
+    const val LAN_PAIRING_TOKEN = "lan_pairing_token"
+    // 上次成功配对的电脑名称，仅用于 UI 展示历史，不影响逻辑
+    const val LAN_LAST_PAIRED_PC_NAME = "lan_last_paired_pc_name"
 
     // ── 主题 ──
     const val THEME_SOURCE = "theme_source"

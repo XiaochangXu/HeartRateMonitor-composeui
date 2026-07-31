@@ -1,8 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <network-security-config>
-    <!-- 允许本地环回明文流量（内置 HTTP/WebSocket 服务器） -->
-    <domain-config cleartextTrafficPermitted="true">
-        <domain includeSubdomains="false">127.0.0.1</domain>
-        <domain includeSubdomains="false">localhost</domain>
-    </domain-config>
+    <!-- 全局允许明文流量：局域网传输（HTTP 配对 + ws:// 推送）需要访问动态局域网 IP -->
+    <base-config cleartextTrafficPermitted="true" />
 </network-security-config>

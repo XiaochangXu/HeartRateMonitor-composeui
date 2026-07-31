@@ -44,6 +44,16 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 
 /**
+ * 颜色选择请求。非 null 时触发 [ColorPickerDialog] 显示。
+ * 由状态栏设置、悬浮窗设置等二级页面共用。
+ */
+internal data class ColorPickerRequest(
+    val prefKey: String,
+    val title: String,
+    val defaultColor: Int
+)
+
+/**
  * Material 3 Icon Container：当 [containerColor] 非透明时，将图标包裹在 40dp 彩色圆形背景中，
  * 提升视觉层级和功能区分度。图标颜色使用 [tint]（默认跟随 onSurfaceVariant）。
  */

@@ -74,13 +74,17 @@ import com.github.heartratemonitor_compose.ui.favorite.FavoriteDevicesScreen
 import com.github.heartratemonitor_compose.ui.history.ChartScreen
 import com.github.heartratemonitor_compose.ui.history.HistoryScreen
 import com.github.heartratemonitor_compose.ui.settings.AboutDetailsScreen
+import com.github.heartratemonitor_compose.ui.settings.FloatingWindowSettingsScreen
+import com.github.heartratemonitor_compose.ui.settings.FunctionSettingsScreen
 import com.github.heartratemonitor_compose.ui.settings.LicenseScreen
 import com.github.heartratemonitor_compose.ui.settings.PrivacyScreen
+import com.github.heartratemonitor_compose.ui.settings.StatusBarSettingsScreen
 import com.github.heartratemonitor_compose.ui.main.AppStatus
 import com.github.heartratemonitor_compose.ui.main.DevicesScreen
 import com.github.heartratemonitor_compose.ui.main.FullScreenHeartRate
 import com.github.heartratemonitor_compose.ui.main.HomeScreen
 import com.github.heartratemonitor_compose.ui.main.MainViewModel
+import com.github.heartratemonitor_compose.ui.server.LanTransferScreen
 import com.github.heartratemonitor_compose.ui.server.ServerScreen
 import com.github.heartratemonitor_compose.ui.settings.FairMemoryScreen
 import com.github.heartratemonitor_compose.ui.settings.FullscreenSoundScreen
@@ -125,6 +129,7 @@ sealed class Screen(val route: String) {
     object Alarm : Screen("alarm")
     object Server : Screen("server")
     object Webhook : Screen("webhook")
+    object LanTransfer : Screen("lan_transfer")
     object FairMemory : Screen("fair_memory")
     object Theme : Screen("theme")
     object NavStyle : Screen("nav_style")
@@ -133,6 +138,9 @@ sealed class Screen(val route: String) {
     object License : Screen("license")
     object Privacy : Screen("privacy")
     object AboutDetails : Screen("about_details")
+    object FunctionSettings : Screen("function_settings")
+    object StatusBarSettings : Screen("status_bar_settings")
+    object FloatingWindowSettings : Screen("floating_window_settings")
 }
 
 /** 底部导航 Tab 页：Home / History / Favorite / Settings 均为 Tab */
@@ -144,6 +152,7 @@ private fun String.toScreenRoute(): String = when (this) {
     "alarm" -> Screen.Alarm.route
     "server" -> Screen.Server.route
     "webhook" -> Screen.Webhook.route
+    "lan_transfer" -> Screen.LanTransfer.route
     "fair_memory" -> Screen.FairMemory.route
     "theme" -> Screen.Theme.route
     "nav_style" -> Screen.NavStyle.route
@@ -152,6 +161,9 @@ private fun String.toScreenRoute(): String = when (this) {
     "license" -> Screen.License.route
     "privacy" -> Screen.Privacy.route
     "about_details" -> Screen.AboutDetails.route
+    "function_settings" -> Screen.FunctionSettings.route
+    "status_bar_settings" -> Screen.StatusBarSettings.route
+    "floating_window_settings" -> Screen.FloatingWindowSettings.route
     else -> Screen.Home.route
 }
 
@@ -367,7 +379,7 @@ fun AppRoot(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.surfaceDim)
     ) {
-        // ── 底层：Tab 页（HorizontalPager 管理 4 Tab，beyondViewportPageCount=2 全部常驻）──
+        // ── 底层：Tab 页（HorizontalPager 管理 4 Tab，beyondViewportPageCount=3 全部常驻）──
         // layerBackdrop 必须在 graphicsLayer 视差位移的外层，否则进入/退出二级页面时
         // 视差动画会使 backdrop 坐标系紊乱，导致 drawBackdrop 采样错位、玻璃扭曲
         Box(
@@ -575,6 +587,13 @@ fun AppRoot(
                 val onBack = remember(safePopBack) { { safePopBack() } }
                 WebhookScreen(onNavigateBack = onBack)
             }
+            composable(Screen.LanTransfer.route) {
+                val onBack = remember(safePopBack) { { safePopBack() } }
+                LanTransferScreen(
+                    onNavigateBack = onBack,
+                    settings = settings
+                )
+            }
             composable(Screen.FairMemory.route) {
                 val onBack = remember(safePopBack) { { safePopBack() } }
                 FairMemoryScreen(onNavigateBack = onBack)
@@ -618,6 +637,27 @@ fun AppRoot(
                     onNavigateBack = onBack,
                     onOpenExternal = onOpenExternalStable,
                     showToast = showToast
+                )
+            }
+            composable(Screen.FunctionSettings.route) {
+                val onBack = remember(safePopBack) { { safePopBack() } }
+                FunctionSettingsScreen(
+                    settings = settings,
+                    onNavigateBack = onBack
+                )
+            }
+            composable(Screen.StatusBarSettings.route) {
+                val onBack = remember(safePopBack) { { safePopBack() } }
+                StatusBarSettingsScreen(
+                    settings = settings,
+                    onNavigateBack = onBack
+                )
+            }
+            composable(Screen.FloatingWindowSettings.route) {
+                val onBack = remember(safePopBack) { { safePopBack() } }
+                FloatingWindowSettingsScreen(
+                    settings = settings,
+                    onNavigateBack = onBack
                 )
             }
         }

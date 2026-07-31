@@ -33,6 +33,12 @@
     <!-- SettingsScreen - General -->
     <string name="settings">设置</string>
     <string name="general">常规</string>
+    <string name="function_settings">功能设置</string>
+    <string name="subtitle_function_settings">开启或关闭应用的功能</string>
+    <string name="status_bar_settings">状态栏设置</string>
+    <string name="subtitle_status_bar_settings">开启或关闭状态栏常驻心率</string>
+    <string name="floating_window_settings">悬浮窗设置</string>
+    <string name="subtitle_floating_window_settings">开启或关闭悬浮窗显示心率</string>
     <string name="record_history">记录历史数据</string>
     <string name="subtitle_record_history">将心率数据保存到历史</string>
     <string name="performance_warning">性能警告</string>
@@ -76,6 +82,29 @@
     <string name="subtitle_http_websocket_server">通过局域网共享心率数据</string>
     <string name="webhook_settings">Webhook 设置</string>
     <string name="subtitle_webhook_settings">将心率数据推送到远程服务器</string>
+    <string name="lan_transfer">局域网传输</string>
+    <string name="subtitle_lan_transfer">一键发现电脑并自动推送心率</string>
+
+    <!-- LanTransferScreen -->
+    <string name="lan_transfer_title">局域网传输</string>
+    <string name="lan_transfer_tip">使用前请在电脑端启动配套程序并保持与手机在同一 Wi-Fi/局域网。手机会自动发现电脑，点击设备发起配对，电脑端确认后即可实时推送心率。</string>
+    <string name="lan_scanning">正在扫描附近电脑…</string>
+    <string name="lan_no_devices">未发现电脑设备，请确认电脑端已启动并处于同一局域网</string>
+    <string name="lan_scan">扫描设备</string>
+    <string name="lan_stop_scan">停止扫描</string>
+    <string name="lan_pairing">正在配对…</string>
+    <string name="lan_pair_approved">电脑已允许连接，心率推送已开启</string>
+    <string name="lan_pair_rejected">电脑拒绝了连接请求</string>
+    <string name="lan_pair_failed">配对失败：%1$s</string>
+    <string name="lan_pair_timeout">配对超时，电脑未响应</string>
+    <string name="lan_disconnect">断开推送</string>
+    <string name="lan_connected_format">已连接：%1$s</string>
+    <string name="lan_status_idle">空闲</string>
+    <string name="lan_status_pushing">推送中</string>
+    <string name="lan_ws_not_enabled">未启用 WebSocket 服务器，无法推送。请前往「HTTP &amp; WebSocket 服务」开启</string>
+    <string name="lan_open_server_settings">前往开启</string>
+    <string name="lan_pair_action">连接</string>
+    <string name="lan_device_unknown">未知电脑</string>
 
     <!-- SettingsScreen - Status Bar -->
     <string name="status_bar_resident">状态栏常驻</string>

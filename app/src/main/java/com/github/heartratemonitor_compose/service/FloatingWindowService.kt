@@ -232,8 +232,9 @@ class FloatingWindowService : Service() {
             PixelFormat.TRANSLUCENT
         ).apply {
             gravity = Gravity.TOP or Gravity.START
-            x = 100
-            y = 100
+            // 读取上次拖动保存的位置，首次安装无记录时回落到默认 (100, 100)
+            x = sharedPreferences.getInt(PrefsKeys.FLOATING_X, 100)
+            y = sharedPreferences.getInt(PrefsKeys.FLOATING_Y, 100)
         }
     }
 
@@ -281,6 +282,13 @@ class FloatingWindowService : Service() {
                 MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
                     touchThroughRunnable?.let { touchThroughHandler.removeCallbacks(it) }
                     touchThroughRunnable = null
+                    // 拖动结束后持久化窗口位置，实现冷启动位置记忆
+                    if (layoutParams.x != initialX || layoutParams.y != initialY) {
+                        sharedPreferences.edit()
+                            .putInt(PrefsKeys.FLOATING_X, layoutParams.x)
+                            .putInt(PrefsKeys.FLOATING_Y, layoutParams.y)
+                            .apply()
+                    }
                     true
                 }
                 else -> false
@@ -422,6 +430,13 @@ class FloatingWindowService : Service() {
     override fun onDestroy() {
         super.onDestroy()
         hideWindow()
+        // 服务销毁时再保存一次最终位置，防止被系统回收时未触发 ACTION_UP/CANCEL
+        if (::layoutParams.isInitialized) {
+            sharedPreferences.edit()
+                .putInt(PrefsKeys.FLOATING_X, layoutParams.x)
+                .putInt(PrefsKeys.FLOATING_Y, layoutParams.y)
+                .apply()
+        }
         touchThroughRunnable?.let { touchThroughHandler.removeCallbacks(it) }
         cancelTouchThroughNotification()
         if (isServiceBound) {

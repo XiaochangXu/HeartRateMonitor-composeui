@@ -1,0 +1,5 @@
+- Upgraded AGP plugin to version 9.3.1
+- Optimized the layout of the settings page
+- Added animation for device searching
+- Added LAN transfer function
+- Enabled plaintext transmission

@@ -33,6 +33,12 @@
     <!-- SettingsScreen - General -->
     <string name="settings">Settings</string>
     <string name="general">General</string>
+    <string name="function_settings">Function Settings</string>
+    <string name="subtitle_function_settings">Enable or disable app features</string>
+    <string name="status_bar_settings">Status Bar Settings</string>
+    <string name="subtitle_status_bar_settings">Enable or disable status bar heart rate</string>
+    <string name="floating_window_settings">Floating Window Settings</string>
+    <string name="subtitle_floating_window_settings">Enable or disable floating window heart rate</string>
     <string name="record_history">Record History Data</string>
     <string name="subtitle_record_history">Save heart rate data to local database</string>
     <string name="performance_warning">Performance Warning</string>
@@ -76,6 +82,29 @@
     <string name="subtitle_http_websocket_server">Share heart rate data over local network</string>
     <string name="webhook_settings">Webhook Settings</string>
     <string name="subtitle_webhook_settings">Push heart rate data to remote server</string>
+    <string name="lan_transfer">LAN Transfer</string>
+    <string name="subtitle_lan_transfer">Discover a PC and auto-push heart rate</string>
+
+    <!-- LanTransferScreen -->
+    <string name="lan_transfer_title">LAN Transfer</string>
+    <string name="lan_transfer_tip">Make sure the companion PC app is running and on the same Wi-Fi/LAN as your phone. The phone auto-discovers the PC; tap a device to pair, after the PC confirms, heart rate will be pushed in real time.</string>
+    <string name="lan_scanning">Scanning for nearby PCs…</string>
+    <string name="lan_no_devices">No PCs found. Make sure the PC app is running and on the same network</string>
+    <string name="lan_scan">Scan</string>
+    <string name="lan_stop_scan">Stop</string>
+    <string name="lan_pairing">Pairing…</string>
+    <string name="lan_pair_approved">PC approved the connection. Heart rate push started</string>
+    <string name="lan_pair_rejected">PC rejected the connection</string>
+    <string name="lan_pair_failed">Pairing failed: %1$s</string>
+    <string name="lan_pair_timeout">Pairing timed out, no response from PC</string>
+    <string name="lan_disconnect">Disconnect</string>
+    <string name="lan_connected_format">Connected: %1$s</string>
+    <string name="lan_status_idle">Idle</string>
+    <string name="lan_status_pushing">Pushing</string>
+    <string name="lan_ws_not_enabled">WebSocket server is disabled, cannot push. Enable it in "HTTP &amp; WebSocket Server"</string>
+    <string name="lan_open_server_settings">Open settings</string>
+    <string name="lan_pair_action">Connect</string>
+    <string name="lan_device_unknown">Unknown PC</string>
 
     <!-- SettingsScreen - Status Bar -->
     <string name="status_bar_resident">Status Bar Resident</string>
@@ -403,6 +432,10 @@
     <string name="theme_variant_content">Content</string>
     <string name="theme_variant_rainbow">Rainbow</string>
     <string name="theme_variant_fruit_salad">Fruit Salad</string>
+
+    <!-- NavStyle (Navigation Style) -->
+    <string name="nav_style">Navigation Style</string>
+    <string name="subtitle_nav_style">Navigation bar and liquid glass effect</string>
 
     <!-- LiquidGlass (导航栏液态玻璃) -->
     <string name="nav_settings_section">Navigation</string>
