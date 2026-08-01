@@ -91,22 +91,22 @@
 ### Windows 端
 
 <p align="center">
-  <img src="HeartRateMonitor-windows/images/1.png" alt="首页"/>
+  <img src="HeartRateMonitor-windows/images/5.png" alt="首页"/>
   <br/><sub>首页</sub>
 </p>
 
 <p align="center">
-  <img src="HeartRateMonitor-windows/images/2.png" alt="悬浮窗设置"/>
+  <img src="HeartRateMonitor-windows/images/6.png" alt="悬浮窗设置"/>
   <br/><sub>悬浮窗设置</sub>
 </p>
 
 <p align="center">
-  <img src="HeartRateMonitor-windows/images/3.png" alt="局域网传输"/>
+  <img src="HeartRateMonitor-windows/images/7.png" alt="局域网传输"/>
   <br/><sub>局域网传输</sub>
 </p>
 
 <p align="center">
-  <img src="HeartRateMonitor-windows/images/4.png" alt="版本与详细信息"/>
+  <img src="HeartRateMonitor-windows/images/8.png" alt="版本与详细信息"/>
   <br/><sub>版本与详细信息</sub>
 </p>
 
