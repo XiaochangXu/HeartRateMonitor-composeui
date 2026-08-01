@@ -43,21 +43,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
-/**
- * 状态栏常驻心率服务。
- *
- * 在顶部状态栏区域以 TYPE_APPLICATION_OVERLAY 叠加层绘制紧凑心率条（心形 + bpm）。
- * 独立于 FloatingWindowService，由设置页开关 startService / stopService 控制。
- * 仅 bindService(BleService) 获取心率数据，依赖同进程 BleService 前台档位保持存活。
- *
- * 阶段 5.2 起：覆盖层改用 [ComposeView] 承载 [StatusBarOverlayContent] Composable，
- * 由 [viewTreeOwners] 注入 ViewTree Lifecycle / SavedStateRegistry / ViewModelStore。
- * 文字仍以 [android.graphics.Paint.Style.FILL_AND_STROKE] 绘制（纯黑/纯白无阴影硬约束），
- * 由 [StatusBarOverlayContent] 内的 Canvas + nativeCanvas 实现，本服务不再直接操作 View 属性。
- *
- * 保留不动：screenReceiver、overlaySafetyCheck（3s）、componentCallbacks、
- * ensureResidentForeground + FGS 类型切换、getStatusBarHeight、updatePosition。
- */
+
 class StatusBarResidentService : Service() {
 
     private lateinit var windowManager: WindowManager

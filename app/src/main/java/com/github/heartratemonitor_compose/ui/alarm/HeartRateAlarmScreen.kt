@@ -106,10 +106,9 @@ fun HeartRateAlarmScreen(
 
     val postureSensorProvider = remember { context.applicationContext.appContainer.postureSensorProvider }
 
-    // 传感器注册 + 姿态分类（排除姿态检测时跳过）
     DisposableEffect(postureSensorProvider, excludePostureDetection) {
         if (excludePostureDetection) {
-            // 排除姿态检测：不注册传感器，姿态显示置为未检测
+            
             currentPosture = PostureType.UNKNOWN
             onDispose { }
         } else {

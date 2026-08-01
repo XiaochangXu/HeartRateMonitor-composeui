@@ -9,20 +9,7 @@ import android.net.Uri
 import com.github.heartratemonitor_compose.data.PrefsKeys
 import com.github.heartratemonitor_compose.service.HeartRateAlarmService
 
-/**
- * 应用冷启动时自动恢复心率预警服务。
- *
- * ContentProvider.onCreate 在应用进程启动时（早于 Application.onCreate 和 Activity）自动调用。
- * 利用此机制检查 heart_rate_alarm_enabled 偏好，若已开启则拉起 HeartRateAlarmService，
- * 无需修改 MainActivity。
- *
- * - 用户主动冷启动（点击图标）时进程处于前台，startService 不会被后台启动限制拒绝；
- *   服务在 onStartCommand 中自行调用 startForeground 提升为前台保活。
- * - 极端情况下（非用户主动启动）后台 startService 可能被拒，try-catch 忽略；
- *   用户进入设置页时 recoverHeartRateAlarmIfNeeded 兜底恢复。
- *
- * authority 与 StatusBarResidentInitializer 的 ${applicationId}.init 不同，用 ${applicationId}.alarm_init。
- */
+
 class HeartRateAlarmInitializer : ContentProvider() {
 
     override fun onCreate(): Boolean {

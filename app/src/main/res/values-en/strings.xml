@@ -99,6 +99,7 @@
     <string name="lan_pair_timeout">Pairing timed out, no response from PC</string>
     <string name="lan_disconnect">Disconnect</string>
     <string name="lan_connected_format">Connected: %1$s</string>
+    <string name="lan_connected_status">Connected to PC</string>
     <string name="lan_status_idle">Idle</string>
     <string name="lan_status_pushing">Pushing</string>
     <string name="lan_ws_not_enabled">WebSocket server is disabled, cannot push. Enable it in "HTTP &amp; WebSocket Server"</string>

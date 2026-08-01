@@ -119,7 +119,7 @@ fun ServerScreen(
                 wsPort = wsPort.toIntOrNull() ?: 8001,
                 ipAddress = ipAddress
             )
-            // 底部留出系统导航栏空间，避免内容被手势条遮挡
+            
             Spacer(Modifier.height(16.dp + WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()))
         }
     }

@@ -17,15 +17,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlin.math.abs
 
-/**
- * 阻尼拖拽动画：驱动底部导航栏选中指示器的位置、按压进度、形变与速度。
- * 衍生自 AndroidLiquidGlass catalog 示例。
- *
- * - [value] 当前指示器位置（浮点 Tab 索引）
- * - [pressProgress] 按压进度 0..1，驱动 lens / highlight / shadow 动画
- * - [scaleX] / [scaleY] 按压形变
- * - [velocity] 拖拽速度，驱动横向拉伸效果
- */
+
 class DampedDragAnimation(
     private val animationScope: CoroutineScope,
     val initialValue: Float,

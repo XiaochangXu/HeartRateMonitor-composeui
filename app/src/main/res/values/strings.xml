@@ -97,8 +97,9 @@
     <string name="lan_pair_rejected">电脑拒绝了连接请求</string>
     <string name="lan_pair_failed">配对失败：%1$s</string>
     <string name="lan_pair_timeout">配对超时，电脑未响应</string>
-    <string name="lan_disconnect">断开推送</string>
+    <string name="lan_disconnect">断开连接</string>
     <string name="lan_connected_format">已连接：%1$s</string>
+    <string name="lan_connected_status">已连接电脑设备</string>
     <string name="lan_status_idle">空闲</string>
     <string name="lan_status_pushing">推送中</string>
     <string name="lan_ws_not_enabled">未启用 WebSocket 服务器，无法推送。请前往「HTTP &amp; WebSocket 服务」开启</string>

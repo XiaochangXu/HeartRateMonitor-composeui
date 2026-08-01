@@ -46,6 +46,7 @@ Can be used in [Windwos version](https://github.com/XiaochangXu/HeartRateMonitor
 - 🎨 **Color Picker**: Self-drawn HSV color wheel
 - ✨ **Smooth Transition Animations** real-time blur scaling
 - 🧊 **Liquid Glass Effect** for implementing the liquid glass effect in the bottom navigation bar
+- 🔗 **Local Network Transmission**: WebSocket server for PC and phone communication
 - 🎯 **Material 3 Dynamic Color**
 
 -----

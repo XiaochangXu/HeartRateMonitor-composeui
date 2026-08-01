@@ -11,18 +11,7 @@ import android.provider.Settings
 import com.github.heartratemonitor_compose.data.PrefsKeys
 import com.github.heartratemonitor_compose.service.StatusBarResidentService
 
-/**
- * 应用冷启动时自动恢复状态栏常驻心率服务。
- *
- * ContentProvider.onCreate 在应用进程启动时（早于 Application.onCreate 和 Activity）自动调用。
- * 利用此机制检查 status_bar_resident_enabled 偏好，若已开启且悬浮窗权限已授予则拉起
- * StatusBarResidentService，无需修改 MainActivity。
- *
- * - 用户主动冷启动（点击图标）时进程处于前台，startService 不会被后台启动限制拒绝；
- *   服务在 onStartCommand 中自行调用 startForeground 提升为前台保活。
- * - 极端情况下（非用户主动启动）后台 startService 可能被拒，try-catch 忽略；
- *   用户进入设置页时 recoverStatusBarResidentIfNeeded 兜底恢复。
- */
+
 class StatusBarResidentInitializer : ContentProvider() {
 
     override fun onCreate(): Boolean {

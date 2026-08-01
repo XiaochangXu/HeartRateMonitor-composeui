@@ -20,11 +20,7 @@ import com.kyant.backdrop.isRuntimeShaderSupported
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
-/**
- * 跟随手指的高光：按下时出现径向高光，位置跟随手指移动。
- * API 33+ 使用 AGSL RuntimeShader，低版本回退为整体白色叠加。
- * 衍生自 AndroidLiquidGlass catalog 示例。
- */
+
 class InteractiveHighlight(
     val animationScope: CoroutineScope,
     val position: (size: Size, offset: Offset) -> Offset = { _, offset -> offset }

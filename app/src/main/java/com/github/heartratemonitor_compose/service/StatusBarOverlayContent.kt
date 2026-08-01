@@ -20,18 +20,7 @@ import androidx.compose.ui.unit.dp
 import com.github.heartratemonitor_compose.R
 import kotlin.math.roundToInt
 
-/**
- * 状态栏覆盖层外观参数（全部以 px 为单位，已应用 scaleFactor）。
- *
- * 文字颜色为纯黑（0xFF000000）或纯白（0xFFFFFFFF），无 alpha，无阴影。
- * 由 [StatusBarResidentService] 的 applyAppearance / applySize / applyTextStyle 从
- * SharedPreferences 读取并计算后赋值，变更触发 [StatusBarOverlayContent] 重绘。
- *
- * 复刻原 layout_status_bar_overlay.xml + StatusBarResidentService 的 View 属性操作：
- * - textColor：applyAppearance 计算（autoColor / whiteText / 默认黑）
- * - textSize / unitTextSize / iconSize / padding / numberMargin / unitMargin：applySize 缩放
- * - thickness / isBpmTextEnabled：applyTextStyle
- */
+
 data class StatusBarOverlayAppearance(
     val textColor: Int = android.graphics.Color.BLACK,
     val textSize: Float = 12f,
@@ -44,18 +33,7 @@ data class StatusBarOverlayAppearance(
     val isBpmTextEnabled: Boolean = true
 )
 
-/**
- * 状态栏覆盖层 Composable。复刻原 [layout_status_bar_overlay.xml]：
- * LinearLayout → Canvas；ImageView(heart) + TextView(bpm_number) + TextView(bpm_unit)
- * 全部在 Canvas 内用 [android.graphics.Canvas] 原生绘制。
- *
- * **硬约束**：状态栏文字必须 [Paint.Style.FILL_AND_STROKE]（纯黑/纯白无阴影）。
- * Compose Text 不支持 stroke，故用 `nativeCanvas.drawText` + 自建 [Paint]，
- * thickness > 0 时叠加 strokeWidth（= textSize * thickness / 100 * 0.25），与原 TextView paint 逻辑一致。
- *
- * 心跳动画在内部用 [Animatable] + [LaunchedEffect] 驱动（替代原 ValueAnimator），
- * 仅作用于心形图标（scale 1f↔1.2f），不影响文字。
- */
+
 @Composable
 fun StatusBarOverlayContent(
     heartRate: String,

@@ -113,8 +113,12 @@ class BleService : Service(), FairMemoryReceiver.MemoryListener {
             heartRate = _heartRate,
             speed = speedProvider.speed,
             isDeviceConnected = ::isDeviceConnected,
-            getStatusMessage = { _bleState.value.getMessage(applicationContext) }
+            getStatusMessage = { _bleState.value.getMessage(applicationContext) },
+            webSocketClientCount = applicationContext.appContainer.webSocketClientCount
         )
+
+        // 注册断开 WebSocket 客户端的回调，供局域网传输页面「断开连接」按钮调用
+        applicationContext.appContainer.disconnectWebSocketClients = { serverHost.disconnectAllWebSocketClients() }
 
         startForegroundService()
         registerSettingsListener()
@@ -463,6 +467,8 @@ class BleService : Service(), FairMemoryReceiver.MemoryListener {
 
     override fun onDestroy() {
         super.onDestroy()
+        applicationContext.appContainer.disconnectWebSocketClients = null
+        applicationContext.appContainer.webSocketClientCount.value = 0
         FairMemoryReceiver.getInstance().removeMemoryListener(this)
         // 刷新未写入的批量心率记录：onDestroy 中同步落盘，确保数据不丢失。
         // runBlocking 短暂阻塞主线程，但 flushPendingRecords 是有界操作（单次批量 insert），

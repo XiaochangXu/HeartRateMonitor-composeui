@@ -3,6 +3,7 @@ package com.github.heartratemonitor_compose.service.server
 import android.content.SharedPreferences
 import com.github.heartratemonitor_compose.data.PrefsKeys
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 
@@ -17,7 +18,8 @@ class ServerHost(
     private val heartRate: StateFlow<Int>,
     private val speed: StateFlow<Float>,
     private val isDeviceConnected: () -> Boolean,
-    private val getStatusMessage: () -> String
+    private val getStatusMessage: () -> String,
+    private val webSocketClientCount: MutableStateFlow<Int>
 ) {
 
     private var httpServerManager: HttpServerManager? = null
@@ -51,6 +53,13 @@ class ServerHost(
     fun stop() {
         httpServerManager?.stop()
         webSocketServerManager?.stop()
+    }
+
+    /**
+     * 主动断开所有已连接的 WebSocket 客户端（PC），用于局域网传输「断开连接」。
+     */
+    fun disconnectAllWebSocketClients() {
+        webSocketServerManager?.disconnectAllClients()
     }
 
     private fun updateHttpServerState() {
@@ -89,7 +98,7 @@ class ServerHost(
             val port = prefs.getInt(PrefsKeys.WEBSOCKET_SERVER_PORT, 8001)
             if (webSocketServerManager == null || currentWebSocketPort != port || currentWebSocketAuthToken != authToken) {
                 webSocketServerManager?.stop()
-                webSocketServerManager = WebSocketServerManager(port, authToken, webSocketStateFlow)
+                webSocketServerManager = WebSocketServerManager(port, authToken, webSocketStateFlow, webSocketClientCount)
                 webSocketServerManager?.start()
                 currentWebSocketPort = port
                 currentWebSocketAuthToken = authToken

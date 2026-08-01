@@ -19,10 +19,6 @@ abstract class AppDatabase : RoomDatabase() {
         @Volatile
         private var INSTANCE: AppDatabase? = null
 
-        /**
-         * v1 → v2 迁移：为 heart_rate_records.sessionId 创建索引，提升按会话查询记录的性能。
-         * 替代原 fallbackToDestructiveMigration()，避免升级时清空用户历史数据。
-         */
         private val MIGRATION_1_2 = object : Migration(1, 2) {
             override suspend fun migrate(connection: SQLiteConnection) {
                 connection.execSQL("CREATE INDEX IF NOT EXISTS `index_heart_rate_records_sessionId` ON `heart_rate_records` (`sessionId`)")

@@ -23,6 +23,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Computer
+import androidx.compose.material.icons.filled.LinkOff
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -39,6 +40,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -76,9 +78,10 @@ fun LanTransferScreen(
     val scope = rememberCoroutineScope()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
 
+    val appContainer = remember { context.applicationContext.appContainer }
     val nsdDiscoverer = remember { NsdDiscoverer(context) }
     val pairClient = remember { PairClient() }
-    val ipAddressProvider: IpAddressProvider = remember { context.applicationContext.appContainer.ipAddressProvider }
+    val ipAddressProvider: IpAddressProvider = remember { appContainer.ipAddressProvider }
 
     var isScanning by remember { mutableStateOf(false) }
     var devices by remember { mutableStateOf<List<NsdDiscoverer.DiscoveredPc>>(emptyList()) }
@@ -88,6 +91,12 @@ fun LanTransferScreen(
     var scanJob: Job? by remember { mutableStateOf(null) }
     var pairJob: Job? by remember { mutableStateOf(null) }
 
+    // 已连接电脑设备：直接观察 WebSocket 服务器真实客户端连接数。
+    // 由 BleService → ServerHost → WebSocketServerManager 维护，PC 连上即 >0、断开即归零。
+    // 跨页面导航保持一致（AppContainer 单例），退出应用随进程销毁自动重置。
+    val wsClientCount by appContainer.webSocketClientCount.collectAsState()
+    val isConnected = wsClientCount > 0
+
     val wsEnabled = remember { mutableStateOf(settings.getBoolean(PrefsKeys.WEBSOCKET_SERVER_ENABLED, false)) }
     LaunchedEffect(Unit) {
         settings.observeBoolean(PrefsKeys.WEBSOCKET_SERVER_ENABLED, false).collectLatest {
@@ -96,7 +105,7 @@ fun LanTransferScreen(
     }
 
     fun startScan() {
-        if (isScanning) return
+        if (isScanning || isConnected) return
         isScanning = true
         devices = emptyList()
         scanJob = scope.launch {
@@ -114,6 +123,18 @@ fun LanTransferScreen(
         scanJob?.cancel()
         scanJob = null
         isScanning = false
+    }
+
+    // 连接状态变化：连上时停止扫描；断开（含 PC 端退出/关闭）时清空设备列表，
+    // 避免残留旧扫描结果显示「n PC 推送中」+ 设备卡片。
+    // LaunchedEffect 仅在 isConnected 变化时触发，不影响扫描过程中的 devices 填充。
+    LaunchedEffect(isConnected) {
+        if (isConnected) {
+            stopScan()
+        } else {
+            stopScan()
+            devices = emptyList()
+        }
     }
 
     fun startPairing(pc: NsdDiscoverer.DiscoveredPc) {
@@ -158,7 +179,8 @@ fun LanTransferScreen(
 
             when (resp) {
                 is PairClient.PairResponse.Approved -> {
-                    settings.setString(PrefsKeys.LAN_LAST_PAIRED_PC_NAME, pc.name)
+                    // PC 已允许连接，随后 PC 会连到本机 WebSocket 服务器，
+                    // webSocketClientCount 自动变为 >0，UI 随之更新为「已连接电脑设备」
                 }
                 is PairClient.PairResponse.Rejected -> {
                     pairError = context.getString(R.string.lan_pair_rejected)
@@ -173,6 +195,18 @@ fun LanTransferScreen(
     fun dismissResult() {
         pairResult = null
         pairError = null
+    }
+
+    fun disconnect() {
+        pairJob?.cancel()
+        pairJob = null
+        pairingPc = null
+        pairResult = null
+        pairError = null
+        stopScan()
+        devices = emptyList()
+        // 真正断开所有 WebSocket 客户端（PC），断开后 webSocketClientCount 归零，UI 自动更新
+        appContainer.disconnectWebSocketClients?.invoke()
     }
 
     Scaffold(
@@ -194,8 +228,25 @@ fun LanTransferScreen(
                         }
                     }
                 },
-                // 右上角搜索按钮：与「可用设备」页面完全一致（Surface 圆形 + onSurface tint）
+                // 右上角：已连接时显示「断开连接」按钮，其后为搜索按钮
                 actions = {
+                    if (isConnected) {
+                        IconButton(onClick = { disconnect() }) {
+                            Surface(
+                                modifier = Modifier.size(40.dp),
+                                shape = CircleShape,
+                                color = MaterialTheme.colorScheme.surfaceContainer
+                            ) {
+                                Box(contentAlignment = Alignment.Center) {
+                                    Icon(
+                                        imageVector = Icons.Filled.LinkOff,
+                                        contentDescription = stringResource(R.string.lan_disconnect),
+                                        tint = MaterialTheme.colorScheme.error
+                                    )
+                                }
+                            }
+                        }
+                    }
                     IconButton(onClick = { startScan() }) {
                         Surface(
                             modifier = Modifier.size(40.dp),
@@ -232,25 +283,23 @@ fun LanTransferScreen(
                 onOpenServerSettings = { onNavigateBack() }
             )
 
-            // 搜索设备卡：参照首页「搜索蓝牙设备」的卡片设计（28dp 圆角 + 行内布局 + 末尾进度条/箭头）
+            // 搜索/连接状态卡：已连接时显示「已连接电脑设备」，否则显示扫描状态
             ScanStateCard(
+                isConnected = isConnected,
                 isScanning = isScanning,
                 foundCount = devices.size,
                 onClick = { if (isScanning) stopScan() else startScan() }
             )
 
-            // 设备列表（未发现设备时不重复显示提示，ScanStateCard 已有文案）
-            devices.forEach { pc ->
-                DeviceCard(
-                    pc = pc,
-                    pairing = pairingPc?.serviceName == pc.serviceName,
-                    onPair = { startPairing(pc) }
-                )
-            }
-
-            val lastPcName = remember { settings.getString(PrefsKeys.LAN_LAST_PAIRED_PC_NAME, "") }
-            if (lastPcName.isNotEmpty() && pairResult == null) {
-                LastPairedCard(name = lastPcName)
+            // 设备列表：已连接时隐藏（无需再选择设备），未发现设备时不重复显示提示
+            if (!isConnected) {
+                devices.forEach { pc ->
+                    DeviceCard(
+                        pc = pc,
+                        pairing = pairingPc?.serviceName == pc.serviceName,
+                        onPair = { startPairing(pc) }
+                    )
+                }
             }
 
             Spacer(Modifier.height(16.dp + WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()))
@@ -371,22 +420,28 @@ private fun WebSocketStatusCard(
 }
 
 /**
- * 搜索设备卡：参照首页「搜索蓝牙设备」入口卡片设计。
- * - 28dp 圆角 surfaceContainer
- * - 行内：Computer 图标 + 状态文本(weight 1f) + 末尾进度条/数字
- * - 整卡可点击切换扫描/停止
+ * 搜索/连接状态卡：参照首页「搜索蓝牙设备」入口卡片设计。
+ * - 已连接：primaryContainer 配色 + 「已连接电脑设备」，不显示扫描进度
+ * - 未连接：surfaceContainer + 扫描状态文案（扫描中/未发现/发现 n 台）+ 末尾进度条/标签
+ * - 整卡可点击切换扫描/停止（已连接时 startScan 内部会拦截）
  */
 @Composable
 private fun ScanStateCard(
+    isConnected: Boolean,
     isScanning: Boolean,
     foundCount: Int,
     onClick: () -> Unit
 ) {
+    val containerColor = if (isConnected) MaterialTheme.colorScheme.primaryContainer
+        else MaterialTheme.colorScheme.surfaceContainer
+    val onContainerColor = if (isConnected) MaterialTheme.colorScheme.onPrimaryContainer
+        else MaterialTheme.colorScheme.onSurface
+
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(28.dp),
-        color = MaterialTheme.colorScheme.surfaceContainer,
-        contentColor = MaterialTheme.colorScheme.onSurface,
+        color = containerColor,
+        contentColor = onContainerColor,
         onClick = onClick
     ) {
         Row(
@@ -398,29 +453,30 @@ private fun ScanStateCard(
             Icon(
                 imageVector = Icons.Filled.Computer,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                tint = onContainerColor,
                 modifier = Modifier.size(18.dp)
             )
             Spacer(Modifier.width(12.dp))
             Text(
                 text = when {
+                    isConnected -> stringResource(R.string.lan_connected_status)
                     isScanning -> stringResource(R.string.lan_scanning)
                     foundCount == 0 -> stringResource(R.string.lan_no_devices)
                     else -> "$foundCount PC"
                 },
                 style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurface,
+                color = onContainerColor,
                 modifier = Modifier.weight(1f),
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
-            if (isScanning) {
+            if (!isConnected && isScanning) {
                 CircularProgressIndicator(
                     modifier = Modifier.size(20.dp),
                     color = MaterialTheme.colorScheme.primary,
                     strokeWidth = 2.dp
                 )
-            } else if (foundCount > 0) {
+            } else if (!isConnected && foundCount > 0) {
                 Text(
                     text = stringResource(R.string.lan_status_pushing),
                     style = MaterialTheme.typography.labelSmall,
@@ -490,33 +546,6 @@ private fun DeviceCard(
                     Text(stringResource(R.string.lan_pair_action))
                 }
             }
-        }
-    }
-}
-
-@Composable
-private fun LastPairedCard(name: String) {
-    Surface(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(28.dp),
-        color = MaterialTheme.colorScheme.secondaryContainer,
-        contentColor = MaterialTheme.colorScheme.onSecondaryContainer
-    ) {
-        Row(
-            modifier = Modifier.padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                painter = painterResource(R.drawable.ic_signal_wifi),
-                contentDescription = null,
-                modifier = Modifier.size(20.dp)
-            )
-            Spacer(Modifier.width(12.dp))
-            Text(
-                text = stringResource(R.string.lan_connected_format, name),
-                style = MaterialTheme.typography.bodyMedium,
-                fontWeight = FontWeight.Medium
-            )
         }
     }
 }

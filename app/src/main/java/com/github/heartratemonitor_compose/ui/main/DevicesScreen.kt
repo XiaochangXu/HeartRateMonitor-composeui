@@ -55,14 +55,7 @@ import com.github.heartratemonitor_compose.data.PrefsKeys
 import com.github.heartratemonitor_compose.service.BleService
 import com.github.heartratemonitor_compose.util.settingsRepository
 
-/**
- * 设备搜索二级界面。
- *
- * 从首页「可用设备」入口进入，包含：
- * - TopAppBar（标题 + 返回箭头 + 搜索按钮）
- * - 首次搜索提示弹窗
- * - 设备列表（复用 [DeviceItem]），按收藏优先 + 信号强度排序
- */
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DevicesScreen(
@@ -78,7 +71,6 @@ fun DevicesScreen(
     val favoriteDeviceId by viewModel.favoriteDeviceId.collectAsStateWithLifecycle()
     val connectedDevice by viewModel.connectedDevice.collectAsStateWithLifecycle()
 
-    // 首次搜索提示弹窗（只弹出一次）
     var showSearchTipDialog by remember { mutableStateOf(false) }
 
     val sortedScanResults = remember(scanResults, favoriteDeviceId) {
@@ -195,7 +187,7 @@ fun DevicesScreen(
                             color = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.weight(1f)
                         )
-                        // 扫描中显示圆形进度条指示器
+                       
                         if (appStatus == AppStatus.SCANNING) {
                             CircularProgressIndicator(
                                 modifier = Modifier.size(18.dp),

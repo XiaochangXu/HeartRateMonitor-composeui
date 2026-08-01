@@ -1,17 +1,19 @@
-﻿package com.github.heartratemonitor_compose.service.server
+package com.github.heartratemonitor_compose.service.server
 
 import android.util.Log
 import fi.iki.elonen.NanoHTTPD
 import fi.iki.elonen.NanoWSD
 import fi.iki.elonen.NanoWSD.WebSocketFrame.CloseCode
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import java.io.IOException
 
 class WebSocketServerManager(
     private val port: Int,
     private val authToken: String,
-    private val stateFlow: SharedFlow<String>
+    private val stateFlow: SharedFlow<String>,
+    private val clientCountFlow: MutableStateFlow<Int>
 ) {
     private var server: AppWebSocketServer? = null
 
@@ -30,13 +32,24 @@ class WebSocketServerManager(
     fun stop() {
         server?.stop()
         server = null
+        clientCountFlow.value = 0
         Log.d("WebSocketServerManager", "WebSocket Server stopped")
+    }
+
+    /**
+     * 主动断开所有已连接的 WebSocket 客户端（PC）。
+     * 用于局域网传输页面「断开连接」按钮。
+     */
+    fun disconnectAllClients() {
+        server?.disconnectAllClients()
     }
 
     private inner class AppWebSocketServer : NanoWSD(port) {
 
         // 跟踪所有活跃连接的 scope，确保 stop() 时全部取消，防止泄漏
         private val activeScopes = java.util.Collections.synchronizedSet(mutableSetOf<CoroutineScope>())
+        // 跟踪所有活跃连接的 WebSocket 实例，用于主动断开
+        private val activeSockets = java.util.Collections.synchronizedSet(mutableSetOf<AppWebSocket>())
 
         override fun serve(session: IHTTPSession?): Response {
             // 鉴权：若配置了 token，则校验 ?token= 查询参数
@@ -53,13 +66,30 @@ class WebSocketServerManager(
             return AppWebSocket(handshake)
         }
 
+        fun disconnectAllClients() {
+            synchronized(activeSockets) {
+                activeSockets.toList().forEach { socket ->
+                    try {
+                        socket.close(CloseCode.GoingAway, "Disconnected by user", false)
+                    } catch (e: Exception) {
+                        Log.w("AppWebSocketServer", "Failed to close socket", e)
+                    }
+                }
+            }
+        }
+
         override fun stop() {
             // 先取消所有活跃连接的 scope，再停止服务器
             synchronized(activeScopes) {
                 activeScopes.forEach { it.cancel() }
                 activeScopes.clear()
             }
+            synchronized(activeSockets) { activeSockets.clear() }
             super.stop()
+        }
+
+        private fun updateClientCount() {
+            clientCountFlow.value = synchronized(activeSockets) { activeSockets.size }
         }
 
         inner class AppWebSocket(handshakeRequest: IHTTPSession) : WebSocket(handshakeRequest) {
@@ -67,7 +97,12 @@ class WebSocketServerManager(
                 activeScopes.add(it)
             }
 
+            init {
+                activeSockets.add(this)
+            }
+
             override fun onOpen() {
+                updateClientCount()
                 Log.d("AppWebSocket", "WebSocket opened for: ${handshakeRequest.remoteIpAddress}")
 
                 // Coroutine for handling heartbeats (Ping/Pong)
@@ -101,6 +136,8 @@ class WebSocketServerManager(
             override fun onClose(code: CloseCode?, reason: String?, initiatedByRemote: Boolean) {
                 webSocketScope.cancel()
                 activeScopes.remove(webSocketScope)
+                activeSockets.remove(this)
+                updateClientCount()
                 Log.d("AppWebSocket", "WebSocket closed. Reason: $reason, Remote: $initiatedByRemote")
             }
 
@@ -115,6 +152,8 @@ class WebSocketServerManager(
             override fun onException(exception: IOException) {
                 webSocketScope.cancel()
                 activeScopes.remove(webSocketScope)
+                activeSockets.remove(this)
+                updateClientCount()
                 Log.e("AppWebSocket", "WebSocket exception", exception)
             }
         }

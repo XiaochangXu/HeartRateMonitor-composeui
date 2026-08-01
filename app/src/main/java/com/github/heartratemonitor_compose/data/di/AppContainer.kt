@@ -9,6 +9,7 @@ import com.github.heartratemonitor_compose.data.network.IpAddressProvider
 import com.github.heartratemonitor_compose.data.sensor.PostureSensorProvider
 import com.github.heartratemonitor_compose.data.system.OverlayPermissionProvider
 import com.github.heartratemonitor_compose.data.webhook.WebhookRepository
+import kotlinx.coroutines.flow.MutableStateFlow
 
 /**
  * 应用级依赖容器（手动 DI，避免引入 Hilt/Koin 等框架）。
@@ -37,4 +38,15 @@ class AppContainer(private val application: Application) {
     val ipAddressProvider: IpAddressProvider by lazy { IpAddressProvider(application) }
 
     val overlayPermissionProvider: OverlayPermissionProvider by lazy { OverlayPermissionProvider(application) }
+
+    // ── 局域网传输：WebSocket 客户端（PC）连接数 ──
+    // 由 BleService → ServerHost → WebSocketServerManager 在客户端 connect/disconnect 时更新。
+    // UI 通过此值判断「已连接电脑设备」状态，替代易失的内存态与易残留的持久化偏好。
+    // >0 表示有 PC 正在连接并接收心率推送。
+    val webSocketClientCount = MutableStateFlow(0)
+
+    // 断开所有 WebSocket 客户端连接的回调，由 BleService 在 onCreate 时注册、onDestroy 时清空。
+    // 服务未运行时为 null，UI 调用为空操作（无连接可断）。
+    @Volatile
+    var disconnectWebSocketClients: (() -> Unit)? = null
 }
