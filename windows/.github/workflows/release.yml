@@ -1,0 +1,59 @@
+name: Release (Windows)
+
+# 手动触发：在 GitHub 仓库 Actions 页选择 "Release (Windows)" → Run workflow，输入版本号。
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: '版本号（如 4.4，将生成 tag v4.4）'
+        required: true
+        default: '4.4'
+
+defaults:
+  run:
+    working-directory: windows
+
+jobs:
+  build-release:
+    runs-on: windows-latest
+    permissions:
+      contents: write   # 创建 tag 与 Release 需要
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Publish (self-contained, win-x64, unpackaged)
+        run: >
+          dotnet publish HeartRate.csproj
+          -c Release
+          -r win-x64
+          --self-contained true
+          -p:WindowsPackageType=None
+          -p:PublishReadyToRun=true
+          -o publish
+
+      - name: Zip artifact
+        shell: pwsh
+        run: |
+          $ver = "${{ github.event.inputs.version }}"
+          $zip = "HeartRateMonitor-v$ver-win-x64.zip"
+          Compress-Archive -Path publish\* -DestinationPath $zip -CompressionLevel Optimal
+          Write-Host "Created $zip"
+          # 列出产物大小
+          $size = [math]::Round((Get-Item $zip).Length / 1MB, 1)
+          Write-Host "Size: $size MB"
+
+      - name: Upload to GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ github.event.inputs.version }}
+          name: v${{ github.event.inputs.version }}
+          generate_release_notes: true   # 自动生成 commit 变更记录
+          files: windows/HeartRateMonitor-v${{ github.event.inputs.version }}-win-x64.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
