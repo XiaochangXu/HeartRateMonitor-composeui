@@ -58,6 +58,9 @@ public static class L
     public static string Lan_PairTitle    => Loc.GetString("Lan_PairTitle");
     public static string Lan_PairApprove  => Loc.GetString("Lan_PairApprove");
     public static string Lan_PairReject   => Loc.GetString("Lan_PairReject");
+    public static string Lan_PortInUse_Title => Loc.GetString("Lan_PortInUse_Title");
+    public static string Lan_PortInUse_Keep  => Loc.GetString("Lan_PortInUse_Keep");
+    public static string Lan_PortUnavailable_Title => Loc.GetString("Lan_PortUnavailable_Title");
 
     // ── Appearance (主题和语言) ────────────────────────────────────────────
     public static string Appearance_Header       => Loc.GetString("Appearance_Header.Text");

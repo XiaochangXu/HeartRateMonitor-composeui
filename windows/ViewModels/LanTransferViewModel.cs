@@ -52,6 +52,10 @@ namespace HeartRate.ViewModels
         /// <summary>本机局域网 IPv4，用于 UI 提示。</summary>
         public string LocalIp => _lanIp;
 
+        /// <summary>局域网传输服务当前是否在运行。开关预检用它区分
+        /// "端口被本应用自身占用"与"被其他进程占用"，避免重启后误报。</summary>
+        public bool IsServiceRunning => _service.IsRunning;
+
         /// <summary>配对端口输入：字符串往返，解析失败时忽略，由 Settings 钳制到合法范围。</summary>
         public string PairPortText
         {

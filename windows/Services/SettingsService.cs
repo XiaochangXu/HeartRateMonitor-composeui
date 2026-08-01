@@ -82,6 +82,16 @@ public static class SettingsService
         return false;
     }
 
+    /// <summary>指定端口是否已被其他<b>已启用</b>服务占用（不含局域网传输自身）。
+    /// 供「自动换端口」挑选空闲端口时排除内置服务的端口。</summary>
+    public static bool PortUsedByOtherService(int port)
+    {
+        var net = Current.Network;
+        if (net.HttpServerEnabled && net.HttpServerPort == port) return true;
+        if (net.WebSocketServerEnabled && net.WebSocketServerPort == port) return true;
+        return false;
+    }
+
     private static void WriteToDisk()
     {
         try

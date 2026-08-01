@@ -39,6 +39,12 @@ public partial class FloatWindowSettings : ObservableObject
     [ObservableProperty]
     private string _language = "zh-CN";
 
+    // ── 背景效果 ──────────────────────────────────────────────────────────
+    // Mica 云母 / Acrylic 亚克力 二选一（同一时间只能有一种，均为系统背景材料，
+    // 仅 Windows 11 支持）。旧 settings.json 没有该字段时反序列化保留默认 "Mica"。
+    [ObservableProperty]
+    private string _backdropMode = "Mica";
+
     // ── 外观 ──────────────────────────────────────────────────────────────
     // 默认外观值：用于字段初始化与「重置为默认值」。
     public const bool DefaultShowBpmText = true;
@@ -101,6 +107,13 @@ public partial class FloatWindowSettings : ObservableObject
     {
         SettingsService.Save();
         ThemeHelper.ApplyTheme(value);
+    }
+
+    partial void OnBackdropModeChanged(string value)
+    {
+        SettingsService.Save();
+        // 切换时即时生效；Win10 不支持时 ApplyBackdrop 内部回退为 Mica
+        ThemeHelper.ApplyBackdrop(value);
     }
 
     partial void OnLanguageChanged(string value) => SettingsService.Save();

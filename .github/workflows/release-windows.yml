@@ -42,7 +42,8 @@ jobs:
         run: |
           $ver = "${{ github.event.inputs.version }}"
           $zip = "HeartRateMonitor-v$ver-win-x64.zip"
-          Compress-Archive -Path publish\* -DestinationPath $zip -CompressionLevel Optimal
+          # SmallestSize = 最高压缩（.NET Brotli，需要 PowerShell 7.4+，GitHub 自带 pwsh 满足）
+          Compress-Archive -Path publish\* -DestinationPath $zip -CompressionLevel SmallestSize
           Write-Host "Created $zip"
           # 列出产物大小
           $size = [math]::Round((Get-Item $zip).Length / 1MB, 1)

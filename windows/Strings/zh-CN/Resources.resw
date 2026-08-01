@@ -285,6 +285,18 @@
   <data name="Appearance_ThemeDark.Content" xml:space="preserve">
     <value>暗色主题</value>
   </data>
+  <data name="Appearance_BackdropCard.Text" xml:space="preserve">
+    <value>背景效果</value>
+  </data>
+  <data name="Appearance_BackdropMica.Content" xml:space="preserve">
+    <value>云母</value>
+  </data>
+  <data name="Appearance_BackdropAcrylic.Content" xml:space="preserve">
+    <value>亚克力</value>
+  </data>
+  <data name="Appearance_BackdropHint.Text" xml:space="preserve">
+    <value>仅 Windows 11 支持</value>
+  </data>
   <data name="Appearance_LanguageCard.Text" xml:space="preserve">
     <value>语言</value>
   </data>
@@ -344,6 +356,24 @@
   </data>
   <data name="Lan_PairReject" xml:space="preserve">
     <value>拒绝</value>
+  </data>
+  <data name="Lan_PortInUse_Title" xml:space="preserve">
+    <value>端口被占用</value>
+  </data>
+  <data name="Lan_PortInUse_Body" xml:space="preserve">
+    <value>配对端口 {0} 已被其他程序占用。是否自动切换到可用端口 {1}？</value>
+  </data>
+  <data name="Lan_PortInUse_Switch" xml:space="preserve">
+    <value>切换到 {0}</value>
+  </data>
+  <data name="Lan_PortInUse_Keep" xml:space="preserve">
+    <value>保持原端口</value>
+  </data>
+  <data name="Lan_PortUnavailable_Title" xml:space="preserve">
+    <value>无可用端口</value>
+  </data>
+  <data name="Lan_PortUnavailable_Body" xml:space="preserve">
+    <value>未找到可用端口，请手动修改配对端口后重试。</value>
   </data>
   <data name="MainWindow_NavVersion.Content" xml:space="preserve">
     <value>版本与信息</value>

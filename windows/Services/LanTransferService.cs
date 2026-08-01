@@ -131,25 +131,32 @@ public sealed class LanTransferService : IDisposable
 
             await app.StartAsync();
             _pairApp = app;
+            // 端口绑定成功即视为运行中（mDNS 随后启动）；IsRunning 提前置位，
+            // 供开关预检区分"自身占用"，避免重启后误报端口被占用。
+            IsRunning = true;
         }
         catch (Exception ex)
         {
             Error = $"pair server: {ex.Message}";
+            IsRunning = false;
         }
 
-        // ── 启动 mDNS 广播 ─────────────────────────────────────────────────
-        try
+        // ── 启动 mDNS 广播（仅当配对 HTTP 服务启动成功）────────────────────
+        // 若配对服务绑定失败（如端口被占用），就不广播 _heartrate._tcp.local，
+        // 避免手机端能发现电脑却无法配对（表现为"配对上但一直失败"的假死）。
+        if (_pairApp is not null)
         {
-            _advertiser = new MdnsAdvertiser(computerName, pairPort, localIps);
-            _advertiser.Start();
+            try
+            {
+                _advertiser = new MdnsAdvertiser(computerName, pairPort, localIps);
+                _advertiser.Start();
+            }
+            catch (Exception ex)
+            {
+                // mDNS 失败不阻塞 HTTP 配对；announce-only 模式由 advertiser 内部退化处理
+                if (Error is null) Error = $"mdns: {ex.Message}";
+            }
         }
-        catch (Exception ex)
-        {
-            // mDNS 失败不阻塞 HTTP 配对；announce-only 模式由 advertiser 内部退化处理
-            if (Error is null) Error = $"mdns: {ex.Message}";
-        }
-
-        IsRunning = _pairApp is not null;
     }
 
     private async Task StopCoreAsync()

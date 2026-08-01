@@ -285,6 +285,18 @@
   <data name="Appearance_ThemeDark.Content" xml:space="preserve">
     <value>Dark Theme</value>
   </data>
+  <data name="Appearance_BackdropCard.Text" xml:space="preserve">
+    <value>Background effect</value>
+  </data>
+  <data name="Appearance_BackdropMica.Content" xml:space="preserve">
+    <value>Mica</value>
+  </data>
+  <data name="Appearance_BackdropAcrylic.Content" xml:space="preserve">
+    <value>Acrylic</value>
+  </data>
+  <data name="Appearance_BackdropHint.Text" xml:space="preserve">
+    <value>Windows 11 only</value>
+  </data>
   <data name="Appearance_LanguageCard.Text" xml:space="preserve">
     <value>Language</value>
   </data>
@@ -344,6 +356,24 @@
   </data>
   <data name="Lan_PairReject" xml:space="preserve">
     <value>Deny</value>
+  </data>
+  <data name="Lan_PortInUse_Title" xml:space="preserve">
+    <value>Port in use</value>
+  </data>
+  <data name="Lan_PortInUse_Body" xml:space="preserve">
+    <value>Pair port {0} is already in use by another program. Switch to an available port {1}?</value>
+  </data>
+  <data name="Lan_PortInUse_Switch" xml:space="preserve">
+    <value>Switch to {0}</value>
+  </data>
+  <data name="Lan_PortInUse_Keep" xml:space="preserve">
+    <value>Keep current port</value>
+  </data>
+  <data name="Lan_PortUnavailable_Title" xml:space="preserve">
+    <value>No available port</value>
+  </data>
+  <data name="Lan_PortUnavailable_Body" xml:space="preserve">
+    <value>No available port found. Please change the pair port manually and retry.</value>
   </data>
   <data name="MainWindow_NavVersion.Content" xml:space="preserve">
     <value>Version &amp; Info</value>

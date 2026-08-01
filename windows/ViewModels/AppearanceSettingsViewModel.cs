@@ -2,6 +2,7 @@ using System.ComponentModel;
 using HeartRate.Helpers;
 using HeartRate.Models;
 using HeartRate.Services;
+using Microsoft.UI.Xaml;
 
 namespace HeartRate.ViewModels
 {
@@ -59,12 +60,35 @@ namespace HeartRate.ViewModels
         /// <summary>语言切换后需要重启才生效的提示文案。</summary>
         public string LanguageRestartHint => L.Appearance_RestartHint;
 
+        // ── 背景效果：云母 / 亚克力 二选一 ──────────────────────────────────
+
+        /// <summary>背景效果下标：0=云母(Mica) / 1=亚克力(Acrylic)。变更即保存并即时切换。</summary>
+        public int BackdropIndex
+        {
+            get => Settings.BackdropMode == "Acrylic" ? 1 : 0;
+            set
+            {
+                var mode = value switch { 1 => "Acrylic", _ => "Mica" };
+                if (Settings.BackdropMode == mode) return;
+                Settings.BackdropMode = mode; // → OnBackdropModeChanged → Save + ApplyBackdrop
+            }
+        }
+
+        /// <summary>系统背景材料（Mica/Acrylic）仅 Windows 11 (22000+) 支持。</summary>
+        public bool IsBackdropSupported => ThemeHelper.IsSystemBackdropSupported;
+
+        /// <summary>Win10 不支持时显示「仅 Windows 11 支持」提示。</summary>
+        public Visibility BackdropUnsupportedVisibility
+            => IsBackdropSupported ? Visibility.Collapsed : Visibility.Visible;
+
         private void OnSettingsPropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
             if (e.PropertyName == nameof(FloatWindowSettings.ThemeMode))
                 OnPropertyChanged(nameof(ThemeModeIndex));
             if (e.PropertyName == nameof(FloatWindowSettings.Language))
                 OnPropertyChanged(nameof(LanguageIndex));
+            if (e.PropertyName == nameof(FloatWindowSettings.BackdropMode))
+                OnPropertyChanged(nameof(BackdropIndex));
         }
     }
 }

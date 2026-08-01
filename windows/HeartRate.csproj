@@ -18,10 +18,16 @@
     <Version>4.4</Version>
     <AssemblyVersion>4.4.0.0</AssemblyVersion>
     <FileVersion>4.4.0.0</FileVersion>
-    <ApplicationIcon>winicon.ico</ApplicationIcon>
+    <ApplicationIcon>favicon-package\favicon.ico</ApplicationIcon>
     <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
     <DefaultLanguage>en-US</DefaultLanguage>
   </PropertyGroup>
+
+  <!-- favicon.ico 用作 exe 图标（快捷方式/开始菜单/任务栏/外壳）；
+       同时复制到输出目录，供运行时 AppWindow.SetIcon 使用 -->
+  <ItemGroup>
+    <Content Include="favicon-package\favicon.ico" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
 
 
   <ItemGroup>

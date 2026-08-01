@@ -25,6 +25,10 @@ namespace HeartRate.Helpers
         public static ElementTheme ActualTheme
             => RootElement?.ActualTheme ?? ElementTheme.Default;
 
+        /// <summary>系统背景材料（Mica/Acrylic）需要 Windows 11 (22000+)。</summary>
+        public static bool IsSystemBackdropSupported
+            => OperatingSystem.IsWindowsVersionAtLeast(10, 0, 22000);
+
         public static void ApplyTheme(ElementTheme theme)
         {
             _currentTheme = theme;
@@ -67,6 +71,12 @@ namespace HeartRate.Helpers
         public static void ApplyBackdrop(string backdrop)
         {
             if (MainWindow is null) return;
+
+            // Win10 不支持系统背景材料，亚克力请求回退为 Mica（Mica 在 Win10 上也
+            // 只显示纯色回退，由 WinAppSDK 处理，不会崩溃）
+            if (backdrop == "Acrylic" && !IsSystemBackdropSupported)
+                backdrop = "Mica";
+
             if (_currentBackdrop == backdrop && MainWindow.SystemBackdrop is not null) return;
 
             MainWindow.SystemBackdrop = backdrop switch

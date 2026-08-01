@@ -1,3 +1,4 @@
+using System.Runtime.InteropServices;
 using System.Text;
 using HeartRate.Services;
 using Microsoft.UI.Xaml;
@@ -9,6 +10,9 @@ public partial class App : Application
 {
     public static Window? MainWindow { get; private set; }
 
+    /// <summary>单实例锁：同名 Mutex 已存在说明已有实例在运行。</summary>
+    private static Mutex? _instanceMutex;
+
     public App()
     {
         InitializeComponent();
@@ -16,6 +20,20 @@ public partial class App : Application
 
     protected override void OnLaunched(LaunchActivatedEventArgs args)
     {
+        // ── 单实例保护 ────────────────────────────────────────────────────
+        // 局域网传输（mDNS/HTTP/WS）依赖本机固定端口，双开会互相抢占端口导致
+        // "address already in use"。第二个实例直接退出并把已有窗口带到前台。
+        if (_instanceMutex is null)
+        {
+            _instanceMutex = new Mutex(true, @"Local\HeartRateMonitor_SingleInstance", out var createdNew);
+            if (!createdNew)
+            {
+                ActivateExistingWindow();
+                Environment.Exit(0);
+                return;
+            }
+        }
+
         // 启动期间的任何未捕获异常都会被 WinUI 转成 STOWED_EXCEPTION(0xC000027B)
         // 导致进程立即崩溃且无窗口弹出，对用户表现为"双击 exe 无反应"。
         // 这里整体 try-catch 把异常落盘到 %LOCALAPPDATA%\HeartRate\startup.log，
@@ -69,4 +87,32 @@ public partial class App : Application
             AppendException(sb, ex.InnerException, depth + 1);
         }
     }
+
+    /// <summary>把已运行的实例窗口带到前台（WinUI 3 unpackaged 窗口类名）。</summary>
+    private static void ActivateExistingWindow()
+    {
+        try
+        {
+            var hwnd = FindWindowW("WinUIDesktopWin32WindowClass", null);
+            if (hwnd != IntPtr.Zero)
+            {
+                ShowWindow(hwnd, SW_RESTORE);
+                SetForegroundWindow(hwnd);
+            }
+        }
+        catch { /* 激活失败不阻塞退出 */ }
+    }
+
+    private const int SW_RESTORE = 9;
+
+    [DllImport("user32.dll", CharSet = CharSet.Unicode)]
+    private static extern IntPtr FindWindowW(string? lpClassName, string? lpWindowName);
+
+    [DllImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+
+    [DllImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool SetForegroundWindow(IntPtr hWnd);
 }

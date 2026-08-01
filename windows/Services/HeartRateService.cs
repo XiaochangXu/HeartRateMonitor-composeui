@@ -40,6 +40,10 @@ public sealed class HeartRateService : IDisposable
     {
         if (_watcher is not null) return;
 
+        // 每次全新扫描前清空去重表：否则 UI 清空列表后重新扫描，
+        // 之前见过的设备会被去重拦截而不再上报（列表保持为空）。
+        _devices.Clear();
+
         _watcher = new BluetoothLEAdvertisementWatcher
         {
             ScanningMode = BluetoothLEScanningMode.Active,
@@ -75,42 +79,64 @@ public sealed class HeartRateService : IDisposable
     public async Task<bool> ConnectAsync(ulong address, CancellationToken ct = default)
     {
         Disconnect();
-        ct.ThrowIfCancellationRequested();
-
-        _device = await BluetoothLEDevice.FromBluetoothAddressAsync(address);
-        if (_device is null) return false;
-
-        _device.ConnectionStatusChanged += OnDeviceConnectionStatusChanged;
-        ct.ThrowIfCancellationRequested();
-
-        // 优先按已知心率服务 UUID 获取，失败则全量遍历服务列表
-        var svcResult = await _device.GetGattServicesForUuidAsync(GattServiceUuids.HeartRate, BluetoothCacheMode.Uncached);
-        _service = svcResult.Status == GattCommunicationStatus.Success
-            ? svcResult.Services.FirstOrDefault()
-            : null;
-
-        if (_service is null)
+        bool success = false;
+        try
         {
-            var all = await _device.GetGattServicesAsync(BluetoothCacheMode.Uncached);
-            if (all.Status == GattCommunicationStatus.Success)
-                _service = all.Services.FirstOrDefault(s => s.Uuid == GattServiceUuids.HeartRate);
+            ct.ThrowIfCancellationRequested();
+
+            _device = await BluetoothLEDevice.FromBluetoothAddressAsync(address);
+            if (_device is null) return false;
+
+            _device.ConnectionStatusChanged += OnDeviceConnectionStatusChanged;
+            ct.ThrowIfCancellationRequested();
+
+            // 优先按已知心率服务 UUID 获取，失败则全量遍历服务列表
+            var svcResult = await _device.GetGattServicesForUuidAsync(GattServiceUuids.HeartRate, BluetoothCacheMode.Uncached);
+            _service = svcResult.Status == GattCommunicationStatus.Success
+                ? svcResult.Services.FirstOrDefault()
+                : null;
+
+            if (_service is null)
+            {
+                var all = await _device.GetGattServicesAsync(BluetoothCacheMode.Uncached);
+                if (all.Status == GattCommunicationStatus.Success)
+                    _service = all.Services.FirstOrDefault(s => s.Uuid == GattServiceUuids.HeartRate);
+            }
+            if (_service is null) return false;
+            ct.ThrowIfCancellationRequested();
+
+            var chResult = await _service.GetCharacteristicsForUuidAsync(GattCharacteristicUuids.HeartRateMeasurement);
+            if (chResult.Status != GattCommunicationStatus.Success)
+                return false;
+            _hrCharacteristic = chResult.Characteristics.FirstOrDefault();
+            if (_hrCharacteristic is null) return false;
+
+            // 开启 CCCD 通知
+            var writeResult = await _hrCharacteristic.WriteClientCharacteristicConfigurationDescriptorAsync(
+                GattClientCharacteristicConfigurationDescriptorValue.Notify);
+            if (writeResult != GattCommunicationStatus.Success) return false;
+
+            _hrCharacteristic.ValueChanged += OnHeartRateValueChanged;
+            success = true;
+            return true;
         }
-        if (_service is null) return false;
-        ct.ThrowIfCancellationRequested();
-
-        var chResult = await _service.GetCharacteristicsForUuidAsync(GattCharacteristicUuids.HeartRateMeasurement);
-        if (chResult.Status != GattCommunicationStatus.Success)
+        catch (OperationCanceledException)
+        {
+            Disconnect();
+            throw;
+        }
+        catch
+        {
+            // GATT 调用在蓝牙关闭/设备不可达/访问被拒时抛异常，
+            // 统一按失败处理（finally 负责清理部分赋值的资源）。
             return false;
-        _hrCharacteristic = chResult.Characteristics.FirstOrDefault();
-        if (_hrCharacteristic is null) return false;
-
-        // 开启 CCCD 通知
-        var writeResult = await _hrCharacteristic.WriteClientCharacteristicConfigurationDescriptorAsync(
-            GattClientCharacteristicConfigurationDescriptorValue.Notify);
-        if (writeResult != GattCommunicationStatus.Success) return false;
-
-        _hrCharacteristic.ValueChanged += OnHeartRateValueChanged;
-        return true;
+        }
+        finally
+        {
+            // 任何失败路径（异常或 return false）都释放已获取的设备/服务，
+            // 避免反复失败连接累积未释放的 WinRT 句柄与事件订阅。
+            if (!success) Disconnect();
+        }
     }
 
     public void Disconnect()
@@ -151,7 +177,10 @@ public sealed class HeartRateService : IDisposable
     {
         if (data.Length < 2) return null;
         bool isUint16 = (data[0] & 0x01) != 0;
-        return isUint16 ? BitConverter.ToUInt16(data, 1) : data[1];
+        // 16 位值需要至少 3 字节，畸形包直接视为无效，
+        // 否则 ToUInt16(data,1) 会在 GATT 回调线程越界抛异常。
+        if (isUint16) return data.Length >= 3 ? BitConverter.ToUInt16(data, 1) : null;
+        return data[1];
     }
 
     public void Dispose() => Disconnect();

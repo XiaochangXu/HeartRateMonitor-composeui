@@ -58,7 +58,7 @@ public sealed partial class MainWindow : Window
         _rootElement = (FrameworkElement)Content;
         ThemeHelper.RootElement = _rootElement;
         ThemeHelper.MainWindow = this;
-        ThemeHelper.ApplyBackdrop("Mica");
+        ThemeHelper.ApplyBackdrop(SettingsService.Current.BackdropMode);
         // 按设置应用主题（默认 Light）。RootElement 已就绪，ApplyTheme 内部会广播 ThemeChanged
         // 供后续可能打开的悬浮窗等子窗口同步主题。
         ThemeHelper.ApplyTheme(SettingsService.Current.ThemeMode);
@@ -77,6 +77,14 @@ public sealed partial class MainWindow : Window
         SetTitleBar(AppTitleBar);
 
         UpdateCaptionButtonColors();
+        // 显式固定窗口圆角为 8px（不随系统策略变化）
+        ApplyWindowCornerPreference();
+
+        // 任务栏/窗口图标：显式使用 favicon.ico（unpackaged 下 exe 图标资源
+        // 不一定被任务栏拾取，SetIcon 保证标题栏与任务栏图标一致）
+        var iconPath = Path.Combine(AppContext.BaseDirectory, "favicon-package", "favicon.ico");
+        if (File.Exists(iconPath)) AppWindow.SetIcon(iconPath);
+
         RestoreWindowBounds();
 
         ViewModel.HeartRate.FloatWindowVisibilityRequested += OnFloatWindowVisibilityRequested;
@@ -264,7 +272,51 @@ public sealed partial class MainWindow : Window
         tb.ButtonInactiveForegroundColor = inactiveForegroundColor;
         tb.ButtonHoverForegroundColor = foregroundColor;
         tb.ButtonPressedForegroundColor = foregroundColor;
+
+        // 窗口顶部 1px 边框（DWM 非客户区）默认跟随系统主题，应用内强制暗黑时
+        // 会残留一条白色细线。用 DWMWA_BORDER_COLOR 按当前主题同步边框颜色。
+        ApplyDwmBorderColor(isDarkTheme);
     }
+
+    // ── 顶部边框/按钮区颜色：消除暗黑模式下 DWM 非客户区残留的白色细线 ──
+    private void ApplyDwmBorderColor(bool isDarkTheme)
+    {
+        try
+        {
+            var hwnd = WindowNative.GetWindowHandle(this);
+            // COLORREF = 0x00BBGGRR：暗黑用 WinUI 深色基底 #202020，浅色用白色
+            uint color = isDarkTheme ? 0x00202020u : 0x00FFFFFFu;
+            // 顶部 1px 窗口边框
+            DwmSetWindowAttribute(hwnd, DWMWA_BORDER_COLOR, ref color, sizeof(uint));
+            // 标题栏/最小化最大化关闭按钮区的底色（左侧被 XAML 内容盖住，
+            // 右侧按钮区归 DWM 画，暗黑下默认仍偏白，需一并设暗）
+            DwmSetWindowAttribute(hwnd, DWMWA_CAPTION_COLOR, ref color, sizeof(uint));
+        }
+        catch { /* 旧系统/不支持该属性时忽略 */ }
+    }
+
+    // DWMWA_BORDER_COLOR / DWMWA_CAPTION_COLOR（Windows 11 引入；Win10 下 DWM 会忽略）
+    private const int DWMWA_BORDER_COLOR = 34;
+    private const int DWMWA_CAPTION_COLOR = 35;
+
+    // ── 窗口圆角：显式固定为 8px（DWMWCP_ROUND），不随系统策略变化 ──
+    private void ApplyWindowCornerPreference()
+    {
+        try
+        {
+            var hwnd = WindowNative.GetWindowHandle(this);
+            // DWMWCP_ROUND = 2（8px 圆角）
+            uint preference = 2;
+            DwmSetWindowAttribute(hwnd, DWMWA_WINDOW_CORNER_PREFERENCE, ref preference, sizeof(uint));
+        }
+        catch { /* 旧系统/不支持该属性时忽略 */ }
+    }
+
+    // DWMWA_WINDOW_CORNER_PREFERENCE（Windows 11 引入；Win10 下 DWM 会忽略）
+    private const int DWMWA_WINDOW_CORNER_PREFERENCE = 33;
+
+    [DllImport("dwmapi.dll")]
+    private static extern int DwmSetWindowAttribute(IntPtr hwnd, int attribute, ref uint pvAttribute, uint cbAttribute);
 
     private void RestoreWindowBounds()
     {

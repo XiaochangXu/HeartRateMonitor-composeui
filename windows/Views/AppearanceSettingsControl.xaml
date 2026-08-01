@@ -70,6 +70,31 @@
                                    TextWrapping="Wrap" />
                     </StackPanel>
                 </Border>
+
+                <!-- ── 背景效果（云母/亚克力 二选一，风格与其他卡片统一）────── -->
+                <Border Background="{ThemeResource LayerFillColorDefaultBrush}"
+                        BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}"
+                        BorderThickness="1"
+                        CornerRadius="{ThemeResource OverlayCornerRadius}"
+                        Padding="20">
+                    <StackPanel Spacing="10">
+                        <TextBlock x:Uid="Appearance_BackdropCard"
+                                   Text="背景效果"
+                                   FontWeight="SemiBold" />
+                        <RadioButtons x:Name="BackdropRadio"
+                                      SelectedIndex="{x:Bind ViewModel.BackdropIndex, Mode=TwoWay}"
+                                      IsEnabled="{x:Bind ViewModel.IsBackdropSupported, Mode=OneWay}"
+                                      MaxColumns="2">
+                            <RadioButton x:Uid="Appearance_BackdropMica" Content="云母" />
+                            <RadioButton x:Uid="Appearance_BackdropAcrylic" Content="亚克力" />
+                        </RadioButtons>
+                        <TextBlock x:Uid="Appearance_BackdropHint"
+                                   Text="仅 Windows 11 支持"
+                                   Style="{ThemeResource CaptionTextBlockStyle}"
+                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                   Visibility="{x:Bind ViewModel.BackdropUnsupportedVisibility, Mode=OneWay}" />
+                    </StackPanel>
+                </Border>
             </StackPanel>
         </ScrollViewer>
     </Grid>

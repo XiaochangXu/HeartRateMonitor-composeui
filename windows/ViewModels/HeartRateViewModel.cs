@@ -63,7 +63,8 @@ namespace HeartRate.ViewModels
 
         public string ConnectButtonContent => IsConnected ? L.HeartRate_Disconnect : L.HeartRate_Connect;
 
-        public bool CanToggleConnect => !IsConnecting && !IsConnected && GetSelectedDevice() is not null;
+        // 已连接时也允许点击（切换为断开）；仅连接中禁用。
+        public bool CanToggleConnect => !IsConnecting && (IsConnected || GetSelectedDevice() is not null);
 
         public string HeartRateText => HeartRate?.ToString() ?? "--";
 
@@ -203,22 +204,30 @@ namespace HeartRate.ViewModels
             if (device is null) return;
 
             IsConnecting = true;
-            var ok = await _service.ConnectAsync(device.Address);
-            IsConnecting = false;
-
-            if (!ok)
+            try
             {
-                StatusTextFallback = L.HeartRate_ConnectFailed;
-                OnPropertyChanged(nameof(StatusText));
-                return;
-            }
+                var ok = await _service.ConnectAsync(device.Address);
+                if (!ok)
+                {
+                    StatusTextFallback = L.HeartRate_ConnectFailed;
+                    OnPropertyChanged(nameof(StatusText));
+                    return;
+                }
 
-            _connectedDevice = device;
-            ConnectionMode = ConnectionMode.Bluetooth;
-            IsConnected = true;
-            OnPropertyChanged(nameof(ConnectedDeviceName));
-            OnPropertyChanged(nameof(ConnectedAddressText));
-            OnPropertyChanged(nameof(HasHeartRateServiceText));
+                _connectedDevice = device;
+                ConnectionMode = ConnectionMode.Bluetooth;
+                // 清除上一次失败遗留的 fallback，避免成功连接后仍显示"连接失败"
+                StatusTextFallback = null;
+                IsConnected = true;
+                OnPropertyChanged(nameof(ConnectedDeviceName));
+                OnPropertyChanged(nameof(ConnectedAddressText));
+                OnPropertyChanged(nameof(HasHeartRateServiceText));
+            }
+            finally
+            {
+                // 即使 ConnectAsync 意外抛异常，也保证复位连接中状态，按钮不会永久禁用
+                IsConnecting = false;
+            }
         }
 
         /// <summary>连接失败/断开时的临时状态文本，优先于派生态。</summary>
