@@ -9,6 +9,8 @@
 
   <h1>Heart Rate Monitor</h1>
 
+Can be used in [Windwos version](https://github.com/XiaochangXu/HeartRateMonitor-windows) 
+
   <p><strong>Make Android heart-rate monitoring elegant.</strong></p>
 
   <p>An Android heart rate monitoring app based on BLE (Bluetooth Low Energy) technology, following Material 3 design guidelines.</p>
