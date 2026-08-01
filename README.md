@@ -1,5 +1,5 @@
 <div align="right">
-  <a href="./HeartRateMonitor-composeui/README_EN.md">English</a> | <strong>简体中文</strong>
+  <a href="./README_EN.md">English</a> | <strong>简体中文</strong>
   <br>
   <a href="./HeartRateMonitor-composeui/SKILL.md">项目规范</a>
 </div>
@@ -34,7 +34,7 @@
 
 | 目录 | 平台 | 技术栈 |
 |---|---|---|
-| [`HeartRateMonitor-composeui`](./HeartRateMonitor-composeui) | Android | Kotlin + Jetpack Compose（Material 3 Expressive） |
+| [`HeartRateMonitor-composeui`](./HeartRateMonitor-composeui) | Android | Kotlin + Jetpack Compose |
 | [`HeartRateMonitor-windows`](./HeartRateMonitor-windows) | Windows 桌面 | .NET 8 + WinUI 3 |
 
 -----
