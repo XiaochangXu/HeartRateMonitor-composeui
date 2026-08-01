@@ -110,6 +110,11 @@ This repository contains two platform-specific applications with no shared code;
   <br/><sub>Version and details</sub>
 </p>
 
+<p align="center">
+  <img src="windows/images/9.png" alt="LAN transfer"/>
+  <br/><sub>LAN transfer</sub>
+</p>
+
 -----
 
 ## 🚀 Installation & Running

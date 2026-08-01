@@ -68,14 +68,7 @@
           SkipUnchangedFiles="true" />
   </Target>
 
-  <!--
-    WinUI 3 框架会向 PublishDir 输出 70+ 个语言的 .mui 卫星资源（af-ZA、vi-VN 等），
-    每个文件夹含 Microsoft.ui.xaml.dll.mui 和 Microsoft.UI.Xaml.Phone.dll.mui。
-    这会让解压后的 zip 顶层充斥语言文件夹，用户难以找到 HeartRate.exe。
-    .mui 是 Win32 MUI 机制，必须放在 <dll目录>\<语言>\ 下，不能移动到子文件夹；
-    但删除非必要语言是安全的 —— WinUI 找不到对应语言会 fallback 到 en-US。
-    这里只保留 en-US/en-us（fallback）+ zh-CN/zh-TW（目标用户语言），删除其余。
-  -->
+
   <Target Name="RemoveExtraSatelliteResources" AfterTargets="EnsureXbfAndPriPublished">
     <ItemGroup>
       <_AllMui Include="$(PublishDir)**\*.mui" />

@@ -110,6 +110,11 @@
   <br/><sub>版本与详细信息</sub>
 </p>
 
+<p align="center">
+  <img src="windows/images/9.png" alt="局域网传输"/>
+  <br/><sub>局域网传输</sub>
+</p>
+
 -----
 
 ## 🚀 安装与运行
