@@ -46,8 +46,8 @@
                         <TextBlock x:Uid="VersionInfo_RepoLabel"
                                    Text="查看项目仓库"
                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                        <HyperlinkButton Content="https://github.com/XiaochangXu/HeartRateMonitor-windows"
-                                         NavigateUri="https://github.com/XiaochangXu/HeartRateMonitor-windows"
+                        <HyperlinkButton Content="https://github.com/XiaochangXu/HeartRateMonitor-composeui"
+                                         NavigateUri="https://github.com/XiaochangXu/HeartRateMonitor-composeui"
                                          Padding="0" />
                     </StackPanel>
 
