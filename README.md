@@ -9,6 +9,8 @@
 
   <h1>心率监控器 - HeartRateMonitor</h1>
 
+可与 [Windwos 端](https://github.com/XiaochangXu/HeartRateMonitor-composeui) 配合使用
+
   <p><strong>让 Android 心率监测更优雅。</strong></p>
 
   <p>基于 BLE（蓝牙低功耗）技术的 Android 心率监测应用，采用 Material 3 设计规范。</p>
