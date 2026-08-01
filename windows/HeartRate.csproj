@@ -23,15 +23,6 @@
     <DefaultLanguage>en-US</DefaultLanguage>
   </PropertyGroup>
 
-  <ItemGroup>
-    <!-- 示例文件/ 是参考用的第三方项目，不能参与本项目的编译 -->
-    <Compile Remove="示例文件\**" />
-    <Content Remove="示例文件\**" />
-    <None Remove="示例文件\**" />
-    <Page Remove="示例文件\**" />
-    <ApplicationDefinition Remove="示例文件\**" />
-    <PRIResource Remove="示例文件\**" />
-  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
