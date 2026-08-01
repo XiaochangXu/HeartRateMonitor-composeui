@@ -127,6 +127,12 @@
 
 ### Windows 端
 
+也可以直接克隆 Windows 端仓库：
+
+```bash
+git clone https://github.com/XiaochangXu/HeartRateMonitor-windows.git
+```
+
 **环境要求**：Windows 10/11、.NET 8 SDK、Windows App SDK 1.8 工作负载。
 
 ```bash

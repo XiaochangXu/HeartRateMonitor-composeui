@@ -127,6 +127,12 @@ This repository contains two platform-specific applications with no shared code;
 
 ### Windows
 
+You can also clone the Windows repo directly:
+
+```bash
+git clone https://github.com/XiaochangXu/HeartRateMonitor-windows.git
+```
+
 **Requirements**: Windows 10/11, .NET 8 SDK, Windows App SDK 1.8 workload.
 
 ```bash
