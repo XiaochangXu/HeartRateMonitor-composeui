@@ -1,11 +1,11 @@
 <div align="right">
   <strong>English</strong> | <a href="./README.md">简体中文</a>
   <br>
-  <a href="./HeartRateMonitor-composeui/SKILL.md">Project Rules</a>
+  <a href="./android/SKILL.md">Project Rules</a>
 </div>
 
 <div align="center">
-  <img src="HeartRateMonitor-composeui/app/src/main/res/drawable/about.png" alt="HeartRateMonitor" width="128" />
+  <img src="android/app/src/main/res/drawable/about.png" alt="HeartRateMonitor" width="128" />
 
   <h1>Heart Rate Monitor</h1>
 
@@ -34,8 +34,8 @@ This repository contains two platform-specific applications with no shared code;
 
 | Directory | Platform | Tech Stack |
 |---|---|---|
-| [`HeartRateMonitor-composeui`](./HeartRateMonitor-composeui) | Android | Kotlin + Jetpack Compose (Material 3 Expressive) |
-| [`HeartRateMonitor-windows`](./HeartRateMonitor-windows) | Windows Desktop | .NET 8 + WinUI 3 |
+| [`android`](./android) | Android | Kotlin + Jetpack Compose (Material 3 Expressive) |
+| [`windows`](./windows) | Windows Desktop | .NET 8 + WinUI 3 |
 
 -----
 
@@ -81,32 +81,32 @@ This repository contains two platform-specific applications with no shared code;
 
 <table>
   <tr>
-    <td align="center"><img src="HeartRateMonitor-composeui/images/1.jpg" width="270"/><br/><sub>Real-time heart rate monitoring</sub></td>
-    <td align="center"><img src="HeartRateMonitor-composeui/images/2.jpg" width="270"/><br/><sub>History & chart analysis</sub></td>
-    <td align="center"><img src="HeartRateMonitor-composeui/images/3.jpg" width="270"/><br/><sub>Personalization & floating window</sub></td>
-    <td align="center"><img src="HeartRateMonitor-composeui/images/4.jpg" width="270"/><br/><sub>About and details</sub></td>
+    <td align="center"><img src="android/images/1.jpg" width="270"/><br/><sub>Real-time heart rate monitoring</sub></td>
+    <td align="center"><img src="android/images/2.jpg" width="270"/><br/><sub>History & chart analysis</sub></td>
+    <td align="center"><img src="android/images/3.jpg" width="270"/><br/><sub>Personalization & floating window</sub></td>
+    <td align="center"><img src="android/images/4.jpg" width="270"/><br/><sub>About and details</sub></td>
   </tr>
 </table>
 
 ### Windows
 
 <p align="center">
-  <img src="HeartRateMonitor-windows/images/5.png" alt="Home"/>
+  <img src="windows/images/5.png" alt="Home"/>
   <br/><sub>Home</sub>
 </p>
 
 <p align="center">
-  <img src="HeartRateMonitor-windows/images/6.png" alt="Floating window settings"/>
+  <img src="windows/images/6.png" alt="Floating window settings"/>
   <br/><sub>Floating window settings</sub>
 </p>
 
 <p align="center">
-  <img src="HeartRateMonitor-windows/images/7.png" alt="LAN transfer"/>
+  <img src="windows/images/7.png" alt="LAN transfer"/>
   <br/><sub>LAN transfer</sub>
 </p>
 
 <p align="center">
-  <img src="HeartRateMonitor-windows/images/8.png" alt="Version and details"/>
+  <img src="windows/images/8.png" alt="Version and details"/>
   <br/><sub>Version and details</sub>
 </p>
 
@@ -116,7 +116,7 @@ This repository contains two platform-specific applications with no shared code;
 
 ### Android
 
-1. **Open the project**: Open the `HeartRateMonitor-composeui` directory with **Android Studio**
+1. **Open the project**: Open the `android` directory with **Android Studio**
 2. Wait for **Gradle** to automatically sync dependencies
 3. **Build and run**: Connect a real device or emulator (API ≥ 24), then click the ▶️ Run button in the toolbar
 
@@ -125,7 +125,7 @@ This repository contains two platform-specific applications with no shared code;
 **Requirements**: Windows 10/11, .NET 8 SDK, Windows App SDK 1.8 workload.
 
 ```bash
-cd HeartRateMonitor-windows
+cd windows
 dotnet build -c Debug
 ```
 
@@ -179,10 +179,10 @@ bin\Debug\net8.0-windows10.0.19041.0\win-x64\HeartRate.exe
 ## 📁 Project Structure
 
 ```
-├── HeartRateMonitor-composeui/   # Android (Kotlin + Compose)
-│   └── .github/workflows/        # Android release pipeline (manual trigger)
-├── HeartRateMonitor-windows/     # Windows (C# + WinUI 3)
-│   └── .github/workflows/        # Windows release pipeline (manual trigger)
+├── android/                     # Android (Kotlin + Compose)
+│   └── .github/workflows/       # Android release pipeline (manual trigger)
+├── windows/                     # Windows (C# + WinUI 3)
+│   └── .github/workflows/       # Windows release pipeline (manual trigger)
 ├── LICENSE
 └── README.md
 ```

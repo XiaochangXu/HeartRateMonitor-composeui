@@ -11,7 +11,7 @@ on:
 
 defaults:
   run:
-    working-directory: HeartRateMonitor-windows
+    working-directory: windows
 
 jobs:
   build-release:
@@ -54,6 +54,6 @@ jobs:
           tag_name: windows-v${{ github.event.inputs.version }}
           name: windows-v${{ github.event.inputs.version }}
           generate_release_notes: true   # 自动生成 commit 变更记录
-          files: HeartRateMonitor-windows/HeartRateMonitor-v${{ github.event.inputs.version }}-win-x64.zip
+          files: windows/HeartRateMonitor-v${{ github.event.inputs.version }}-win-x64.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

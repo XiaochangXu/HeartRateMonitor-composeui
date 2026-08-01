@@ -1,11 +1,11 @@
 <div align="right">
   <a href="./README_EN.md">English</a> | <strong>简体中文</strong>
   <br>
-  <a href="./HeartRateMonitor-composeui/SKILL.md">项目规范</a>
+  <a href="./android/SKILL.md">项目规范</a>
 </div>
 
 <div align="center">
-  <img src="HeartRateMonitor-composeui/app/src/main/res/drawable/about.png" alt="HeartRateMonitor" width="128" />
+  <img src="android/app/src/main/res/drawable/about.png" alt="HeartRateMonitor" width="128" />
 
   <h1>心率监控器 - HeartRateMonitor</h1>
 
@@ -34,8 +34,8 @@
 
 | 目录 | 平台 | 技术栈 |
 |---|---|---|
-| [`HeartRateMonitor-composeui`](./HeartRateMonitor-composeui) | Android | Kotlin + Jetpack Compose |
-| [`HeartRateMonitor-windows`](./HeartRateMonitor-windows) | Windows 桌面 | .NET 8 + WinUI 3 |
+| [`android`](./android) | Android | Kotlin + Jetpack Compose |
+| [`windows`](./windows) | Windows 桌面 | .NET 8 + WinUI 3 |
 
 -----
 
@@ -81,32 +81,32 @@
 
 <table>
   <tr>
-    <td align="center"><img src="HeartRateMonitor-composeui/images/1.jpg" width="270"/><br/><sub>实时心率监测主页</sub></td>
-    <td align="center"><img src="HeartRateMonitor-composeui/images/2.jpg" width="270"/><br/><sub>心率历史与图表分析</sub></td>
-    <td align="center"><img src="HeartRateMonitor-composeui/images/3.jpg" width="270"/><br/><sub>个性化设置与悬浮窗</sub></td>
-    <td align="center"><img src="HeartRateMonitor-composeui/images/4.jpg" width="270"/><br/><sub>版本与详细信息</sub></td>
+    <td align="center"><img src="android/images/1.jpg" width="270"/><br/><sub>实时心率监测主页</sub></td>
+    <td align="center"><img src="android/images/2.jpg" width="270"/><br/><sub>心率历史与图表分析</sub></td>
+    <td align="center"><img src="android/images/3.jpg" width="270"/><br/><sub>个性化设置与悬浮窗</sub></td>
+    <td align="center"><img src="android/images/4.jpg" width="270"/><br/><sub>版本与详细信息</sub></td>
    </tr>
 </table>
 
 ### Windows 端
 
 <p align="center">
-  <img src="HeartRateMonitor-windows/images/5.png" alt="首页"/>
+  <img src="windows/images/5.png" alt="首页"/>
   <br/><sub>首页</sub>
 </p>
 
 <p align="center">
-  <img src="HeartRateMonitor-windows/images/6.png" alt="悬浮窗设置"/>
+  <img src="windows/images/6.png" alt="悬浮窗设置"/>
   <br/><sub>悬浮窗设置</sub>
 </p>
 
 <p align="center">
-  <img src="HeartRateMonitor-windows/images/7.png" alt="局域网传输"/>
+  <img src="windows/images/7.png" alt="局域网传输"/>
   <br/><sub>局域网传输</sub>
 </p>
 
 <p align="center">
-  <img src="HeartRateMonitor-windows/images/8.png" alt="版本与详细信息"/>
+  <img src="windows/images/8.png" alt="版本与详细信息"/>
   <br/><sub>版本与详细信息</sub>
 </p>
 
@@ -116,7 +116,7 @@
 
 ### Android 端
 
-1. **打开项目**：使用 **Android Studio** 打开 `HeartRateMonitor-composeui` 目录
+1. **打开项目**：使用 **Android Studio** 打开 `android` 目录
 2. 等待 **Gradle** 自动同步依赖
 3. **构建并运行**：使用真机或模拟器（API ≥ 24）连接，点击工具栏中的 ▶️ 运行按钮
 
@@ -125,7 +125,7 @@
 **环境要求**：Windows 10/11、.NET 8 SDK、Windows App SDK 1.8 工作负载。
 
 ```bash
-cd HeartRateMonitor-windows
+cd windows
 dotnet build -c Debug
 ```
 
@@ -179,10 +179,10 @@ bin\Debug\net8.0-windows10.0.19041.0\win-x64\HeartRate.exe
 ## 📁 项目结构
 
 ```
-├── HeartRateMonitor-composeui/   # Android 端（Kotlin + Compose）
-│   └── .github/workflows/        # Android 发布流水线（手动触发）
-├── HeartRateMonitor-windows/     # Windows 端（C# + WinUI 3）
-│   └── .github/workflows/        # Windows 发布流水线（手动触发）
+├── android/                     # Android 端（Kotlin + Compose）
+│   └── .github/workflows/       # Android 发布流水线（手动触发）
+├── windows/                     # Windows 端（C# + WinUI 3）
+│   └── .github/workflows/       # Windows 发布流水线（手动触发）
 ├── LICENSE
 └── README.md
 ```

@@ -14,7 +14,7 @@ permissions:
 
 defaults:
   run:
-    working-directory: HeartRateMonitor-composeui
+    working-directory: android
 
 jobs:
   build:
@@ -52,6 +52,6 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.event.inputs.version }}
-          files: HeartRateMonitor-composeui/app/build/outputs/apk/release/*.apk
+          files: android/app/build/outputs/apk/release/*.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
