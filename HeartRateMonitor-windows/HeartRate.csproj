@@ -1,0 +1,92 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows10.0.19041.0</TargetFramework>
+    <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
+    <RootNamespace>HeartRate</RootNamespace>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <UseWinUI>true</UseWinUI>
+    <WindowsPackageType>None</WindowsPackageType>
+    <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <PlatformTarget>x64</PlatformTarget>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Version>1.0.1</Version>
+    <AssemblyVersion>1.0.1.0</AssemblyVersion>
+    <FileVersion>1.0.1.0</FileVersion>
+    <ApplicationIcon>winicon.ico</ApplicationIcon>
+    <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+    <DefaultLanguage>en-US</DefaultLanguage>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- 示例文件/ 是参考用的第三方项目，不能参与本项目的编译 -->
+    <Compile Remove="示例文件\**" />
+    <Content Remove="示例文件\**" />
+    <None Remove="示例文件\**" />
+    <Page Remove="示例文件\**" />
+    <ApplicationDefinition Remove="示例文件\**" />
+    <PRIResource Remove="示例文件\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
+    <PackageReference Include="Microsoft.Windows.CsWin32" Version="0.3.298">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.8.260710003" />
+  </ItemGroup>
+
+  <!-- 网络传输：ASP.NET Core Kestrel（HTTP + WebSocket 服务端）-->
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <!--
+    WinUI 3 unpackaged 应用运行时依赖两类文件：
+    1) .xbf（XAML Binary Format）：InitializeComponent() 内部 LoadComponent 加载它们；
+       缺失会抛 XamlParseException "XAML parsing failed." (0x802B000A)。
+    2) HeartRate.pri：x:Uid 资源索引；缺失会让所有 x:Uid 解析为空字符串。
+    Windows App SDK 1.8 + dotnet publish 在某些组合下不会把这两类文件复制到
+    PublishDir（即便它们已在 TargetDir）。本 Target 兜底补齐。
+  -->
+  <Target Name="EnsureXbfAndPriPublished" AfterTargets="Publish">
+    <ItemGroup>
+      <_XbfToPublish Include="$(TargetDir)**\*.xbf" />
+      <_PriToPublish Include="$(TargetDir)$(AssemblyName).pri" />
+    </ItemGroup>
+    <Copy SourceFiles="@(_XbfToPublish)"
+          DestinationFolder="$(PublishDir)%(RecursiveDir)"
+          SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(_PriToPublish)"
+          DestinationFolder="$(PublishDir)"
+          SkipUnchangedFiles="true" />
+  </Target>
+
+  <!--
+    WinUI 3 框架会向 PublishDir 输出 70+ 个语言的 .mui 卫星资源（af-ZA、vi-VN 等），
+    每个文件夹含 Microsoft.ui.xaml.dll.mui 和 Microsoft.UI.Xaml.Phone.dll.mui。
+    这会让解压后的 zip 顶层充斥语言文件夹，用户难以找到 HeartRate.exe。
+    .mui 是 Win32 MUI 机制，必须放在 <dll目录>\<语言>\ 下，不能移动到子文件夹；
+    但删除非必要语言是安全的 —— WinUI 找不到对应语言会 fallback 到 en-US。
+    这里只保留 en-US/en-us（fallback）+ zh-CN/zh-TW（目标用户语言），删除其余。
+  -->
+  <Target Name="RemoveExtraSatelliteResources" AfterTargets="EnsureXbfAndPriPublished">
+    <ItemGroup>
+      <_AllMui Include="$(PublishDir)**\*.mui" />
+      <_KeepMui Include="$(PublishDir)en-US\*.mui;$(PublishDir)en-us\*.mui;$(PublishDir)zh-CN\*.mui;$(PublishDir)zh-TW\*.mui" />
+      <_ExtraMui Include="@(_AllMui)" Exclude="@(_KeepMui)" />
+    </ItemGroup>
+    <Delete Files="@(_ExtraMui)" />
+    <ItemGroup>
+      <_EmptyLangDirs Include="@(_ExtraMui->'%(RootDir)%(Directory)'->Distinct())" />
+    </ItemGroup>
+    <RemoveDir Directories="@(_EmptyLangDirs)" />
+  </Target>
+
+</Project>

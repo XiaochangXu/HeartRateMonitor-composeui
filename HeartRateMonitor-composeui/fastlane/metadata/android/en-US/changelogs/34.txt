@@ -1,0 +1,2 @@
+1.Fixed NoClassDefFoundError crash on devices running below Android 8.0 (API 26) caused by the missing NotificationChannel class during app startup.
+2.Added Build.VERSION.SDK_INT >= Build.VERSION_CODES.O version checks around NotificationChannel creation in BleService , HeartRateAlarmService , and StatusBarResidentService .

@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Window x:Class="HeartRate.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:views="using:HeartRate.Views"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="心率监控器">
+
+    <Grid Background="Transparent">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- Custom title bar — registered via SetTitleBar() in code-behind -->
+        <Grid x:Name="AppTitleBar"
+              Grid.Row="0"
+              Height="40">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <Button x:Name="DockButton"
+                    Grid.Column="0"
+                    Click="DockButton_Click"
+                    Background="Transparent"
+                    BorderThickness="0"
+                    CornerRadius="4"
+                    Width="30" Height="28"
+                    Padding="0"
+                    Margin="8,0,0,0"
+                    VerticalAlignment="Center">
+                <Viewbox Width="14" Height="14">
+                    <Path Fill="{StaticResource HeartBrush}"
+                          Data="M 451.5 808 C 441.8 804.7 433.3 799.3 426 792 L 357 729 C 286.3 664.3 222.5 600.2 165.5 536.5 C 108.5 472.8 80 402.7 80 326 C 80 263.3 101 211 143 169 C 185 127 237.3 106 300 106 C 335.3 106 368.7 113.5 400 128.5 C 431.3 143.5 458 164 480 190 C 502 164 528.7 143.5 560 128.5 C 591.3 113.5 624.7 106 660 106 C 722.7 106 775 127 817 169 C 859 211 880 263.3 880 326 C 880 402.7 851.7 473 795 537 C 738.3 601 674 665.3 602 730 L 534 792 C 526.7 799.3 518.2 804.7 508.5 808 C 498.8 811.3 489.3 813 480 813 C 470.7 813 461.2 811.3 451.5 808 Z" />
+                </Viewbox>
+            </Button>
+
+            <TextBlock x:Uid="MainWindow_TitleText"
+                       Grid.Column="1"
+                       Text="心率监控器"
+                       FontSize="13"
+                       VerticalAlignment="Center"
+                       Margin="8,0,0,0" />
+        </Grid>
+
+        <Grid Grid.Row="1"
+              Margin="16,0,16,16">
+            <NavigationView x:Name="NavView"
+                            PaneDisplayMode="Left"
+                            OpenPaneLength="176"
+                            IsBackButtonVisible="Collapsed"
+                            IsSettingsVisible="False"
+                            IsPaneToggleButtonVisible="False"
+                            IsPaneOpen="True"
+                            SelectionChanged="NavView_SelectionChanged">
+
+                <NavigationView.MenuItems>
+                    <NavigationViewItem x:Uid="MainWindow_NavHome"
+                                        Tag="home">
+                        <NavigationViewItem.Icon>
+                            <FontIcon Glyph="&#xE80F;" />
+                        </NavigationViewItem.Icon>
+                    </NavigationViewItem>
+                    <NavigationViewItem x:Uid="MainWindow_NavAppearance"
+                                        Tag="appearance">
+                        <NavigationViewItem.Icon>
+                            <FontIcon Glyph="&#xE771;" />
+                        </NavigationViewItem.Icon>
+                    </NavigationViewItem>
+                    <NavigationViewItem x:Uid="MainWindow_NavFloatSettings"
+                                        Tag="floatSettings">
+                        <NavigationViewItem.Icon>
+                            <FontIcon Glyph="&#xE713;" />
+                        </NavigationViewItem.Icon>
+                    </NavigationViewItem>
+                    <NavigationViewItem x:Uid="MainWindow_NavNetwork"
+                                        Tag="network">
+                        <NavigationViewItem.Icon>
+                            <FontIcon Glyph="&#xE704;" />
+                        </NavigationViewItem.Icon>
+                    </NavigationViewItem>
+                    <NavigationViewItem x:Uid="MainWindow_NavLanTransfer"
+                                        Tag="lanTransfer">
+                        <NavigationViewItem.Icon>
+                            <FontIcon Glyph="&#xE868;" />
+                        </NavigationViewItem.Icon>
+                    </NavigationViewItem>
+                    <NavigationViewItem x:Uid="MainWindow_NavVersion"
+                                        Tag="versionInfo">
+                        <NavigationViewItem.Icon>
+                            <FontIcon Glyph="&#xE946;" />
+                        </NavigationViewItem.Icon>
+                    </NavigationViewItem>
+                </NavigationView.MenuItems>
+
+                <Grid>
+                    <Grid x:Name="HomeContent"
+                          ColumnSpacing="16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="1.2*" MinWidth="340" MaxWidth="560" />
+                            <ColumnDefinition Width="1.5*" MinWidth="400" />
+                        </Grid.ColumnDefinitions>
+
+                        <views:DeviceListControl Grid.Column="0"
+                                                 ViewModel="{x:Bind ViewModel.DeviceList, Mode=OneTime}" />
+
+                        <views:HeartRateControl Grid.Column="1"
+                                                ViewModel="{x:Bind ViewModel.HeartRate, Mode=OneTime}" />
+                    </Grid>
+
+                    <views:FloatWindowSettingsControl x:Name="FloatSettingsContent"
+                                                      Visibility="Collapsed"
+                                                      ViewModel="{x:Bind ViewModel.FloatSettings, Mode=OneTime}" />
+
+                    <views:NetworkSettingsControl x:Name="NetworkContent"
+                                                   Visibility="Collapsed"
+                                                   ViewModel="{x:Bind ViewModel.NetworkSettings, Mode=OneTime}" />
+
+                    <views:AppearanceSettingsControl x:Name="AppearanceContent"
+                                                      Visibility="Collapsed"
+                                                      ViewModel="{x:Bind ViewModel.Appearance, Mode=OneTime}" />
+
+                    <views:LanTransferControl x:Name="LanTransferContent"
+                                                Visibility="Collapsed"
+                                                ViewModel="{x:Bind ViewModel.LanTransfer, Mode=OneTime}" />
+
+                    <views:VersionInfoControl x:Name="VersionInfoContent"
+                                                Visibility="Collapsed" />
+                </Grid>
+            </NavigationView>
+        </Grid>
+    </Grid>
+</Window>

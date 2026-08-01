@@ -1,0 +1,5 @@
+- Introduce the AndroidLiquidGlass library and Capsule library
+- Refactor the bottom tab solution to use HorizontalPager
+- Implement the liquid glass effect
+- Optimize Vico charts
+- Refactor the UI

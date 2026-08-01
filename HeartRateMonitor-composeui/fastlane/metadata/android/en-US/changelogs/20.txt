@@ -1,0 +1,5 @@
+- Fixed update checker delay when app version matches remote version
+- Fixed HTTP/WebSocket server startup blocking main thread
+- Optimized calibration data collection performance
+- Fixed Gitee release API returning stale latest version
+- Migrated to /releases list endpoint for reliable version detection

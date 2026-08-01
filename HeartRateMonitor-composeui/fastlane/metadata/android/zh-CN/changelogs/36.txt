@@ -1,0 +1,5 @@
+- 引入AndroidLiquidGlass库和Capsule库
+- 底部tab方案修改为HorizontalPager
+- 实现液态玻璃效果
+- 优化vico图表
+- 重构ui

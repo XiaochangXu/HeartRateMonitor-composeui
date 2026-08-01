@@ -1,0 +1,1225 @@
+package com.github.heartratemonitor_compose.ui.main
+
+import android.app.Activity
+import androidx.activity.compose.BackHandler
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.Bluetooth
+import androidx.compose.material.icons.filled.BluetoothDisabled
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.HeartBroken
+import androidx.compose.material.icons.filled.Fullscreen
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.StarBorder
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.State
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import kotlinx.coroutines.flow.Flow
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color as ComposeColor
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.StrokeJoin
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.github.heartratemonitor_compose.R
+import com.github.heartratemonitor_compose.data.PrefsKeys
+import com.github.heartratemonitor_compose.data.repository.SettingsRepository
+import com.github.heartratemonitor_compose.util.settingsRepository
+import com.juul.kable.Advertisement
+import kotlin.math.abs
+import kotlin.math.ceil
+import kotlin.math.floor
+import kotlin.math.min
+import kotlin.math.sin
+import kotlin.math.PI
+import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
+import com.patrykandpatrick.vico.compose.cartesian.layer.LineCartesianLayer
+import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLine
+import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLineCartesianLayer
+import com.patrykandpatrick.vico.compose.cartesian.rememberCartesianChart
+import com.patrykandpatrick.vico.compose.cartesian.rememberVicoScrollState
+import com.patrykandpatrick.vico.compose.cartesian.rememberVicoZoomState
+import com.patrykandpatrick.vico.compose.cartesian.AutoScrollCondition
+import com.patrykandpatrick.vico.compose.cartesian.Zoom
+import com.patrykandpatrick.vico.compose.cartesian.axis.HorizontalAxis
+import com.patrykandpatrick.vico.compose.cartesian.axis.VerticalAxis
+import com.patrykandpatrick.vico.compose.cartesian.data.CartesianChartModelProducer
+import com.patrykandpatrick.vico.compose.cartesian.data.CartesianLayerRangeProvider
+import com.patrykandpatrick.vico.compose.cartesian.data.CartesianValueFormatter
+import com.patrykandpatrick.vico.compose.cartesian.data.lineModel
+import com.patrykandpatrick.vico.compose.cartesian.data.lineSeries
+import com.patrykandpatrick.vico.compose.common.Fill
+import com.patrykandpatrick.vico.compose.common.data.ExtraStore
+import com.patrykandpatrick.vico.compose.cartesian.decoration.HorizontalLine
+import com.patrykandpatrick.vico.compose.common.Insets
+import com.patrykandpatrick.vico.compose.common.Position
+import com.patrykandpatrick.vico.compose.common.component.rememberLineComponent
+import com.patrykandpatrick.vico.compose.common.component.rememberShapeComponent
+import com.patrykandpatrick.vico.compose.common.component.rememberTextComponent
+import com.github.heartratemonitor_compose.util.SoundManager
+import com.github.heartratemonitor_compose.ui.settings.resolveSoundMode
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.withTimeoutOrNull
+
+/**
+ * 全屏模式心率状态机：用于驱动声音播放。
+ * - HIGH：心率 > highThreshold（默认 100）
+ * - LOW：心率 <= highThreshold
+ */
+private enum class FullscreenHrState { HIGH, LOW }
+
+/**
+ * 
+ *
+ * 内部实时图表用 Vico [CartesianChartHost]（阶段 4 已从 AndroidView{LineChart} 迁移）。
+ *
+ * @param onToggleFloatingWindow 切换悬浮窗（顶部按钮，原历史入口位置）
+ * @param onEnterFullScreen 进入全屏心率模式
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun HomeScreen(
+    viewModel: MainViewModel,
+    onToggleFloatingWindow: () -> Unit,
+    onNavigateToDevices: () -> Unit,
+    onEnterFullScreen: () -> Unit,
+    isActive: Boolean = true
+) {
+    val context = LocalContext.current
+    val settings = remember { context.settingsRepository }
+
+    // 不在前台 Tab 时暂停高频状态订阅，避免二级页面转场期间后台 Home 页持续重组抢主线程
+    val heartRate by viewModel.heartRate.collectWhenActive(isActive, initial = 0)
+    val speed by viewModel.speed.collectWhenActive(isActive, initial = 0f)
+    val appStatus by viewModel.appStatus.collectWhenActive(isActive, initial = AppStatus.DISCONNECTED)
+    val statusMessage by viewModel.statusMessage.collectWhenActive(isActive, initial = "")
+    val sessionMaxHr by viewModel.sessionMaxHr.collectWhenActive(isActive, initial = 0)
+    val sessionMinHr by viewModel.sessionMinHr.collectWhenActive(isActive, initial = 0)
+    val connectedDevice by viewModel.connectedDevice.collectWhenActive(isActive, initial = null)
+    val chartDataSnapshot by viewModel.chartDataSnapshot.collectWhenActive(isActive, initial = null)
+
+    // 三个设置开关均直接从 SettingsRepository 的 StateFlow 订阅，
+    // 避免经 MainViewModel 中转产生额外异步延迟。
+    val isHistoryEnabled by settings.observeBoolean(PrefsKeys.HISTORY_RECORDING_ENABLED, false)
+        .collectWhenActive(isActive, initial = false)
+    val isSpeedEnabled by settings.observeBoolean(PrefsKeys.SPEED_DISPLAY_ENABLED, false)
+        .collectWhenActive(isActive, initial = false)
+    val isAnimationEnabled by settings.observeBoolean(PrefsKeys.HEARTBEAT_ANIMATION_ENABLED, true)
+        .collectWhenActive(isActive, initial = true)
+    // 悬浮窗开关状态（顶部按钮图标切换）
+    val floatingWindowEnabled by settings.observeBoolean(PrefsKeys.FLOATING_WINDOW_ENABLED, false)
+        .collectWhenActive(isActive, initial = false)
+
+    val isConnected = appStatus == AppStatus.CONNECTED
+
+    Scaffold(
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text(
+                        text = context.getString(R.string.app_name),
+                        style = MaterialTheme.typography.headlineSmall
+                    )
+                },
+                actions = {
+                    IconButton(onClick = onToggleFloatingWindow) {
+                        Surface(
+                            modifier = Modifier.size(40.dp),
+                            shape = CircleShape,
+                            color = if (floatingWindowEnabled) MaterialTheme.colorScheme.primary
+                            else MaterialTheme.colorScheme.surfaceContainer
+                        ) {
+                            Box(contentAlignment = Alignment.Center) {
+                                Icon(
+                                    painter = painterResource(
+                                        if (floatingWindowEnabled) R.drawable.ic_floating_window_on
+                                        else R.drawable.ic_floating_window_off
+                                    ),
+                                    contentDescription = stringResource(R.string.cd_toggle_floating_window),
+                                    tint = if (floatingWindowEnabled) MaterialTheme.colorScheme.onPrimary
+                                    else MaterialTheme.colorScheme.onSurface,
+                                    modifier = Modifier.size(24.dp)
+                                )
+                            }
+                        }
+                    }
+                }
+            )
+        }
+    ) { padding ->
+        HomeContent(
+            modifier = Modifier
+                .fillMaxSize()
+                // 仅应用顶部 padding（TopAppBar 高度），底部不应用 padding 让内容延伸到屏幕底部
+                .padding(top = padding.calculateTopPadding()),
+            viewModel = viewModel,
+            heartRate = heartRate,
+            speed = speed,
+            appStatus = appStatus,
+            statusMessage = statusMessage,
+            isConnected = isConnected,
+            isHistoryEnabled = isHistoryEnabled,
+            isSpeedEnabled = isSpeedEnabled,
+            isAnimationEnabled = isAnimationEnabled,
+            sessionMaxHr = sessionMaxHr,
+            sessionMinHr = sessionMinHr,
+            connectedDeviceName = connectedDevice?.name,
+            chartDataSnapshot = chartDataSnapshot,
+            onNavigateToDevices = onNavigateToDevices,
+            onEnterFullScreen = onEnterFullScreen
+        )
+    }
+}
+
+@Composable
+private fun HomeContent(
+    modifier: Modifier,
+    viewModel: MainViewModel,
+    heartRate: Int,
+    speed: Float,
+    appStatus: AppStatus,
+    statusMessage: String,
+    chartDataSnapshot: ChartDataSnapshot?,
+    isConnected: Boolean,
+    isHistoryEnabled: Boolean,
+    isSpeedEnabled: Boolean,
+    isAnimationEnabled: Boolean,
+    sessionMaxHr: Int,
+    sessionMinHr: Int,
+    connectedDeviceName: String?,
+    onNavigateToDevices: () -> Unit,
+    onEnterFullScreen: () -> Unit
+) {
+
+    val navBarInset = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+    LazyColumn(
+        modifier = modifier,
+        contentPadding = PaddingValues(
+            start = 16.dp,
+            end = 16.dp,
+            top = 16.dp,
+            bottom = 16.dp + 64.dp + 8.dp + navBarInset
+        ),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        item {
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                HeartRateCard(
+                    modifier = Modifier.weight(1f),
+                    heartRate = heartRate,
+                    appStatus = appStatus,
+                    isAnimationEnabled = isAnimationEnabled,
+                    sessionMaxHr = sessionMaxHr,
+                    sessionMinHr = sessionMinHr
+                )
+                val isSpeedActive = isSpeedEnabled && isConnected
+                SpeedCard(
+                    modifier = Modifier.width(120.dp),
+                    speed = speed,
+                    isActive = isSpeedActive
+                )
+            }
+        }
+
+        item {
+            when {
+                isConnected && isHistoryEnabled -> {
+                    RealtimeChart(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(200.dp),
+                        chartDataSnapshot = chartDataSnapshot,
+                        appStatus = appStatus
+                    )
+                }
+                isConnected && !isHistoryEnabled -> {
+                    ChartPlaceholder(R.string.history_not_enabled)
+                }
+                else -> {
+                    ChartPlaceholder(R.string.device_not_connected)
+                }
+            }
+        }
+
+        item {
+            val availableDevicesText = stringResource(R.string.available_devices)
+            val connectedDeviceText = stringResource(R.string.connected_device)
+            val isConnecting = appStatus == AppStatus.CONNECTING
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(28.dp),
+                color = MaterialTheme.colorScheme.surfaceContainer,
+                contentColor = MaterialTheme.colorScheme.onSurface,
+                onClick = onNavigateToDevices
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 14.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Bluetooth,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(Modifier.width(12.dp))
+                    Text(
+                        text = when {
+                            isConnecting -> statusMessage
+                            isConnected && !connectedDeviceName.isNullOrEmpty() -> "$connectedDeviceText $connectedDeviceName"
+                            else -> availableDevicesText
+                        },
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.weight(1f),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    if (isConnecting) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(20.dp),
+                            color = MaterialTheme.colorScheme.primary,
+                            strokeWidth = 2.dp
+                        )
+                    } else {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
+        }
+
+        if (isConnected) {
+            item {
+                Surface(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(28.dp),
+                    color = MaterialTheme.colorScheme.primaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                    onClick = onEnterFullScreen
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 14.dp),
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Fullscreen,
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Spacer(Modifier.width(8.dp))
+                        Text(
+                            text = stringResource(R.string.enter_fullscreen),
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                    }
+                }
+            }
+
+            item {
+                // 断开连接（与全屏模式按钮形状统一）
+                Surface(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(28.dp),
+                    color = MaterialTheme.colorScheme.error,
+                    contentColor = MaterialTheme.colorScheme.onError,
+                    onClick = remember(viewModel) { { viewModel.disconnectDevice() } }
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 14.dp),
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.BluetoothDisabled,
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Spacer(Modifier.width(8.dp))
+                        Text(
+                            text = stringResource(R.string.disconnect),
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+/**
+ * 图表占位卡片：未连接设备 / 已连接但未开启历史记录时显示。
+ * 与 RealtimeChart 等高（200dp）+ surfaceContainerHigh 背景，保持视觉一致性。
+ * 居中文字使用 alpha 0.45 含蓄提示，不抢视觉焦点。
+ */
+@Composable
+private fun ChartPlaceholder(messageRes: Int) {
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(200.dp),
+        shape = RoundedCornerShape(28.dp),
+        color = MaterialTheme.colorScheme.surfaceContainer
+    ) {
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier.alpha(0.45f)
+        ) {
+            Text(
+                text = stringResource(messageRes),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+}
+
+/** 心率卡片：
+ * 使用 surfaceContainerHigh 背景 + onSurface 文字（不跟随 seed 色，仅跟随亮/暗模式）。
+ * 心跳动画作用于背景爱心 emoji，文字不跳动。
+ * 右上角显示本次连接的心率最大值/最小值（断开即清零）。
+ */
+@Composable
+private fun HeartRateCard(
+    modifier: Modifier,
+    heartRate: Int,
+    appStatus: AppStatus,
+    isAnimationEnabled: Boolean,
+    sessionMaxHr: Int,
+    sessionMinHr: Int
+) {
+    val isConnected = appStatus == AppStatus.CONNECTED
+
+    // 中性色令牌：不跟随 seed 色，仅跟随亮/暗模式（亮色黑、暗色白）
+    val containerColor = MaterialTheme.colorScheme.surfaceContainer
+    val contentColor = MaterialTheme.colorScheme.onSurface
+
+    // 心跳动画：bpm > 30 且开启动画且已连接时缩放（作用于背景爱心，文字不跳动）
+    // 缩放范围 1.0 → 1.15，配合 96dp 图标尺寸：最大 ~110dp，在 150dp 高的卡片内有充足余量，不会被 Surface 圆角裁剪
+    val heartScale = remember { Animatable(1f) }
+    val shouldAnimate = isAnimationEnabled && heartRate > 30 && isConnected
+    // 量化 bpm 到 5 步长，减少动画重启频率
+    val animBpm = if (shouldAnimate) (heartRate / 5) * 5 else 0
+    LaunchedEffect(animBpm) {
+        if (animBpm > 0) {
+            val cycleMs = (60000f / animBpm).toLong()
+            while (true) {
+                heartScale.animateTo(1.15f, tween((cycleMs / 2).toInt(), easing = FastOutSlowInEasing))
+                heartScale.animateTo(1f, tween((cycleMs / 2).toInt(), easing = FastOutSlowInEasing))
+            }
+        } else {
+            heartScale.animateTo(1f, tween(200))
+        }
+    }
+
+    Surface(
+        modifier = modifier.height(150.dp),
+        shape = RoundedCornerShape(28.dp),
+        color = containerColor,
+        contentColor = contentColor
+    ) {
+        Box {
+            // 背景爱心图标（纯红 + 心跳缩放动画）
+            // 使用矢量图标：精确控制尺寸 96dp，缩放 1.15x ≈ 110dp，在 150dp 卡片内不会被圆角裁剪
+            // 已连接：Icons.Filled.Favorite（完整爱心）；断开：Icons.Filled.HeartBroken（裂成两半的实心爱心）
+            // tint 使用纯红 Color(0xFFFF0000)，alpha 0.35 保留含蓄感
+            Icon(
+                imageVector = if (isConnected) Icons.Filled.Favorite
+                              else Icons.Filled.HeartBroken,
+                contentDescription = null,
+                tint = ComposeColor(0xFFFF0000),
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .size(96.dp)
+                    .alpha(if (isConnected) 0.35f else 0.25f)
+                    .graphicsLayer {
+                        scaleX = heartScale.value
+                        scaleY = heartScale.value
+                    }
+            )
+
+            if (isConnected && sessionMaxHr > 0) {
+                Text(
+                    text = "MAX ${sessionMaxHr}",
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(12.dp),
+                    color = contentColor.copy(alpha = 0.7f),
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Medium,
+                    maxLines = 1
+                )
+            }
+
+            if (isConnected && sessionMinHr > 0) {
+                Text(
+                    text = "MIN ${sessionMinHr}",
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .padding(12.dp),
+                    color = contentColor.copy(alpha = 0.7f),
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Medium,
+                    maxLines = 1
+                )
+            }
+
+            // bpm 数值（文字不跳动）
+            Row(
+                modifier = Modifier.align(Alignment.Center),
+                verticalAlignment = Alignment.Bottom
+            ) {
+                Text(
+                    text = if (isConnected && heartRate > 0) "$heartRate" else "--",
+                    color = contentColor,
+                    fontSize = 48.sp,
+                    fontWeight = FontWeight.Medium
+                )
+                Spacer(Modifier.width(4.dp))
+                Text(
+                    text = "bpm",
+                    color = contentColor.copy(alpha = 0.9f),
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+            }
+        }
+    }
+}
+
+/**
+ * 速度卡片：与 HeartRateCard 视觉风格一致。
+ * - Surface 容器 + surfaceContainerHigh 背景 + onSurface 内容色（不跟随 seed 色）
+ * - 20dp 圆角，与首页其他卡片统一（项目规范：一级卡片 20dp 圆角 + 0dp 阴影）
+ * - [isActive]=false 时仅显示 "--"，颜色与已激活时一致（不做颜色区分）
+ */
+@Composable
+private fun SpeedCard(
+    modifier: Modifier,
+    speed: Float,
+    isActive: Boolean
+) {
+    Surface(
+        modifier = modifier.height(150.dp),
+        shape = RoundedCornerShape(28.dp),
+        color = MaterialTheme.colorScheme.surfaceContainer,
+        contentColor = MaterialTheme.colorScheme.onSurface
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                text = stringResource(R.string.speed),
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Text(
+                text = if (isActive) "%.1f".format(speed) else "--",
+                style = MaterialTheme.typography.headlineSmall,
+                color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.fillMaxWidth().wrapContentWidth(Alignment.CenterHorizontally)
+            )
+            Text(
+                text = "km/h",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.fillMaxWidth().wrapContentWidth(Alignment.End)
+            )
+        }
+    }
+}
+
+/**
+ * 实时心率图表（Vico CartesianChartHost）。
+ *
+ * 数据源:
+ * - [MainViewModel.chartDataSnapshot] (ChartDataSnapshot?) 由 ViewModel 维护的已格式化坐标快照
+ *
+ * 渲染特点（向心电图风格靠拢）:
+ * - 逐拍数据:RR-Interval 累加时间戳 + 瞬时心率,分辨率高于 1Hz 平均 bpm
+ * - 三次贝塞尔插值 (cubic) + 心率红渐变填充,曲线平滑有节律感
+ * - 动态 Y 轴范围（数据 min/max ±10，取整到 10 的倍数），配合每 10 bpm 网格线
+ * - 最高/最低极值 HorizontalLine 标注（Max/Min + 数值）
+ *
+ * 可视窗口:最近 60 秒（scroll 到末尾实现自动跟随）
+ */
+@Composable
+private fun RealtimeChart(
+    modifier: Modifier,
+    chartDataSnapshot: ChartDataSnapshot?,
+    appStatus: AppStatus
+) {
+    val modelProducer = remember { CartesianChartModelProducer() }
+
+    // 直接使用 MainViewModel 维护的已格式化坐标快照，UI 层不再每拍全量转换/拷贝。
+    // 快照列表在 ViewModel 中已复制为不可变 List，避免 runTransaction 挂起期间被并发修改。
+    LaunchedEffect(chartDataSnapshot) {
+        val snapshot = chartDataSnapshot ?: return@LaunchedEffect
+        if (appStatus != AppStatus.CONNECTED || snapshot.xValues.isEmpty()) return@LaunchedEffect
+        modelProducer.runTransaction {
+            lineModel {
+                series(x = snapshot.xValues, y = snapshot.yValues)
+            }
+        }
+    }
+
+    LaunchedEffect(appStatus) {
+        if (appStatus != AppStatus.CONNECTED) {
+            modelProducer.runTransaction {
+                // 空事务清空所有 series（无 series 调用 = 清空）
+            }
+        }
+    }
+
+    // 心率红主色,ECG 风格
+    val lineColor = ComposeColor(0xFFE53935)
+
+    // 计算 1 分钟窗口内的极值，用于 HorizontalLine 标注
+    val maxY = chartDataSnapshot?.yValues?.maxOrNull() ?: 0.0
+    val minY = chartDataSnapshot?.yValues?.minOrNull() ?: 0.0
+
+    // 极值参考线 + 标签组件（微型圆角背景，提升可读性）
+    val extremaLineColor = lineColor.copy(alpha = 0.35f)
+    val extremaLineComp = rememberLineComponent(fill = Fill(extremaLineColor), thickness = 1.dp)
+    val extremaLabelBg = rememberShapeComponent(
+        fill = Fill(MaterialTheme.colorScheme.surfaceContainer),
+        shape = RoundedCornerShape(4.dp)
+    )
+    val extremaLabelStyle = TextStyle(color = lineColor, fontSize = 10.sp)
+    val maxLabelComp = rememberTextComponent(
+        extremaLabelStyle,
+        margins = Insets(start = 6.dp),
+        padding = Insets(start = 6.dp, top = 2.dp, end = 6.dp, bottom = 2.dp),
+        background = extremaLabelBg
+    )
+    val minLabelComp = rememberTextComponent(
+        extremaLabelStyle,
+        margins = Insets(start = 6.dp),
+        padding = Insets(start = 6.dp, top = 2.dp, end = 6.dp, bottom = 2.dp),
+        background = extremaLabelBg
+    )
+    val decorations = remember(maxY, minY) {
+        buildList {
+            if (maxY > 0) {
+                add(
+                    HorizontalLine(
+                        y = { maxY },
+                        line = extremaLineComp,
+                        labelComponent = maxLabelComp,
+                        label = { "Max ${maxY.toInt()}" },
+                        verticalLabelPosition = Position.Vertical.Top
+                    )
+                )
+                if (minY > 0 && minY != maxY) {
+                    add(
+                        HorizontalLine(
+                            y = { minY },
+                            line = extremaLineComp,
+                            labelComponent = minLabelComp,
+                            label = { "Min ${minY.toInt()}" },
+                            verticalLabelPosition = Position.Vertical.Bottom
+                        )
+                    )
+                }
+            }
+        }
+    }
+
+    // 圆角卡片容器包裹心率图表，使用主题色适配深色/浅色模式，与 SpeedCard 视觉风格保持一致
+    Surface(
+        modifier = modifier,
+        shape = RoundedCornerShape(28.dp),
+        color = MaterialTheme.colorScheme.surfaceContainer
+    ) {
+        CartesianChartHost(
+            chart = rememberCartesianChart(
+                rememberLineCartesianLayer(
+                    lineProvider = LineCartesianLayer.LineProvider.series(
+                        LineCartesianLayer.rememberLine(
+                            fill = LineCartesianLayer.LineFill.single(Fill(lineColor)),
+                            stroke = LineCartesianLayer.LineStroke.Continuous(thickness = 3.dp),
+                            areaFill = LineCartesianLayer.AreaFill.single(
+                                Fill(
+                                    Brush.verticalGradient(
+                                        listOf(lineColor.copy(alpha = 0.35f), ComposeColor.Transparent)
+                                    )
+                                )
+                            ),
+                            interpolator = LineCartesianLayer.Interpolator.cubic()
+                        )
+                    ),
+                    // 动态 Y 轴范围：数据 min - 10 / max + 10，取整到 10 的倍数，保证网格线落在整数刻度
+                    rangeProvider = remember {
+                        object : CartesianLayerRangeProvider {
+                            override fun getMinY(minY: Double, maxY: Double, extraStore: ExtraStore) =
+                                floor((minY - 10.0) / 10.0) * 10.0
+                            override fun getMaxY(minY: Double, maxY: Double, extraStore: ExtraStore) =
+                                ceil((maxY + 10.0) / 10.0) * 10.0
+                        }
+                    }
+                ),
+                startAxis = VerticalAxis.rememberStart(
+                    // 每 10 bpm 一条网格线，配合动态范围显示中间刻度
+                    itemPlacer = VerticalAxis.ItemPlacer.step({ 10.0 }),
+                    valueFormatter = CartesianValueFormatter { _, value, _ ->
+                        value.toInt().toString()
+                    }
+                ),
+                bottomAxis = HorizontalAxis.rememberBottom(
+                    // 采样频率低，降低标签密度：每 ~20 个数据点显示一个时间标签（约 3~4 个）
+                    itemPlacer = HorizontalAxis.ItemPlacer.aligned(spacing = { 20 }),
+                    valueFormatter = CartesianValueFormatter { _, value, _ ->
+                        // value 是整数毫秒（x 值已量化），转回分:秒显示
+                        val totalSec = (value / 1000.0).toLong()
+                        val minutes = totalSec / 60
+                        val seconds = totalSec % 60
+                        String.format("%02d:%02d", minutes, seconds)
+                    }
+                ),
+                decorations = decorations
+            ),
+            modelProducer = modelProducer,
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(8.dp),
+            // 实时图表自动跟随最新数据：每次模型变更都滚动到末尾
+            // OnModelGrowth 仅在数据宽度增加时触发，但 60 秒窗口会同步裁剪旧数据，宽度不变 → 不触发
+            scrollState = rememberVicoScrollState(
+                scrollEnabled = true,
+                autoScrollCondition = AutoScrollCondition { _, _ -> true }
+            ),
+            zoomState = rememberVicoZoomState(
+                zoomEnabled = true,
+                initialZoom = Zoom.Content
+            ),
+            // 禁用 diff 动画与初始生长动画，避免曲线从下往上长
+            animationSpec = null,
+            animateIn = false
+        )
+    }
+}
+
+/**
+ * 设备列表项：替代原 list_item_device.xml + DeviceAdapter。
+ */
+@Composable
+internal fun DeviceItem(
+    advertisement: Advertisement,
+    isFavorite: Boolean,
+    isConnecting: Boolean,
+    onDeviceClick: () -> Unit,
+    onFavoriteClick: () -> Unit
+) {
+    val rssi = advertisement.rssi
+    val strongColor = ComposeColor(0xFF00668B) // primary_light
+    val mediumColor = ComposeColor(0xFFF59E0B)
+    val weakColor = ComposeColor(0xFFB00020)   // red_error
+
+    // 信号强度统一使用 WiFi 信号图标，通过颜色区分强/中/弱
+    val signalTint: ComposeColor
+    val rssiColor: ComposeColor
+    when {
+        rssi > -65 -> {
+            signalTint = strongColor
+            rssiColor = strongColor
+        }
+        rssi > -80 -> {
+            signalTint = mediumColor
+            rssiColor = mediumColor
+        }
+        else -> {
+            signalTint = weakColor
+            rssiColor = weakColor
+        }
+    }
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .heightIn(min = 72.dp)
+            .clickable { onDeviceClick() }
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = advertisement.name ?: "Unknown Device",
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            Spacer(Modifier.height(4.dp))
+            Text(
+                text = advertisement.identifier,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+        if (isConnecting) {
+            CircularProgressIndicator(
+                modifier = Modifier.size(20.dp),
+                color = MaterialTheme.colorScheme.primary,
+                strokeWidth = 2.dp
+            )
+        } else {
+            Icon(
+                painter = painterResource(R.drawable.ic_signal_wifi),
+                contentDescription = null,
+                tint = signalTint,
+                modifier = Modifier.size(20.dp)
+            )
+            Spacer(Modifier.width(8.dp))
+            Text(
+                text = "${rssi}dBm",
+                style = MaterialTheme.typography.labelSmall,
+                color = rssiColor
+            )
+        }
+        Spacer(Modifier.width(8.dp))
+        IconButton(onClick = onFavoriteClick) {
+            Icon(
+                imageVector = if (isFavorite) Icons.Filled.Star
+                               else Icons.Filled.StarBorder,
+                contentDescription = stringResource(R.string.cd_favorite),
+                tint = MaterialTheme.colorScheme.primary
+            )
+        }
+    }
+}
+
+/**
+ * 全屏心率模式覆盖层。
+ *
+ * - 纯黑背景，横屏全屏显示
+ * - 静态爱心 + 心率数值，按屏幕高度自适应放到最大
+ * - ECG 滚动波形：屏幕底部持续左滚的心电波形，QRS 与实际心率同步
+ * - 爱心在 QRS 波峰时产生微妙光晕脉冲（非缩放动画）
+ * - 颜色读取设置页悬浮窗「文本颜色」选项（floating_text_color）
+ * - 点击屏幕或按返回键退出
+ */
+@Composable
+internal fun FullScreenHeartRate(
+    viewModel: MainViewModel,
+    onExit: () -> Unit
+) {
+    val heartRate by viewModel.heartRate.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+    val settings = remember { context.settingsRepository }
+    val heartColor = remember {
+        ComposeColor(settings.getInt(PrefsKeys.FLOATING_TEXT_COLOR, android.graphics.Color.RED))
+    }
+    val isAnimationEnabled = remember { settings.getBoolean(PrefsKeys.HEARTBEAT_ANIMATION_ENABLED, true) }
+
+    // ── 全屏模式声音：根据 FULLSCREEN_SOUND_MODE 选择关闭/中文/英文语音 ──
+    val soundMode = remember { resolveSoundMode(settings) }
+    val highThreshold = 100  // 全屏模式声音阈值固定 100：高于 100 播高音，低于等于 100 播低音
+    val soundManager = remember(soundMode) {
+        if (soundMode != "off") SoundManager(context, soundMode) else null
+    }
+    DisposableEffect(soundManager) {
+        onDispose { soundManager?.release() }
+    }
+    // 初始 null：首次状态语音播完后才设置，触发循环 beep 启动
+    var hrState by remember { mutableStateOf<FullscreenHrState?>(null) }
+
+    LaunchedEffect(Unit) {
+        val sm = soundManager ?: return@LaunchedEffect
+        if (heartRate <= 0) return@LaunchedEffect
+        delay(500)
+        withTimeoutOrNull(2000) { sm.awaitLoaded() } ?: return@LaunchedEffect
+        val newState = if (heartRate > highThreshold) FullscreenHrState.HIGH else FullscreenHrState.LOW
+        val voiceType = if (newState == FullscreenHrState.HIGH) SoundManager.SoundType.TOO_HIGH else SoundManager.SoundType.TOO_LOW
+        sm.play(voiceType)
+        delay(sm.getDurationMs(voiceType) + 500)
+        hrState = newState
+    }
+
+    // 后续心率变化：跨阈值瞬间播放状态语音（首次由上面的 LaunchedEffect(Unit) 处理）
+    LaunchedEffect(heartRate) {
+        val sm = soundManager ?: return@LaunchedEffect
+        if (heartRate <= 0 || hrState == null) return@LaunchedEffect
+        val newState = if (heartRate > highThreshold) FullscreenHrState.HIGH else FullscreenHrState.LOW
+        if (newState != hrState) {
+            val voiceType = if (newState == FullscreenHrState.HIGH) SoundManager.SoundType.TOO_HIGH else SoundManager.SoundType.TOO_LOW
+            sm.play(voiceType)
+            delay(sm.getDurationMs(voiceType) + 150)
+            hrState = newState
+        }
+    }
+
+    // 循环 beep：按 60_000/bpm 间隔重复播放，节奏跟心跳
+    // HIGH→high_beep, LOW→low_beep
+    // 依赖 hrState：首次状态语音播完后（hrState 被设置）才启动，避免与状态语音重叠
+    LaunchedEffect(hrState, heartRate) {
+        val sm = soundManager ?: return@LaunchedEffect
+        if (heartRate <= 0 || hrState == null) return@LaunchedEffect
+        withTimeoutOrNull(2000) { sm.awaitLoaded() } ?: return@LaunchedEffect
+        val state = hrState!!
+        val beepType = when (state) {
+            FullscreenHrState.HIGH -> SoundManager.SoundType.HIGH_BEEP
+            FullscreenHrState.LOW -> SoundManager.SoundType.LOW_BEEP
+        }
+        val intervalMs = (60_000f / heartRate).toLong().coerceIn(200L, 3_000L)
+        while (isActive) {
+            sm.play(beepType)
+            delay(intervalMs)
+        }
+    }
+
+    // ECG 滚动动画：ecgPhase 在 0..1 之间循环，每个周期 = 一个心动周期（60_000/bpm ms）
+    val effectiveBpm = if (isAnimationEnabled && heartRate > 30) heartRate else 0
+    val ecgPhase = remember { Animatable(0f) }
+    LaunchedEffect(effectiveBpm) {
+        if (effectiveBpm > 0) {
+            val cycleMs = (60_000f / effectiveBpm).toInt().coerceAtLeast(200)
+            ecgPhase.snapTo(0f)
+            ecgPhase.animateTo(
+                targetValue = 1f,
+                animationSpec = infiniteRepeatable(
+                    animation = tween(durationMillis = cycleMs, easing = LinearEasing),
+                    repeatMode = RepeatMode.Restart
+                )
+            )
+        }
+    }
+
+    // 爱心光晕：QRS 波峰时最亮；alpha 计算移到 graphicsLayer 绘制阶段，避免每帧重组
+    val rPeakPhase = 0.2f
+
+    // 全屏沉浸模式：隐藏状态栏/导航栏 + 保持屏幕常亮，退出时恢复
+    val fullscreenView = LocalView.current
+    DisposableEffect(fullscreenView) {
+        val window = (fullscreenView.context as? Activity)?.window
+        val controller = window?.let { WindowInsetsControllerCompat(it, fullscreenView) }
+        controller?.hide(WindowInsetsCompat.Type.systemBars())
+        controller?.systemBarsBehavior =
+            WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+        fullscreenView.keepScreenOn = true
+
+        onDispose {
+            controller?.show(WindowInsetsCompat.Type.systemBars())
+            fullscreenView.keepScreenOn = false
+        }
+    }
+
+    BackHandler { onExit() }
+
+    BoxWithConstraints(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(ComposeColor.Black)
+            .drawBehind {
+                val canvasW = size.width
+                val canvasH = size.height
+                val baseline = canvasH * 0.82f
+                val amplitude = canvasH * 0.12f
+                val cyclesOnScreen = 4f
+                val currentPhase = ecgPhase.value
+
+                val gridColor = heartColor.copy(alpha = 0.1f)
+                val gridStep = canvasW / 20f
+                var gx = 0f
+                while (gx <= canvasW) {
+                    drawLine(
+                        color = gridColor,
+                        start = Offset(gx, baseline - amplitude * 1.5f),
+                        end = Offset(gx, baseline + amplitude * 1.5f),
+                        strokeWidth = 2f
+                    )
+                    gx += gridStep
+                }
+                var gy = baseline - amplitude * 1.5f
+                while (gy <= baseline + amplitude * 1.5f) {
+                    drawLine(
+                        color = gridColor,
+                        start = Offset(0f, gy),
+                        end = Offset(canvasW, gy),
+                        strokeWidth = 2f
+                    )
+                    gy += amplitude * 0.5f
+                }
+
+                val path = Path()
+                var first = true
+                var x = 0f
+                while (x <= canvasW) {
+                    val phase = (x / canvasW * cyclesOnScreen + currentPhase) % 1f
+                    val y = if (effectiveBpm > 0) {
+                        baseline - ecgWaveformValue(phase, amplitude)
+                    } else {
+                        baseline
+                    }
+                    if (first) {
+                        path.moveTo(x, y)
+                        first = false
+                    } else {
+                        path.lineTo(x, y)
+                    }
+                    x += 2f
+                }
+                drawPath(
+                    path = path,
+                    color = heartColor,
+                    style = Stroke(
+                        width = 5f,
+                        cap = StrokeCap.Round,
+                        join = StrokeJoin.Round
+                    )
+                )
+            }
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null
+            ) { onExit() }
+    ) {
+        val horizontalMargin = maxWidth * 0.05f
+        val halfWidth = (maxWidth - horizontalMargin * 2) / 2
+        val heartSize = minOf(halfWidth, maxHeight) * 0.9f
+        val maxFontSizeByWidth = halfWidth / 2.0f
+        val maxFontSizeByHeight = maxHeight * 0.85f
+        val bpmFontSize = minOf(maxFontSizeByWidth, maxFontSizeByHeight).value.toInt().sp
+
+        Row(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = horizontalMargin),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxHeight(),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Favorite,
+                    contentDescription = null,
+                    tint = heartColor,
+                    modifier = Modifier
+                        .size(heartSize)
+                        .graphicsLayer {
+                            val phaseFraction = ecgPhase.value % 1f
+                            val rawDist = abs(phaseFraction - rPeakPhase)
+                            val distToPeak = min(rawDist, 1f - rawDist)
+                            val heartGlow = if (effectiveBpm > 0) (1f - distToPeak / 0.06f).coerceIn(0f, 1f) else 0f
+                            alpha = 0.75f + 0.25f * heartGlow
+                        }
+                )
+            }
+
+            Text(
+                text = ":",
+                color = heartColor,
+                fontSize = bpmFontSize,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.graphicsLayer {
+                    val phaseFraction = ecgPhase.value % 1f
+                    val rawDist = abs(phaseFraction - rPeakPhase)
+                    val distToPeak = min(rawDist, 1f - rawDist)
+                    val heartGlow = if (effectiveBpm > 0) (1f - distToPeak / 0.06f).coerceIn(0f, 1f) else 0f
+                    alpha = 0.75f + 0.25f * heartGlow
+                }
+            )
+
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxHeight(),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = if (heartRate > 0) "$heartRate" else "--",
+                        color = heartColor,
+                        fontSize = bpmFontSize,
+                        fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.Center,
+                        maxLines = 1,
+                        softWrap = false
+                    )
+                    Text(
+                        text = stringResource(R.string.bpm_unit),
+                        color = heartColor.copy(alpha = 0.7f),
+                        fontSize = (bpmFontSize.value * 0.3f).toInt().sp,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
+            }
+        }
+
+        Text(
+            text = stringResource(R.string.fullscreen_exit_hint),
+            color = ComposeColor.White.copy(alpha = 0.35f),
+            fontSize = 13.sp,
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(bottom = 8.dp)
+        )
+    }
+}
+
+/**
+ * ECG 波形函数：返回给定相位 [phase]（0..1）处的 Y 偏移量（正值向上）。
+ * 包含标准 P-QRS-T 波形：
+ * - P 波（0.05~0.12）：小凸起
+ * - PR 段（0.12~0.17）：基线
+ * - Q 波（0.17~0.19）：小下凹
+ * - R 波（0.19~0.23）：尖锐主峰
+ * - S 波（0.23~0.26）：下凹
+ * - ST 段（0.26~0.35）：基线
+ * - T 波（0.35~0.52）：中等凸起
+ * - 基线（0.52~1.0）：平线
+ */
+private fun ecgWaveformValue(phase: Float, amplitude: Float): Float {
+    val t = phase
+    return when {
+        // P 波
+        t < 0.05f -> 0f
+        t < 0.12f -> {
+            val pt = (t - 0.05f) / 0.07f
+            sin(pt * PI).toFloat() * amplitude * 0.15f
+        }
+        // PR 段
+        t < 0.17f -> 0f
+        // Q 波（小下凹）
+        t < 0.19f -> {
+            -((t - 0.17f) / 0.02f) * amplitude * 0.1f
+        }
+        // R 波（尖锐主峰）
+        t < 0.21f -> {
+            val rt = (t - 0.19f) / 0.02f
+            rt * amplitude
+        }
+        t < 0.23f -> {
+            val rt = (t - 0.21f) / 0.02f
+            (1f - rt) * amplitude
+        }
+        // S 波（下凹）
+        t < 0.26f -> {
+            val st = (t - 0.23f) / 0.03f
+            -(1f - st) * amplitude * 0.25f
+        }
+        // ST 段
+        t < 0.35f -> 0f
+        // T 波
+        t < 0.52f -> {
+            val tt = (t - 0.35f) / 0.17f
+            sin(tt * PI).toFloat() * amplitude * 0.3f
+        }
+        // 基线
+        else -> 0f
+    }
+}
+
+/**
+ * 仅在 [isActive] 为 true 时收集 Flow，暂停期间保留 [initial] 值。
+ *
+ * 用于 Home 页在切到二级页面时停止订阅心率、图表等高频更新，
+ * 避免后台页面持续重组导致转场动画掉帧。
+ */
+@Composable
+private fun <T> Flow<T>.collectWhenActive(
+    isActive: Boolean,
+    initial: T
+): State<T> {
+    val state = remember { mutableStateOf(initial) }
+    LaunchedEffect(isActive) {
+        if (isActive) this@collectWhenActive.collect { state.value = it }
+    }
+    return state
+}

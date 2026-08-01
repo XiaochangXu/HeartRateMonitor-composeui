@@ -1,0 +1,363 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <data name="MainWindow_Title" xml:space="preserve">
+    <value>Heart Rate Monitor</value>
+  </data>
+  <data name="MainWindow_ToggleFloat" xml:space="preserve">
+    <value>Show / hide floating window</value>
+  </data>
+  <data name="MainWindow_TitleText.Text" xml:space="preserve">
+    <value>Heart Rate Monitor</value>
+  </data>
+  <data name="DeviceList_HeaderText.Text" xml:space="preserve">
+    <value>Heart Rate Devices</value>
+  </data>
+  <data name="DeviceList_StartScan" xml:space="preserve">
+    <value>Start Scan</value>
+  </data>
+  <data name="DeviceList_StopScan" xml:space="preserve">
+    <value>Stop Scan</value>
+  </data>
+  <data name="DeviceList_Clear" xml:space="preserve">
+    <value>Clear</value>
+  </data>
+  <data name="DeviceList_UnknownDevice" xml:space="preserve">
+    <value>Unknown device</value>
+  </data>
+  <data name="DeviceList_EmptyHint" xml:space="preserve">
+    <value>No devices found. Start a scan first.</value>
+  </data>
+  <data name="DeviceList_HrBadge.Text" xml:space="preserve">
+    <value>● HR</value>
+  </data>
+  <data name="HeartRate_HeaderText.Text" xml:space="preserve">
+    <value>Live Heart Rate</value>
+  </data>
+  <data name="HeartRate_Connect" xml:space="preserve">
+    <value>Connect</value>
+  </data>
+  <data name="HeartRate_Disconnect" xml:space="preserve">
+    <value>Disconnect</value>
+  </data>
+  <data name="HeartRate_NotConnected" xml:space="preserve">
+    <value>Not connected</value>
+  </data>
+  <data name="HeartRate_Connecting" xml:space="preserve">
+    <value>Connecting...</value>
+  </data>
+  <data name="HeartRate_ConnectedName" xml:space="preserve">
+    <value>Connected to {0}</value>
+  </data>
+  <data name="HeartRate_ConnectFailed" xml:space="preserve">
+    <value>Connection failed (make sure the device is on and not in use by another app)</value>
+  </data>
+  <data name="HeartRate_Disconnected" xml:space="preserve">
+    <value>Connection lost</value>
+  </data>
+  <data name="HeartRate_NoDevice" xml:space="preserve">
+    <value>Select a device first</value>
+  </data>
+  <data name="HeartRate_DeviceName.Text" xml:space="preserve">
+    <value>Device name</value>
+  </data>
+  <data name="HeartRate_ConnectionMode.Text" xml:space="preserve">
+    <value>Connection</value>
+  </data>
+  <data name="HeartRate_ConnModeBluetooth" xml:space="preserve">
+    <value>Bluetooth</value>
+  </data>
+  <data name="HeartRate_ConnModeLan" xml:space="preserve">
+    <value>LAN</value>
+  </data>
+  <data name="HeartRate_Address.Text" xml:space="preserve">
+    <value>Connection address</value>
+  </data>
+  <data name="HeartRate_HasHrService.Text" xml:space="preserve">
+    <value>Heart rate service</value>
+  </data>
+  <data name="HeartRate_Yes" xml:space="preserve">
+    <value>Yes</value>
+  </data>
+  <data name="HeartRate_No" xml:space="preserve">
+    <value>No</value>
+  </data>
+  <data name="HeartRate_FloatLabel.Text" xml:space="preserve">
+    <value>Floating window</value>
+  </data>
+  <data name="HeartRate_Bpm" xml:space="preserve">
+    <value>bpm</value>
+  </data>
+  <data name="HeartRate_BluetoothBlockedTitle" xml:space="preserve">
+    <value>Cannot connect</value>
+  </data>
+  <data name="HeartRate_BluetoothBlockedBody" xml:space="preserve">
+    <value>Please disconnect the LAN connection first.</value>
+  </data>
+  <data name="Dialog_Ok" xml:space="preserve">
+    <value>OK</value>
+  </data>
+  <data name="MainWindow_NavHome.Content" xml:space="preserve">
+    <value>Home</value>
+  </data>
+  <data name="MainWindow_NavFloatSettings.Content" xml:space="preserve">
+    <value>Float Window Settings</value>
+  </data>
+  <data name="FloatSettings_HeaderText.Text" xml:space="preserve">
+    <value>Float Window Settings</value>
+  </data>
+  <data name="FloatSettings_ShowHeart.Header" xml:space="preserve">
+    <value>Show heart icon</value>
+  </data>
+  <data name="FloatSettings_ShowBpm.Header" xml:space="preserve">
+    <value>Show bpm text</value>
+  </data>
+  <data name="FloatSettings_HeartbeatAnimation.Header" xml:space="preserve">
+    <value>Enable heartbeat animation</value>
+  </data>
+  <data name="FloatSettings_ScaleHeader.Text" xml:space="preserve">
+    <value>Overall size</value>
+  </data>
+  <data name="FloatSettings_HeartSizeHeader.Text" xml:space="preserve">
+    <value>Icon size</value>
+  </data>
+  <data name="FloatSettings_BgOpacityHeader.Text" xml:space="preserve">
+    <value>Background opacity</value>
+  </data>
+  <data name="FloatSettings_BorderOpacityHeader.Text" xml:space="preserve">
+    <value>Border opacity</value>
+  </data>
+  <data name="FloatSettings_HeartColorHeader.Text" xml:space="preserve">
+    <value>Floating window color</value>
+  </data>
+  <data name="FloatSettings_ClickThrough.Header" xml:space="preserve">
+    <value>Enable click-through</value>
+  </data>
+  <data name="FloatSettings_ClickThrough.OnContent" xml:space="preserve">
+    <value>Locked</value>
+  </data>
+  <data name="FloatSettings_ClickThrough.OffContent" xml:space="preserve">
+    <value>Unlocked</value>
+  </data>
+  <data name="FloatSettings_HotKeyHeader.Text" xml:space="preserve">
+    <value>Lock hotkey</value>
+  </data>
+  <data name="FloatSettings_HotKeyBox.PlaceholderText" xml:space="preserve">
+    <value>Press a key combination…</value>
+  </data>
+  <data name="FloatSettings_HotKeyHint.Text" xml:space="preserve">
+    <value>Press the hotkey to toggle the floating window lock. When locked, the window ignores the mouse and clicks pass through it.</value>
+  </data>
+  <data name="FloatSettings_ClearHotKey.Content" xml:space="preserve">
+    <value>Clear</value>
+  </data>
+  <data name="FloatSettings_Reset.Content" xml:space="preserve">
+    <value>Reset to defaults</value>
+  </data>
+  <data name="MainWindow_NavNetwork.Content" xml:space="preserve">
+    <value>Network &amp; Transfer</value>
+  </data>
+  <data name="Net_Header.Text" xml:space="preserve">
+    <value>Network Transfer</value>
+  </data>
+  <data name="Net_HttpToggle.Header" xml:space="preserve">
+    <value>HTTP Server</value>
+  </data>
+  <data name="Net_HttpPort.Text" xml:space="preserve">
+    <value>Port</value>
+  </data>
+  <data name="Net_HttpUrlLabel.Text" xml:space="preserve">
+    <value>Access URL</value>
+  </data>
+  <data name="Net_WsToggle.Header" xml:space="preserve">
+    <value>WebSocket Server</value>
+  </data>
+  <data name="Net_WsPort.Text" xml:space="preserve">
+    <value>Port</value>
+  </data>
+  <data name="Net_WsUrlLabel.Text" xml:space="preserve">
+    <value>Access URL</value>
+  </data>
+  <data name="Net_Webhooks.Text" xml:space="preserve">
+    <value>Webhooks</value>
+  </data>
+  <data name="Net_AddWebhook.Content" xml:space="preserve">
+    <value>Add</value>
+  </data>
+  <data name="Net_Edit.Content" xml:space="preserve">
+    <value>Edit</value>
+  </data>
+  <data name="Net_Delete.Content" xml:space="preserve">
+    <value>Delete</value>
+  </data>
+  <data name="WebhookDialog.Title" xml:space="preserve">
+    <value>Webhook</value>
+  </data>
+  <data name="WebhookDialog.PrimaryButtonText" xml:space="preserve">
+    <value>Save</value>
+  </data>
+  <data name="WebhookDialog.CloseButtonText" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="WebhookDialog_Name.Text" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="WebhookDialog_NameBox.PlaceholderText" xml:space="preserve">
+    <value>My Webhook</value>
+  </data>
+  <data name="WebhookDialog_Url.Text" xml:space="preserve">
+    <value>URL</value>
+  </data>
+  <data name="WebhookDialog_UrlBox.PlaceholderText" xml:space="preserve">
+    <value>https://example.com/hook</value>
+  </data>
+  <data name="WebhookDialog_Enabled.Header" xml:space="preserve">
+    <value>Enabled</value>
+  </data>
+  <data name="WebhookDialog_Triggers.Text" xml:space="preserve">
+    <value>Triggers</value>
+  </data>
+  <data name="WebhookDialog_TriggerHr.Content" xml:space="preserve">
+    <value>Heart rate updated</value>
+  </data>
+  <data name="WebhookDialog_TriggerConn.Content" xml:space="preserve">
+    <value>Connected</value>
+  </data>
+  <data name="WebhookDialog_TriggerDisc.Content" xml:space="preserve">
+    <value>Disconnected</value>
+  </data>
+  <data name="WebhookDialog_Body.Text" xml:space="preserve">
+    <value>Body</value>
+  </data>
+  <data name="WebhookDialog_PlaceholderHint.Text" xml:space="preserve">
+    <value>Placeholders: {bpm} {speed}</value>
+  </data>
+  <data name="WebhookDialog_Headers.Text" xml:space="preserve">
+    <value>Headers</value>
+  </data>
+  <data name="WebhookDialog_Test.Content" xml:space="preserve">
+    <value>Send Test</value>
+  </data>
+  <data name="Network_Disabled" xml:space="preserve">
+    <value>Disabled</value>
+  </data>
+  <data name="Network_Stopped" xml:space="preserve">
+    <value>Stopped</value>
+  </data>
+  <data name="Network_RunningOn" xml:space="preserve">
+    <value>Running (port {0})</value>
+  </data>
+  <data name="Network_Error" xml:space="preserve">
+    <value>Error: {0}</value>
+  </data>
+  <data name="PortConflict_Title" xml:space="preserve">
+    <value>Port conflict</value>
+  </data>
+  <data name="PortConflict_Body" xml:space="preserve">
+    <value>Port {0} is already in use by another service. Change the port before enabling.</value>
+  </data>
+  <data name="Webhook_DeleteConfirmTitle" xml:space="preserve">
+    <value>Delete Webhook</value>
+  </data>
+  <data name="Webhook_DeleteConfirmBody" xml:space="preserve">
+    <value>Delete webhook "{0}"?</value>
+  </data>
+  <data name="Webhook_Delete" xml:space="preserve">
+    <value>Delete</value>
+  </data>
+  <data name="Webhook_Cancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="MainWindow_NavAppearance.Content" xml:space="preserve">
+    <value>Theme &amp; Language</value>
+  </data>
+  <data name="Appearance_Header.Text" xml:space="preserve">
+    <value>Theme &amp; Language</value>
+  </data>
+  <data name="Appearance_ThemeCard.Text" xml:space="preserve">
+    <value>Theme Mode</value>
+  </data>
+  <data name="Appearance_ThemeSystem.Content" xml:space="preserve">
+    <value>Follow System</value>
+  </data>
+  <data name="Appearance_ThemeLight.Content" xml:space="preserve">
+    <value>Light Theme</value>
+  </data>
+  <data name="Appearance_ThemeDark.Content" xml:space="preserve">
+    <value>Dark Theme</value>
+  </data>
+  <data name="Appearance_LanguageCard.Text" xml:space="preserve">
+    <value>Language</value>
+  </data>
+  <data name="Appearance_LangZh.Content" xml:space="preserve">
+    <value>Chinese</value>
+  </data>
+  <data name="Appearance_LangEn.Content" xml:space="preserve">
+    <value>English</value>
+  </data>
+  <data name="Appearance_RestartHint.Text" xml:space="preserve">
+    <value>A restart is required after switching language.</value>
+  </data>
+  <data name="MainWindow_NavLanTransfer.Content" xml:space="preserve">
+    <value>LAN Transfer</value>
+  </data>
+  <data name="Lan_Header.Text" xml:space="preserve">
+    <value>LAN Transfer</value>
+  </data>
+  <data name="Lan_Toggle.Header" xml:space="preserve">
+    <value>Enable LAN Transfer</value>
+  </data>
+  <data name="Lan_ComputerName.Text" xml:space="preserve">
+    <value>Computer name</value>
+  </data>
+  <data name="Lan_PairPort.Text" xml:space="preserve">
+    <value>Pair port</value>
+  </data>
+  <data name="Lan_LocalIp.Text" xml:space="preserve">
+    <value>Local IP</value>
+  </data>
+  <data name="Lan_Status.Text" xml:space="preserve">
+    <value>Status</value>
+  </data>
+  <data name="Lan_Devices.Text" xml:space="preserve">
+    <value>Connected devices</value>
+  </data>
+  <data name="Lan_NoDevices.Text" xml:space="preserve">
+    <value>No paired devices</value>
+  </data>
+  <data name="Lan_Disabled" xml:space="preserve">
+    <value>Disabled</value>
+  </data>
+  <data name="Lan_Stopped" xml:space="preserve">
+    <value>Stopped</value>
+  </data>
+  <data name="Lan_RunningOn" xml:space="preserve">
+    <value>Broadcasting (pair port {0})</value>
+  </data>
+  <data name="Lan_PairTitle" xml:space="preserve">
+    <value>Heart Rate Pairing Request</value>
+  </data>
+  <data name="Lan_PairBody" xml:space="preserve">
+    <value>Device "{0}" ({1}) wants to push heart rate data. Allow?</value>
+  </data>
+  <data name="Lan_PairApprove" xml:space="preserve">
+    <value>Allow</value>
+  </data>
+  <data name="Lan_PairReject" xml:space="preserve">
+    <value>Deny</value>
+  </data>
+  <data name="MainWindow_NavVersion.Content" xml:space="preserve">
+    <value>Version &amp; Info</value>
+  </data>
+  <data name="VersionInfo_Header.Text" xml:space="preserve">
+    <value>Version &amp; Info</value>
+  </data>
+  <data name="VersionInfo_CurrentVersionLabel.Text" xml:space="preserve">
+    <value>Current version</value>
+  </data>
+  <data name="VersionInfo_RepoLabel.Text" xml:space="preserve">
+    <value>Project repository</value>
+  </data>
+  <data name="VersionInfo_AndroidLabel.Text" xml:space="preserve">
+    <value>Android app link</value>
+  </data>
+</root>

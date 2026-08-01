@@ -1,0 +1,10 @@
+更新日志（最终版本）：
+
+1.优化性能，完善细节
+2.room升级至3.0.0
+3.kable升级至0.44.3
+4.coreKtx升级至1.19.0
+5.savedstate升级至1.5.0
+6.fragmentKtx升级至1.8.9
+7.activityCompose升级至1.13.0
+8.navigationCompose升级至2.9.8
