@@ -191,9 +191,8 @@ bin\Debug\net8.0-windows10.0.19041.0\win-x64\HeartRate.exe
 
 ```
 ├── android/                     # Android 端（Kotlin + Compose）
-│   └── .github/workflows/       # Android 发布流水线（手动触发）
 ├── windows/                     # Windows 端（C# + WinUI 3）
-│   └── .github/workflows/       # Windows 发布流水线（手动触发）
+├── .github/workflows/           # 发布流水线：release-android.yml / release-windows.yml
 ├── LICENSE
 └── README.md
 ```

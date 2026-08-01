@@ -191,9 +191,8 @@ bin\Debug\net8.0-windows10.0.19041.0\win-x64\HeartRate.exe
 
 ```
 ├── android/                     # Android (Kotlin + Compose)
-│   └── .github/workflows/       # Android release pipeline (manual trigger)
 ├── windows/                     # Windows (C# + WinUI 3)
-│   └── .github/workflows/       # Windows release pipeline (manual trigger)
+├── .github/workflows/           # Release pipelines: release-android.yml / release-windows.yml
 ├── LICENSE
 └── README.md
 ```
