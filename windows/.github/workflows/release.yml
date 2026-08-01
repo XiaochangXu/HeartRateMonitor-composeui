@@ -5,9 +5,9 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: '版本号（如 1.0.0，将生成 tag windows-v1.0.0）'
+        description: '版本号（如 4.4，将生成 tag v4.4）'
         required: true
-        default: '1.0.0'
+        default: '4.4'
 
 defaults:
   run:
@@ -51,8 +51,8 @@ jobs:
       - name: Upload to GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: windows-v${{ github.event.inputs.version }}
-          name: windows-v${{ github.event.inputs.version }}
+          tag_name: v${{ github.event.inputs.version }}
+          name: v${{ github.event.inputs.version }}
           generate_release_notes: true   # 自动生成 commit 变更记录
           files: windows/HeartRateMonitor-v${{ github.event.inputs.version }}-win-x64.zip
         env:

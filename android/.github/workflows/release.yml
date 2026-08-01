@@ -5,9 +5,9 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Release version (e.g. android-v1.0.0)'
+        description: 'Release version (e.g. v4.4)'
         required: true
-        default: 'android-v1.0.0'
+        default: 'v4.4'
 
 permissions:
   contents: write

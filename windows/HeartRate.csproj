@@ -15,9 +15,9 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <LangVersion>latest</LangVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <Version>1.0.1</Version>
-    <AssemblyVersion>1.0.1.0</AssemblyVersion>
-    <FileVersion>1.0.1.0</FileVersion>
+    <Version>4.4</Version>
+    <AssemblyVersion>4.4.0.0</AssemblyVersion>
+    <FileVersion>4.4.0.0</FileVersion>
     <ApplicationIcon>winicon.ico</ApplicationIcon>
     <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
     <DefaultLanguage>en-US</DefaultLanguage>

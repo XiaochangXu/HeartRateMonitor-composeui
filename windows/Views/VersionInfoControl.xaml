@@ -36,7 +36,7 @@
                                    Text="当前版本"
                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                         <TextBlock x:Name="VersionText"
-                                   Text="1.0.1"
+                                   Text="4.4"
                                    FontSize="18"
                                    FontWeight="SemiBold" />
                     </StackPanel>
