@@ -119,6 +119,12 @@
 
 ## 🚀 安装与运行
 
+克隆仓库：
+
+```bash
+git clone https://github.com/XiaochangXu/HeartRateMonitor-composeui.git
+```
+
 ### Android 端
 
 1. **打开项目**：使用 **Android Studio** 打开 `android` 目录
@@ -126,12 +132,6 @@
 3. **构建并运行**：使用真机或模拟器（API ≥ 24）连接，点击工具栏中的 ▶️ 运行按钮
 
 ### Windows 端
-
-也可以直接克隆 Windows 端仓库：
-
-```bash
-git clone https://github.com/XiaochangXu/HeartRateMonitor-windows.git
-```
 
 **环境要求**：Windows 10/11、.NET 8 SDK、Windows App SDK 1.8 工作负载。
 
