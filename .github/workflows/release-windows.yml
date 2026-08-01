@@ -44,26 +44,16 @@ jobs:
           $zip = "$PWD/HeartRateMonitor-v$ver-win-x64.zip"
           $src = (Resolve-Path publish).Path
 
-          Add-Type -AssemblyName System.IO.Compression
           Add-Type -AssemblyName System.IO.Compression.FileSystem
 
-          # 最高压缩 SmallestSize（.NET 7+，Brotli）；旧运行时没有该枚举则退回 Optimal
+          # 最高压缩 SmallestSize（.NET 7+，Brotli）；旧运行时没有该枚举则退回 Optimal。
+          # 不依赖 Compress-Archive（旧版 pwsh 的 ValidateSet 不认 SmallestSize）
           $level = [System.IO.Compression.CompressionLevel]::Optimal
           try { $level = [System.IO.Compression.CompressionLevel]::SmallestSize } catch { }
 
           Remove-Item $zip -Force -ErrorAction SilentlyContinue
-          $archive = [System.IO.Compression.ZipFile]::Open($zip, [System.IO.Compression.ZipArchiveMode]::Create)
-          try {
-            Get-ChildItem -Path $src -Recurse -File | ForEach-Object {
-              $rel = $_.FullName.Substring($src.Length + 1).Replace('\', '/')
-              $entry = $archive.CreateEntry($rel, $level)
-              $out = $entry.Open()
-              $in  = $_.OpenRead()
-              try { $in.CopyTo($out) } finally { $in.Dispose(); $out.Dispose() }
-            }
-          } finally {
-            $archive.Dispose()
-          }
+          # includeBaseDirectory=false：压缩 publish 目录内容（不含顶层目录本身）
+          [System.IO.Compression.ZipFile]::CreateFromDirectory($src, $zip, $level, $false)
 
           $size = [math]::Round((Get-Item $zip).Length / 1MB, 1)
           Write-Host "Created $zip ($size MB, level=$level)"
