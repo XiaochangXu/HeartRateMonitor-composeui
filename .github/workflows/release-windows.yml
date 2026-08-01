@@ -41,13 +41,32 @@ jobs:
         shell: pwsh
         run: |
           $ver = "${{ github.event.inputs.version }}"
-          $zip = "HeartRateMonitor-v$ver-win-x64.zip"
-          # SmallestSize = 最高压缩（.NET Brotli，需要 PowerShell 7.4+，GitHub 自带 pwsh 满足）
-          Compress-Archive -Path publish\* -DestinationPath $zip -CompressionLevel SmallestSize
-          Write-Host "Created $zip"
-          # 列出产物大小
+          $zip = "$PWD/HeartRateMonitor-v$ver-win-x64.zip"
+          $src = (Resolve-Path publish).Path
+
+          Add-Type -AssemblyName System.IO.Compression
+          Add-Type -AssemblyName System.IO.Compression.FileSystem
+
+          # 最高压缩 SmallestSize（.NET 7+，Brotli）；旧运行时没有该枚举则退回 Optimal
+          $level = [System.IO.Compression.CompressionLevel]::Optimal
+          try { $level = [System.IO.Compression.CompressionLevel]::SmallestSize } catch { }
+
+          Remove-Item $zip -Force -ErrorAction SilentlyContinue
+          $archive = [System.IO.Compression.ZipFile]::Open($zip, [System.IO.Compression.ZipArchiveMode]::Create)
+          try {
+            Get-ChildItem -Path $src -Recurse -File | ForEach-Object {
+              $rel = $_.FullName.Substring($src.Length + 1).Replace('\', '/')
+              $entry = $archive.CreateEntry($rel, $level)
+              $out = $entry.Open()
+              $in  = $_.OpenRead()
+              try { $in.CopyTo($out) } finally { $in.Dispose(); $out.Dispose() }
+            }
+          } finally {
+            $archive.Dispose()
+          }
+
           $size = [math]::Round((Get-Item $zip).Length / 1MB, 1)
-          Write-Host "Size: $size MB"
+          Write-Host "Created $zip ($size MB, level=$level)"
 
       - name: Upload to GitHub Release
         uses: softprops/action-gh-release@v2
