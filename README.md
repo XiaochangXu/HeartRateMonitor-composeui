@@ -9,7 +9,7 @@
 
   <h1>心率监控器 - HeartRateMonitor</h1>
 
-可与 [Windwos 端](https://github.com/XiaochangXu/HeartRateMonitor-composeui) 配合使用
+可与 [Windwos 端](https://github.com/XiaochangXu/HeartRateMonitor-windows) 配合使用
 
   <p><strong>让 Android 心率监测更优雅。</strong></p>
 
