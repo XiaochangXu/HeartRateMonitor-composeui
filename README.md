@@ -35,7 +35,7 @@
 | 目录 | 平台 | 技术栈 |
 |---|---|---|
 | [`android`](./android) | Android | Kotlin + Jetpack Compose |
-| [`windows`](./windows) | Windows 桌面 | .NET 10 + WinUI 3 |
+| [`windows`](./windows) | Windows | .NET 10 + WinUI 3 |
 
 -----
 
