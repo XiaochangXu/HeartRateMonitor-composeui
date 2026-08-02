@@ -22,7 +22,7 @@
     <img src="https://img.shields.io/badge/minSdk-24-green" alt="minSdk" />
     <img src="https://img.shields.io/badge/targetSdk-37-green" alt="targetSdk" />
     <img src="https://img.shields.io/badge/platform-Windows-blue?logo=windows&logoColor=white" alt="Platform" />
-    <img src="https://img.shields.io/badge/.NET-8.0-512BD4?logo=dotnet&logoColor=white" alt=".NET" />
+    <img src="https://img.shields.io/badge/.NET-10.0-512BD4?logo=dotnet&logoColor=white" alt=".NET" />
   </p>
 </div>
 
@@ -35,7 +35,7 @@ This repository contains two platform-specific applications with no shared code;
 | Directory | Platform | Tech Stack |
 |---|---|---|
 | [`android`](./android) | Android | Kotlin + Jetpack Compose (Material 3 Expressive) |
-| [`windows`](./windows) | Windows Desktop | .NET 8 + WinUI 3 |
+| [`windows`](./windows) | Windows Desktop | .NET 10 + WinUI 3 |
 
 -----
 
@@ -133,7 +133,7 @@ git clone https://github.com/XiaochangXu/HeartRateMonitor-composeui.git
 
 ### Windows
 
-**Requirements**: Windows 10/11, .NET 8 SDK, Windows App SDK 1.8 workload.
+**Requirements**: Windows 10/11, .NET 10 SDK, Windows App SDK 1.8 workload.
 
 ```bash
 cd windows
@@ -180,7 +180,7 @@ bin\Debug\net8.0-windows10.0.19041.0\win-x64\HeartRate.exe
 
 ### Windows
 
-- .NET 8 + WinUI 3 (Windows App SDK 1.8)
+- .NET 10 + WinUI 3 (Windows App SDK 1.8)
 - CommunityToolkit.Mvvm (MVVM source generators)
 - Direct2D / DirectComposition floating window rendering
 - Self-contained unpackaged deployment
