@@ -13,6 +13,9 @@ public static class SettingsService
     private static readonly Lazy<FloatWindowSettings> _settings = new(Load);
     private static readonly System.Threading.Timer _debounceTimer =
         new(_ => WriteToDisk(), null, Timeout.Infinite, Timeout.Infinite);
+    // _dirty 与写盘受同一把锁保护：Save 置位与定时线程的清理不会互相覆盖，
+    // 避免"写盘瞬间的新设置变更被 _dirty=false 清掉"导致丢失更新。
+    private static readonly object _sync = new();
     private static bool _dirty;
 
     // WebhookTrigger 等枚举以 snake_case 字符串持久化（与示例项目一致）
@@ -33,7 +36,7 @@ public static class SettingsService
     /// <summary>防抖保存（界面上的连续调整）。</summary>
     public static void Save()
     {
-        _dirty = true;
+        lock (_sync) { _dirty = true; }
         Changed?.Invoke();
         _debounceTimer.Change(300, Timeout.Infinite);
     }
@@ -41,7 +44,7 @@ public static class SettingsService
     /// <summary>立即保存（位置等关键时机）。</summary>
     public static void SaveNow()
     {
-        _dirty = true;
+        lock (_sync) { _dirty = true; }
         Changed?.Invoke();
         WriteToDisk();
     }
@@ -54,7 +57,7 @@ public static class SettingsService
     /// </summary>
     public static void SaveWithoutNotify()
     {
-        _dirty = true;
+        lock (_sync) { _dirty = true; }
         WriteToDisk();
     }
 
@@ -96,12 +99,16 @@ public static class SettingsService
     {
         try
         {
-            if (!_dirty) return;
+            string json;
+            lock (_sync)
+            {
+                if (!_dirty) return;
+                json = JsonSerializer.Serialize(Current, _jsonOptions);
+                _dirty = false;
+            }
             var dir = Path.GetDirectoryName(FilePath)!;
             Directory.CreateDirectory(dir);
-            var json = JsonSerializer.Serialize(Current, _jsonOptions);
             File.WriteAllText(FilePath, json);
-            _dirty = false;
         }
         catch
         {

@@ -34,7 +34,7 @@
                     Margin="8,0,0,0"
                     VerticalAlignment="Center">
                 <Image Width="16" Height="16"
-                       Source="ms-appx:///favicon-package/favicon.ico" />
+                       Source="ms-appx:///winico/favicon.ico" />
             </Button>
 
             <TextBlock x:Uid="MainWindow_TitleText"

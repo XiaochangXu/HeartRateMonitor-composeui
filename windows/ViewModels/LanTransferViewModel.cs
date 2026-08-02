@@ -18,6 +18,9 @@ namespace HeartRate.ViewModels
         private readonly LanTransferService _service;
         private readonly DispatcherQueue _uiDispatcher;
         private readonly string _lanIp;
+        // 配对端口输入防抖：逐字符输入不立即重启 LAN 服务，停笔 350ms 后一次性应用
+        private readonly DispatcherQueueTimer _pairPortDebounce;
+        private string _pendingPairPort = string.Empty;
 
         public LanTransferSettings Settings { get; }
 
@@ -34,6 +37,10 @@ namespace HeartRate.ViewModels
             _service = service;
             _uiDispatcher = uiDispatcher;
             _lanIp = NetworkIPHelper.GetLanIPv4Addresses().FirstOrDefault()?.ToString() ?? "localhost";
+
+            _pairPortDebounce = uiDispatcher.CreateTimer();
+            _pairPortDebounce.Interval = TimeSpan.FromMilliseconds(350);
+            _pairPortDebounce.Tick += (_, _) => ApplyPairPort();
 
             Settings.PropertyChanged += OnSettingsPropertyChanged;
             _service.StatusChanged += OnServiceStatusChanged;
@@ -56,11 +63,23 @@ namespace HeartRate.ViewModels
         /// "端口被本应用自身占用"与"被其他进程占用"，避免重启后误报。</summary>
         public bool IsServiceRunning => _service.IsRunning;
 
-        /// <summary>配对端口输入：字符串往返，解析失败时忽略，由 Settings 钳制到合法范围。</summary>
+        /// <summary>配对端口输入：防抖 350ms 后提交，避免逐字符重启 LAN 服务。</summary>
         public string PairPortText
         {
             get => Settings.PairPort.ToString();
-            set { if (int.TryParse(value, out var p) && p != Settings.PairPort) Settings.PairPort = p; }
+            set
+            {
+                _pendingPairPort = value;
+                _pairPortDebounce.Stop();
+                _pairPortDebounce.Start();
+            }
+        }
+
+        private void ApplyPairPort()
+        {
+            if (int.TryParse(_pendingPairPort, out var p) && p != Settings.PairPort)
+                Settings.PairPort = p;
+            OnPropertyChanged(nameof(PairPortText));
         }
 
         /// <summary>电脑名输入：双向字符串绑定（空时 Service 退化到 MachineName）。</summary>

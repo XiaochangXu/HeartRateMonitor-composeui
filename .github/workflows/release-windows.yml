@@ -22,19 +22,20 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup .NET 8
+      - name: Setup .NET 10
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '8.0.x'
+          dotnet-version: '10.0.x'
 
       - name: Publish (self-contained, win-x64, unpackaged)
+        # 不启用 PublishReadyToRun：R2R 预编译原生代码会显著增大体积
+        # （实测 ~45MB），本应用为小型工具，JIT 启动差异可接受。
         run: >
           dotnet publish HeartRate.csproj
           -c Release
           -r win-x64
           --self-contained true
           -p:WindowsPackageType=None
-          -p:PublishReadyToRun=true
           -o publish
 
       - name: Zip artifact

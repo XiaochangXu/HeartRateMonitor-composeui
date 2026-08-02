@@ -82,7 +82,7 @@ public sealed partial class MainWindow : Window
 
         // 任务栏/窗口图标：显式使用 favicon.ico（unpackaged 下 exe 图标资源
         // 不一定被任务栏拾取，SetIcon 保证标题栏与任务栏图标一致）
-        var iconPath = Path.Combine(AppContext.BaseDirectory, "favicon-package", "favicon.ico");
+        var iconPath = Path.Combine(AppContext.BaseDirectory, "winico", "favicon.ico");
         if (File.Exists(iconPath)) AppWindow.SetIcon(iconPath);
 
         RestoreWindowBounds();
@@ -237,8 +237,12 @@ public sealed partial class MainWindow : Window
     {
         if (e.PropertyName != nameof(HeartRateViewModel.HeartRate)) return;
         if (_floatWindow is null) return;
+        // 数据源断开（HeartRate=null，如 LAN/蓝牙断开）时清除悬浮窗显示，
+        // 否则悬浮窗会残留断开前最后一个心率值
         if (ViewModel.HeartRate.HeartRate is int hr)
             _floatWindow.UpdateHeartRate(hr);
+        else
+            _floatWindow.ClearHeartRate();
     }
 
     private void OnRootElementActualThemeChanged(FrameworkElement sender, object args)
@@ -337,10 +341,11 @@ public sealed partial class MainWindow : Window
 
         if (savedVisible)
         {
-            width = s.WindowWidth;
-            height = s.WindowHeight;
-            x = s.WindowX;
-            y = s.WindowY;
+            // 显示器变小/分辨率降低时收缩并钳制，避免窗口部分移出屏幕难以取回
+            width = Math.Min(s.WindowWidth, work.Width);
+            height = Math.Min(s.WindowHeight, work.Height);
+            x = Math.Clamp(s.WindowX, work.X, Math.Max(work.X, work.X + work.Width - width));
+            y = Math.Clamp(s.WindowY, work.Y, Math.Max(work.Y, work.Y + work.Height - 100));
         }
         else
         {
@@ -399,16 +404,38 @@ public sealed partial class MainWindow : Window
     private void RegisterCurrentHotKey()
     {
         var hwnd = WindowNative.GetWindowHandle(this);
+        var oldKey = _registeredHotKey;
         PInvoke.UnregisterHotKey(new HWND((nint)hwnd), HOTKEY_ID);
         _registeredHotKey = null;
 
         var s = SettingsService.Current;
         if (string.IsNullOrEmpty(s.ClickThroughHotKey)) return;
-        if (!HotKeyParser.TryParse(s.ClickThroughHotKey, out uint mods, out uint vk)) return;
+        if (!HotKeyParser.TryParse(s.ClickThroughHotKey, out uint mods, out uint vk))
+        {
+            // 新热键无法解析（录制与注册不对称，如 Space 等键）：恢复旧热键
+            RestoreHotKey(hwnd, oldKey);
+            return;
+        }
 
         // MOD_NOREPEAT：按住热键只触发一次，避免状态连续翻转
         if (PInvoke.RegisterHotKey(new HWND((nint)hwnd), HOTKEY_ID, (HOT_KEY_MODIFIERS)(mods | HotKeyParser.MOD_NOREPEAT), vk))
+        {
             _registeredHotKey = s.ClickThroughHotKey;
+        }
+        else
+        {
+            // 新热键注册失败（被其他应用占用等）：恢复旧热键，避免静默丢失
+            RestoreHotKey(hwnd, oldKey);
+        }
+    }
+
+    /// <summary>注册失败/解析失败时恢复之前生效的热键，避免功能静默丢失。</summary>
+    private void RestoreHotKey(nint hwnd, string? oldKey)
+    {
+        if (string.IsNullOrEmpty(oldKey)) return;
+        if (!HotKeyParser.TryParse(oldKey, out uint mods, out uint vk)) return;
+        if (PInvoke.RegisterHotKey(new HWND((nint)hwnd), HOTKEY_ID, (HOT_KEY_MODIFIERS)(mods | HotKeyParser.MOD_NOREPEAT), vk))
+            _registeredHotKey = oldKey;
     }
 
     private static IntPtr SubclassProc(IntPtr hwnd, uint msg, IntPtr wParam, IntPtr lParam,

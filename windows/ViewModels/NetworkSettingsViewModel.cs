@@ -18,6 +18,11 @@ namespace HeartRate.ViewModels
         private readonly WebhookService _webhooks;
         private readonly DispatcherQueue _uiDispatcher;
         private readonly string _lanIp;
+        // 端口输入防抖：逐字符输入不立即触发服务重启，停笔 350ms 后一次性应用
+        private readonly DispatcherQueueTimer _httpPortDebounce;
+        private readonly DispatcherQueueTimer _wsPortDebounce;
+        private string _pendingHttpPort = string.Empty;
+        private string _pendingWsPort = string.Empty;
 
         public NetworkSettings Network { get; }
         public ObservableCollection<Webhook> Webhooks => Network.Webhooks;
@@ -35,6 +40,13 @@ namespace HeartRate.ViewModels
             _uiDispatcher = uiDispatcher;
             _lanIp = NetworkIPHelper.GetLanIPv4Addresses().FirstOrDefault()?.ToString() ?? "localhost";
 
+            _httpPortDebounce = uiDispatcher.CreateTimer();
+            _httpPortDebounce.Interval = TimeSpan.FromMilliseconds(350);
+            _httpPortDebounce.Tick += (_, _) => ApplyHttpPort();
+            _wsPortDebounce = uiDispatcher.CreateTimer();
+            _wsPortDebounce.Interval = TimeSpan.FromMilliseconds(350);
+            _wsPortDebounce.Tick += (_, _) => ApplyWsPort();
+
             Network.PropertyChanged += OnNetworkPropertyChanged;
             _server.StatusChanged += OnServerStatusChanged;
         }
@@ -48,17 +60,41 @@ namespace HeartRate.ViewModels
             ? $"ws://{_lanIp}:{Network.WebSocketServerPort}/ws"
             : string.Empty;
 
-        /// <summary>HTTP 端口输入：字符串往返，解析失败时忽略，由 Network 钳制到合法范围。</summary>
+        /// <summary>HTTP 端口输入：防抖 350ms 后提交，避免逐字符重启 Kestrel 服务。</summary>
         public string HttpPortText
         {
             get => Network.HttpServerPort.ToString();
-            set { if (int.TryParse(value, out var p) && p != Network.HttpServerPort) Network.HttpServerPort = p; }
+            set
+            {
+                _pendingHttpPort = value;
+                _httpPortDebounce.Stop();
+                _httpPortDebounce.Start();
+            }
         }
 
         public string WsPortText
         {
             get => Network.WebSocketServerPort.ToString();
-            set { if (int.TryParse(value, out var p) && p != Network.WebSocketServerPort) Network.WebSocketServerPort = p; }
+            set
+            {
+                _pendingWsPort = value;
+                _wsPortDebounce.Stop();
+                _wsPortDebounce.Start();
+            }
+        }
+
+        private void ApplyHttpPort()
+        {
+            if (int.TryParse(_pendingHttpPort, out var p) && p != Network.HttpServerPort)
+                Network.HttpServerPort = p;
+            OnPropertyChanged(nameof(HttpPortText));
+        }
+
+        private void ApplyWsPort()
+        {
+            if (int.TryParse(_pendingWsPort, out var p) && p != Network.WebSocketServerPort)
+                Network.WebSocketServerPort = p;
+            OnPropertyChanged(nameof(WsPortText));
         }
 
         public string HttpStatusText

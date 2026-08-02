@@ -35,6 +35,8 @@ public sealed class FloatWindow
     private const uint WM_LBUTTONDBLCLK = 0x0203;
     private const uint WM_RBUTTONDOWN = 0x0204;
     private const uint WM_DESTROY = 0x0002;
+    private const uint WM_CAPTURECHANGED = 0x0215;
+    private const uint WM_DPICHANGED = 0x02E0;
 
     private const uint D3D11_SDK_VERSION = 7;
     private const int BaseWidth = 140;
@@ -94,7 +96,6 @@ public sealed class FloatWindow
         _uiDispatcher = DispatcherQueue.GetForCurrentThread();
         LoadSettings();
         CreateFloatWindow();
-        SettingsService.Changed += OnSettingsChanged;
     }
 
 
@@ -113,8 +114,15 @@ public sealed class FloatWindow
         _posX = s.PositionX; _posY = s.PositionY;
     }
 
+    /// <summary>
+    /// 创建 Win32 窗口并初始化 DComp 合成。任何一步失败都抛异常：
+    /// 由 MainWindow 捕获后置 _floatWindow=null，避免留下不可见但拦截点击的悬空窗口。
+    /// Close() 销毁窗口后（WM_DESTROY → Cleanup 会退订事件）可再次调用本方法重建。
+    /// </summary>
     private void CreateFloatWindow()
     {
+        SettingsService.Changed += OnSettingsChanged;
+
         var hInst = PInvoke.GetModuleHandle(default(PCWSTR));
         var wc = new WNDCLASSW
         {
@@ -126,7 +134,7 @@ public sealed class FloatWindow
             fixed (char* pCls = "HeartRate_Float")
             {
                 wc.lpszClassName = new PCWSTR(pCls);
-                PInvoke.RegisterClass(wc);
+                PInvoke.RegisterClass(wc); // 类已存在时返回 0（ERROR_CLASS_ALREADY_EXISTS），可忽略
             }
         }
 
@@ -135,7 +143,7 @@ public sealed class FloatWindow
 
         var hwnd = CreateWindowNative("HeartRate_Float", w, h, hInst);
         _hwnd = (nint)(IntPtr)hwnd;
-        if (_hwnd == 0) return;
+        if (_hwnd == 0) throw new InvalidOperationException("CreateWindowEx failed for float window");
 
         var gc = GCHandle.ToIntPtr(GCHandle.Alloc(this));
         unsafe
@@ -144,7 +152,20 @@ public sealed class FloatWindow
                 PInvoke.SetProp(hwnd, new PCWSTR(p), new HANDLE(gc));
         }
 
-        InitComposition();
+        try
+        {
+            InitComposition(); // 失败抛异常
+        }
+        catch
+        {
+            // 销毁窗口触发 WM_DESTROY → Cleanup → 释放 GCHandle 并退订事件
+            PInvoke.DestroyWindow(hwnd);
+            throw;
+        }
+
+        // PerMonitorV2 下 CreateWindowEx 尺寸即物理像素；surface 按 dpi 放大，
+        // 若不校正会导致高 DPI 下内容被窗口裁剪。
+        ApplySizeFromDpi();
         Render();
         PlaceOnScreen();
     }
@@ -177,25 +198,25 @@ public sealed class FloatWindow
                 default, D3D11_CREATE_DEVICE_FLAG.D3D11_CREATE_DEVICE_BGRA_SUPPORT,
                 null, 0, D3D11_SDK_VERSION,
                 out d3dDevice, null, out d3dContext);
-            if (hr.Failed) return;
+            if (hr.Failed) throw new InvalidOperationException($"D3D11CreateDevice failed: hr=0x{hr.Value:X8}");
 
             // 2) IDXGIDevice：显式 QI（D3D11 设备实现 IDXGIDevice）
             var giid = typeof(IDXGIDevice).GUID;
             nint pUnk = Marshal.GetIUnknownForObject(d3dDevice);
             int qr = Marshal.QueryInterface(pUnk, ref giid, out nint pDxgi);
             Marshal.Release(pUnk);
-            if (qr != 0) return;
+            if (qr != 0) throw new InvalidOperationException($"QueryInterface IDXGIDevice failed: hr=0x{qr:X8}");
             var dxgiDevice = (IDXGIDevice)Marshal.GetObjectForIUnknown(pDxgi);
             Marshal.Release(pDxgi);
 
             // 3) ID2D1Device：DComp 设备传 null 无法 CreateSurface，必须绑定渲染设备
             ID2D1Device d2dDevice;
             hr = PInvoke.D2D1CreateDevice(dxgiDevice, (D2D1_CREATION_PROPERTIES*)null, out d2dDevice);
-            if (hr.Failed) return;
+            if (hr.Failed) throw new InvalidOperationException($"D2D1CreateDevice failed: hr=0x{hr.Value:X8}");
 
             // 4) DComp 设备绑定 D2D 设备（CreateSurface 可用，BeginDraw 返回 ID2D1DeviceContext）
             hr = PInvoke.DCompositionCreateDevice2(d2dDevice, &iid, out var devObj);
-            if (hr.Failed) return;
+            if (hr.Failed) throw new InvalidOperationException($"DCompositionCreateDevice2 failed: hr=0x{hr.Value:X8}");
             _device = (IDCompositionDesktopDevice)devObj;
 
             _device.CreateTargetForHwnd(new HWND(_hwnd), new BOOL(1), out _target);
@@ -209,6 +230,16 @@ public sealed class FloatWindow
     }
 
     private float GetDpiScale() => _hwnd == 0 ? 1f : PInvoke.GetDpiForWindow(new HWND(_hwnd)) / 96f;
+
+    /// <summary>按当前 DPI 校正窗口物理尺寸（与 DComp surface 尺寸保持一致）。</summary>
+    private void ApplySizeFromDpi()
+    {
+        var dpi = GetDpiScale();
+        var w = Math.Max(1, (int)(BaseWidth * _scale * dpi));
+        var h = Math.Max(1, (int)(BaseHeight * _scale * dpi));
+        PInvoke.SetWindowPos(new HWND(_hwnd), new HWND(-1), 0, 0, w, h,
+            SET_WINDOW_POS_FLAGS.SWP_NOMOVE | SET_WINDOW_POS_FLAGS.SWP_NOACTIVATE | SET_WINDOW_POS_FLAGS.SWP_FRAMECHANGED);
+    }
 
     private void CreateFormats(float dpi)
     {
@@ -509,6 +540,23 @@ public sealed class FloatWindow
                 case WM_RBUTTONDOWN:
                     self.Close();
                     break;
+                case WM_CAPTURECHANGED:
+                    // 捕获被系统剥夺（Alt+Tab、其他窗口抢焦点等）时复位拖拽状态，
+                    // 避免 _mouseDown 悬挂导致无按键的"幽灵拖拽"
+                    self._dragging = false;
+                    self._mouseDown = false;
+                    break;
+                case WM_DPICHANGED:
+                    // 跨 DPI 显示器移动：按系统建议矩形调整窗口并重建字体/surface
+                    self.CreateFormats(self.GetDpiScale());
+                    self._heartGeometry = null;
+                    self._heartGeometrySize = -1f;
+                    var rect = *(RECT*)lParam.Value;
+                    PInvoke.SetWindowPos(hwnd, new HWND(-1), rect.left, rect.top,
+                        rect.right - rect.left, rect.bottom - rect.top,
+                        SET_WINDOW_POS_FLAGS.SWP_NOACTIVATE | SET_WINDOW_POS_FLAGS.SWP_FRAMECHANGED);
+                    self.Render();
+                    break;
                 case WM_DESTROY:
                     self.Cleanup();
                     break;
@@ -574,11 +622,19 @@ public sealed class FloatWindow
 
     public void Show()
     {
+        // Close() 已销毁窗口（DestroyWindow），重新显示时按最新设置重建
+        if (_hwnd == 0)
+        {
+            LoadSettings();
+            CreateFloatWindow();
+        }
         if (_hwnd == 0) return;
         _closed = false;
         PInvoke.ShowWindow(new HWND(_hwnd), SHOW_WINDOW_CMD.SW_SHOW);
         PlaceOnScreen();
         StartAnimIfNeeded();
+        // 强制重绘：隐藏期间（窗口已销毁）的设置变更未渲染，surface 需与窗口尺寸同步
+        Render();
     }
 
     public void UpdateHeartRate(int bpm)
@@ -590,13 +646,26 @@ public sealed class FloatWindow
         Render();
     }
 
+    /// <summary>数据源断开时清除心率显示（回到 "--"）并停止心跳动画。</summary>
+    public void ClearHeartRate()
+    {
+        _bpmText = "--";
+        _animBpm = 0;
+        RestartBeatTiming();
+        StartAnimIfNeeded(); // _animBpm==0 → 内部 StopAnim
+        Render();
+    }
+
     public void Close()
     {
         if (_closed) return;
         _closed = true;
         StopAnim();
         SavePosition();
-        PInvoke.ShowWindow(new HWND(_hwnd), SHOW_WINDOW_CMD.SW_HIDE);
+        // 真正销毁窗口 → WM_DESTROY → Cleanup：释放 GCHandle 并退订
+        // SettingsService.Changed，避免隐藏后实例被强根永久持有。
+        if (_hwnd != 0)
+            PInvoke.DestroyWindow(new HWND(_hwnd));
     }
 
     private void OnSettingsChanged()

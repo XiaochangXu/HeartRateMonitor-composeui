@@ -160,17 +160,20 @@ public sealed class NetworkServerService : IDisposable
         try { await app.StopAsync(); }
         catch { /* 忽略停止异常 */ }
 
-        // 关闭所有 WS 连接
-        foreach (var (ws, _) in _clients)
+        // 关闭所有 WS 连接（循环 + 逐个移除：处理与 OnWsConnect 并发添加新连接的竞态）
+        for (int pass = 0; pass < 3 && _clients.Count > 0; pass++)
         {
-            try
+            foreach (var (ws, _) in _clients.ToArray())
             {
-                if (ws.State == WebSocketState.Open)
-                    await ws.CloseAsync(WebSocketCloseStatus.EndpointUnavailable, "Server stopping", CancellationToken.None);
+                try
+                {
+                    if (ws.State == WebSocketState.Open)
+                        await ws.CloseAsync(WebSocketCloseStatus.EndpointUnavailable, "Server stopping", CancellationToken.None);
+                }
+                catch { }
+                _clients.TryRemove(ws, out _);
             }
-            catch { }
         }
-        _clients.Clear();
         IsHttpRunning = false;
         IsWsRunning = false;
     }
@@ -204,11 +207,12 @@ public sealed class NetworkServerService : IDisposable
         var channel = Channel.CreateUnbounded<string>();
         _clients[ws] = channel;
 
-        // 连接建立即推送当前快照
-        await SendTextAsync(ws, BuildStateJson());
-
         try
         {
+            // 连接建立即推送当前快照（必须位于 try 内：发送失败时
+            // finally 才能清理 _clients 条目与 channel，避免孤儿连接泄漏）
+            await SendTextAsync(ws, BuildStateJson());
+
             await foreach (var msg in channel.Reader.ReadAllAsync(ctx.RequestAborted))
             {
                 if (ws.State != WebSocketState.Open) break;
@@ -308,7 +312,12 @@ public sealed class NetworkServerService : IDisposable
         _heartRate.HeartRateReceived -= OnHeartRateReceived;
         _heartRate.ConnectionChanged -= OnConnectionChanged;
         _settings.PropertyChanged -= OnSettingsPropertyChanged;
+        // 异步停止，绝不在调用线程（通常为 UI 线程的窗口关闭流程）同步等待：
+        // StopAsync 内部 await 的 continuation 会捕获 UI SynchronizationContext，
+        // 若此处用 GetAwaiter().GetResult() 阻塞 UI 线程，continuation 永远无法
+        // 回到 UI 线程执行 → 经典死锁（点 × 关闭应用卡死无响应）。
+        // _applyLock 不显式 Dispose：进程退出时随对象回收，
+        // 避免 fire-and-forget 的在途 StopAsync 对已释放信号量抛 ObjectDisposedException。
         _ = StopAsync();
-        _applyLock.Dispose();
     }
 }

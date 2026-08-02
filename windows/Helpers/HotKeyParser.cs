@@ -76,7 +76,32 @@ public static class HotKeyParser
             if (int.TryParse(s.AsSpan(1), out int n) && n >= 1 && n <= 24)
                 return (uint)(0x6F + n);
         }
-        return 0;
+        // 非字母数字键：与 VkToLabel 的 key.ToString() 输出保持对称，
+        // 否则录制 Space/Enter 等键存入设置后 TryParse 失败、热键静默失效。
+        return s.ToUpperInvariant() switch
+        {
+            "SPACE" => 0x20,
+            "ENTER" or "RETURN" => 0x0D,
+            "TAB" => 0x09,
+            "ESCAPE" or "ESC" => 0x1B,
+            "LEFT" => 0x25,
+            "UP" => 0x26,
+            "RIGHT" => 0x27,
+            "DOWN" => 0x28,
+            "INSERT" => 0x2D,
+            "DELETE" or "DEL" => 0x2E,
+            "BACK" or "BACKSPACE" => 0x08,
+            "HOME" => 0x24,
+            "END" => 0x23,
+            "PAGEUP" => 0x21,
+            "PAGEDOWN" => 0x22,
+            "CAPSLOCK" => 0x14,
+            "NUMLOCK" => 0x90,
+            "SCROLL" => 0x91,
+            "PAUSE" or "PAUSEBREAK" => 0x13,
+            "PRINT" or "PRINTSCREEN" => 0x2C,
+            _ => 0,
+        };
     }
 
     private static string VkToLabel(VirtualKey key)

@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using HeartRate.Models;
 using Windows.Devices.Bluetooth;
 using Windows.Devices.Bluetooth.Advertisement;
@@ -12,7 +13,9 @@ namespace HeartRate.Services;
 public sealed class HeartRateService : IDisposable
 {
     private BluetoothLEAdvertisementWatcher? _watcher;
-    private readonly Dictionary<ulong, BleDeviceInfo> _devices = new();
+    // BLE 广播回调在线程池触发，StartScan 的 Clear 在 UI 线程执行，
+    // 用 ConcurrentDictionary 保证跨线程去重安全。
+    private readonly ConcurrentDictionary<ulong, BleDeviceInfo> _devices = new();
     private BluetoothLEDevice? _device;
     private GattDeviceService? _service;
     private GattCharacteristic? _hrCharacteristic;
@@ -26,7 +29,7 @@ public sealed class HeartRateService : IDisposable
     /// <summary>连接状态变化时触发。</summary>
     public event EventHandler<BluetoothConnectionStatus>? ConnectionChanged;
 
-    public IReadOnlyCollection<BleDeviceInfo> Devices => _devices.Values;
+    public IReadOnlyCollection<BleDeviceInfo> Devices => _devices.Values.ToArray();
     public bool IsScanning => _watcher?.Status == BluetoothLEAdvertisementWatcherStatus.Started;
     public bool IsConnected => _device?.ConnectionStatus == BluetoothConnectionStatus.Connected;
 
@@ -62,15 +65,13 @@ public sealed class HeartRateService : IDisposable
 
     private void OnAdvertisementReceived(BluetoothLEAdvertisementWatcher sender, BluetoothLEAdvertisementReceivedEventArgs args)
     {
-        if (_devices.ContainsKey(args.BluetoothAddress)) return;
-
         var info = new BleDeviceInfo
         {
             Address = args.BluetoothAddress,
             Name = args.Advertisement.LocalName,
             HasHeartRateService = args.Advertisement.ServiceUuids.Contains(GattServiceUuids.HeartRate),
         };
-        _devices[args.BluetoothAddress] = info;
+        if (!_devices.TryAdd(args.BluetoothAddress, info)) return;
         DeviceDiscovered?.Invoke(this, info);
     }
 
@@ -183,5 +184,10 @@ public sealed class HeartRateService : IDisposable
         return data[1];
     }
 
-    public void Dispose() => Disconnect();
+    public void Dispose()
+    {
+        // 先停止扫描再断开 GATT，避免 watcher 持续占用 BLE 无线电与事件订阅
+        StopScan();
+        Disconnect();
+    }
 }

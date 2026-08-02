@@ -3,6 +3,7 @@ using System.Text;
 using HeartRate.Services;
 using Microsoft.UI.Xaml;
 using Microsoft.Windows.Globalization;
+using WinRT.Interop;
 
 namespace HeartRate;
 
@@ -48,6 +49,9 @@ public partial class App : Application
 
             MainWindow = new MainWindow();
             MainWindow.Activate();
+            // 记录主窗口句柄：供二次启动精确激活本实例窗口，
+            // 避免按全局类名 FindWindowW 误激活其他 WinUI 3 应用。
+            SaveMainWindowHandle(WindowNative.GetWindowHandle(MainWindow));
         }
         catch (Exception ex)
         {
@@ -88,12 +92,17 @@ public partial class App : Application
         }
     }
 
-    /// <summary>把已运行的实例窗口带到前台（WinUI 3 unpackaged 窗口类名）。</summary>
+    /// <summary>把已运行的实例窗口带到前台。</summary>
     private static void ActivateExistingWindow()
     {
         try
         {
-            var hwnd = FindWindowW("WinUIDesktopWin32WindowClass", null);
+            var hwnd = ReadMainWindowHandle();
+            if (hwnd == IntPtr.Zero)
+            {
+                // 兜底：主窗口句柄文件不可用时回退到类名搜索（本实例窗口类名）
+                hwnd = FindWindowW("WinUIDesktopWin32WindowClass", null);
+            }
             if (hwnd != IntPtr.Zero)
             {
                 ShowWindow(hwnd, SW_RESTORE);
@@ -103,10 +112,48 @@ public partial class App : Application
         catch { /* 激活失败不阻塞退出 */ }
     }
 
+    /// <summary>主窗口句柄持久化路径：跨进程共享，供二次启动激活。</summary>
+    private static string MainWindowHandleFile => Path.Combine(
+        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+        "HeartRate", "mainhwnd.txt");
+
+    /// <summary>主窗口创建并激活后保存其句柄（供二次启动读取）。</summary>
+    private static void SaveMainWindowHandle(nint hwnd)
+    {
+        try
+        {
+            var dir = Path.GetDirectoryName(MainWindowHandleFile)!;
+            Directory.CreateDirectory(dir);
+            File.WriteAllText(MainWindowHandleFile, hwnd.ToString());
+        }
+        catch { /* 句柄持久化失败不影响主流程 */ }
+    }
+
+    /// <summary>读取并校验主窗口句柄；无效（崩溃残留/已销毁）时返回 0。</summary>
+    private static IntPtr ReadMainWindowHandle()
+    {
+        try
+        {
+            if (File.Exists(MainWindowHandleFile)
+                && long.TryParse(File.ReadAllText(MainWindowHandleFile).Trim(), out var v)
+                && v != 0)
+            {
+                var hwnd = new IntPtr(v);
+                if (IsWindow(hwnd)) return hwnd;
+            }
+        }
+        catch { }
+        return IntPtr.Zero;
+    }
+
     private const int SW_RESTORE = 9;
 
     [DllImport("user32.dll", CharSet = CharSet.Unicode)]
     private static extern IntPtr FindWindowW(string? lpClassName, string? lpWindowName);
+
+    [DllImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool IsWindow(IntPtr hWnd);
 
     [DllImport("user32.dll")]
     [return: MarshalAs(UnmanagedType.Bool)]

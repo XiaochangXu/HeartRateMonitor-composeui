@@ -54,9 +54,14 @@ namespace HeartRate.ViewModels
             DeviceList.PropertyChanged += OnDeviceListPropertyChanged;
         }
 
-        /// <summary>主窗口关闭时停止网络服务、解除事件订阅。</summary>
+        /// <summary>窗口关闭时停止网络服务、解除事件订阅。</summary>
         public void Shutdown()
         {
+            // 各 ViewModel 对 Service 长生命周期对象的事件订阅统一退订
+            DeviceList.Unsubscribe();
+            HeartRate.Unsubscribe();
+            DeviceList.PropertyChanged -= OnDeviceListPropertyChanged;
+
             _webhookService.Dispose();
             _networkServer.Dispose();
             _lanService.HeartRateUpdated -= OnLanHeartRateUpdated;
@@ -67,6 +72,13 @@ namespace HeartRate.ViewModels
         /// <summary>局域网收到手机心率推送 → 更新首页数据源信息 + 转发 bpm 到刷新链路。</summary>
         private void OnLanHeartRateUpdated(LanPhone phone, int bpm, bool connected, string status)
         {
+            // 手机端 BLE 断开时（connected=false）只同步状态文案，不更新数据源：
+            // 若无条件 UpdateLanSource 会把电脑端数据源污染为局域网并锁死蓝牙连接。
+            if (!connected)
+            {
+                HeartRate.NotifyLanDisconnectedStatus(status);
+                return;
+            }
             HeartRate.UpdateLanSource(phone.DeviceName, phone.WsHost);
             _heartRateService.RaiseHeartRateReceived(bpm);
         }

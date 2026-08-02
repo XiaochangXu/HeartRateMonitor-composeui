@@ -317,7 +317,7 @@ public sealed class LanTransferService : IDisposable
         }
         finally
         {
-            await CloseSessionAsync(phone.DeviceId);
+            RemoveSessionIfCurrent(phone.DeviceId, session);
             RaisePhoneDisconnected(phone.DeviceId);
         }
     }
@@ -330,6 +330,21 @@ public sealed class LanTransferService : IDisposable
             session.Cts.Dispose();
         }
         await Task.CompletedTask;
+    }
+
+    /// <summary>
+    /// 仅当字典中当前条目正是本会话时才移除并取消。
+    /// 同 device_id 重配对后旧任务的 finally 若仍按 device_id 清理，
+    /// 会误删新插入的会话并取消其连接；这里用实例比对避免误杀。
+    /// </summary>
+    private void RemoveSessionIfCurrent(string deviceId, PhoneSession session)
+    {
+        if (_sessions.TryGetValue(deviceId, out var current) && ReferenceEquals(current, session)
+            && _sessions.TryRemove(deviceId, out _))
+        {
+            session.Cts.Cancel();
+            session.Cts.Dispose();
+        }
     }
 
     private void OnSettingsPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
@@ -357,8 +372,13 @@ public sealed class LanTransferService : IDisposable
     public void Dispose()
     {
         _settings.PropertyChanged -= OnSettingsPropertyChanged;
+        // 异步停止，绝不在调用线程（通常为 UI 线程的窗口关闭流程）同步等待：
+        // StopAsync 内部 await 的 continuation 会捕获 UI SynchronizationContext，
+        // 若此处用 GetAwaiter().GetResult() 阻塞 UI 线程，continuation 永远无法
+        // 回到 UI 线程执行 → 经典死锁（点 × 关闭应用卡死无响应）。
+        // _applyLock 不显式 Dispose：进程退出时随对象回收，
+        // 避免 fire-and-forget 的在途 StopAsync 对已释放信号量抛 ObjectDisposedException。
         _ = StopAsync();
-        _applyLock.Dispose();
     }
 
     // ── 嵌套类型 ────────────────────────────────────────────────────────────

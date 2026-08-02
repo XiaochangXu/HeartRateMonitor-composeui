@@ -121,9 +121,14 @@ namespace HeartRate.ViewModels
             OnPropertyChanged(nameof(HasActiveSource));
             if (!value)
             {
-                HeartRate = null;
                 _connectedDevice = null;
-                ConnectionMode = ConnectionMode.None;
+                // 仅当数据源确为蓝牙时才清空心率与模式；
+                // LAN 手机推送活跃时不得破坏 LAN 数据源（否则 UI 出现矛盾文案）。
+                if (ConnectionMode == ConnectionMode.Bluetooth)
+                {
+                    HeartRate = null;
+                    ConnectionMode = ConnectionMode.None;
+                }
                 OnPropertyChanged(nameof(ConnectedDeviceName));
                 OnPropertyChanged(nameof(ConnectedAddressText));
                 OnPropertyChanged(nameof(HasHeartRateServiceText));
@@ -139,8 +144,13 @@ namespace HeartRate.ViewModels
             {
                 _lanDeviceName = null;
                 _lanAddress = null;
-                if (ConnectionMode == ConnectionMode.Lan) ConnectionMode = ConnectionMode.None;
-                HeartRate = null;
+                // 仅当数据源确为局域网时才清空心率与模式；
+                // BLE 连接中（ConnectionMode==Bluetooth）不得抹掉正在显示的 BLE 心率。
+                if (ConnectionMode == ConnectionMode.Lan)
+                {
+                    ConnectionMode = ConnectionMode.None;
+                    HeartRate = null;
+                }
                 OnPropertyChanged(nameof(ConnectedDeviceName));
                 OnPropertyChanged(nameof(ConnectedAddressText));
                 OnPropertyChanged(nameof(HasHeartRateServiceText));
@@ -264,6 +274,8 @@ namespace HeartRate.ViewModels
         {
             _uiDispatcher.TryEnqueue(() =>
             {
+                // 已标记断开（无活跃数据源）时忽略迟到的 GATT 数据
+                if (!IsConnected && !IsLanConnected) return;
                 StatusTextFallback = null;
                 HeartRate = bpm;
                 OnPropertyChanged(nameof(StatusText));
@@ -278,8 +290,27 @@ namespace HeartRate.ViewModels
                 if (!IsConnected) return;
                 StatusTextFallback = L.HeartRate_Disconnected;
                 IsConnected = false;
+                // 设备断电等被动断开时清理 GATT 句柄与事件订阅，避免资源残留
+                _service.Disconnect();
                 OnPropertyChanged(nameof(StatusText));
             });
+        }
+
+        /// <summary>手机推送 connected=false 时仅同步状态文案，不污染数据源。</summary>
+        public void NotifyLanDisconnectedStatus(string status)
+        {
+            _uiDispatcher.TryEnqueue(() =>
+            {
+                StatusTextFallback = status;
+                OnPropertyChanged(nameof(StatusText));
+            });
+        }
+
+        /// <summary>窗口关闭时退订服务事件，避免残留订阅。</summary>
+        public void Unsubscribe()
+        {
+            _service.HeartRateReceived -= OnHeartRateReceived;
+            _service.ConnectionChanged -= OnConnectionChanged;
         }
     }
 }

@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net8.0-windows10.0.19041.0</TargetFramework>
+    <TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
     <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
     <RootNamespace>HeartRate</RootNamespace>
     <ApplicationManifest>app.manifest</ApplicationManifest>
@@ -18,7 +18,7 @@
     <Version>4.4</Version>
     <AssemblyVersion>4.4.0.0</AssemblyVersion>
     <FileVersion>4.4.0.0</FileVersion>
-    <ApplicationIcon>favicon-package\favicon.ico</ApplicationIcon>
+    <ApplicationIcon>winico\favicon.ico</ApplicationIcon>
     <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
     <DefaultLanguage>en-US</DefaultLanguage>
   </PropertyGroup>
@@ -26,7 +26,7 @@
   <!-- favicon.ico 用作 exe 图标（快捷方式/开始菜单/任务栏/外壳）；
        同时复制到输出目录，供运行时 AppWindow.SetIcon 使用 -->
   <ItemGroup>
-    <Content Include="favicon-package\favicon.ico" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="winico\favicon.ico" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
 

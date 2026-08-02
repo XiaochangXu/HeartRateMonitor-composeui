@@ -28,6 +28,9 @@ namespace HeartRate.ViewModels
             _service.DeviceDiscovered += OnDeviceDiscovered;
         }
 
+        /// <summary>窗口关闭时退订服务事件，避免残留订阅。</summary>
+        public void Unsubscribe() => _service.DeviceDiscovered -= OnDeviceDiscovered;
+
         public string ScanButtonContent => IsScanning ? L.DeviceList_StopScan : L.DeviceList_StartScan;
 
         public Visibility EmptyHintVisibility => Devices.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
