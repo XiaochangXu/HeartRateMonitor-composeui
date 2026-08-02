@@ -35,7 +35,7 @@ This repository contains two platform-specific applications with no shared code;
 | Directory | Platform | Tech Stack |
 |---|---|---|
 | [`android`](./android) | Android | Kotlin + Jetpack Compose (Material 3 Expressive) |
-| [`windows`](./windows) | Windows Desktop | .NET 10 + WinUI 3 |
+| [`windows`](./windows) | Windows | .NET 10 + WinUI 3 |
 
 -----
 
