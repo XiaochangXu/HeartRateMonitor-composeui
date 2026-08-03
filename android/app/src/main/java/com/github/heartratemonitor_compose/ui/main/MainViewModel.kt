@@ -17,6 +17,7 @@ import com.github.heartratemonitor_compose.service.BleService
 import com.github.heartratemonitor_compose.service.FairMemoryReceiver
 import com.github.heartratemonitor_compose.service.KillStateSaver
 import com.juul.kable.Advertisement
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -24,6 +25,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.supervisorScope
 import java.lang.ref.WeakReference
 
 enum class AppStatus {
@@ -171,65 +173,99 @@ class MainViewModel(application: Application) : AndroidViewModel(application),
         serviceDataJob?.cancel()
 
         serviceDataJob = viewModelScope.launch {
-            launch {
-                service.heartRateMeasurement.collect { measurement ->
-                    _heartRate.value = measurement.bpm
-                    if (measurement.bpm > 0 && _appStatus.value == AppStatus.CONNECTED) {
-                        processHeartRateMeasurement(measurement)
+            // supervisorScope：任一订阅异常只终止自身，不级联取消其余数据管道，
+            // 避免单个 collector 抛异常导致心率/状态/扫描结果全部永久停更。
+            supervisorScope {
+                launch {
+                    try {
+                        service.heartRateMeasurement.collect { measurement ->
+                            _heartRate.value = measurement.bpm
+                            if (measurement.bpm > 0 && _appStatus.value == AppStatus.CONNECTED) {
+                                processHeartRateMeasurement(measurement)
+                            }
+                        }
+                    } catch (e: CancellationException) {
+                        throw e
+                    } catch (e: Exception) {
+                        Log.e("MainViewModel", "心率数据订阅异常终止", e)
                     }
                 }
-            }
 
-            launch {
-                service.speed.collect { _speed.value = it }
-            }
-
-            launch {
-                service.scanResults.collect { _scanResults.value = it }
-            }
-
-            launch {
-                service.connectedDevice.collect { _connectedDevice.value = it }
-            }
-
-            launch {
-                service.bleState.collectLatest { state ->
-                    Log.d("MainViewModel", "bleState: ${state.javaClass.simpleName}, manualPending=$manualConnectionPending, connectingId=${_connectingDeviceId.value}")
-                    _statusMessage.value = state.getMessage(getApplication())
-                    val newStatus = when (state) {
-                        is BleState.Scanning -> AppStatus.SCANNING
-                        is BleState.AutoConnecting, is BleState.Connecting, is BleState.AutoReconnecting -> AppStatus.CONNECTING
-                        is BleState.Connected -> AppStatus.CONNECTED
-                        else -> AppStatus.DISCONNECTED
+                launch {
+                    try {
+                        service.speed.collect { _speed.value = it }
+                    } catch (e: CancellationException) {
+                        throw e
+                    } catch (e: Exception) {
+                        Log.e("MainViewModel", "速度数据订阅异常终止", e)
                     }
+                }
 
-                    if (_appStatus.value != AppStatus.CONNECTED && newStatus == AppStatus.CONNECTED) {
-                        initializeChart()
+                launch {
+                    try {
+                        service.scanResults.collect { _scanResults.value = it }
+                    } catch (e: CancellationException) {
+                        throw e
+                    } catch (e: Exception) {
+                        Log.e("MainViewModel", "扫描结果订阅异常终止", e)
                     }
+                }
 
-                    if (_appStatus.value == AppStatus.CONNECTED && newStatus != AppStatus.CONNECTED) {
-                        _sessionMaxHr.value = 0
-                        _sessionMinHr.value = 0
-                        // 断开时立即清空图表数据 + snapshot，避免重连时残留旧曲线
-                        clearChartData()
+                launch {
+                    try {
+                        service.connectedDevice.collect { _connectedDevice.value = it }
+                    } catch (e: CancellationException) {
+                        throw e
+                    } catch (e: Exception) {
+                        Log.e("MainViewModel", "已连接设备订阅异常终止", e)
                     }
+                }
 
-                    if (newStatus != AppStatus.CONNECTING) {
-                        // 手动连接中途可能收到自动重连扫描的 ScanFailed（DISCONNECTED），
-                        // 此时 manualConnectionPending=true，不能清空 connectingDeviceId，
-                        // 否则后续 Connecting 到达时已丢失设备信息，动画不会显示。
-                        if (!manualConnectionPending) {
-                            Log.d("MainViewModel", "clearing connectingDeviceId (newStatus=$newStatus)")
-                            _connectingDeviceId.value = null
-                        } else {
-                            Log.d("MainViewModel", "keeping connectingDeviceId=${_connectingDeviceId.value} (manualPending=true)")
+                launch {
+                    try {
+                        service.bleState.collectLatest { state ->
+                            Log.d("MainViewModel", "bleState: ${state.javaClass.simpleName}, manualPending=$manualConnectionPending, connectingId=${_connectingDeviceId.value}")
+                            _statusMessage.value = state.getMessage(getApplication())
+                            val newStatus = when (state) {
+                                is BleState.Scanning -> AppStatus.SCANNING
+                                is BleState.AutoConnecting, is BleState.Connecting, is BleState.AutoReconnecting -> AppStatus.CONNECTING
+                                is BleState.Connected -> AppStatus.CONNECTED
+                                else -> AppStatus.DISCONNECTED
+                            }
+
+                            if (_appStatus.value != AppStatus.CONNECTED && newStatus == AppStatus.CONNECTED) {
+                                initializeChart()
+                            }
+
+                            if (_appStatus.value == AppStatus.CONNECTED && newStatus != AppStatus.CONNECTED) {
+                                _sessionMaxHr.value = 0
+                                _sessionMinHr.value = 0
+                                // 断开时立即清空图表数据 + snapshot，避免重连时残留旧曲线
+                                clearChartData()
+                            }
+
+                            if (newStatus != AppStatus.CONNECTING) {
+                                // 手动连接中途可能收到自动重连扫描的 ScanFailed（DISCONNECTED），
+                                // 此时 manualConnectionPending=true，不能清空 connectingDeviceId，
+                                // 否则后续 Connecting 到达时已丢失设备信息，动画不会显示。
+                                if (!manualConnectionPending) {
+                                    Log.d("MainViewModel", "clearing connectingDeviceId (newStatus=$newStatus)")
+                                    _connectingDeviceId.value = null
+                                } else {
+                                    Log.d("MainViewModel", "keeping connectingDeviceId=${_connectingDeviceId.value} (manualPending=true)")
+                                }
+                            } else {
+                                Log.d("MainViewModel", "CONNECTING reached, clearing manualPending, connectingId=${_connectingDeviceId.value}")
+                                manualConnectionPending = false
+                            }
+
+                            _appStatus.value = newStatus
                         }
-                    } else {
-                        Log.d("MainViewModel", "CONNECTING reached, clearing manualPending, connectingId=${_connectingDeviceId.value}")
-                        manualConnectionPending = false
+                    } catch (e: CancellationException) {
+                        throw e
+                    } catch (e: Exception) {
+                        Log.e("MainViewModel", "连接状态订阅异常终止", e)
                     }
-
-                    _appStatus.value = newStatus
                 }
             }
         }

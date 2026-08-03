@@ -18,6 +18,7 @@ namespace HeartRate.ViewModels
         public NetworkSettingsViewModel NetworkSettings { get; }
         public AppearanceSettingsViewModel Appearance { get; }
         public LanTransferViewModel LanTransfer { get; }
+        public AppSettingsViewModel AppSettings { get; }
 
         public MainViewModel(HeartRateService service)
         {
@@ -49,9 +50,22 @@ namespace HeartRate.ViewModels
             _ = _lanService.ApplyAsync();
 
             Appearance = new AppearanceSettingsViewModel();
+            AppSettings = new AppSettingsViewModel();
 
             HeartRate.GetSelectedDevice = () => DeviceList.SelectedDevice;
+            // 连接时名称兜底：按地址查历史缓存名，避免自动连接命中首包缺名时卡片显示"未知设备"
+            HeartRate.GetCachedDeviceName = addr => DeviceList.GetCachedDeviceName(addr);
+            // 左侧"强制断开"按钮 → 右侧心率面板的强制断开逻辑
+            DeviceList.ForceDisconnectRequested = () => HeartRate.ForceDisconnectCommand.Execute(null);
             DeviceList.PropertyChanged += OnDeviceListPropertyChanged;
+            HeartRate.PropertyChanged += OnHeartRatePropertyChanged;
+            // 自动连接上一次连接的设备：启动扫描发现目标设备时自动连接
+            DeviceList.AutoConnectTargetFound += OnAutoConnectTargetFound;
+            if (SettingsService.Current.AutoConnectLastDevice
+                && SettingsService.Current.LastConnectedAddress is ulong lastAddr)
+            {
+                DeviceList.SetAutoConnectTarget(lastAddr);
+            }
         }
 
         /// <summary>窗口关闭时停止网络服务、解除事件订阅。</summary>
@@ -61,6 +75,8 @@ namespace HeartRate.ViewModels
             DeviceList.Unsubscribe();
             HeartRate.Unsubscribe();
             DeviceList.PropertyChanged -= OnDeviceListPropertyChanged;
+            HeartRate.PropertyChanged -= OnHeartRatePropertyChanged;
+            DeviceList.AutoConnectTargetFound -= OnAutoConnectTargetFound;
 
             _webhookService.Dispose();
             _networkServer.Dispose();
@@ -92,5 +108,19 @@ namespace HeartRate.ViewModels
             if (e.PropertyName == nameof(DeviceListViewModel.SelectedDevice))
                 HeartRate.NotifySelectedDeviceChanged();
         }
+
+        /// <summary>用户点击"连接"即停止扫描；自动重连成功时兜底再停一次。</summary>
+        private void OnHeartRatePropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if ((e.PropertyName == nameof(HeartRateViewModel.IsConnecting) && HeartRate.IsConnecting)
+                || (e.PropertyName == nameof(HeartRateViewModel.IsConnected) && HeartRate.IsConnected))
+            {
+                DeviceList.StopScan();
+            }
+        }
+
+        /// <summary>启动扫描发现上一次连接的设备 → 自动连接（IsConnecting 会触发扫描停止）。</summary>
+        private void OnAutoConnectTargetFound(object? sender, BleDeviceInfo device)
+            => _ = HeartRate.AutoConnectLastDeviceAsync(device);
     }
 }

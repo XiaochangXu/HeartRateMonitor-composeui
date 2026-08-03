@@ -53,8 +53,15 @@
                     <StackPanel Orientation="Horizontal"
                                 HorizontalAlignment="Center"
                                 Spacing="6">
+                        <!-- 自动重连时显示圆形进度条，替换状态圆点 -->
+                        <ProgressRing IsActive="{x:Bind ViewModel.IsReconnecting, Mode=OneWay}"
+                                      Visibility="{x:Bind ViewModel.IsReconnecting, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                      Width="14"
+                                      Height="14"
+                                      VerticalAlignment="Center" />
                         <Ellipse Width="8"
                                  Height="8"
+                                 Visibility="{x:Bind ViewModel.IsReconnecting, Mode=OneWay, Converter={StaticResource InverseBooleanToVisibilityConverter}}"
                                  Fill="{x:Bind ViewModel.HasActiveSource, Mode=OneWay, Converter={StaticResource RunningStatusBrushConverter}}"
                                  VerticalAlignment="Center" />
                         <TextBlock Text="{x:Bind ViewModel.StatusText, Mode=OneWay}"

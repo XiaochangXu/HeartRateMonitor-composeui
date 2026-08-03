@@ -89,6 +89,28 @@ public partial class FloatWindowSettings : ObservableObject
         ShowHeartbeatAnimation = DefaultShowHeartbeatAnimation;
     }
 
+    // ── 蓝牙自动重连 ──────────────────────────────────────────────────────
+    public const bool DefaultAutoReconnect = true;
+
+    /// <summary>设备意外断开后自动重连（手动断开/强制断开不触发）。</summary>
+    [ObservableProperty]
+    private bool _autoReconnectEnabled = DefaultAutoReconnect;
+
+    // ── 应用设置：自动连接上一次设备 ──────────────────────────────────────
+    public const bool DefaultAutoConnectLast = true;
+
+    /// <summary>启动扫描到上次连接的设备时自动连接（30 秒超时）。</summary>
+    [ObservableProperty]
+    private bool _autoConnectLastDevice = DefaultAutoConnectLast;
+
+    /// <summary>上一次成功连接的设备 MAC 地址（供启动自动连接）。</summary>
+    [ObservableProperty]
+    private ulong? _lastConnectedAddress;
+
+    /// <summary>上一次成功连接的设备名称（展示用）。</summary>
+    [ObservableProperty]
+    private string _lastConnectedName = "";
+
     // ── 触摸穿透（锁定）──────────────────────────────────────────────────
     // 开启后悬浮窗不接收鼠标（WM_NCHITTEST 返回 HTTRANSPARENT），
     // 鼠标点击穿透到下方窗口，悬浮窗固定在原位不可拖拽。
@@ -120,6 +142,10 @@ public partial class FloatWindowSettings : ObservableObject
 
     partial void OnClickThroughEnabledChanged(bool value) => SettingsService.Save();
     partial void OnClickThroughHotKeyChanged(string value) => SettingsService.Save();
+    partial void OnAutoReconnectEnabledChanged(bool value) => SettingsService.Save();
+    partial void OnAutoConnectLastDeviceChanged(bool value) => SettingsService.Save();
+    partial void OnLastConnectedAddressChanged(ulong? value) => SettingsService.Save();
+    partial void OnLastConnectedNameChanged(string value) => SettingsService.Save();
 
     partial void OnWindowScaleChanged(double value)
     {

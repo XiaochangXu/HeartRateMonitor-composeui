@@ -33,6 +33,7 @@ import kotlinx.coroutines.flow.*
 import org.json.JSONObject
 import java.util.concurrent.CancellationException
 import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicLong
 
 class BleService : Service(), FairMemoryReceiver.MemoryListener {
 
@@ -77,6 +78,10 @@ class BleService : Service(), FairMemoryReceiver.MemoryListener {
     private val isScanning = AtomicBoolean(false)
     private var lastConnectedDeviceId: String? = null
     @Volatile private var lastConnectedDeviceName: String = "Unknown Device"
+    // 连接/扫描纪元：用户每次发起新的 BLE 活动（扫描/连接）时自增。
+    // 被取消的旧连接任务的 finally 用其启动时捕获的纪元做校验，
+    // 避免退避中的旧自动重连误取消用户刚发起的新连接。
+    private val connectEpoch = AtomicLong(0L)
 
     // --- 自动重连退避 ---
     private var autoReconnectAttempt = 0
@@ -87,6 +92,10 @@ class BleService : Service(), FairMemoryReceiver.MemoryListener {
         /** 自动重连基础退避（毫秒），实际退避 = base * 2^(attempt-1)，上限 60s */
         private const val AUTO_RECONNECT_BASE_DELAY_MS = 1000L
         private const val AUTO_RECONNECT_MAX_DELAY_MS = 60_000L
+        /** 心率订阅失败最大重试次数：连续失败超过该次数后放弃本次连接内的监听 */
+        private const val MAX_OBSERVE_RETRY_ATTEMPTS = 5
+        /** 心率订阅失败重试基础退避（毫秒），实际退避 = base * 失败次数 */
+        private const val OBSERVE_RETRY_BASE_DELAY_MS = 1000L
     }
 
     // --- WebSocket 广播节流 ---
@@ -194,6 +203,7 @@ class BleService : Service(), FairMemoryReceiver.MemoryListener {
     fun startScan(durationMillis: Long = 15_000L) {
         if (!isScanning.compareAndSet(false, true)) return
         stopAllBleActivities()
+        connectEpoch.incrementAndGet()
 
         scanJob = serviceScope.launch {
             // [Fix]: Use Map to prevent duplicates/stacking of same device with updated RSSI
@@ -224,6 +234,7 @@ class BleService : Service(), FairMemoryReceiver.MemoryListener {
     fun startAutoConnectScan(favoriteDeviceId: String, durationMillis: Long = 15_000L) {
         if (!isScanning.compareAndSet(false, true)) return
         stopAllBleActivities()
+        connectEpoch.incrementAndGet()
 
         scanJob = serviceScope.launch {
             // [Fix]: Use Map here as well for consistency
@@ -272,6 +283,8 @@ class BleService : Service(), FairMemoryReceiver.MemoryListener {
         stopAllBleActivities()
         isManuallyDisconnected = false
         autoReconnectAttempt = 0  // 手动连接时重置重试计数
+        // 新连接意图：使退避中的旧自动重连检查失效（旧任务捕获的纪元与本值不再相等）
+        val myEpoch = connectEpoch.incrementAndGet()
 
         connectionJob = serviceScope.launch {
             var peripheral: Peripheral? = null
@@ -300,20 +313,24 @@ class BleService : Service(), FairMemoryReceiver.MemoryListener {
                 }
                 stateMonitor.join()
 
-            } catch (e: Exception) {
-                val errorMessage = when (e) {
-                    is TimeoutCancellationException -> getString(R.string.ble_connect_timeout)
-                    is CancellationException -> getString(R.string.ble_connect_cancelled, e.message)
-                    else -> getString(R.string.ble_connect_failed, e.message)
+            } catch (e: TimeoutCancellationException) {
+                Log.e("BleService", "Connection to $identifier timed out", e)
+                if (_bleState.value !is BleState.AutoReconnecting) {
+                    _bleState.value = BleState.Disconnected(getString(R.string.ble_connect_timeout))
                 }
+            } catch (e: CancellationException) {
+                // 结构化并发：真正的取消（外部 cancel / 设备断开）必须向上传播，
+                // 不能被当作连接失败吞掉；清理与自动重连仍在 finally 中执行。
+                throw e
+            } catch (e: Exception) {
                 Log.e("BleService", "Connection to $identifier failed", e)
                 if (_bleState.value !is BleState.AutoReconnecting) {
-                    _bleState.value = BleState.Disconnected(errorMessage)
+                    _bleState.value = BleState.Disconnected(getString(R.string.ble_connect_failed, e.message))
                 }
             } finally {
                 withContext(NonCancellable) {
                     cleanupConnection(peripheral)
-                    checkAutoReconnect()
+                    checkAutoReconnect(myEpoch)
                 }
             }
         }
@@ -375,6 +392,8 @@ class BleService : Service(), FairMemoryReceiver.MemoryListener {
 
         webhookRepository.triggerWebhooks(WebhookTrigger.DISCONNECTED, _heartRate.value, speedProvider.speed.value)
         _heartRate.value = 0
+        // 同步清空测量源，避免重连后首页沿用上次会话的旧心率值
+        _heartRateMeasurement.value = HeartRateMeasurement.EMPTY
         // 清除已连接设备信息（断开后 DevicesScreen 不再显示已连接卡片）
         _connectedDevice.value = null
         _scanResults.value = emptyList()
@@ -382,10 +401,12 @@ class BleService : Service(), FairMemoryReceiver.MemoryListener {
         connectedPeripheral = null
     }
 
-    private suspend fun checkAutoReconnect() {
+    private suspend fun checkAutoReconnect(epoch: Long) {
         val autoReconnectEnabled = sharedPreferences.getBoolean(PrefsKeys.AUTO_RECONNECT_ENABLED, true)
         Log.d("BleService", "checkAutoReconnect: enabled=$autoReconnectEnabled, isManual=$isManuallyDisconnected, lastDeviceId=$lastConnectedDeviceId")
         if (!autoReconnectEnabled || isManuallyDisconnected || lastConnectedDeviceId == null) return
+        // 期间用户已发起新的连接/扫描（connectEpoch 变化），旧任务不再自动重连，避免打断新连接
+        if (connectEpoch.get() != epoch) return
 
         autoReconnectAttempt++
         if (autoReconnectAttempt > MAX_AUTO_RECONNECT_ATTEMPTS) {
@@ -398,22 +419,44 @@ class BleService : Service(), FairMemoryReceiver.MemoryListener {
         val delayMs = (AUTO_RECONNECT_BASE_DELAY_MS shl (autoReconnectAttempt - 1))
             .coerceAtMost(AUTO_RECONNECT_MAX_DELAY_MS)
         delay(delayMs)
+        // 退避结束后再次校验，覆盖延迟期间用户发起的任何新连接/扫描
+        if (connectEpoch.get() != epoch) return
         _bleState.value = BleState.AutoReconnecting
         startAutoConnectScan(lastConnectedDeviceId!!)
     }
 
     private suspend fun observeHeartRateData(peripheral: Peripheral) {
-        try {
-            bleManager.observeHeartRate(peripheral).collect { measurement ->
-                _heartRate.value = measurement.bpm
-                _heartRateMeasurement.value = measurement
-                webhookRepository.triggerWebhooks(WebhookTrigger.HEART_RATE_UPDATED, measurement.bpm, speedProvider.speed.value)
+        var consecutiveFailures = 0
+        // 订阅失败（如 CCCD 写入失败/瞬时 GATT 错误）后自动重订阅，避免整个连接周期内数据永久静默。
+        // 若流正常结束也会回到循环重新订阅，实现连接内的自愈。
+        while (currentCoroutineContext().isActive) {
+            try {
+                // 成功进入收集即重置失败计数；collect 正常返回（流结束）后继续下一轮重新订阅
+                consecutiveFailures = 0
+                bleManager.observeHeartRate(peripheral).collect { measurement ->
+                    _heartRate.value = measurement.bpm
+                    _heartRateMeasurement.value = measurement
+                    webhookRepository.triggerWebhooks(WebhookTrigger.HEART_RATE_UPDATED, measurement.bpm, speedProvider.speed.value)
 
-                heartRateRecorder.record(measurement.bpm, lastConnectedDeviceName)
-                broadcastWebSocketState()
+                    // 历史记录落盘失败不应中断心率采集（如 DB 瞬时异常），单独隔离
+                    try {
+                        heartRateRecorder.record(measurement.bpm, lastConnectedDeviceName)
+                    } catch (e: Exception) {
+                        Log.w("BleService", "心率记录写入失败", e)
+                    }
+                    broadcastWebSocketState()
+                }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                consecutiveFailures++
+                if (consecutiveFailures > MAX_OBSERVE_RETRY_ATTEMPTS) {
+                    Log.e("BleService", "心率订阅连续失败 $consecutiveFailures 次，本次连接内停止监听", e)
+                    break
+                }
+                Log.w("BleService", "心率订阅失败，第 $consecutiveFailures 次重试", e)
+                delay(OBSERVE_RETRY_BASE_DELAY_MS * consecutiveFailures)
             }
-        } catch (e: Exception) {
-            Log.w("BleService", "Heart rate observation failed", e)
         }
     }
 

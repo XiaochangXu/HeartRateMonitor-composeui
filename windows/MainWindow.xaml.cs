@@ -95,6 +95,9 @@ public sealed partial class MainWindow : Window
         Closed += OnClosed;
 
         SetupHotKey();
+
+        // 启动后自动开始持续扫描：发现设备→显示提示→点击连接后停止
+        ViewModel.DeviceList.AutoStartScan();
     }
 
     private void InjectLanApprovalHandler()
@@ -183,6 +186,7 @@ public sealed partial class MainWindow : Window
     {
         var tag = (args.SelectedItem as NavigationViewItem)?.Tag as string;
         HomeContent.Visibility = tag == "home" ? Visibility.Visible : Visibility.Collapsed;
+        AppSettingsContent.Visibility = tag == "appSettings" ? Visibility.Visible : Visibility.Collapsed;
         FloatSettingsContent.Visibility = tag == "floatSettings" ? Visibility.Visible : Visibility.Collapsed;
         NetworkContent.Visibility = tag == "network" ? Visibility.Visible : Visibility.Collapsed;
         AppearanceContent.Visibility = tag == "appearance" ? Visibility.Visible : Visibility.Collapsed;
@@ -382,6 +386,10 @@ public sealed partial class MainWindow : Window
 
         // 停止 HTTP/WebSocket 服务、解除心率事件订阅
         ViewModel.Shutdown();
+
+        // 确定性退出进程：避免 WinUI 3 在部分场景（后台任务未收尾等）下
+        // 窗口已关闭但进程残留。必须放在所有清理的最后，Exit 之后代码不再执行。
+        Application.Current.Exit();
     }
 
     // ── 全局热键注册与 WM_HOTKEY 处理 ─────────────────────────────────────

@@ -63,6 +63,12 @@
                             <FontIcon Glyph="&#xE80F;" />
                         </NavigationViewItem.Icon>
                     </NavigationViewItem>
+                    <NavigationViewItem x:Uid="MainWindow_NavAppSettings"
+                                        Tag="appSettings">
+                        <NavigationViewItem.Icon>
+                            <FontIcon Glyph="&#xE713;" />
+                        </NavigationViewItem.Icon>
+                    </NavigationViewItem>
                     <NavigationViewItem x:Uid="MainWindow_NavAppearance"
                                         Tag="appearance">
                         <NavigationViewItem.Icon>
@@ -107,8 +113,12 @@
                                                  ViewModel="{x:Bind ViewModel.DeviceList, Mode=OneTime}" />
 
                         <views:HeartRateControl Grid.Column="1"
-                                                ViewModel="{x:Bind ViewModel.HeartRate, Mode=OneTime}" />
+                                            ViewModel="{x:Bind ViewModel.HeartRate, Mode=OneTime}" />
                     </Grid>
+
+                    <views:AppSettingsControl x:Name="AppSettingsContent"
+                                              Visibility="Collapsed"
+                                              ViewModel="{x:Bind ViewModel.AppSettings, Mode=OneTime}" />
 
                     <views:FloatWindowSettingsControl x:Name="FloatSettingsContent"
                                                       Visibility="Collapsed"

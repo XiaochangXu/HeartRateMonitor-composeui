@@ -38,6 +38,7 @@ import com.github.heartratemonitor_compose.data.PrefsKeys
 import com.github.heartratemonitor_compose.ui.theme.HeartRateMonitorMobileTheme
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.collectLatest
@@ -62,6 +63,8 @@ class StatusBarResidentService : Service() {
     private val serviceScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
     private var bleService: BleService? = null
     private var isServiceBound = false
+    /** 当前生效的 BleService 心率订阅，重新订阅前先取消，避免叠加重复收集 */
+    private var bleDataJob: Job? = null
 
     private var isOverlayShown = false
 
@@ -311,7 +314,10 @@ class StatusBarResidentService : Service() {
     }
 
     private fun observeBleData() {
-        serviceScope.launch {
+        // 取消旧订阅：BleService 重建后重新 onServiceConnected 会再次调用本方法，
+        // 旧协程会持有已销毁服务实例的 StateFlow，必须避免叠加重复收集。
+        bleDataJob?.cancel()
+        bleDataJob = serviceScope.launch {
             bleService?.heartRate?.collectLatest { rate ->
                 updateHeartRateText(rate)
                 updateHeartbeatAnimation(rate)

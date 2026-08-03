@@ -27,6 +27,15 @@
   <data name="DeviceList_EmptyHint" xml:space="preserve">
     <value>No devices found. Start a scan first.</value>
   </data>
+  <data name="DeviceList_FoundDevice" xml:space="preserve">
+    <value>Found {0}</value>
+  </data>
+  <data name="DeviceList_BluetoothUnavailable" xml:space="preserve">
+    <value>Bluetooth unavailable, cannot scan</value>
+  </data>
+  <data name="DeviceList_ScanAutoStopped" xml:space="preserve">
+    <value>Scan auto-stopped after 1 minute. Click to rescan.</value>
+  </data>
   <data name="DeviceList_HrBadge.Text" xml:space="preserve">
     <value>● HR</value>
   </data>
@@ -44,6 +53,36 @@
   </data>
   <data name="HeartRate_Connecting" xml:space="preserve">
     <value>Connecting...</value>
+  </data>
+  <data name="HeartRate_Reconnecting" xml:space="preserve">
+    <value>Reconnecting... Please wait or force disconnect.</value>
+  </data>
+  <data name="HeartRate_ReconnectFailed" xml:space="preserve">
+    <value>Reconnect failed (no connection within 30 seconds)</value>
+  </data>
+  <data name="HeartRate_AutoReconnectLabel.Text" xml:space="preserve">
+    <value>Auto reconnect</value>
+  </data>
+  <data name="AppSettings_HeaderText.Text" xml:space="preserve">
+    <value>App Settings</value>
+  </data>
+  <data name="AppSettings_AutoConnectLast.Header" xml:space="preserve">
+    <value>Auto-connect last device</value>
+  </data>
+  <data name="AppSettings_AutoConnectLastHint.Text" xml:space="preserve">
+    <value>Automatically connect to the last connected device when found after launch (30 s timeout).</value>
+  </data>
+  <data name="AppSettings_AutoReconnect.Header" xml:space="preserve">
+    <value>Auto reconnect</value>
+  </data>
+  <data name="AppSettings_AutoReconnectHint.Text" xml:space="preserve">
+    <value>Auto-reconnect after unexpected disconnection (not triggered by manual or forced disconnect).</value>
+  </data>
+  <data name="DeviceList_AutoConnectTimeout" xml:space="preserve">
+    <value>Last connected device not found (30 s)</value>
+  </data>
+  <data name="DeviceList_ForceDisconnect.Text" xml:space="preserve">
+    <value>Force disconnect</value>
   </data>
   <data name="HeartRate_ConnectedName" xml:space="preserve">
     <value>Connected to {0}</value>
@@ -93,11 +132,20 @@
   <data name="HeartRate_BluetoothBlockedBody" xml:space="preserve">
     <value>Please disconnect the LAN connection first.</value>
   </data>
+  <data name="HeartRate_DeviceNotInRangeTitle" xml:space="preserve">
+    <value>Device out of range</value>
+  </data>
+  <data name="HeartRate_DeviceNotInRangeBody" xml:space="preserve">
+    <value>This device is not in the current scan range. Please scan first.</value>
+  </data>
   <data name="Dialog_Ok" xml:space="preserve">
     <value>OK</value>
   </data>
   <data name="MainWindow_NavHome.Content" xml:space="preserve">
     <value>Home</value>
+  </data>
+  <data name="MainWindow_NavAppSettings.Content" xml:space="preserve">
+    <value>App Settings</value>
   </data>
   <data name="MainWindow_NavFloatSettings.Content" xml:space="preserve">
     <value>Float Window Settings</value>

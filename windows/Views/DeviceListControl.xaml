@@ -48,8 +48,26 @@
                                    VerticalAlignment="Center" />
                     </StackPanel>
                 </Button>
+                <Button x:Name="BtnForceDisconnect"
+                        Command="{x:Bind ViewModel.ForceDisconnectCommand}"
+                        Padding="12,6">
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                        <FontIcon Glyph="&#xE71A;"
+                                  VerticalAlignment="Center" />
+                        <TextBlock x:Uid="DeviceList_ForceDisconnect"
+                                   Text="强制断开"
+                                   VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
             </StackPanel>
         </StackPanel>
+
+        <TextBlock Grid.Row="1"
+                   Text="{x:Bind ViewModel.ScanStatusMessage, Mode=OneWay}"
+                   Visibility="{x:Bind ViewModel.ScanStatusVisibility, Mode=OneWay}"
+                   Margin="12,8,0,0"
+                   FontSize="12"
+                   Foreground="{ThemeResource SystemFillColorCautionBrush}" />
 
         <Grid Grid.Row="2"
               Margin="0,8,0,0">
@@ -68,6 +86,7 @@
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*" />
                                         <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="Auto" />
                                     </Grid.ColumnDefinitions>
 
                                     <TextBlock Text="{x:Bind DisplayName, Mode=OneTime}"
@@ -76,7 +95,21 @@
                                                Grid.Column="0"
                                                TextTrimming="CharacterEllipsis" />
 
-                                    <Border Grid.Column="1"
+                                    <!-- 信号强度：WiFi 图标 + 数值，颜色随等级（绿/黄/红）变化 -->
+                                    <StackPanel Grid.Column="1"
+                                                Orientation="Horizontal"
+                                                Spacing="4"
+                                                VerticalAlignment="Center"
+                                                Margin="8,0,0,0">
+                                        <FontIcon Glyph="&#xE701;"
+                                                  FontSize="14"
+                                                  Foreground="{x:Bind Rssi, Mode=OneTime, Converter={StaticResource RssiToBrushConverter}}" />
+                                        <TextBlock Text="{x:Bind RssiText, Mode=OneTime}"
+                                                   FontSize="13"
+                                                   Foreground="{x:Bind Rssi, Mode=OneTime, Converter={StaticResource RssiToBrushConverter}}" />
+                                    </StackPanel>
+
+                                    <Border Grid.Column="2"
                                             Background="{ThemeResource SystemFillColorSuccessBrush}"
                                             CornerRadius="3"
                                             Padding="6,2"
@@ -107,6 +140,11 @@
                         VerticalAlignment="Center"
                         Spacing="6"
                         IsHitTestVisible="False">
+                <ProgressRing IsActive="{x:Bind ViewModel.ScanProgressActive, Mode=OneWay}"
+                              Visibility="{x:Bind ViewModel.ScanProgressActive, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}"
+                              Width="28"
+                              Height="28"
+                              HorizontalAlignment="Center" />
                 <FontIcon Glyph="&#xE9D9;"
                           FontSize="28"
                           Foreground="{ThemeResource TextFillColorTertiaryBrush}"

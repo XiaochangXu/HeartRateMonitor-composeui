@@ -69,7 +69,7 @@ public sealed class FloatWindow
     private bool _showHeartbeatAnimation;
 
     // ── 心跳动画 ──────────────────────────────────────────────────────────
-    // 动画缩放系数（1=不缩放），由 DispatcherQueueTimer 在 UI 线程上 ~30fps 更新。
+    // 动画缩放系数（1=不缩放），由 DispatcherQueueTimer 在 UI 线程上 ~60fps 更新。
     private float _animScale = 1f;
     private int _animBpm;
     private DateTimeOffset _animStart;
@@ -722,7 +722,7 @@ public sealed class FloatWindow
         EnsureAnimTimer();
         if (_animTimer is not null && !_animTimer.IsRunning)
         {
-            _animTimer.Interval = TimeSpan.FromMilliseconds(33);
+            _animTimer.Interval = TimeSpan.FromMilliseconds(16);
             _animTimer.Start();
         }
     }
@@ -732,7 +732,7 @@ public sealed class FloatWindow
         if (_animTimer is not null || _uiDispatcher is null) return;
         _animTimer = _uiDispatcher.CreateTimer();
         if (_animTimer is null) return;
-        _animTimer.Interval = TimeSpan.FromMilliseconds(33);
+        _animTimer.Interval = TimeSpan.FromMilliseconds(16);
         _animTimer.Tick += OnAnimTick;
     }
 

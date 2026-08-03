@@ -87,6 +87,8 @@ class FloatingWindowService : Service() {
     private val serviceScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
     private var bleService: BleService? = null
     private var isServiceBound = false
+    /** 当前生效的 BleService 数据订阅，重新订阅前先取消，避免叠加重复收集 */
+    private var bleDataJobs: List<Job> = emptyList()
 
     private var isWindowShown = false
 
@@ -172,19 +174,24 @@ class FloatingWindowService : Service() {
     }
 
     private fun observeBleData() {
-        serviceScope.launch {
-            bleService?.heartRate?.collectLatest { rate ->
-                heartRateText = if (rate > 0) "$rate" else "--"
-                bpmForAnimation = rate
-                // 心率变更时同步连接状态，确保断开后心跳动画立即停止
-                isConnected = bleService?.isDeviceConnected() ?: false
+        // 取消旧订阅：BleService 重建后重新 onServiceConnected 会再次调用本方法，
+        // 旧协程会持有已销毁服务实例的 StateFlow，必须避免叠加重复收集。
+        bleDataJobs.forEach { it.cancel() }
+        bleDataJobs = listOf(
+            serviceScope.launch {
+                bleService?.heartRate?.collectLatest { rate ->
+                    heartRateText = if (rate > 0) "$rate" else "--"
+                    bpmForAnimation = rate
+                    // 心率变更时同步连接状态，确保断开后心跳动画立即停止
+                    isConnected = bleService?.isDeviceConnected() ?: false
+                }
+            },
+            serviceScope.launch {
+                bleService?.speed?.collectLatest { speed ->
+                    speedText = String.format("%.1f", speed)
+                }
             }
-        }
-        serviceScope.launch {
-            bleService?.speed?.collectLatest { speed ->
-                speedText = String.format("%.1f", speed)
-            }
-        }
+        )
     }
 
     fun showWindow() {

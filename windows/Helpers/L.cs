@@ -17,6 +17,10 @@ public static class L
     public static string DeviceList_Clear         => Loc.GetString("DeviceList_Clear");
     public static string DeviceList_UnknownDevice => Loc.GetString("DeviceList_UnknownDevice");
     public static string DeviceList_EmptyHint     => Loc.GetString("DeviceList_EmptyHint");
+    public static string DeviceList_FoundDevice   => Loc.GetString("DeviceList_FoundDevice");
+    public static string DeviceList_BluetoothUnavailable => Loc.GetString("DeviceList_BluetoothUnavailable");
+    public static string DeviceList_ScanAutoStopped => Loc.GetString("DeviceList_ScanAutoStopped");
+    public static string DeviceList_AutoConnectTimeout => Loc.GetString("DeviceList_AutoConnectTimeout");
 
     // ── HeartRate ───────────────────────────────────────────────────────────
     public static string HeartRate_HeaderText    => Loc.GetString("HeartRate_HeaderText");
@@ -24,6 +28,8 @@ public static class L
     public static string HeartRate_Disconnect    => Loc.GetString("HeartRate_Disconnect");
     public static string HeartRate_NotConnected  => Loc.GetString("HeartRate_NotConnected");
     public static string HeartRate_Connecting    => Loc.GetString("HeartRate_Connecting");
+    public static string HeartRate_Reconnecting  => Loc.GetString("HeartRate_Reconnecting");
+    public static string HeartRate_ReconnectFailed => Loc.GetString("HeartRate_ReconnectFailed");
     public static string HeartRate_ConnectedName => Loc.GetString("HeartRate_ConnectedName");
     public static string HeartRate_ConnectFailed => Loc.GetString("HeartRate_ConnectFailed");
     public static string HeartRate_Disconnected  => Loc.GetString("HeartRate_Disconnected");
@@ -40,6 +46,8 @@ public static class L
     public static string HeartRate_Bpm           => Loc.GetString("HeartRate_Bpm");
     public static string HeartRate_BluetoothBlockedTitle => Loc.GetString("HeartRate_BluetoothBlockedTitle");
     public static string HeartRate_BluetoothBlockedBody => Loc.GetString("HeartRate_BluetoothBlockedBody");
+    public static string HeartRate_DeviceNotInRangeTitle => Loc.GetString("HeartRate_DeviceNotInRangeTitle");
+    public static string HeartRate_DeviceNotInRangeBody => Loc.GetString("HeartRate_DeviceNotInRangeBody");
     public static string Dialog_Ok               => Loc.GetString("Dialog_Ok");
 
     // ── NetworkTransfer ────────────────────────────────────────────────────
