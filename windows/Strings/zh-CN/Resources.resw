@@ -438,4 +438,55 @@
   <data name="VersionInfo_AndroidLabel.Text" xml:space="preserve">
     <value>Android 端链接</value>
   </data>
+  <data name="VersionInfo_CheckUpdateLabel.Text" xml:space="preserve">
+    <value>检查更新</value>
+  </data>
+  <data name="VersionInfo_CheckUpdateButton.Text" xml:space="preserve">
+    <value>检查更新</value>
+  </data>
+  <data name="VersionInfo_CheckUpdateHint.Text" xml:space="preserve">
+    <value>从 Gitee 获取最新版本信息</value>
+  </data>
+  <data name="VersionInfo_CheckingUpdate" xml:space="preserve">
+    <value>正在检查...</value>
+  </data>
+  <data name="VersionInfo_UpdateCheckTitle" xml:space="preserve">
+    <value>检查更新</value>
+  </data>
+  <data name="VersionInfo_UpToDate" xml:space="preserve">
+    <value>当前已是最新版本（v{0}）</value>
+  </data>
+  <data name="VersionInfo_NewVersionFound" xml:space="preserve">
+    <value>发现新版本 v{0}</value>
+  </data>
+  <data name="VersionInfo_CurrentVersion" xml:space="preserve">
+    <value>当前版本：v{0}</value>
+  </data>
+  <data name="VersionInfo_ReleaseNotesTitle" xml:space="preserve">
+    <value>更新内容：</value>
+  </data>
+  <data name="VersionInfo_NoReleaseNotes" xml:space="preserve">
+    <value>暂无更新日志</value>
+  </data>
+  <data name="VersionInfo_GoUpdate" xml:space="preserve">
+    <value>跳转更新</value>
+  </data>
+  <data name="VersionInfo_Cancel" xml:space="preserve">
+    <value>取消</value>
+  </data>
+  <data name="VersionInfo_NoRelease" xml:space="preserve">
+    <value>未找到任何 Release，请先在 Gitee 上发布一个版本</value>
+  </data>
+  <data name="VersionInfo_ApiRateLimit" xml:space="preserve">
+    <value>Gitee API 限流，请稍后再试</value>
+  </data>
+  <data name="VersionInfo_ApiError" xml:space="preserve">
+    <value>Gitee API 返回错误码：{0}</value>
+  </data>
+  <data name="VersionInfo_NetworkError" xml:space="preserve">
+    <value>网络错误：{0}</value>
+  </data>
+  <data name="VersionInfo_NoValidRelease" xml:space="preserve">
+    <value>未找到有效的正式 Release</value>
+  </data>
 </root>

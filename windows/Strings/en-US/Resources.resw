@@ -438,4 +438,55 @@
   <data name="VersionInfo_AndroidLabel.Text" xml:space="preserve">
     <value>Android app link</value>
   </data>
+  <data name="VersionInfo_CheckUpdateLabel.Text" xml:space="preserve">
+    <value>Check for updates</value>
+  </data>
+  <data name="VersionInfo_CheckUpdateButton.Text" xml:space="preserve">
+    <value>Check for updates</value>
+  </data>
+  <data name="VersionInfo_CheckUpdateHint.Text" xml:space="preserve">
+    <value>Get latest version info from Gitee</value>
+  </data>
+  <data name="VersionInfo_CheckingUpdate" xml:space="preserve">
+    <value>Checking...</value>
+  </data>
+  <data name="VersionInfo_UpdateCheckTitle" xml:space="preserve">
+    <value>Check for updates</value>
+  </data>
+  <data name="VersionInfo_UpToDate" xml:space="preserve">
+    <value>You're up to date (v{0})</value>
+  </data>
+  <data name="VersionInfo_NewVersionFound" xml:space="preserve">
+    <value>New version v{0} found</value>
+  </data>
+  <data name="VersionInfo_CurrentVersion" xml:space="preserve">
+    <value>Current version: v{0}</value>
+  </data>
+  <data name="VersionInfo_ReleaseNotesTitle" xml:space="preserve">
+    <value>Release notes:</value>
+  </data>
+  <data name="VersionInfo_NoReleaseNotes" xml:space="preserve">
+    <value>No release notes</value>
+  </data>
+  <data name="VersionInfo_GoUpdate" xml:space="preserve">
+    <value>Go to update</value>
+  </data>
+  <data name="VersionInfo_Cancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="VersionInfo_NoRelease" xml:space="preserve">
+    <value>No releases found. Please publish a release on Gitee first.</value>
+  </data>
+  <data name="VersionInfo_ApiRateLimit" xml:space="preserve">
+    <value>Gitee API rate limited. Please try again later.</value>
+  </data>
+  <data name="VersionInfo_ApiError" xml:space="preserve">
+    <value>Gitee API returned error code: {0}</value>
+  </data>
+  <data name="VersionInfo_NetworkError" xml:space="preserve">
+    <value>Network error: {0}</value>
+  </data>
+  <data name="VersionInfo_NoValidRelease" xml:space="preserve">
+    <value>No valid stable release found</value>
+  </data>
 </root>

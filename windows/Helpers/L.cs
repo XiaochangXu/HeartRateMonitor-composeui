@@ -73,4 +73,12 @@ public static class L
     // ── Appearance (主题和语言) ────────────────────────────────────────────
     public static string Appearance_Header       => Loc.GetString("Appearance_Header.Text");
     public static string Appearance_RestartHint  => Loc.GetString("Appearance_RestartHint.Text");
+
+    // ── VersionInfo (版本与信息 / 检查更新) ────────────────────────────────
+    public static string VersionInfo_CheckingUpdate   => Loc.GetString("VersionInfo_CheckingUpdate");
+    public static string VersionInfo_UpdateCheckTitle => Loc.GetString("VersionInfo_UpdateCheckTitle");
+    public static string VersionInfo_ReleaseNotesTitle => Loc.GetString("VersionInfo_ReleaseNotesTitle");
+    public static string VersionInfo_NoReleaseNotes    => Loc.GetString("VersionInfo_NoReleaseNotes");
+    public static string VersionInfo_GoUpdate          => Loc.GetString("VersionInfo_GoUpdate");
+    public static string VersionInfo_Cancel            => Loc.GetString("VersionInfo_Cancel");
 }

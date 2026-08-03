@@ -41,9 +41,35 @@
                                    FontWeight="SemiBold" />
                     </StackPanel>
 
+                    <!-- 检查更新 -->
+                    <StackPanel Spacing="4">
+                        <TextBlock x:Uid="VersionInfo_CheckUpdateLabel"
+                                   Text="检查更新"
+                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        <Button x:Name="CheckUpdateButton"
+                                HorizontalAlignment="Stretch"
+                                HorizontalContentAlignment="Left"
+                                Padding="12,6"
+                                Click="OnCheckUpdateClick">
+                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                <FontIcon Glyph="&#xE777;"
+                                          FontSize="14"
+                                          VerticalAlignment="Center" />
+                                <TextBlock x:Name="CheckUpdateButtonText"
+                                           x:Uid="VersionInfo_CheckUpdateButton"
+                                           Text="检查更新"
+                                           VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
+                        <TextBlock x:Uid="VersionInfo_CheckUpdateHint"
+                                   Text="从 Gitee 获取最新版本信息"
+                                   Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+                                   FontSize="12" />
+                    </StackPanel>
+
                     <!-- 查看项目仓库 -->
                     <StackPanel Spacing="4">
-                        <TextBlock x:Uid="VersionInfo_RepoLabel"
+                        <TextBlock x:Uid="VersionInfo_RepoLabel.Text"
                                    Text="查看项目仓库"
                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                         <HyperlinkButton Content="https://github.com/XiaochangXu/HeartRateMonitor-composeui"
