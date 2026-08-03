@@ -4,3 +4,4 @@
 - Fixed page data update freezes caused by a single exception. Previously, an error in any data source would stop refreshing the home screen heart rate, connection status, and scan list altogether. Data channels are now isolated, so a single error does not affect others.
 - Fixed duplicate subscriptions in the floating window/notification bar.
 - Fixed duplicate data collection no longer occurring after the service is rebuilt by the system.
+- Optimize multilingual support
