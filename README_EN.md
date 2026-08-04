@@ -174,7 +174,7 @@ bin\Debug\net10.0-windows10.0.19041.0\win-x64\HeartRate.exe
 
 ### Android
 
-- Kotlin + Jetpack Compose (Material 3 Expressive)
+- Kotlin + Jetpack Compose
 - Kable (BLE), Vico (Charts), Room (Database), MaterialKolor (Dynamic Color)
 - NanoHTTPD (HTTP/WebSocket Server), PermissionX, AndroidLiquidGlass
 
