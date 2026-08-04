@@ -143,7 +143,7 @@ dotnet build -c Debug
 运行：
 
 ```bash
-bin\Debug\net8.0-windows10.0.19041.0\win-x64\HeartRate.exe
+bin\Debug\net10.0-windows10.0.19041.0\win-x64\HeartRate.exe
 ```
 
 > 若 `dotnet` 不在 PATH，请使用完整路径调用 `dotnet.exe`。
