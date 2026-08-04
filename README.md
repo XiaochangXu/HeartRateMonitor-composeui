@@ -18,7 +18,7 @@
     <img src="https://img.shields.io/badge/platform-Android-green?logo=android&logoColor=white" alt="Platform" />
     <img src="https://img.shields.io/badge/Kotlin-2.3.10-7F52FF?logo=kotlin&logoColor=white" alt="Kotlin" />
     <img src="https://img.shields.io/badge/UI-Jetpack%20Compose-orange?logo=jetpackcompose&logoColor=white" alt="UI" />
-    <img src="https://img.shields.io/badge/Material-3?style=flat" alt="Material3" />
+    <img src="https://img.shields.io/badge/Material%203-007AFF?style=flat-square" alt="Material 3" />
     <img src="https://img.shields.io/badge/minSdk-24-green" alt="minSdk" />
     <img src="https://img.shields.io/badge/targetSdk-37-green" alt="targetSdk" />
     <img src="https://img.shields.io/badge/platform-Windows-blue?logo=windows&logoColor=white" alt="Platform" />
