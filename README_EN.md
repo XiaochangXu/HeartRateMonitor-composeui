@@ -34,7 +34,7 @@ This repository contains two platform-specific applications with no shared code;
 
 | Directory | Platform | Tech Stack |
 |---|---|---|
-| [`android`](./android) | Android | Kotlin + Jetpack Compose (Material 3 Expressive) |
+| [`android`](./android) | Android | Kotlin + Jetpack Compose |
 | [`windows`](./windows) | Windows | .NET 10 + WinUI 3 |
 
 -----
@@ -143,7 +143,7 @@ dotnet build -c Debug
 Run:
 
 ```bash
-bin\Debug\net8.0-windows10.0.19041.0\win-x64\HeartRate.exe
+bin\Debug\net10.0-windows10.0.19041.0\win-x64\HeartRate.exe
 ```
 
 > If `dotnet` is not in PATH, call `dotnet.exe` with its full path.
