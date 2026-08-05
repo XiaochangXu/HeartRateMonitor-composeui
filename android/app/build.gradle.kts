@@ -33,6 +33,10 @@ android {
         ndk {
             abiFilters += "arm64-v8a"
         }
+
+        // 显式声明保留的语言资源，避免 AGP 资源压缩器在 values/ 与 values-en/
+        // 内容冗余时进行 locale collapsing，导致默认 values/ 被错误替换为中文
+        resourceConfigurations += listOf("en", "zh")
     }
 
     buildTypes {
