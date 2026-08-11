@@ -1,0 +1,6 @@
+- 修复 Compose 闭包过期导致液态玻璃导航栏拖拽指示器页面不切换的问题
+- 优化开启液态玻璃导航栏后拖拽指示器的跟手
+- 修改顶部应用栏为自动隐藏模式（ pinnedScrollBehavior() →        enterAlwaysScrollBehavior() ）
+- 增加设置卡片的显示隐藏过渡动画
+- 剥离libsgliteJni.so的原生符号，减小应用体积
+- 修改检查更新的弹窗为BottomSheet，可显示mark文档

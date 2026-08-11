@@ -1,0 +1,70 @@
+name: Release (Windows)
+
+# 手动触发：在 GitHub 仓库 Actions 页选择 "Release (Windows)" → Run workflow，输入版本号。
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: '版本号（如 4.4，将生成 tag v4.4）'
+        required: true
+        default: '4.4'
+
+defaults:
+  run:
+    working-directory: windows
+
+jobs:
+  build-release:
+    runs-on: windows-latest
+    permissions:
+      contents: write   # 创建 tag 与 Release 需要
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Publish (self-contained, win-x64, unpackaged)
+        # 不启用 PublishReadyToRun：R2R 预编译原生代码会显著增大体积
+        # （实测 ~45MB），本应用为小型工具，JIT 启动差异可接受。
+        run: >
+          dotnet publish HeartRate.csproj
+          -c Release
+          -r win-x64
+          --self-contained true
+          -p:WindowsPackageType=None
+          -o publish
+
+      - name: Zip artifact
+        shell: pwsh
+        run: |
+          $ver = "${{ github.event.inputs.version }}"
+          $zip = "$PWD/HeartRateMonitor-v$ver-win-x64.zip"
+          $src = (Resolve-Path publish).Path
+
+          Add-Type -AssemblyName System.IO.Compression.FileSystem
+
+          # 最高压缩 SmallestSize（.NET 7+，Brotli）；旧运行时没有该枚举则退回 Optimal。
+          # 不依赖 Compress-Archive（旧版 pwsh 的 ValidateSet 不认 SmallestSize）
+          $level = [System.IO.Compression.CompressionLevel]::Optimal
+          try { $level = [System.IO.Compression.CompressionLevel]::SmallestSize } catch { }
+
+          Remove-Item $zip -Force -ErrorAction SilentlyContinue
+          # includeBaseDirectory=false：压缩 publish 目录内容（不含顶层目录本身）
+          [System.IO.Compression.ZipFile]::CreateFromDirectory($src, $zip, $level, $false)
+
+          $size = [math]::Round((Get-Item $zip).Length / 1MB, 1)
+          Write-Host "Created $zip ($size MB, level=$level)"
+
+      - name: Upload to GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ github.event.inputs.version }}
+          name: v${{ github.event.inputs.version }}
+          generate_release_notes: true   # 自动生成 commit 变更记录
+          files: windows/HeartRateMonitor-v${{ github.event.inputs.version }}-win-x64.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

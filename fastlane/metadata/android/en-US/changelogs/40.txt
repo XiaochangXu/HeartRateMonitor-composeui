@@ -1,0 +1,6 @@
+- Fixed the issue where the liquid glass navigation bar drag indicator failed to switch pages due to expired Compose closures
+- Optimized the responsiveness of the drag indicator when the liquid glass navigation bar is enabled
+- Changed the top app bar to auto-hide mode (replaced pinnedScrollBehavior() with enterAlwaysScrollBehavior())
+- Added show/hide transition animations for setting cards
+- Stripped native symbols from libsgliteJni.so to reduce app package size
+- Redesigned the update check dialog as a bottom sheet, supporting markdown document display
