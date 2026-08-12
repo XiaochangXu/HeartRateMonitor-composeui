@@ -1,0 +1,47 @@
+{
+    "logs": [
+        {
+            "outputFile": "com.github.heartratemonitor_compose.baselineprofile-mergeDebugResources-16:/values-v21/values-v21.xml",
+            "map": [
+                {
+                    "source": "C:\\Users\\Administrator\\.gradle\\caches\\9.6.1\\transforms\\06e0bb7b9447d1f757cf65d993d10eb8\\transformed\\core-1.9.0\\res\\values-v21\\values-v21.xml",
+                    "from": {
+                        "startLines": "2,3,4,5,6,7,8,9,10,13",
+                        "startColumns": "4,4,4,4,4,4,4,4,4,4",
+                        "startOffsets": "55,173,237,304,368,484,610,736,864,1036",
+                        "endLines": "2,3,4,5,6,7,8,9,12,17",
+                        "endColumns": "117,63,66,63,115,125,125,127,12,12",
+                        "endOffsets": "168,232,299,363,479,605,731,859,1031,1383"
+                    },
+                    "to": {
+                        "startLines": "2,3,4,5,6,7,8,9,28,31",
+                        "startColumns": "4,4,4,4,4,4,4,4,4,4",
+                        "startOffsets": "55,173,237,304,368,484,610,736,1820,1992",
+                        "endLines": "2,3,4,5,6,7,8,9,30,35",
+                        "endColumns": "117,63,66,63,115,125,125,127,12,12",
+                        "endOffsets": "168,232,299,363,479,605,731,859,1987,2339"
+                    }
+                },
+                {
+                    "source": "C:\\Users\\Administrator\\.gradle\\caches\\9.6.1\\transforms\\b151b49469054fd59ff20e137d00918a\\transformed\\core-1.7.0\\res\\values-v21\\values.xml",
+                    "from": {
+                        "startLines": "4,13",
+                        "startColumns": "0,0",
+                        "startOffsets": "146,621",
+                        "endLines": "12,21",
+                        "endColumns": "8,8",
+                        "endOffsets": "620,1093"
+                    },
+                    "to": {
+                        "startLines": "10,19",
+                        "startColumns": "4,4",
+                        "startOffsets": "864,1343",
+                        "endLines": "18,27",
+                        "endColumns": "8,8",
+                        "endOffsets": "1338,1815"
+                    }
+                }
+            ]
+        }
+    ]
+}

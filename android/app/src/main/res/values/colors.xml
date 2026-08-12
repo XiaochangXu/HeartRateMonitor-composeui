@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="primary_light">#00668B</color>
+    <color name="on_primary_light">#FFFFFF</color>
+    <color name="primary_container_light">#C3E8FF</color>
+    <color name="on_primary_container_light">#001F2D</color>
+    <color name="background_light">#F8F9FA</color>
+    <color name="on_background_light">#191C1E</color>
+    <!-- windowBackground 与 Compose colorScheme.surfaceDim (#DEDCE0) 对齐，
+         中性浅灰色，避免开屏色相突变 -->
+    <color name="surface_dim_light">#DEDCE0</color>
+    <!-- 低版本回退（Android 12 以下无系统 Monet 颜色） -->
+    <color name="window_background_light">@color/surface_dim_light</color>
+    <color name="window_background_dark">@color/surface_dim_dark</color>
+    <color name="surface_light">#FFFBFE</color>
+    <color name="on_surface_light">#191C1E</color>
+    <color name="surface_variant_light">#DDE3EA</color>
+    <color name="on_surface_variant_light">#41484D</color>
+
+    <color name="primary_dark">#78D1FF</color>
+    <color name="on_primary_dark">#00354A</color>
+    <color name="primary_container_dark">#004D6A</color>
+    <color name="on_primary_container_dark">#C3E8FF</color>
+    <color name="background_dark">#131316</color>
+    <color name="on_background_dark">#E6E1E9</color>
+    <!-- windowBackground 低版本回退色（与 Compose ExpressSurfaceDimDark 对齐） -->
+    <color name="surface_dim_dark">#0E0E11</color>
+    <color name="surface_dark">#1C1B1F</color>
+    <color name="on_surface_dark">#E1E2E5</color>
+    <color name="surface_variant_dark">#41484D</color>
+    <color name="on_surface_variant_dark">#C1C7CE</color>
+
+    <color name="red_error">#B00020</color>
+    <color name="white">#FFFFFF</color>
+    <color name="black">#000000</color>
+    <color name="card_stroke_light">#E5E7EB</color>
+    <color name="card_stroke_dark">#41484D</color>
+</resources>

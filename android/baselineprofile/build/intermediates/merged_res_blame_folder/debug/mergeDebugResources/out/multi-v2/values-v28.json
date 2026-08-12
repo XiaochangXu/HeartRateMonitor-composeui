@@ -1,0 +1,28 @@
+{
+    "logs": [
+        {
+            "outputFile": "com.github.heartratemonitor_compose.baselineprofile-mergeDebugResources-16:/values-v28/values-v28.xml",
+            "map": [
+                {
+                    "source": "C:\\Users\\Administrator\\.gradle\\caches\\9.6.1\\transforms\\b151b49469054fd59ff20e137d00918a\\transformed\\core-1.7.0\\res\\values-v28\\values.xml",
+                    "from": {
+                        "startLines": "4,13",
+                        "startColumns": "0,0",
+                        "startOffsets": "146,625",
+                        "endLines": "12,21",
+                        "endColumns": "8,8",
+                        "endOffsets": "624,1101"
+                    },
+                    "to": {
+                        "startLines": "2,11",
+                        "startColumns": "4,4",
+                        "startOffsets": "55,538",
+                        "endLines": "10,19",
+                        "endColumns": "8,8",
+                        "endOffsets": "533,1014"
+                    }
+                }
+            ]
+        }
+    ]
+}

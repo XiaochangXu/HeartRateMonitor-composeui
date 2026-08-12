@@ -1,0 +1,13 @@
+#Wed Aug 12 08:38:06 CST 2026
+base.0=D\:\\Trae\\Project\\HeartRateMonitor-composeui\\android\\baselineprofile\\build\\intermediates\\dex\\nonMinifiedRelease\\mergeExtDexNonMinifiedRelease\\classes.dex
+base.1=D\:\\Trae\\Project\\HeartRateMonitor-composeui\\android\\baselineprofile\\build\\intermediates\\dex\\nonMinifiedRelease\\mergeProjectDexNonMinifiedRelease\\0\\classes.dex
+base.2=D\:\\Trae\\Project\\HeartRateMonitor-composeui\\android\\baselineprofile\\build\\intermediates\\dex\\nonMinifiedRelease\\mergeProjectDexNonMinifiedRelease\\14\\classes.dex
+base.3=D\:\\Trae\\Project\\HeartRateMonitor-composeui\\android\\baselineprofile\\build\\intermediates\\global_synthetics_dex\\nonMinifiedRelease\\generateNonMinifiedReleaseGlobalSynthetics\\classes.dex
+path.0=classes.dex
+path.1=0/classes.dex
+path.2=14/classes.dex
+path.3=classes.dex
+renamed.0=classes.dex
+renamed.1=classes2.dex
+renamed.2=classes3.dex
+renamed.3=classes4.dex

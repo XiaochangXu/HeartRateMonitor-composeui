@@ -1,0 +1,9 @@
+- Fixed an issue where cleaning up old connections during BLE device switching corrupted new connections and caused connection failures
+- Fixed a coroutine subscription leak occurring when the heart rate alert service reconnected
+- Resolved the risk of ANR caused by main thread blocking via runBlocking when exiting pages
+- Fixed thread safety and exception handling issues in Webhook and database repository modules
+- Improved fault tolerance for SoundManager, resolving permanent loading hangs and empty sensor data problems
+- Addressed unprotected background service launching and fragile initialization sequence issues
+- Enabled Baseline Profile to boost app launch speed and runtime performance
+- Adopted ContainedLoadingIndicator as the loading spinner for device searching and device connection workflows
+- Implemented gradient blur effect for the status bar

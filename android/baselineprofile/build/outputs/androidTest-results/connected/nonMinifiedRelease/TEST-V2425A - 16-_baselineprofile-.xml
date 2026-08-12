@@ -1,0 +1,15 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<testsuites tests="1" failures="1" errors="0" skipped="0" time="51.672" timestamp="2026-08-12T00:39:56" hostname="localhost">
+  <testsuite name="com.github.heartratemonitor_compose.baselineprofile.BaselineProfileGenerator" tests="1" failures="1" errors="0" skipped="0" time="38.811" timestamp="2026-08-12T00:39:56" hostname="localhost">
+    <properties>
+      <property name="device" value="V2425A - 16" />
+      <property name="flavor" value="" />
+      <property name="project" value=":baselineprofile" />
+    </properties>
+    <testcase name="generate" classname="com.github.heartratemonitor_compose.baselineprofile.BaselineProfileGenerator" time="38.811">
+      <failure></failure>
+    </testcase>
+  </testsuite>
+  <system-err>Test run failed to complete. Instrumentation run failed due to Process crashed.
+</system-err>
+</testsuites>

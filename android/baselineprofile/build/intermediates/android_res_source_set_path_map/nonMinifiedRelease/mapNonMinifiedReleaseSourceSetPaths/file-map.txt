@@ -1,0 +1,8 @@
+com.github.heartratemonitor_compose.baselineprofile-pngs-0 D:\Trae\Project\HeartRateMonitor-composeui\android\baselineprofile\build\generated\res\pngs\nonMinifiedRelease
+com.github.heartratemonitor_compose.baselineprofile-updated_navigation_xml-1 D:\Trae\Project\HeartRateMonitor-composeui\android\baselineprofile\build\generated\updated_navigation_xml\nonMinifiedRelease
+com.github.heartratemonitor_compose.baselineprofile-packageNonMinifiedReleaseResources-2 D:\Trae\Project\HeartRateMonitor-composeui\android\baselineprofile\build\intermediates\incremental\nonMinifiedRelease\packageNonMinifiedReleaseResources\merged.dir
+com.github.heartratemonitor_compose.baselineprofile-packageNonMinifiedReleaseResources-3 D:\Trae\Project\HeartRateMonitor-composeui\android\baselineprofile\build\intermediates\incremental\nonMinifiedRelease\packageNonMinifiedReleaseResources\stripped.dir
+com.github.heartratemonitor_compose.baselineprofile-nonMinifiedRelease-4 D:\Trae\Project\HeartRateMonitor-composeui\android\baselineprofile\build\intermediates\merged_res\nonMinifiedRelease\mergeNonMinifiedReleaseResources
+com.github.heartratemonitor_compose.baselineprofile-main-5 D:\Trae\Project\HeartRateMonitor-composeui\android\baselineprofile\src\main\res
+com.github.heartratemonitor_compose.baselineprofile-nonMinifiedRelease-6 D:\Trae\Project\HeartRateMonitor-composeui\android\baselineprofile\src\nonMinifiedRelease\res
+gradleHome-0 C:\Users\Administrator\.gradle

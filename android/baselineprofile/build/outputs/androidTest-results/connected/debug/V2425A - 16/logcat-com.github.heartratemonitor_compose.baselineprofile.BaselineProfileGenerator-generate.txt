@@ -1,0 +1,41 @@
+08-12 08:25:02.443 13930 13972 I TestRunner: started: generate(com.github.heartratemonitor_compose.baselineprofile.BaselineProfileGenerator)
+08-12 08:25:02.454 13930 13972 D Benchmark: Profiler MethodTracing, freq 1000, duration 5
+08-12 08:25:02.454 13930 13972 D Benchmark: additionalTestOutputDir=/sdcard/Android/media/com.github.heartratemonitor_compose/additional_test_output
+08-12 08:25:02.454 13930 13972 D BPGenerator: before collect, target=com.github.heartratemonitor_compose
+08-12 08:25:02.456 13930 13972 I UiAutomation: Initialized for user 0 on display 0
+08-12 08:25:02.474 13930 13972 I UiDevice: Creating a new instance, old instance exists: false
+08-12 08:25:02.475 13930 13972 D UiDevice: Setting accessibility service flags: 65618
+08-12 08:25:02.477 13930 13972 D UiDevice: Turning on screen.
+08-12 08:25:02.482 14655 14655 I g       : accessibility event occurred, safety center feature not enabled.
+08-12 08:25:02.503 13930 13972 D Benchmark: Usable output directory: /storage/emulated/0/Android/media/com.github.heartratemonitor_compose
+08-12 08:25:02.503 13930 13972 D Benchmark: Output Directory: /sdcard/Android/media/com.github.heartratemonitor_compose/additional_test_output
+08-12 08:25:02.772 13930 13972 D Benchmark: Force-stopping process com.github.heartratemonitor_compose
+08-12 08:25:02.827 13891 14067 W Binder  : Caught a RuntimeException from the binder stub implementation.
+08-12 08:25:02.827 13891 14067 W Binder  : java.lang.SecurityException: Calling from not trusted UID!
+08-12 08:25:02.827 13891 14067 W Binder  : 	at android.app.UiAutomationConnection.throwIfCalledByNotTrustedUidLocked(UiAutomationConnection.java:760)
+08-12 08:25:02.827 13891 14067 W Binder  : 	at android.app.UiAutomationConnection.shutdown(UiAutomationConnection.java:659)
+08-12 08:25:02.827 13891 14067 W Binder  : 	at android.app.IUiAutomationConnection$Stub.onTransact(IUiAutomationConnection.java:445)
+08-12 08:25:02.827 13891 14067 W Binder  : 	at android.os.Binder.execTransactInternal(Binder.java:1441)
+08-12 08:25:02.827 13891 14067 W Binder  : 	at android.os.Binder.execTransact(Binder.java:1380)
+08-12 08:25:02.828 13891 13891 I app_process: System.exit called, status: 0
+08-12 08:25:02.828 13891 13891 I AndroidRuntime: VM exiting with result code 0.
+08-12 08:25:02.872 10431 10431 I adbd    : Remote process closed the socket (on MSG_PEEK)
+08-12 08:25:02.885 10431 10431 E adbd    : service_to_fd shell:am get-current-user ; echo utp_shell_exit_code=$?
+08-12 08:25:02.909 14173 14173 E cmd     : BBinder_init Processname  cmd
+08-12 08:25:02.909 14173 14173 E cmd     : BBinder_init hasGetProcessName  cmd
+08-12 08:25:02.931 10431 10431 E adbd    : service_to_fd shell:[[ -d "/sdcard/Android/media/com.github.heartratemonitor_compose/additional_test_output" ]] ; echo utp_shell_exit_code=$?
+08-12 08:25:02.975 10431 10431 E adbd    : service_to_fd shell:ls "/sdcard/Android/media/com.github.heartratemonitor_compose/additional_test_output" | cat ; echo utp_shell_exit_code=$?
+08-12 08:25:03.043 10431 10431 E adbd    : service_to_fd shell:pm list packages androidx.test.services ; echo utp_shell_exit_code=$?
+08-12 08:25:03.104 14199 14199 E cmd     : BBinder_init Processname  cmd
+08-12 08:25:03.104 14199 14199 E cmd     : BBinder_init hasGetProcessName  cmd
+08-12 08:25:03.140 10431 10431 E adbd    : service_to_fd shell:am get-current-user ; echo utp_shell_exit_code=$?
+08-12 08:25:03.211 14205 14205 E cmd     : BBinder_init Processname  cmd
+08-12 08:25:03.211 14205 14205 E cmd     : BBinder_init hasGetProcessName  cmd
+08-12 08:25:03.244 10431 10431 E adbd    : service_to_fd shell:[[ -d "/sdcard/googletest/test_outputfiles" ]] ; echo utp_shell_exit_code=$?
+08-12 08:25:03.288 10431 10431 E adbd    : service_to_fd shell:ls "/sdcard/googletest/test_outputfiles" | cat ; echo utp_shell_exit_code=$?
+08-12 08:25:03.484  8359  8394 I android.vending: CollectorTransition concurrent copying GC freed 5323KB AllocSpace bytes, 6(408KB) LOS objects, 24% free, 8022KB(2076KB_16KB)/10MB, 2, itvl 9.253s, cpu 42.854ms, paused 168us,32us total 44.975ms
+08-12 08:25:06.050 15131 15136 I vivo.safecenter: Background young concurrent copying GC freed 4062KB AllocSpace bytes, 6(312KB) LOS objects, 46% free, 5334KB(3428KB_16KB)/9984KB, 2, itvl 127.994s, cpu 15.698ms, paused 50us,30us total 17.841ms
+08-12 08:25:07.526 17649 17649 D BoundBrokerSvc: onUnbind: Intent { act=com.google.android.gms.feedback.internal.IFeedbackService dat=chimera-action:/... xflg=0x4 cmp=com.google.android.gms/.chimera.GmsBoundBrokerService }
+08-12 08:25:08.490 17014 17067 D LogUtil_LogConfig: getLogFile(): logFilePath = /data/user/0/com.huawei.health/files/com.huawei.health/com.huawei.health_PhoneService/
+08-12 08:25:08.495 17014 17067 D LogUtil_LogConfig: acquireMaxLogFileLengthContainsOffset describe: com.huawei.health:PhoneService result:10485760
+08-12 08:25:13.273 14655 14673 I ssioncontroller: CollectorTransition concurrent copying GC freed 1396KB AllocSpace bytes, 12(240KB) LOS objects, 34% free, 3953KB(1720KB_80KB)/6001KB, 2Bd, itvl 222.185s, cpu 43.434ms, paused 152us,26us total 51.570ms

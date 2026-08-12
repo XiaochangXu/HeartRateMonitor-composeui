@@ -1,0 +1,8 @@
+com.github.heartratemonitor_compose.baselineprofile-pngs-0 D:\Trae\Project\HeartRateMonitor-composeui\android\baselineprofile\build\generated\res\pngs\debug
+com.github.heartratemonitor_compose.baselineprofile-updated_navigation_xml-1 D:\Trae\Project\HeartRateMonitor-composeui\android\baselineprofile\build\generated\updated_navigation_xml\debug
+com.github.heartratemonitor_compose.baselineprofile-packageDebugResources-2 D:\Trae\Project\HeartRateMonitor-composeui\android\baselineprofile\build\intermediates\incremental\debug\packageDebugResources\merged.dir
+com.github.heartratemonitor_compose.baselineprofile-packageDebugResources-3 D:\Trae\Project\HeartRateMonitor-composeui\android\baselineprofile\build\intermediates\incremental\debug\packageDebugResources\stripped.dir
+com.github.heartratemonitor_compose.baselineprofile-debug-4 D:\Trae\Project\HeartRateMonitor-composeui\android\baselineprofile\build\intermediates\merged_res\debug\mergeDebugResources
+com.github.heartratemonitor_compose.baselineprofile-debug-5 D:\Trae\Project\HeartRateMonitor-composeui\android\baselineprofile\src\debug\res
+com.github.heartratemonitor_compose.baselineprofile-main-6 D:\Trae\Project\HeartRateMonitor-composeui\android\baselineprofile\src\main\res
+gradleHome-0 C:\Users\Administrator\.gradle

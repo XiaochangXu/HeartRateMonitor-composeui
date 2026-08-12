@@ -1,0 +1,86 @@
+# proto-message: google.testing.platform.proto.api.core.TestSuiteResult
+# 2026-08-12T00:39:56.283422500Z:
+test_suite_meta_data {
+  scheduled_test_case_count: 1
+  device {
+    id: "10AF1J04JX0016G"
+    friendly_name: "primary"
+  }
+}
+test_status: FAILED
+test_result {
+  test_case {
+    test_class: "BaselineProfileGenerator"
+    test_package: "com.github.heartratemonitor_compose.baselineprofile"
+    test_method: "generate"
+    start_time {
+      seconds: 1786495144
+      nanos: 580000000
+    }
+    end_time {
+      seconds: 1786495183
+      nanos: 404000000
+    }
+    device {
+      id: "10AF1J04JX0016G"
+      friendly_name: "primary"
+    }
+  }
+  test_status: FAILED
+  output_artifact {
+    label {
+      label: "logcat"
+      namespace: "android"
+    }
+    source_path {
+      path: "D:\\Trae\\Project\\HeartRateMonitor-composeui\\android\\baselineprofile\\build\\outputs\\androidTest-results\\connected\\nonMinifiedRelease\\V2425A - 16\\logcat-com.github.heartratemonitor_compose.baselineprofile.BaselineProfileGenerator-generate.txt"
+    }
+  }
+  output_artifact {
+    label {
+      label: "device-info"
+      namespace: "android"
+    }
+    source_path {
+      path: "D:\\Trae\\Project\\HeartRateMonitor-composeui\\android\\baselineprofile\\build\\outputs\\androidTest-results\\connected\\nonMinifiedRelease\\V2425A - 16\\device-info.pb"
+    }
+  }
+  output_artifact {
+    label {
+      label: "device-info.meminfo"
+      namespace: "android"
+    }
+    source_path {
+      path: "D:\\Trae\\Project\\HeartRateMonitor-composeui\\android\\baselineprofile\\build\\outputs\\androidTest-results\\connected\\nonMinifiedRelease\\V2425A - 16\\meminfo"
+    }
+  }
+  output_artifact {
+    label {
+      label: "device-info.cpuinfo"
+      namespace: "android"
+    }
+    source_path {
+      path: "D:\\Trae\\Project\\HeartRateMonitor-composeui\\android\\baselineprofile\\build\\outputs\\androidTest-results\\connected\\nonMinifiedRelease\\V2425A - 16\\cpuinfo"
+    }
+  }
+}
+output_artifact {
+  label {
+    label: "test-results.log"
+    namespace: "com.google.testing.platform.runtime.android.driver.AndroidInstrumentationDriver"
+  }
+  source_path {
+    path: "D:\\Trae\\Project\\HeartRateMonitor-composeui\\android\\baselineprofile\\build\\outputs\\androidTest-results\\connected\\nonMinifiedRelease\\V2425A - 16\\testlog\\test-results.log"
+  }
+  type: TEST_DATA
+  mime_type: "text/plain"
+}
+issue {
+  namespace {
+    namespace: "com.google.testing.platform.runtime.android.driver.AndroidInstrumentationDriver"
+  }
+  severity: SEVERE
+  code: 1
+  name: "INSTRUMENTATION_FAILED"
+  message: "Test run failed to complete. Instrumentation run failed due to Process crashed."
+}
