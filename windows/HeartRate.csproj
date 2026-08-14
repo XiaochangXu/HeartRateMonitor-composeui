@@ -1,0 +1,74 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
+    <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
+    <RootNamespace>HeartRate</RootNamespace>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <UseWinUI>true</UseWinUI>
+    <WindowsPackageType>None</WindowsPackageType>
+    <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <PlatformTarget>x64</PlatformTarget>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Version>4.8</Version>
+    <AssemblyVersion>4.8.0.0</AssemblyVersion>
+    <FileVersion>4.8.0.0</FileVersion>
+    <ApplicationIcon>winico\favicon.ico</ApplicationIcon>
+    <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+    <DefaultLanguage>en-US</DefaultLanguage>
+  </PropertyGroup>
+
+  
+  <ItemGroup>
+    <Content Include="winico\favicon.ico" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+
+  <ItemGroup>
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
+    <PackageReference Include="Microsoft.Windows.CsWin32" Version="0.3.298">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.8.260710003" />
+  </ItemGroup>
+
+  
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  
+  <Target Name="EnsureXbfAndPriPublished" AfterTargets="Publish">
+    <ItemGroup>
+      <_XbfToPublish Include="$(TargetDir)**\*.xbf" />
+      <_PriToPublish Include="$(TargetDir)$(AssemblyName).pri" />
+    </ItemGroup>
+    <Copy SourceFiles="@(_XbfToPublish)"
+          DestinationFolder="$(PublishDir)%(RecursiveDir)"
+          SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(_PriToPublish)"
+          DestinationFolder="$(PublishDir)"
+          SkipUnchangedFiles="true" />
+  </Target>
+
+
+  <Target Name="RemoveExtraSatelliteResources" AfterTargets="EnsureXbfAndPriPublished">
+    <ItemGroup>
+      <_AllMui Include="$(PublishDir)**\*.mui" />
+      <_KeepMui Include="$(PublishDir)en-US\*.mui;$(PublishDir)en-us\*.mui;$(PublishDir)zh-CN\*.mui;$(PublishDir)zh-TW\*.mui" />
+      <_ExtraMui Include="@(_AllMui)" Exclude="@(_KeepMui)" />
+    </ItemGroup>
+    <Delete Files="@(_ExtraMui)" />
+    <ItemGroup>
+      <_EmptyLangDirs Include="@(_ExtraMui->'%(RootDir)%(Directory)'->Distinct())" />
+    </ItemGroup>
+    <RemoveDir Directories="@(_EmptyLangDirs)" />
+  </Target>
+
+</Project>

@@ -1,0 +1,16 @@
+- Optimize the display of connection status on the LAN transfer page
+- Remove the separate rounded WiFi card showing "Connected: COMPUTER"
+- Merge connection/disconnection status into the computer icon card for unified display
+- Display "No computer device found. Please confirm the computer client is running and on the same LAN" when disconnected
+- Display "Connected to computer device" with a highlighted color scheme when connected
+- Add a "Disconnect" button in the top-right corner
+- Fix inaccurate connection status issues
+- Use real client connection count from the WebSocket server to record connection status
+- Fix the issue where "Connected" still appears after exiting and re-entering the app
+- Fix the issue where connection status is lost when returning to the settings page and re-entering the LAN transfer page
+- Fix the issue where the mobile device still shows "Connected" after the computer client is closed or exited
+- Fix the issue where the scan progress indicator keeps spinning when connected
+- Fix the issue where the lower device card is not hidden when connected
+- Fix residual display and device card issues after disconnecting
+- Automatically clear the device list on manual disconnection or when the computer client is actively closed/exited
+- Standardize the color of the disconnect button icon

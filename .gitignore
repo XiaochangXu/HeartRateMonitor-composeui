@@ -1,0 +1,78 @@
+## 系统文件
+Thumbs.db
+desktop.ini
+.DS_Store
+
+## IDE
+.idea/
+.vscode/
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.userprefs
+*.iml
+
+## 本地临时
+*.log
+*.tmp
+*.bak
+*.swp
+*~
+
+## Android 构建产物与本地配置（原 android/.gitignore、android/app/.gitignore）
+android/.gradle/
+android/build/
+android/app/build/
+android/baselineprofile/build/
+android/.kotlin/
+android/.tubiao/
+android/.trae/
+android/.qoder/
+android/.opencode
+android/.codebuddy
+android/.zcode
+android/.logs/
+android/.icon/
+*.apk
+*.aab
+*.dex
+*.class
+*.lnk
+local.properties
+git推送命令.txt
+com.github.heartratemonitor_compose.yml
+
+## Windows 构建产物（原 windows/.gitignore）
+windows/[Bb]in/
+windows/[Oo]bj/
+windows/[Dd]ebug/
+windows/[Rr]elease/
+windows/build-debug*
+*.dll
+*.exe
+*.pdb
+*.ilk
+*.obj
+_hrun.log
+_windows_list.txt
+lan_debug.log
+
+## NuGet
+*.nupkg
+*.snupkg
+**/[Pp]ackages/*
+!**/[Pp]ackages/build/
+
+## 发布与签名
+[Pp]ublish/
+[Pp]ublish-*/
+*.pfx
+*.jks
+*.keystore
+*.cert
+
+## .key 签名目录需完整入库（豁免上面的全局签名规则）
+!android/.key/
+!android/.key/**
