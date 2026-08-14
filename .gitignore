@@ -43,7 +43,7 @@ android/.icon/
 local.properties
 git推送命令.txt
 com.github.heartratemonitor_compose.yml
-.tubiao
+.tubiao/
 
 ## Windows 构建产物（原 windows/.gitignore）
 windows/[Bb]in/
