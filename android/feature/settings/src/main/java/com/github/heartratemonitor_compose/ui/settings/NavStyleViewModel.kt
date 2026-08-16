@@ -9,7 +9,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 /**
- * 导航效果设置页面的 ViewModel（教科书式 MVI）。
+ * 导航效果设置页面的 ViewModel（MVI 架构）。
  *
  * 液态玻璃配置经 [LiquidGlassState]（Hilt 单例，持久化真源仍为 SettingsRepository）
  * 投影进单一 [NavStyleUiState]；开关/滑块/恢复默认经 Intent 上行。

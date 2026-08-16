@@ -10,7 +10,7 @@ import com.github.heartratemonitor_compose.service.FairMemoryReceiver
 import javax.inject.Inject
 
 /**
- * 教科书式 MVI，Phase 2。历史会话列表、统计/迷你图采样、多选态归约进单一 UiState
+ * MVI 架构，Phase 2。历史会话列表、统计/迷你图采样、多选态归约进单一 UiState
  * （多选态为业务状态：影响删除行为，D3 自 Composable 上提）。
  * 依赖由 Hilt 构造注入（Phase 3 起）。
  */

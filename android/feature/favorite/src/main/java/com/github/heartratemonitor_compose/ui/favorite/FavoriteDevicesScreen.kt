@@ -45,6 +45,7 @@ fun FavoriteDevicesScreen(
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
+        containerColor = MaterialTheme.colorScheme.surfaceContainer,
         topBar = {
             TopAppBar(
                 modifier = Modifier.windowInsetsPadding(WindowInsets.statusBars),
@@ -61,7 +62,7 @@ fun FavoriteDevicesScreen(
                             Surface(
                                 modifier = Modifier.size(40.dp),
                                 shape = CircleShape,
-                                color = MaterialTheme.colorScheme.surfaceContainer
+                                color = MaterialTheme.colorScheme.surfaceBright
                             ) {
                                 Box(contentAlignment = Alignment.Center) {
                                     Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(com.github.heartratemonitor_compose.ui.widgets.R.string.cd_back))
@@ -78,7 +79,7 @@ fun FavoriteDevicesScreen(
                         Surface(
                             modifier = Modifier.size(40.dp),
                             shape = CircleShape,
-                            color = MaterialTheme.colorScheme.surfaceContainer
+                            color = MaterialTheme.colorScheme.surfaceBright
                         ) {
                             Box(contentAlignment = Alignment.Center) {
                                 Icon(
@@ -226,7 +227,7 @@ private fun DeviceCard(
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.extraLarge,
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceBright),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Row(

@@ -6,14 +6,14 @@ coreKtx = "1.19.0"
 junit = "4.13.2"
 junitVersion = "1.2.1"
 espressoCore = "3.6.1"
-lifecycle = "2.9.1"
+lifecycle = "2.11.0"
 activityCompose = "1.13.0"
 composeUi = "1.12.0-beta02"
 materialIcons = "1.7.8"
 material3 = "1.5.0-alpha23"
 vico = "3.2.3"
 room = "3.0.0"
-navigationCompose = "2.9.8"
+navigation3 = "1.1.4"
 savedstate = "1.5.0"
 fragmentKtx = "1.8.9"
 kable = "0.44.3"
@@ -61,8 +61,9 @@ androidx-room-runtime = { group = "androidx.room3", name = "room3-runtime", vers
 androidx-room-compiler = { group = "androidx.room3", name = "room3-compiler", version.ref = "room" }
 # SQLite bundled driver for Room 3 (Android)
 androidx-sqlite-bundled = { group = "androidx.sqlite", name = "sqlite-bundled", version = "2.7.0" }
-# Navigation
-androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
+# Navigation 3（1.1.x 稳定版，替代 navigation-compose；传依赖 navigation3-runtime/scene/navigationevent）
+androidx-navigation3-ui = { group = "androidx.navigation3", name = "navigation3-ui", version.ref = "navigation3" }
+androidx-lifecycle-viewmodel-navigation3 = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-navigation3", version.ref = "lifecycle" }
 # Lifecycle
 androidx-lifecycle-service = { group = "androidx.lifecycle", name = "lifecycle-service", version.ref = "lifecycle" }
 androidx-lifecycle-runtime-compose = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "lifecycle" }
@@ -96,6 +97,8 @@ truth = { group = "com.google.truth", name = "truth", version.ref = "truth" }
 androidx-test-core = { group = "androidx.test", name = "core", version.ref = "androidxTestCore" }
 # Room 3 测试与 sqlite-framework（:data:database 的 AppDatabaseTest 随迁使用，版本与 :app 既有硬编码一致）
 kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "coroutines" }
+# kotlinx-serialization：navigation3 rememberNavBackStack 持久化返回栈要求 NavKey 为 @Serializable
+kotlinx-serialization-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-core", version = "1.9.0" }
 androidx-sqlite-framework = { group = "androidx.sqlite", name = "sqlite-framework", version = "2.7.0" }
 # WorkManager：销毁时异步落盘心率记录，避免主线程 runBlocking ANR
 androidx-work-runtime-ktx = { group = "androidx.work", name = "work-runtime-ktx", version.ref = "work" }
@@ -122,6 +125,7 @@ coil-network-okhttp = { group = "io.coil-kt.coil3", name = "coil-network-okhttp"
 android-application = { id = "com.android.application", version.ref = "agp" }
 android-library = { id = "com.android.library", version.ref = "agp" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 androidx-baselineprofile = { id = "androidx.baselineprofile", version.ref = "benchmark" }
 android-test = { id = "com.android.test", version.ref = "agp" }

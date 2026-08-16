@@ -10,7 +10,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 /**
- * 关于详情页的 ViewModel（教科书式 MVI）。
+ * 关于详情页的 ViewModel（MVI 架构）。
  *
  * 检查更新流程（发起/取消/结果）归约进单一 [AboutDetailsUiState]，
  * 替代原页面经 SettingsDependencies EntryPoint 直取 UpdateChecker 的写法；

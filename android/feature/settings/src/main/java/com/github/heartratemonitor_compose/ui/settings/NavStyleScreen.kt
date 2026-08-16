@@ -61,6 +61,7 @@ fun NavStyleScreen(
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
+        containerColor = MaterialTheme.colorScheme.surfaceContainer,
         topBar = {
             TopAppBar(
                 modifier = Modifier.windowInsetsPadding(WindowInsets.statusBars),
@@ -80,7 +81,7 @@ fun NavStyleScreen(
                         Surface(
                             modifier = Modifier.size(40.dp),
                             shape = CircleShape,
-                            color = MaterialTheme.colorScheme.surfaceContainer
+                            color = MaterialTheme.colorScheme.surfaceBright
                         ) {
                             Box(contentAlignment = Alignment.Center) {
                                 Icon(
@@ -292,7 +293,18 @@ private fun NavSliderRow(
             value = value,
             onValueChange = onValueChange,
             valueRange = valueRange,
-            steps = 0
+            steps = 0,
+            // 与共享 DragSlider（SettingsComponents.kt）配色保持一致，
+            // 否则原生 Slider 默认色（inactiveTrack 走 surfaceContainerHighest 色阶）与
+            // 悬浮窗/状态栏设置页的滑块轨道颜色不一致
+            colors = SliderDefaults.colors(
+                thumbColor = MaterialTheme.colorScheme.primary,
+                activeTrackColor = MaterialTheme.colorScheme.primary,
+                inactiveTrackColor = MaterialTheme.colorScheme.surfaceVariant,
+                disabledThumbColor = MaterialTheme.colorScheme.outline,
+                disabledActiveTrackColor = MaterialTheme.colorScheme.outline,
+                disabledInactiveTrackColor = MaterialTheme.colorScheme.surfaceVariant
+            )
         )
     }
 }

@@ -13,7 +13,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 /**
- * 状态栏常驻设置页面的 ViewModel（教科书式 MVI，Phase 1）。
+ * 状态栏常驻设置页面的 ViewModel（MVI 架构，Phase 1）。
  *
  * 职责：
  * - 从 [SettingsRepository.settings] 全量快照派生状态栏设置：

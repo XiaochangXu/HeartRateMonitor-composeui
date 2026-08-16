@@ -10,7 +10,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 /**
- * 悬浮窗设置页面的 ViewModel（教科书式 MVI，Phase 1）。
+ * 悬浮窗设置页面的 ViewModel（MVI 架构，Phase 1）。
  *
  * 职责：
  * - 从 [SettingsRepository.settings] 全量快照派生悬浮窗设置：

@@ -22,7 +22,7 @@ enum class AppStatus {
 enum class BleToastEvent { CONNECTED, AUTO_RECONNECTING, RECONNECT_FAILED, AUTO_CONNECT_FAILED }
 
 /**
- * 主模块唯一 UI 状态（教科书式 MVI，Phase 5）。
+ * 主模块唯一 UI 状态（MVI 架构，Phase 5）。
  * 默认值引用 [AppSettings.DEFAULTS]，全屏文字色默认 RED 为历史分歧点。
  */
 data class MainUiState(

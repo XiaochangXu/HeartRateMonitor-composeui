@@ -3,8 +3,8 @@ package com.github.heartratemonitor_compose.ui.settings
 import android.content.Intent
 import android.net.Uri
 import com.github.heartratemonitor_compose.feature.settings.R
-import com.github.heartratemonitor_compose.ui.util.SheetBottomShape
-import com.github.heartratemonitor_compose.ui.util.SheetTopShape
+import com.github.heartratemonitor_compose.ui.util.SegmentBottomShape
+import com.github.heartratemonitor_compose.ui.util.SegmentTopShape
 import com.github.heartratemonitor_compose.ui.util.StatusBarScrim
 import com.github.heartratemonitor_compose.ui.util.segmentedItemShape
 import androidx.compose.foundation.layout.*
@@ -34,6 +34,7 @@ fun FairMemoryScreen(
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
+        containerColor = MaterialTheme.colorScheme.surfaceContainer,
         topBar = {
             TopAppBar(
                 modifier = Modifier.windowInsetsPadding(WindowInsets.statusBars),
@@ -53,7 +54,7 @@ fun FairMemoryScreen(
                         Surface(
                             modifier = Modifier.size(40.dp),
                             shape = CircleShape,
-                            color = MaterialTheme.colorScheme.surfaceContainer
+                            color = MaterialTheme.colorScheme.surfaceBright
                         ) {
                             Box(
                                 contentAlignment = Alignment.Center,
@@ -88,7 +89,7 @@ fun FairMemoryScreen(
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = MaterialTheme.shapes.extraLarge,
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceBright)
             ) {
                 Text(
                     text = stringResource(R.string.fair_memory_overview),
@@ -106,7 +107,7 @@ fun FairMemoryScreen(
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = MaterialTheme.shapes.extraLarge,
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceBright)
             ) {
                 Text(
                     text = stringResource(R.string.fair_memory_how_it_works),
@@ -128,8 +129,8 @@ fun FairMemoryScreen(
             ) {
                 Surface(
                     modifier = Modifier.fillMaxWidth(),
-                    shape = SheetTopShape,
-                    color = MaterialTheme.colorScheme.surfaceContainer,
+                    shape = SegmentTopShape,
+                    color = MaterialTheme.colorScheme.surfaceBright,
                     contentColor = MaterialTheme.colorScheme.onSurface
                 ) {
                     Column(
@@ -152,8 +153,8 @@ fun FairMemoryScreen(
 
                 Surface(
                     modifier = Modifier.fillMaxWidth(),
-                    shape = SheetBottomShape,
-                    color = MaterialTheme.colorScheme.surfaceContainer,
+                    shape = SegmentBottomShape,
+                    color = MaterialTheme.colorScheme.surfaceBright,
                     contentColor = MaterialTheme.colorScheme.onSurface
                 ) {
                     Column(
@@ -183,7 +184,7 @@ fun FairMemoryScreen(
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = MaterialTheme.shapes.extraLarge,
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceBright)
             ) {
                 Text(
                     text = stringResource(R.string.fair_memory_adaptation),
@@ -254,7 +255,7 @@ private fun DocumentationLinkCard(
         },
         modifier = Modifier.fillMaxWidth(),
         shape = shape,
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceBright)
     ) {
         Column(
             modifier = Modifier.padding(16.dp),

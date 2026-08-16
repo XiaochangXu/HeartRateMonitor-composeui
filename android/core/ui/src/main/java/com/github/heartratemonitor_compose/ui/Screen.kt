@@ -3,20 +3,6 @@ package com.github.heartratemonitor_compose.ui
 const val FLOATING_NAV_HEIGHT = 64
 const val FLOATING_NAV_BOTTOM_MARGIN = 12
 
-const val SECONDARY_SLIDE_DURATION = 350
-
-const val BACKGROUND_PARALLAX_RATIO = 0.2f
-
-const val SAME_ROUTE_DEBOUNCE_MS = 100L
-/**
- * 异路由转场互斥窗口：防止转场动画期间导航导致 AnimatedContent 竞态。
- * 与 [SECONDARY_SLIDE_DURATION] 对齐，确保动画完成前不放行下一次导航。
- */
-const val TRANSITION_DEBOUNCE_MS = 350L
-
-/** NavHost 占位路由：Tab 页在 NavHost 外部管理，仅作为 startDestination */
-const val TAB_PLACEHOLDER = "tab_placeholder"
-
 sealed class Screen(val route: String) {
     object Home : Screen("home")
     object Settings : Screen("settings")

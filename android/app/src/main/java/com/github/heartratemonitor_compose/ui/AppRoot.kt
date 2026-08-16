@@ -4,11 +4,7 @@ import android.app.Activity
 import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.os.Build
-import android.util.Log
 import androidx.activity.compose.BackHandler
-import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
@@ -22,7 +18,6 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -30,16 +25,14 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import androidx.navigation.compose.currentBackStackEntryAsState
-import androidx.navigation.compose.rememberNavController
+import androidx.navigation3.runtime.NavBackStack
+import androidx.navigation3.runtime.rememberNavBackStack
 import com.github.heartratemonitor_compose.service.KillStateSaver
 import com.github.heartratemonitor_compose.ui.main.FullScreenHeartRate
 import com.github.heartratemonitor_compose.ui.main.MainViewModel
@@ -61,10 +54,12 @@ fun AppRoot(
     onOpenExternal: (Intent) -> Unit
 ) {
     val context = LocalContext.current
-    val navController = rememberNavController()
+    // navigation3：返回栈永不为空，栈底固定 TabRoot 占位（Tab 页 = 栈大小 1），
+    // 二级页面在其上压栈/出栈
+    val navBackStack = rememberNavBackStack(AppNavKey.TabRoot)
     val navGuard = rememberNavGuard()
-    val safeNavigateInner = rememberSafeNavigate(navController, navGuard)
-    val safePopBackInner = rememberSafePopBack(navController, navGuard)
+    val safeNavigateInner = rememberSafeNavigate(navBackStack, navGuard)
+    val safePopBackInner = rememberSafePopBack(navBackStack)
 
     val mainViewModel: MainViewModel = hiltViewModel()
     val pagerState = rememberPagerState(initialPage = 0) { 4 }
@@ -84,51 +79,15 @@ fun AppRoot(
         }
     }
 
-    // 禁用 NavController 自带的返回回调，所有返回键由 BackHandler 统一处理
-    // 防止转场动画期间 BackHandler 被短暂禁用时 NavController 绕过防抖直接 pop
-    DisposableEffect(navController) {
-        navController.enableOnBackPressed(false)
-        onDispose {
-            navController.enableOnBackPressed(true)
-        }
-    }
+    // Tab 页在 NavDisplay 外部管理：栈底仅剩 TabRoot 占位 = 在 Tab 页
+    val isOnTab = navBackStack.size == 1
 
-    val navBackStackEntry by navController.currentBackStackEntryAsState()
-    val currentRoute = navBackStackEntry?.destination?.route
-    var lastKnownRoute by remember { mutableStateOf(TAB_PLACEHOLDER) }
-    // 兜底同步：覆盖非导航入口的路由变化（当前架构下不存在，正常路径与 syncRoute 赋值幂等）
-    LaunchedEffect(currentRoute) {
-        if (currentRoute != null) {
-            lastKnownRoute = currentRoute
-        }
+    val safeNavigate = remember(safeNavigateInner) {
+        { key: AppNavKey -> safeNavigateInner(key) }
     }
-    /**
-     * 在导航放行的同一时刻同步 lastKnownRoute，使 isOnTab 驱动的视差动画与
-     * NavHost 转场动画同帧启动。原实现依赖 LaunchedEffect 在组合提交后异步回写，
-     * 视差总是比页面滑动晚一帧（约 16ms）启动，转场起始瞬间两层运动错位，
-     * 视觉上表现为"抖动"。同步后动画参数（时长/缓动/视差比例）完全不变，
-     * 仅消除启动时序错位。
-     */
-    val syncRoute = remember(navController) {
-        {
-            navController.currentDestination?.route?.let { lastKnownRoute = it }
-            Unit
-        }
+    val safePopBack = remember(safePopBackInner) {
+        { safePopBackInner() }
     }
-    val safeNavigate = remember(safeNavigateInner, syncRoute) {
-        { route: String ->
-            safeNavigateInner(route)
-            syncRoute()
-        }
-    }
-    val safePopBack = remember(safePopBackInner, syncRoute) {
-        {
-            safePopBackInner()
-            syncRoute()
-        }
-    }
-    // Tab 页在 NavHost 外部管理，NavHost 在 placeholder 时表示当前在 Tab 页
-    val isOnTab = lastKnownRoute == TAB_PLACEHOLDER
 
     AppLifecycleEffects(
         mainViewModel = mainViewModel,
@@ -138,55 +97,21 @@ fun AppRoot(
         onFullScreenChange = { isFullScreenMode = it },
         isOnTab = isOnTab,
         currentTab = currentTab,
-        lastKnownRoute = lastKnownRoute
+        currentRoute = navBackStack.lastOrNull()?.toString()
     )
-
-    // 仅由 isOnTab 触发：Tab→二级 时位移，二级→二级 时保持当前状态不变
-    val backgroundOffset = remember { Animatable(0f) }
-    LaunchedEffect(isOnTab) {
-        backgroundOffset.animateTo(
-            targetValue = if (isOnTab) 0f else -BACKGROUND_PARALLAX_RATIO,
-            animationSpec = tween(SECONDARY_SLIDE_DURATION, easing = FastOutSlowInEasing)
-        )
-    }
-
-    val navBarBottomInset = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
-    val statusBarTopInset = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
-
-    // blur 需 API 31+，lens 需 API 33+，低版本库内部静默 no-op
-    val liquidGlassConfig by liquidGlassState.config.collectAsStateWithLifecycle()
-    // blur 需 API 31+ (Android 12)，更低版本即使用户开启设置也回退到简单 Surface 模式，
-    // 避免 drawBackdrop 仍以半透明采样但 blur 静默 no-op 导致"半个液态玻璃"的异常外观。
-    val liquidGlassEnabled = liquidGlassConfig.enabled &&
-        Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
-    // 先画背景色再画内容，避免玻璃外区域透明。
-    // onDraw 用 remember 稳定化，防止 AppRoot 重组时频繁重建 LayerBackdrop。
-    val liquidBackdropBgColor = MaterialTheme.colorScheme.surfaceDim
-    val liquidBackdropOnDraw: androidx.compose.ui.graphics.drawscope.ContentDrawScope.() -> Unit =
-        remember(liquidBackdropBgColor) {
-            { drawRect(liquidBackdropBgColor); drawContent() }
-        }
-    val liquidBackdrop = rememberLayerBackdrop(onDraw = liquidBackdropOnDraw)
 
     // 在二级页面拦截返回键，Tab 页让系统处理（退出应用）
     BackHandler(enabled = !isOnTab) {
         safePopBack()
     }
 
-    val navigateToTab = remember(navController, currentTab, isOnTab, scope, navGuard, syncRoute) {
+    val navigateToTab = remember(navBackStack, currentTab, isOnTab, scope) {
         tab@{ pageIndex: Int ->
             val newTab = tabScreenAt(pageIndex)
             if (currentTab == newTab && isOnTab) return@tab
             if (!isOnTab) {
-                val now = System.currentTimeMillis()
-                if (now - navGuard.lastNavTimeMs < TRANSITION_DEBOUNCE_MS) {
-                    Log.w("AppRoot", "tab switch blocked by debounce: ${now - navGuard.lastNavTimeMs}ms since last")
-                    return@tab
-                }
-                navGuard.lastNavTimeMs = now
-                navController.popBackStack(TAB_PLACEHOLDER, inclusive = false)
-                // 与 safeNavigate/safePopBack 同步：pop 转场与视差回位动画同帧启动
-                syncRoute()
+                // 清空二级页返回栈（保留栈底 TabRoot 占位，等价于原 popBackStack(TAB_PLACEHOLDER)）
+                navBackStack.removeAll { it != AppNavKey.TabRoot }
             }
             scope.launch { pagerState.animateScrollToPage(pageIndex) }
         }
@@ -202,33 +127,46 @@ fun AppRoot(
 
     val changelogNotice by changelogNotifier.notice.collectAsStateWithLifecycle()
 
+    val navBarBottomInset = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+    val statusBarTopInset = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
+
+    // blur 需 API 31+，lens 需 API 33+，低版本库内部静默 no-op
+    val liquidGlassConfig by liquidGlassState.config.collectAsStateWithLifecycle()
+    // blur 需 API 31+ (Android 12)，更低版本即使用户开启设置也回退到简单 Surface 模式，
+    // 避免 drawBackdrop 仍以半透明采样但 blur 静默 no-op 导致"半个液态玻璃"的异常外观。
+    val liquidGlassEnabled = liquidGlassConfig.enabled &&
+        Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
+    // 先画背景色再画内容，避免玻璃外区域透明。
+    // onDraw 用 remember 稳定化，防止 AppRoot 重组时频繁重建 LayerBackdrop。
+    val liquidBackdropBgColor = MaterialTheme.colorScheme.surfaceContainer
+    val liquidBackdropOnDraw: androidx.compose.ui.graphics.drawscope.ContentDrawScope.() -> Unit =
+        remember(liquidBackdropBgColor) {
+            { drawRect(liquidBackdropBgColor); drawContent() }
+        }
+    val liquidBackdrop = rememberLayerBackdrop(onDraw = liquidBackdropOnDraw)
+
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.surfaceDim)
+            .background(MaterialTheme.colorScheme.surfaceContainer)
     ) {
-        // layerBackdrop 必须在 graphicsLayer 视差位移的外层，否则视差动画会使 backdrop 采样错位
+        // 玻璃层：录制 NavDisplay 内容（Tab 页 + 二级页）供玻璃导航条采样
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .then(if (liquidGlassEnabled) Modifier.layerBackdrop(liquidBackdrop) else Modifier)
         ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .clipToBounds()
-                    .graphicsLayer { translationX = backgroundOffset.value * size.width }
-            ) {
-                AppTabPager(
-                    viewModel = mainViewModel,
-                    pagerState = pagerState,
-                    isOnTab = isOnTab,
-                    onToggleFloatingWindow = onToggleFloatingWindow,
-                    onEnterFullScreen = { isFullScreenMode = true },
-                    safeNavigate = safeNavigate,
-                    onOpenExternal = onOpenExternalStable
-                )
-            }
+            AppNavHost(
+                navBackStack = navBackStack,
+                pagerState = pagerState,
+                isOnTab = isOnTab,
+                safePopBack = safePopBack,
+                safeNavigate = safeNavigate,
+                mainViewModel = mainViewModel,
+                onToggleFloatingWindow = onToggleFloatingWindow,
+                onEnterFullScreen = { isFullScreenMode = true },
+                onOpenExternal = onOpenExternalStable
+            )
         }
 
         AppBottomNavBar(
@@ -236,18 +174,11 @@ fun AppRoot(
             liquidBackdrop = liquidBackdrop,
             liquidGlassConfig = liquidGlassConfig,
             isFullScreenMode = isFullScreenMode,
+            isOnTab = isOnTab,
             selectedPage = selectedPage,
             onTabSelected = onTabSelected,
             navBarBottomInset = navBarBottomInset,
             modifier = Modifier.align(Alignment.BottomCenter)
-        )
-
-        AppNavHost(
-            navController = navController,
-            safePopBack = safePopBack,
-            safeNavigate = safeNavigate,
-            mainViewModel = mainViewModel,
-            onOpenExternal = onOpenExternalStable
         )
 
         // 底部：仅覆盖系统导航条 inset 区域，二级页面底部渐变由本层统一提供
@@ -258,7 +189,7 @@ fun AppRoot(
                 .align(Alignment.TopCenter)
                 .background(
                     Brush.verticalGradient(
-                        0f to MaterialTheme.colorScheme.surface.copy(alpha = 0.95f),
+                        0f to MaterialTheme.colorScheme.surfaceContainer.copy(alpha = 0.95f),
                         1f to Color.Transparent
                     )
                 )
@@ -271,7 +202,7 @@ fun AppRoot(
                 .background(
                     Brush.verticalGradient(
                         0f to Color.Transparent,
-                        1f to MaterialTheme.colorScheme.surface.copy(alpha = 0.9f)
+                        1f to MaterialTheme.colorScheme.surfaceContainer.copy(alpha = 0.9f)
                     )
                 )
         )

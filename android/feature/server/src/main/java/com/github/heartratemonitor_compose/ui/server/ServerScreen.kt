@@ -35,8 +35,8 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.github.heartratemonitor_compose.feature.server.R
 import com.github.heartratemonitor_compose.ui.widgets.IconContainer
-import com.github.heartratemonitor_compose.ui.util.SheetBottomShape
-import com.github.heartratemonitor_compose.ui.util.SheetTopShape
+import com.github.heartratemonitor_compose.ui.util.SegmentBottomShape
+import com.github.heartratemonitor_compose.ui.util.SegmentTopShape
 import com.github.heartratemonitor_compose.ui.util.StatusBarScrim
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -76,6 +76,7 @@ fun ServerScreen(
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
+        containerColor = MaterialTheme.colorScheme.surfaceContainer,
         topBar = {
             TopAppBar(
                 modifier = Modifier.windowInsetsPadding(WindowInsets.statusBars),
@@ -90,7 +91,7 @@ fun ServerScreen(
                         Surface(
                             modifier = Modifier.size(40.dp),
                             shape = CircleShape,
-                            color = MaterialTheme.colorScheme.surfaceContainer
+                            color = MaterialTheme.colorScheme.surfaceBright
                         ) {
                             Box(contentAlignment = Alignment.Center) {
                                 Icon(Icons.AutoMirrored.Default.ArrowBack, stringResource(com.github.heartratemonitor_compose.ui.widgets.R.string.cd_back))
@@ -178,7 +179,7 @@ private fun ServerCard(
     leadingIcon: Painter
 ) {
     val context = LocalContext.current
-    val containerColor = MaterialTheme.colorScheme.surfaceContainer
+    val containerColor = MaterialTheme.colorScheme.surfaceBright
 
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -272,8 +273,8 @@ private fun ServerStatusCard(
     ) {
         Surface(
             modifier = Modifier.fillMaxWidth(),
-            shape = SheetTopShape,
-            color = MaterialTheme.colorScheme.surfaceContainer,
+            shape = SegmentTopShape,
+            color = MaterialTheme.colorScheme.surfaceBright,
             contentColor = MaterialTheme.colorScheme.onSurface
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
@@ -304,8 +305,8 @@ private fun ServerStatusCard(
 
         Surface(
             modifier = Modifier.fillMaxWidth(),
-            shape = SheetBottomShape,
-            color = MaterialTheme.colorScheme.surfaceContainer,
+            shape = SegmentBottomShape,
+            color = MaterialTheme.colorScheme.surfaceBright,
             contentColor = MaterialTheme.colorScheme.onSurface
         ) {
             Column(modifier = Modifier.padding(16.dp)) {

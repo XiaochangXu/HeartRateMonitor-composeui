@@ -71,6 +71,7 @@ fun HistoryScreen(
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
+        containerColor = MaterialTheme.colorScheme.surfaceContainer,
         topBar = {
             HistoryTopBar(
                 isMultiSelectMode = isMultiSelectMode,
@@ -232,7 +233,7 @@ private fun HistoryTopBar(
                     Surface(
                         modifier = Modifier.size(40.dp),
                         shape = CircleShape,
-                        color = MaterialTheme.colorScheme.surfaceContainer
+                        color = MaterialTheme.colorScheme.surfaceBright
                     ) {
                         Box(contentAlignment = Alignment.Center) {
                             Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(com.github.heartratemonitor_compose.ui.widgets.R.string.cd_back))
@@ -297,7 +298,7 @@ private fun SessionCard(
             ),
         shape = sessionCardShape,
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainer
+            containerColor = MaterialTheme.colorScheme.surfaceBright
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {

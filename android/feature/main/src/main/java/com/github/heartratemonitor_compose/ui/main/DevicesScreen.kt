@@ -43,7 +43,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -55,6 +54,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.github.heartratemonitor_compose.feature.main.R
 import com.github.heartratemonitor_compose.service.ConnectedDevice
 import com.github.heartratemonitor_compose.ui.util.CapsuleShape
+import com.github.heartratemonitor_compose.ui.util.SegmentBottomShape
+import com.github.heartratemonitor_compose.ui.util.SegmentMiddleShape
+import com.github.heartratemonitor_compose.ui.util.SegmentTopShape
 import com.github.heartratemonitor_compose.ui.util.SheetBottomShape
 import com.github.heartratemonitor_compose.ui.util.SheetTopShape
 import com.github.heartratemonitor_compose.ui.util.StatusBarScrim
@@ -93,6 +95,7 @@ fun DevicesScreen(
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
+        containerColor = MaterialTheme.colorScheme.surfaceContainer,
         topBar = {
             TopAppBar(
                 modifier = Modifier.windowInsetsPadding(WindowInsets.statusBars),
@@ -112,7 +115,7 @@ fun DevicesScreen(
                         Surface(
                             modifier = Modifier.size(40.dp),
                             shape = CircleShape,
-                            color = MaterialTheme.colorScheme.surfaceContainer
+                            color = MaterialTheme.colorScheme.surfaceBright
                         ) {
                             Box(contentAlignment = Alignment.Center) {
                                 Icon(
@@ -127,7 +130,7 @@ fun DevicesScreen(
                     Surface(
                         modifier = Modifier.height(40.dp),
                         shape = CapsuleShape,
-                        color = MaterialTheme.colorScheme.surfaceContainer,
+                        color = MaterialTheme.colorScheme.surfaceBright,
                         contentColor = if (uiState.scanFilterEnabled) {
                             MaterialTheme.colorScheme.primary
                         } else {
@@ -171,7 +174,7 @@ fun DevicesScreen(
                             Surface(
                                 modifier = Modifier.size(40.dp),
                                 shape = CircleShape,
-                                color = MaterialTheme.colorScheme.surfaceContainer
+                                color = MaterialTheme.colorScheme.surfaceBright
                             ) {
                                 Box(contentAlignment = Alignment.Center) {
                                     Icon(
@@ -216,8 +219,8 @@ fun DevicesScreen(
             item(key = "available_header") {
                 Surface(
                     modifier = Modifier.fillMaxWidth(),
-                    shape = SheetTopShape,
-                    color = MaterialTheme.colorScheme.surfaceContainer,
+                    shape = SegmentTopShape,
+                    color = MaterialTheme.colorScheme.surfaceBright,
                     contentColor = MaterialTheme.colorScheme.onSurface
                 ) {
                     Row(
@@ -239,8 +242,8 @@ fun DevicesScreen(
                 item(key = "available_empty") {
                     Surface(
                         modifier = Modifier.fillMaxWidth(),
-                        shape = SheetBottomShape,
-                        color = MaterialTheme.colorScheme.surfaceContainer,
+                        shape = SegmentBottomShape,
+                        color = MaterialTheme.colorScheme.surfaceBright,
                         contentColor = MaterialTheme.colorScheme.onSurface
                     ) {
                         Text(
@@ -261,9 +264,9 @@ fun DevicesScreen(
                 ) { advertisement ->
                     val isLast = advertisement == sortedScanResults.last()
                     val shape = if (isLast) {
-                        SheetBottomShape
+                        SegmentBottomShape
                     } else {
-                        RectangleShape
+                        SegmentMiddleShape
                     }
                     val isFavorite = advertisement.identifier == favoriteDeviceId
                     val isConnecting = isConnectingDevice(advertisement.identifier)
@@ -276,7 +279,7 @@ fun DevicesScreen(
                     Surface(
                         modifier = Modifier.fillMaxWidth(),
                         shape = shape,
-                        color = MaterialTheme.colorScheme.surfaceContainer,
+                        color = MaterialTheme.colorScheme.surfaceBright,
                         contentColor = MaterialTheme.colorScheme.onSurface
                     ) {
                         DeviceItem(
@@ -349,8 +352,8 @@ private fun ConnectedDeviceCard(
     ) {
         Surface(
             modifier = Modifier.fillMaxWidth(),
-            shape = SheetTopShape,
-            color = MaterialTheme.colorScheme.surfaceContainer,
+            shape = SegmentTopShape,
+            color = MaterialTheme.colorScheme.surfaceBright,
             contentColor = MaterialTheme.colorScheme.onSurface
         ) {
             Row(
@@ -382,8 +385,8 @@ private fun ConnectedDeviceCard(
         }
         Surface(
             modifier = Modifier.fillMaxWidth(),
-            shape = SheetBottomShape,
-            color = MaterialTheme.colorScheme.surfaceContainer,
+            shape = SegmentBottomShape,
+            color = MaterialTheme.colorScheme.surfaceBright,
             contentColor = MaterialTheme.colorScheme.onSurface
         ) {
             Row(

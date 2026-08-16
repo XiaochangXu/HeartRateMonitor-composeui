@@ -5,7 +5,10 @@ import android.content.Context
 import android.content.ContextWrapper
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material.ripple.RippleAlpha
+import androidx.compose.material3.LocalRippleConfiguration
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.RippleConfiguration
 import androidx.compose.material3.Shapes
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.dynamicDarkColorScheme
@@ -13,6 +16,7 @@ import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.material3.ColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
@@ -40,6 +44,7 @@ private val ExpressLightColorScheme = lightColorScheme(
     onSurface = ExpressOnSurfaceLight,
     surfaceVariant = ExpressSurfaceVariantLight,
     onSurfaceVariant = ExpressOnSurfaceVariantLight,
+    surfaceBright = ExpressSurfaceBrightLight,
     surfaceDim = ExpressSurfaceDimLight,
     surfaceContainerLowest = ExpressSurfaceContainerLowestLight,
     surfaceContainerLow = ExpressSurfaceContainerLowLight,
@@ -66,6 +71,7 @@ private val ExpressDarkColorScheme = darkColorScheme(
     onSurface = ExpressOnSurfaceDark,
     surfaceVariant = ExpressSurfaceVariantDark,
     onSurfaceVariant = ExpressOnSurfaceVariantDark,
+    surfaceBright = ExpressSurfaceBrightDark,
     surfaceDim = ExpressSurfaceDimDark,
     surfaceContainerLowest = ExpressSurfaceContainerLowestDark,
     surfaceContainerLow = ExpressSurfaceContainerLowDark,
@@ -164,12 +170,26 @@ fun HeartRateMonitorMobileTheme(
         }
     }
 
-    MaterialTheme(
-        colorScheme = colorScheme,
-        typography = ExpressTypography,
-        shapes = ExpressShapes,
-        content = content
+    // 波纹反馈：透明度为 M3 官方默认的 2 倍
+    // （pressed 20% / hovered 16% / focused 20% / dragged 32%），按压感更明显。
+    // M3 ripple 节点自动读取 LocalRippleConfiguration，全局生效。
+    val rippleAlpha = RippleAlpha(
+        hoveredAlpha = 2f * 0.08f,
+        focusedAlpha = 2f * 0.10f,
+        pressedAlpha = 2f * 0.10f,
+        draggedAlpha = 2f * 0.16f
     )
+
+    CompositionLocalProvider(
+        LocalRippleConfiguration provides RippleConfiguration(rippleAlpha = rippleAlpha)
+    ) {
+        MaterialTheme(
+            colorScheme = colorScheme,
+            typography = ExpressTypography,
+            shapes = ExpressShapes,
+            content = content
+        )
+    }
 }
 
 /**

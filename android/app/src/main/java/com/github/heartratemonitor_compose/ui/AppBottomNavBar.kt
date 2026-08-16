@@ -4,6 +4,7 @@ import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.EaseOut
 import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -64,7 +65,7 @@ private const val NAV_ITEM_DURATION = 200
 private val NAV_ICON_SIZE = 24.dp
 
 /**
- * 全屏心率模式时通过 alpha=0 隐藏，组合树常驻不销毁。
+ * 全屏心率模式或二级页面（不在 Tab 页）时通过 alpha=0 隐藏，组合树常驻不销毁。
  */
 @Composable
 fun AppBottomNavBar(
@@ -72,33 +73,41 @@ fun AppBottomNavBar(
     liquidBackdrop: Backdrop,
     liquidGlassConfig: LiquidGlassConfig,
     isFullScreenMode: Boolean,
+    isOnTab: Boolean,
     selectedPage: () -> Int,
     onTabSelected: (Int) -> Unit,
     navBarBottomInset: androidx.compose.ui.unit.Dp,
     modifier: Modifier = Modifier
 ) {
+    // 二级页面（!isOnTab）或全屏时导航条隐藏：alpha 动画平滑淡出/淡入，
+    // 组合树常驻不销毁（避免重建 Backdrop/手势协程），仅透明度过渡
+    val navBarAlpha by animateFloatAsState(
+        targetValue = if (isFullScreenMode || !isOnTab) 0f else 1f,
+        animationSpec = tween(250),
+        label = "navBarAlpha"
+    )
     Box(modifier = modifier) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(navBarBottomInset + FLOATING_NAV_HEIGHT.dp + FLOATING_NAV_BOTTOM_MARGIN.dp)
                 .align(Alignment.BottomCenter)
-                .graphicsLayer { alpha = if (isFullScreenMode) 0f else 1f }
+                .graphicsLayer { alpha = navBarAlpha }
                 .background(
                     Brush.verticalGradient(
                         0f to Color.Transparent,
-                        1f to MaterialTheme.colorScheme.surface.copy(alpha = 0.9f)
+                        1f to MaterialTheme.colorScheme.surfaceContainer.copy(alpha = 0.9f)
                     )
                 )
         )
 
-        // 组合树常驻不销毁：全屏时 alpha=0 隐藏，避免进出全屏时重建组合树导致
+        // 组合树常驻不销毁：隐藏时 alpha=0，避免重建组合树导致
         // Backdrop/GPU 资源重新分配、手势协程重启、WindowInsets 抖动叠加。
         Box(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .fillMaxWidth()
-                .graphicsLayer { alpha = if (isFullScreenMode) 0f else 1f }
+                .graphicsLayer { alpha = navBarAlpha }
                 .padding(horizontal = 16.dp)
                 .padding(bottom = navBarBottomInset + FLOATING_NAV_BOTTOM_MARGIN.dp)
         ) {
@@ -225,7 +234,7 @@ private fun SurfaceFallbackNav(
                 .fillMaxWidth()
                 .height(FLOATING_NAV_HEIGHT.dp),
             shape = ContinuousCapsule,
-            color = MaterialTheme.colorScheme.surfaceContainerHigh
+            color = MaterialTheme.colorScheme.surfaceBright
         ) {}
 
         // 显式固定高度：BoxWithConstraints 继承全屏 maxHeight，fillMaxHeight() 会撞爆容器。

@@ -65,7 +65,7 @@ internal fun SettingsItem(
             .fillMaxWidth()
             .then(if (!enabled) Modifier.alpha(0.45f) else Modifier),
         shape = shape,
-        color = MaterialTheme.colorScheme.surfaceContainer,
+        color = MaterialTheme.colorScheme.surfaceBright,
         contentColor = MaterialTheme.colorScheme.onSurface
     ) {
         Column(

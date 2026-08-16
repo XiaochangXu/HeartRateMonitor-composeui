@@ -91,10 +91,10 @@ data class AppSettings(
 
         const val DEFAULT_THEME_PALETTE_STYLE = "TonalSpot"
 
-        /** 与 Backdrop 库示例一致。 */
+        /** 液态玻璃模糊半径默认值。 */
         const val DEFAULT_LIQUID_GLASS_BLUR_DP = 5f
 
-        /** 与 Backdrop 库示例一致。 */
+        /** 液态玻璃扭曲强度默认值。 */
         const val DEFAULT_LIQUID_GLASS_DISTORTION_DP = 30f
 
         val DEFAULTS: Map<Preferences.Key<*>, Any?> = buildMap {

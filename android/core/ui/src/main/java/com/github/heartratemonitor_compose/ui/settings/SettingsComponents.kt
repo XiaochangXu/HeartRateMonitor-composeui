@@ -111,12 +111,12 @@ fun SettingsGroupCard(
 }
 
 /**
- * 独立设置项卡片：根据在分组中的位置应用不同的圆角形状。
- * - [isFirst] && [isLast]：四角全圆角（单独一项）
- * - [isFirst]：顶部圆角，底部直角（首项）
- * - [isLast]：底部圆角，顶部直角（末项）
- * - 都不传：四角直角（中间项，长方形）
- * 卡片之间有 2dp 间隙，背景透过间隙显示，形成"分段式卡片组"视觉效果。
+ * 独立设置项卡片：根据在分组中的位置应用不同的圆角形状（分段列表风格）。
+ * - [isFirst] && [isLast]：四角全圆角（单独一项，28dp）
+ * - [isFirst]：顶部 28dp 大圆角，底部 4dp 小圆角（组首项）
+ * - [isLast]：顶部 4dp 小圆角，底部 28dp 大圆角（组末项）
+ * - 都不传：四角 4dp 小圆角（组内中间项）
+ * 卡片之间有 2dp 间隙，背景透过间隙显示，形成"首末大圆角、中间小圆角"的分段式卡片组视觉效果。
  * - [onClick] 非空时整张卡片可点击，ripple 被 Surface 的 clip 裁剪到圆角内。
  * - 最小高度 56dp，与 MD3 列表规范一致。
  */
@@ -142,7 +142,7 @@ fun SettingsItem(
                 }
             ),
         shape = effectiveShape,
-        color = MaterialTheme.colorScheme.surfaceContainer,
+        color = MaterialTheme.colorScheme.surfaceBright,
         contentColor = MaterialTheme.colorScheme.onSurface
     ) {
         Column(

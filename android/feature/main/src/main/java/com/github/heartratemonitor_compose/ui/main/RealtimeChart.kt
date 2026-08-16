@@ -98,7 +98,7 @@ internal fun ChartPlaceholder(messageRes: Int) {
             .fillMaxWidth()
             .height(200.dp),
         shape = MaterialTheme.shapes.extraLarge,
-        color = MaterialTheme.colorScheme.surfaceContainer
+        color = MaterialTheme.colorScheme.surfaceBright
     ) {
         Column {
             ChartCardHeader()
@@ -131,7 +131,7 @@ internal fun ChartLoadingIndicator() {
             .fillMaxWidth()
             .height(200.dp),
         shape = MaterialTheme.shapes.extraLarge,
-        color = MaterialTheme.colorScheme.surfaceContainer
+        color = MaterialTheme.colorScheme.surfaceBright
     ) {
         Column {
             ChartCardHeader()
@@ -247,7 +247,7 @@ internal fun RealtimeChart(
     Surface(
         modifier = modifier,
         shape = MaterialTheme.shapes.extraLarge,
-        color = MaterialTheme.colorScheme.surfaceContainer
+        color = MaterialTheme.colorScheme.surfaceBright
     ) {
         Column(
             modifier = Modifier.fillMaxSize()

@@ -91,7 +91,7 @@ fun ChangelogBottomSheet(
                     .fillMaxWidth()
                     .weight(1f),
                 shape = cardShape(16.dp),
-                color = MaterialTheme.colorScheme.surfaceContainer
+                color = MaterialTheme.colorScheme.surfaceBright
             ) {
                 Column(
                     modifier = Modifier

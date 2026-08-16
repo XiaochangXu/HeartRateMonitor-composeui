@@ -11,7 +11,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 /**
- * 教科书式 MVI，Phase 2。收藏设备列表与当前收藏 ID 归约进单一 UiState，
+ * MVI 架构，Phase 2。收藏设备列表与当前收藏 ID 归约进单一 UiState，
  * UI 层仅订阅状态并经 Intent 触发增删。
  * 依赖由 Hilt 构造注入（Phase 3 起）。
  */

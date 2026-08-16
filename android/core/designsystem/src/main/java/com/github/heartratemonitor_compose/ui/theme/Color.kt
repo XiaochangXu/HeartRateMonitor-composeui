@@ -20,6 +20,8 @@ val ExpressSurfaceVariantLight = Color(0xFFE1E2EC)
 val ExpressOnSurfaceVariantLight = Color(0xFF44464F)
 val ExpressBackgroundLight = Color(0xFFFAF8FF)
 val ExpressOnBackgroundLight = Color(0xFF1A1B20)
+// M3 surfaceBright：卡片色（tone 98），亮于页面 surfaceContainer（与页面形成色阶对比，不偏色相）
+val ExpressSurfaceBrightLight = Color(0xFFFAF8FF)
 // M3 surfaceDim：app 大背景，中性色略暗于 surface（与卡片形成色阶对比，不偏色相）
 val ExpressSurfaceDimLight = Color(0xFFDAD9E0)
 val ExpressErrorLight = Color(0xFFBA1A1A)
@@ -45,6 +47,8 @@ val ExpressSurfaceVariantDark = Color(0xFF44464F)
 val ExpressOnSurfaceVariantDark = Color(0xFFC5C6D0)
 val ExpressBackgroundDark = Color(0xFF121318)
 val ExpressOnBackgroundDark = Color(0xFFE2E2E9)
+// M3 surfaceBright：卡片色（tone 24），亮于页面 surfaceContainer（与页面形成色阶对比，不偏色相）
+val ExpressSurfaceBrightDark = Color(0xFF38393F)
 // M3 surfaceDim：app 大背景，中性深色（与卡片形成色阶对比，不偏色相）
 val ExpressSurfaceDimDark = Color(0xFF121318)
 val ExpressErrorDark = Color(0xFFFFB4AB)

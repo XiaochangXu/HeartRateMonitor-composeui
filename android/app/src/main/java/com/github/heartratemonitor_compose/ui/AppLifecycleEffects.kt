@@ -26,14 +26,14 @@ fun AppLifecycleEffects(
     onFullScreenChange: (Boolean) -> Unit,
     isOnTab: Boolean,
     currentTab: Screen,
-    lastKnownRoute: String
+    currentRoute: String?
 ) {
     val scope = rememberCoroutineScope()
 
     // rememberUpdatedState 确保 LaunchedEffect(Unit) 内的 collect 始终读取最新值，
     // 避免闭包捕获首次参数值导致快照数据过时
     val currentFullScreen by rememberUpdatedState(isFullScreenMode)
-    val currentRoute by rememberUpdatedState(lastKnownRoute)
+    val currentRouteState by rememberUpdatedState(currentRoute)
     val currentTabState by rememberUpdatedState(currentTab)
     val currentOnFullScreenChange by rememberUpdatedState(onFullScreenChange)
 
@@ -55,7 +55,7 @@ fun AppLifecycleEffects(
     // 从单一 uiState 派生 + distinctUntilChanged，保持原 StateFlow 只在变化时发射的语义
     LaunchedEffect(Unit) {
         mainViewModel.uiState.map { it.connectedDevice }.distinctUntilChanged().collect {
-            pushSnapshot(currentRoute, currentTabState.route, currentFullScreen)
+            pushSnapshot(currentRouteState ?: "", currentTabState.route, currentFullScreen)
         }
     }
 
@@ -84,7 +84,7 @@ fun AppLifecycleEffects(
         }
     }
 
-    LaunchedEffect(currentTab, lastKnownRoute, isFullScreenMode) {
-        pushSnapshot(lastKnownRoute, currentTab.route, isFullScreenMode)
+    LaunchedEffect(currentTab, currentRoute, isFullScreenMode) {
+        pushSnapshot(currentRoute ?: "", currentTab.route, isFullScreenMode)
     }
 }

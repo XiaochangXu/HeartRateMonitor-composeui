@@ -18,7 +18,7 @@ import kotlin.math.sqrt
 import javax.inject.Inject
 
 /**
- * 教科书式 MVI，Phase 4。预警设置自 SettingsRepository.settings 快照投影进 UiState，
+ * MVI 架构，Phase 4。预警设置自 SettingsRepository.settings 快照投影进 UiState，
  * 设置写入经 Intent 上行：阈值 clamp 为纯 reduce 函数，Service 启停经 ServiceLauncher。
  * 依赖由 Hilt 构造注入（Phase 3 起）。
  */

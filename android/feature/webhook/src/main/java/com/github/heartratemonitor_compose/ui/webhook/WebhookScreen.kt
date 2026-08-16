@@ -46,6 +46,7 @@ fun WebhookScreen(
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
+        containerColor = MaterialTheme.colorScheme.surfaceContainer,
         topBar = {
             TopAppBar(
                 modifier = Modifier.windowInsetsPadding(WindowInsets.statusBars),
@@ -60,7 +61,7 @@ fun WebhookScreen(
                         Surface(
                             modifier = Modifier.size(40.dp),
                             shape = CircleShape,
-                            color = MaterialTheme.colorScheme.surfaceContainer
+                            color = MaterialTheme.colorScheme.surfaceBright
                         ) {
                             Box(contentAlignment = Alignment.Center) {
                                 Icon(Icons.AutoMirrored.Default.ArrowBack, stringResource(com.github.heartratemonitor_compose.ui.widgets.R.string.cd_back))
@@ -82,34 +83,39 @@ fun WebhookScreen(
         }
     ) { padding ->
         Box(modifier = Modifier.fillMaxSize()) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .verticalScroll(rememberScrollState())
-                    .padding(horizontal = 16.dp)
-                    .padding(top = padding.calculateTopPadding() + 16.dp),
-                verticalArrangement = Arrangement.spacedBy(24.dp)
-            ) {
-                if (webhooks.isEmpty()) {
+            if (webhooks.isEmpty()) {
+                // 空状态：整页（扣除顶栏高度）垂直水平居中
                 Box(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .height(200.dp),
+                        .fillMaxSize()
+                        .padding(top = padding.calculateTopPadding()),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(stringResource(R.string.no_webhooks), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                }
-            } else {
-                webhooks.forEachIndexed { index, webhook ->
-                    WebhookListItem(
-                        webhook = webhook,
-                        onEdit = { showEditDialog = Pair(index, webhook) },
-                        onDelete = { viewModel.dispatch(WebhookIntent.Delete(index)) }
+                    Text(
+                        stringResource(R.string.no_webhooks),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
-            }
-            // 底部留出系统导航栏空间，避免内容被手势条遮挡
-            Spacer(Modifier.height(16.dp + WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()))
+            } else {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .verticalScroll(rememberScrollState())
+                        .padding(horizontal = 16.dp)
+                        .padding(top = padding.calculateTopPadding() + 16.dp),
+                    verticalArrangement = Arrangement.spacedBy(24.dp)
+                ) {
+                    webhooks.forEachIndexed { index, webhook ->
+                        WebhookListItem(
+                            webhook = webhook,
+                            onEdit = { showEditDialog = Pair(index, webhook) },
+                            onDelete = { viewModel.dispatch(WebhookIntent.Delete(index)) }
+                        )
+                    }
+                    // 底部留出系统导航栏空间，避免内容被手势条遮挡
+                    Spacer(Modifier.height(16.dp + WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()))
+                }
             }
             StatusBarScrim()
         }
@@ -184,7 +190,7 @@ private fun WebhookListItem(
         modifier = Modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.extraLarge,
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceBright)
     ) {
         Row(
             modifier = Modifier

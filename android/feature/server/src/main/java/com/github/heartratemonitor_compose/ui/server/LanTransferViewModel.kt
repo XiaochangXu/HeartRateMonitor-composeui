@@ -21,7 +21,7 @@ import kotlinx.coroutines.withTimeoutOrNull
 import javax.inject.Inject
 
 /**
- * 局域网传输页面的 ViewModel（教科书式 MVI，Phase 3）。
+ * 局域网传输页面的 ViewModel（MVI 架构，Phase 3）。
  *
  * 职责（D1 迁移：业务逻辑出 UI 层）：
  * - NSD 扫描生命周期（StartScan/StopScan）与发现列表；

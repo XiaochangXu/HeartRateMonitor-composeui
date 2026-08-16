@@ -26,7 +26,7 @@ import java.lang.ref.WeakReference
 import javax.inject.Inject
 
 /**
- * 教科书式 MVI，Phase 5。仅 BLE 状态订阅 + 组件编排 + 对外单一 [uiState]；
+ * MVI 架构，Phase 5。仅 BLE 状态订阅 + 组件编排 + 对外单一 [uiState]；
  * 图表数据管道归 [ChartDataManager]，BLE 数据管道订阅与状态机归约见 MainBleStreams.kt。
  *
  * 契约 6 红线原样保留：manualConnectionPending 防竞态、

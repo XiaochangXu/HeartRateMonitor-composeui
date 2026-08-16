@@ -9,7 +9,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 /**
- * 功能设置页面的 ViewModel（教科书式 MVI 试点，Phase 0）。
+ * 功能设置页面的 ViewModel（MVI 架构试点，Phase 0）。
  *
  * 职责：
  * - 从 [SettingsRepository.settings] 全量快照派生页面所需 7 个开关状态：

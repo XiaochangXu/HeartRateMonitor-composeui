@@ -1,6 +1,10 @@
 package com.github.heartratemonitor_compose.ui.settings
 
 import android.widget.Toast
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -25,6 +29,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.github.heartratemonitor_compose.feature.settings.R
 import com.github.heartratemonitor_compose.ui.util.StatusBarScrim
+import com.github.heartratemonitor_compose.ui.util.cardShape
 
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
@@ -48,6 +53,7 @@ fun FullscreenSoundScreen(
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
+        containerColor = MaterialTheme.colorScheme.surfaceContainer,
         topBar = {
             TopAppBar(
                 modifier = Modifier.windowInsetsPadding(WindowInsets.statusBars),
@@ -67,7 +73,7 @@ fun FullscreenSoundScreen(
                         Surface(
                             modifier = Modifier.size(40.dp),
                             shape = CircleShape,
-                            color = MaterialTheme.colorScheme.surfaceContainer
+                            color = MaterialTheme.colorScheme.surfaceBright
                         ) {
                             Box(contentAlignment = Alignment.Center) {
                                 Icon(
@@ -166,10 +172,17 @@ fun FullscreenSoundScreen(
                             )
                         }
                         Spacer(Modifier.width(16.dp))
-                        Surface(
-                            modifier = Modifier.size(40.dp),
-                            shape = CircleShape,
-                            color = MaterialTheme.colorScheme.primary,
+                        // 圆形 filled 图标按钮：40dp 圆形 primary 底 +
+                        // onPrimary 图标；按压时圆角以 fastSpatial spring（damping 0.6 /
+                        // stiffness 800）平滑收缩到 8dp（按压缩形反馈）
+                        val playInteractionSource = remember { MutableInteractionSource() }
+                        val isPlayPressed by playInteractionSource.collectIsPressedAsState()
+                        val playCornerRadius by animateDpAsState(
+                            targetValue = if (isPlayPressed) 8.dp else 20.dp,
+                            animationSpec = spring(dampingRatio = 0.6f, stiffness = 800f),
+                            label = "playButtonCorner"
+                        )
+                        FilledIconButton(
                             onClick = {
                                 if (currentMode == "off") {
                                     Toast.makeText(
@@ -182,16 +195,19 @@ fun FullscreenSoundScreen(
                                 } else {
                                     viewModel.dispatch(FullscreenSoundIntent.StartPreview)
                                 }
-                            }
+                            },
+                            shape = cardShape(playCornerRadius),
+                            interactionSource = playInteractionSource,
+                            colors = IconButtonDefaults.filledIconButtonColors(
+                                containerColor = MaterialTheme.colorScheme.primary,
+                                contentColor = MaterialTheme.colorScheme.onPrimary
+                            )
                         ) {
-                            Box(contentAlignment = Alignment.Center) {
-                                Icon(
-                                    imageVector = if (isPreviewing) Icons.Filled.Stop else Icons.Filled.PlayArrow,
-                                    contentDescription = stringResource(R.string.start_preview),
-                                    tint = MaterialTheme.colorScheme.onPrimary,
-                                    modifier = Modifier.size(24.dp)
-                                )
-                            }
+                            Icon(
+                                imageVector = if (isPreviewing) Icons.Filled.Stop else Icons.Filled.PlayArrow,
+                                contentDescription = stringResource(R.string.start_preview),
+                                modifier = Modifier.size(24.dp)
+                            )
                         }
                     }
                 }

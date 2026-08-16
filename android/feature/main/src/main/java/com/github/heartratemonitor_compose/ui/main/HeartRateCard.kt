@@ -71,9 +71,9 @@ internal fun HeartRateCard(
     val isConnected = appStatus == AppStatus.CONNECTED
     val hasData = isConnected && heartRate > 0
 
-    val containerColor = MaterialTheme.colorScheme.surfaceContainer
+    val containerColor = MaterialTheme.colorScheme.surfaceBright
     val contentColor = MaterialTheme.colorScheme.onSurface
-    val trackColor = MaterialTheme.colorScheme.surfaceContainerHighest
+    val trackColor = MaterialTheme.colorScheme.surfaceContainer
 
     val zoneColor = when {
         !hasData -> trackColor
@@ -123,7 +123,7 @@ internal fun HeartRateCard(
                     Surface(
                         modifier = Modifier.size(40.dp),
                         shape = CircleShape,
-                        color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                        color = MaterialTheme.colorScheme.surfaceContainer,
                         contentColor = MaterialTheme.colorScheme.onSurfaceVariant
                     ) {
                         Box(contentAlignment = Alignment.Center) {
@@ -186,7 +186,7 @@ internal fun HeartRateStatCard(
     Surface(
         modifier = modifier,
         shape = MaterialTheme.shapes.extraLarge,
-        color = MaterialTheme.colorScheme.surfaceContainer,
+        color = MaterialTheme.colorScheme.surfaceBright,
         contentColor = MaterialTheme.colorScheme.onSurface
     ) {
         Row(
@@ -344,7 +344,7 @@ internal fun SpeedCard(
     Surface(
         modifier = modifier.height(150.dp),
         shape = MaterialTheme.shapes.extraLarge,
-        color = MaterialTheme.colorScheme.surfaceContainer,
+        color = MaterialTheme.colorScheme.surfaceBright,
         contentColor = MaterialTheme.colorScheme.onSurface
     ) {
         Column(
@@ -382,7 +382,7 @@ internal fun SpeedPill(
     isActive: Boolean
 ) {
     val containerColor = if (isActive) MaterialTheme.colorScheme.primaryContainer
-    else MaterialTheme.colorScheme.surfaceContainer
+    else MaterialTheme.colorScheme.surfaceBright
     val contentColor = if (isActive) MaterialTheme.colorScheme.onPrimaryContainer
     else MaterialTheme.colorScheme.onSurfaceVariant
 

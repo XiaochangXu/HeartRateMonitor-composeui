@@ -21,7 +21,7 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun StatusBarScrim(
     modifier: Modifier = Modifier,
-    color: Color = MaterialTheme.colorScheme.surface
+    color: Color = MaterialTheme.colorScheme.surfaceContainer
 ) {
     val density = LocalDensity.current
     val height = with(density) {

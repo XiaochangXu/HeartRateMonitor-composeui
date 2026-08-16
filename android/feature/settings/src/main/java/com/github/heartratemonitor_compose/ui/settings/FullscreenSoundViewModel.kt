@@ -19,7 +19,7 @@ import kotlinx.coroutines.withTimeoutOrNull
 import javax.inject.Inject
 
 /**
- * 全屏提示音设置页面的 ViewModel（教科书式 MVI，Phase 1）。
+ * 全屏提示音设置页面的 ViewModel（MVI 架构，Phase 1）。
  *
  * 职责：
  * - 声音模式归约进 [FullscreenSoundUiState.soundMode]（observeNullable 派生，

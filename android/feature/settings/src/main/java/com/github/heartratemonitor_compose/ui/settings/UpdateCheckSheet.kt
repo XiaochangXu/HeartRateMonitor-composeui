@@ -136,7 +136,7 @@ private fun UpdateAvailableContent(
                 .fillMaxWidth()
                 .weight(1f),
             shape = cardShape(16.dp),
-            color = MaterialTheme.colorScheme.surfaceContainer
+            color = MaterialTheme.colorScheme.surfaceBright
         ) {
             Column(
                 modifier = Modifier
@@ -215,7 +215,7 @@ private fun UpdateMessageContent(
                 .fillMaxWidth()
                 .weight(1f),
             shape = cardShape(16.dp),
-            color = MaterialTheme.colorScheme.surfaceContainer
+            color = MaterialTheme.colorScheme.surfaceBright
         ) {
             if (data.renderAsMarkdown) {
                 Column(

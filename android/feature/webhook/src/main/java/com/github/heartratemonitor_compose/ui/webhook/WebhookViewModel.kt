@@ -11,7 +11,7 @@ import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 /**
- * Webhook 配置页面的 ViewModel（教科书式 MVI，Phase 2）。
+ * Webhook 配置页面的 ViewModel（MVI 架构，Phase 2）。
  *
  * Webhook 列表归约进单一 [WebhookUiState]；读写仍经 [WebhookRepository]
  * （触发链路保持契约 5：triggerWebhooks 节流不受本迁移影响）。

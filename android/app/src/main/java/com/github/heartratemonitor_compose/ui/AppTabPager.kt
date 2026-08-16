@@ -22,7 +22,7 @@ fun AppTabPager(
     isOnTab: Boolean,
     onToggleFloatingWindow: () -> Unit,
     onEnterFullScreen: () -> Unit,
-    safeNavigate: (String) -> Unit,
+    safeNavigate: (AppNavKey) -> Unit,
     onOpenExternal: (android.content.Intent) -> Unit
 ) {
     val context = LocalContext.current
@@ -37,7 +37,7 @@ fun AppTabPager(
         when (page) {
             0 -> {
                 val onToggleFloatingWindowStable = remember(onToggleFloatingWindow) { onToggleFloatingWindow }
-                val onNavigateToDevices = remember(safeNavigate) { { safeNavigate(Screen.Devices.route) } }
+                val onNavigateToDevices = remember(safeNavigate) { { safeNavigate(AppNavKey.Devices) } }
                 val onEnterFullScreenStable = remember { onEnterFullScreen }
                 HomeScreen(
                     viewModel = viewModel,
@@ -48,7 +48,7 @@ fun AppTabPager(
                 )
             }
             1 -> {
-                val onChart = remember(safeNavigate) { { sessionId: Long -> safeNavigate(Screen.Chart.createRoute(sessionId)) } }
+                val onChart = remember(safeNavigate) { { sessionId: Long -> safeNavigate(AppNavKey.Chart(sessionId)) } }
                 HistoryScreen(
                     onNavigateBack = {},
                     onNavigateToChart = onChart,
@@ -64,7 +64,7 @@ fun AppTabPager(
                 )
             }
             3 -> {
-                val onSettingsNavigate = remember(safeNavigate) { { route: String -> safeNavigate(route.toScreenRoute()) } }
+                val onSettingsNavigate = remember(safeNavigate) { { route: String -> safeNavigate(appNavKeyOf(route.toScreenRoute())) } }
                 val showToast = remember(context) { { message: String -> Toast.makeText(context, message, Toast.LENGTH_SHORT).show() } }
                 SettingsScreen(
                     isActive = isActive,

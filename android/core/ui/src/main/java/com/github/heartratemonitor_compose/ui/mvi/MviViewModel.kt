@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 /**
- * 教科书式 MVI 基类：单一 UiState 下行 + 单一 dispatch 意图上行。
+ * MVI 基类：单一 UiState 下行 + 单一 dispatch 意图上行。
  *
  * 子类职责：定义 [I]（sealed Intent）与 [S]（不可变 UiState data class），
  * 在 [handleIntent] 中完成意图处理（含副作用调用），经 [setState] 归约状态。

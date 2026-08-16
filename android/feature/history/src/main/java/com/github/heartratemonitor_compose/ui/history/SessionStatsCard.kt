@@ -48,7 +48,7 @@ internal fun SessionStatsCard(
     Surface(
         modifier = modifier,
         shape = MaterialTheme.shapes.extraLarge,
-        color = MaterialTheme.colorScheme.surfaceContainer
+        color = MaterialTheme.colorScheme.surfaceBright
     ) {
         Column(
             modifier = Modifier

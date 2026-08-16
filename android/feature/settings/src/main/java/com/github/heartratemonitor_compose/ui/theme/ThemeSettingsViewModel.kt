@@ -8,7 +8,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 /**
- * 主题设置页面的 ViewModel（教科书式 MVI）。
+ * 主题设置页面的 ViewModel（MVI 架构）。
  *
  * 主题配置经 [ThemeState]（Hilt 单例，持久化真源仍为 SettingsRepository）
  * 投影进单一 [ThemeSettingsUiState]；来源/模式/种子色/variant 经 Intent 上行。

@@ -1,5 +1,9 @@
 package com.github.heartratemonitor_compose.ui.alarm
 
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -9,13 +13,14 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -36,6 +41,7 @@ import androidx.compose.ui.unit.dp
 import com.github.heartratemonitor_compose.feature.alarm.R
 import com.github.heartratemonitor_compose.service.posture.PostureCalibration
 import com.github.heartratemonitor_compose.service.posture.PostureType
+import com.github.heartratemonitor_compose.ui.util.cardShape
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 
@@ -54,7 +60,7 @@ internal fun PostureCard(
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.extraLarge,
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceBright),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Column(
@@ -112,6 +118,39 @@ private fun PostureIndicator(label: String, iconRes: Int, isActive: Boolean) {
     }
 }
 
+/**
+ * 胶囊 filled 按钮（按压收缩圆角 + 阴影反馈）：
+ * 默认胶囊圆角（40dp 半高 20dp）+ primary 底 + onPrimary 文字；
+ * 按压时圆角以 fastSpatial spring（damping 0.6 / stiffness 800）平滑收缩到 8dp，
+ * 同时浮现 1dp 阴影。
+ */
+@Composable
+private fun CalibrationButton(
+    onClick: () -> Unit,
+    label: String,
+    modifier: Modifier = Modifier
+) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isPressed by interactionSource.collectIsPressedAsState()
+    val cornerRadius by animateDpAsState(
+        targetValue = if (isPressed) 8.dp else 20.dp,
+        animationSpec = spring(dampingRatio = 0.6f, stiffness = 800f),
+        label = "calibrationButtonCorner"
+    )
+    Button(
+        onClick = onClick,
+        modifier = modifier,
+        shape = cardShape(cornerRadius),
+        interactionSource = interactionSource,
+        elevation = ButtonDefaults.buttonElevation(
+            defaultElevation = 0.dp,
+            pressedElevation = 1.dp
+        )
+    ) {
+        Text(label)
+    }
+}
+
 /** 姿态校准卡片：校准中显示波浪进度，空闲时显示校准按钮与状态 */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -133,7 +172,7 @@ internal fun CalibrationCard(
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.extraLarge,
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceBright),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
@@ -171,12 +210,16 @@ internal fun CalibrationCard(
                 }
             } else {
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    OutlinedButton(onClick = onCalibrateSitting, modifier = Modifier.weight(1f)) {
-                        Text(stringResource(R.string.calibrate_sitting))
-                    }
-                    OutlinedButton(onClick = onCalibrateStanding, modifier = Modifier.weight(1f)) {
-                        Text(stringResource(R.string.calibrate_standing))
-                    }
+                    CalibrationButton(
+                        onClick = onCalibrateSitting,
+                        label = stringResource(R.string.calibrate_sitting),
+                        modifier = Modifier.weight(1f)
+                    )
+                    CalibrationButton(
+                        onClick = onCalibrateStanding,
+                        label = stringResource(R.string.calibrate_standing),
+                        modifier = Modifier.weight(1f)
+                    )
                 }
                 Spacer(Modifier.height(8.dp))
                 Text(
