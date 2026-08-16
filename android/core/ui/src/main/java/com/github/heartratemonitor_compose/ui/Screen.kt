@@ -4,16 +4,15 @@ const val FLOATING_NAV_HEIGHT = 64
 const val FLOATING_NAV_BOTTOM_MARGIN = 12
 
 const val SECONDARY_SLIDE_DURATION = 350
-/** 进入二级页面时底层 Tab 层向左位移比例（视差效果） */
+
 const val BACKGROUND_PARALLAX_RATIO = 0.2f
 
-/** 同路由防双击窗口：防止快速双击同一项目重复压栈 */
 const val SAME_ROUTE_DEBOUNCE_MS = 100L
 /**
  * 异路由转场互斥窗口：防止转场动画期间导航导致 AnimatedContent 竞态。
- * 低于 [SECONDARY_SLIDE_DURATION]：FastOutSlowInEasing 在 250/350≈71% 处已完成 ~94%
+ * 与 [SECONDARY_SLIDE_DURATION] 对齐，确保动画完成前不放行下一次导航。
  */
-const val TRANSITION_DEBOUNCE_MS = 250L
+const val TRANSITION_DEBOUNCE_MS = 350L
 
 /** NavHost 占位路由：Tab 页在 NavHost 外部管理，仅作为 startDestination */
 const val TAB_PLACEHOLDER = "tab_placeholder"

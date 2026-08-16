@@ -156,7 +156,7 @@ fun AboutDetailsScreen(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(horizontal = 11.dp)
+                    .padding(horizontal = 16.dp)
                     .verticalScroll(rememberScrollState())
                     .padding(top = padding.calculateTopPadding() + 16.dp),
                 verticalArrangement = Arrangement.spacedBy(24.dp)

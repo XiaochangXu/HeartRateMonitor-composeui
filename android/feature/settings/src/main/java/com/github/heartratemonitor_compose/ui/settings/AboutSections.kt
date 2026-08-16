@@ -45,7 +45,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
-import coil3.request.CachePolicy
 import coil3.request.ImageRequest
 import com.github.heartratemonitor_compose.feature.settings.R
 
@@ -242,7 +241,6 @@ internal fun MaintainerCard() {
                     AsyncImage(
                         model = ImageRequest.Builder(context)
                             .data(avatarUrl)
-                            .diskCachePolicy(CachePolicy.DISABLED)
                             .build(),
                         contentDescription = stringResource(R.string.maintainer),
                         modifier = Modifier
