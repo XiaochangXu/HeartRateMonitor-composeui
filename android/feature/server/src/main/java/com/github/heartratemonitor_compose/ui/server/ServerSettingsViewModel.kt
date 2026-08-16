@@ -30,7 +30,7 @@ class ServerSettingsViewModel @Inject constructor(
     private val ipAddressProvider: IpAddressProvider
 ) : MviViewModel<ServerUiState, ServerSettingsIntent>(
     // 本机 IP 为进入页面时的一次性展示值，随初始状态快照归约（原 UI 层 remember 直读上提）
-    initialServerUiState(ipAddressProvider.getLocalIpAddress())
+    initialServerUiState(settings, ipAddressProvider.getLocalIpAddress())
 ) {
 
     init {
@@ -107,11 +107,15 @@ data class ServerUiState(
     val ipAddress: String? = null
 )
 
-/** 初始状态：默认值唯一来源为 [AppSettings.DEFAULTS]（契约 10.3）。 */
-internal fun initialServerUiState(ipAddress: String?): ServerUiState = ServerUiState(
-    httpEnabled = AppSettings.defaultFor(SettingsKeys.HTTP_SERVER_ENABLED),
-    httpPort = AppSettings.defaultFor(SettingsKeys.HTTP_SERVER_PORT),
-    wsEnabled = AppSettings.defaultFor(SettingsKeys.WEBSOCKET_SERVER_ENABLED),
-    wsPort = AppSettings.defaultFor(SettingsKeys.WEBSOCKET_SERVER_PORT),
+/**
+ * 初始状态：读 [SettingsRepository] 内存快照真实值（app 启动时已预热、零 IO），
+ * 消除进入页面时"先默认值后快照覆盖"的闪变；键缺失时 [SettingsRepository.get]
+ * 回落 [AppSettings.DEFAULTS]（契约 10.3）。
+ */
+internal fun initialServerUiState(settings: SettingsRepository, ipAddress: String?): ServerUiState = ServerUiState(
+    httpEnabled = settings.get(SettingsKeys.HTTP_SERVER_ENABLED),
+    httpPort = settings.get(SettingsKeys.HTTP_SERVER_PORT),
+    wsEnabled = settings.get(SettingsKeys.WEBSOCKET_SERVER_ENABLED),
+    wsPort = settings.get(SettingsKeys.WEBSOCKET_SERVER_PORT),
     ipAddress = ipAddress
 )

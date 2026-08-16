@@ -221,63 +221,64 @@ fun FullScreenHeartRate(
             .fillMaxSize()
             .background(ComposeColor.Black)
             .drawBehind {
-                val canvasW = size.width
-                val canvasH = size.height
-                val baseline = canvasH * 0.82f
-                val amplitude = canvasH * 0.12f
-                val cyclesOnScreen = 4f
-                val currentPhase = ecgPhase.value
+                // 动画关闭（心率动画开关关闭，或未连接/心率 ≤30）时不画网格与波形线：
+                // 纯黑背景 + 静态爱心与心率数字，避免"静止红平线"的观感歧义。
+                // 动画开启时绘制行为与之前完全一致。
+                if (effectiveBpm > 0) {
+                    val canvasW = size.width
+                    val canvasH = size.height
+                    val baseline = canvasH * 0.82f
+                    val amplitude = canvasH * 0.12f
+                    val cyclesOnScreen = 4f
+                    val currentPhase = ecgPhase.value
 
-                val gridColor = heartColor.copy(alpha = 0.1f)
-                val gridStep = canvasW / 20f
-                var gx = 0f
-                while (gx <= canvasW) {
-                    drawLine(
-                        color = gridColor,
-                        start = Offset(gx, baseline - amplitude * 1.5f),
-                        end = Offset(gx, baseline + amplitude * 1.5f),
-                        strokeWidth = 2f
-                    )
-                    gx += gridStep
-                }
-                var gy = baseline - amplitude * 1.5f
-                while (gy <= baseline + amplitude * 1.5f) {
-                    drawLine(
-                        color = gridColor,
-                        start = Offset(0f, gy),
-                        end = Offset(canvasW, gy),
-                        strokeWidth = 2f
-                    )
-                    gy += amplitude * 0.5f
-                }
+                    val gridColor = heartColor.copy(alpha = 0.1f)
+                    val gridStep = canvasW / 20f
+                    var gx = 0f
+                    while (gx <= canvasW) {
+                        drawLine(
+                            color = gridColor,
+                            start = Offset(gx, baseline - amplitude * 1.5f),
+                            end = Offset(gx, baseline + amplitude * 1.5f),
+                            strokeWidth = 2f
+                        )
+                        gx += gridStep
+                    }
+                    var gy = baseline - amplitude * 1.5f
+                    while (gy <= baseline + amplitude * 1.5f) {
+                        drawLine(
+                            color = gridColor,
+                            start = Offset(0f, gy),
+                            end = Offset(canvasW, gy),
+                            strokeWidth = 2f
+                        )
+                        gy += amplitude * 0.5f
+                    }
 
-                val path = Path()
-                var first = true
-                var x = 0f
-                while (x <= canvasW) {
-                    val phase = (x / canvasW * cyclesOnScreen + currentPhase) % 1f
-                    val y = if (effectiveBpm > 0) {
-                        baseline - ecgWaveformValue(phase, amplitude)
-                    } else {
-                        baseline
+                    val path = Path()
+                    var first = true
+                    var x = 0f
+                    while (x <= canvasW) {
+                        val phase = (x / canvasW * cyclesOnScreen + currentPhase) % 1f
+                        val y = baseline - ecgWaveformValue(phase, amplitude)
+                        if (first) {
+                            path.moveTo(x, y)
+                            first = false
+                        } else {
+                            path.lineTo(x, y)
+                        }
+                        x += 2f
                     }
-                    if (first) {
-                        path.moveTo(x, y)
-                        first = false
-                    } else {
-                        path.lineTo(x, y)
-                    }
-                    x += 2f
-                }
-                drawPath(
-                    path = path,
-                    color = heartColor,
-                    style = Stroke(
-                        width = 5f,
-                        cap = StrokeCap.Round,
-                        join = StrokeJoin.Round
+                    drawPath(
+                        path = path,
+                        color = heartColor,
+                        style = Stroke(
+                            width = 5f,
+                            cap = StrokeCap.Round,
+                            join = StrokeJoin.Round
+                        )
                     )
-                )
+                }
             }
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },

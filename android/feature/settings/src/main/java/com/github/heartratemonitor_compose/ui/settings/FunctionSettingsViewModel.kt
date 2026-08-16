@@ -2,7 +2,6 @@ package com.github.heartratemonitor_compose.ui.settings
 
 import androidx.lifecycle.viewModelScope
 import com.github.heartratemonitor_compose.data.repository.SettingsRepository
-import com.github.heartratemonitor_compose.data.settings.AppSettings
 import com.github.heartratemonitor_compose.data.settings.SettingsKeys
 import com.github.heartratemonitor_compose.ui.mvi.MviViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -24,7 +23,9 @@ import javax.inject.Inject
 @HiltViewModel
 class FunctionSettingsViewModel @Inject constructor(
     private val settings: SettingsRepository
-) : MviViewModel<FunctionSettingsUiState, FunctionSettingsIntent>(initialFunctionSettingsUiState()) {
+) : MviViewModel<FunctionSettingsUiState, FunctionSettingsIntent>(
+    initialFunctionSettingsUiState(settings)
+) {
 
     init {
         // 设置真源投影：每次快照变化原子归约进 UiState，禁止本地双写（§3.5）
@@ -87,13 +88,17 @@ data class FunctionSettingsUiState(
     val scanFilterEnabled: Boolean
 )
 
-/** 初始状态：默认值唯一来源为 [AppSettings.DEFAULTS]（契约 10.3）。 */
-internal fun initialFunctionSettingsUiState(): FunctionSettingsUiState = FunctionSettingsUiState(
-    historyRecordingEnabled = AppSettings.defaultFor(SettingsKeys.HISTORY_RECORDING_ENABLED),
-    heartbeatAnimationEnabled = AppSettings.defaultFor(SettingsKeys.HEARTBEAT_ANIMATION_ENABLED),
-    speedDisplayEnabled = AppSettings.defaultFor(SettingsKeys.SPEED_DISPLAY_ENABLED),
-    hideFromRecentsEnabled = AppSettings.defaultFor(SettingsKeys.HIDE_FROM_RECENTS_ENABLED),
-    autoConnectEnabled = AppSettings.defaultFor(SettingsKeys.AUTO_CONNECT_ENABLED),
-    autoReconnectEnabled = AppSettings.defaultFor(SettingsKeys.AUTO_RECONNECT_ENABLED),
-    scanFilterEnabled = AppSettings.defaultFor(SettingsKeys.SCAN_FILTER_ENABLED)
+/**
+ * 初始状态：读 [SettingsRepository] 内存快照真实值（app 启动时已预热、零 IO），
+ * 消除进入页面时"先默认值后快照覆盖"的闪变；键缺失时 [SettingsRepository.get]
+ * 回落 [AppSettings.DEFAULTS]（契约 10.3）。
+ */
+internal fun initialFunctionSettingsUiState(settings: SettingsRepository): FunctionSettingsUiState = FunctionSettingsUiState(
+    historyRecordingEnabled = settings.get(SettingsKeys.HISTORY_RECORDING_ENABLED),
+    heartbeatAnimationEnabled = settings.get(SettingsKeys.HEARTBEAT_ANIMATION_ENABLED),
+    speedDisplayEnabled = settings.get(SettingsKeys.SPEED_DISPLAY_ENABLED),
+    hideFromRecentsEnabled = settings.get(SettingsKeys.HIDE_FROM_RECENTS_ENABLED),
+    autoConnectEnabled = settings.get(SettingsKeys.AUTO_CONNECT_ENABLED),
+    autoReconnectEnabled = settings.get(SettingsKeys.AUTO_RECONNECT_ENABLED),
+    scanFilterEnabled = settings.get(SettingsKeys.SCAN_FILTER_ENABLED)
 )

@@ -63,8 +63,8 @@ fun AppRoot(
     val context = LocalContext.current
     val navController = rememberNavController()
     val navGuard = rememberNavGuard()
-    val safeNavigate = rememberSafeNavigate(navController, navGuard)
-    val safePopBack = rememberSafePopBack(navController, navGuard)
+    val safeNavigateInner = rememberSafeNavigate(navController, navGuard)
+    val safePopBackInner = rememberSafePopBack(navController, navGuard)
 
     val mainViewModel: MainViewModel = hiltViewModel()
     val pagerState = rememberPagerState(initialPage = 0) { 4 }
@@ -96,9 +96,35 @@ fun AppRoot(
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
     var lastKnownRoute by remember { mutableStateOf(TAB_PLACEHOLDER) }
+    // 兜底同步：覆盖非导航入口的路由变化（当前架构下不存在，正常路径与 syncRoute 赋值幂等）
     LaunchedEffect(currentRoute) {
         if (currentRoute != null) {
             lastKnownRoute = currentRoute
+        }
+    }
+    /**
+     * 在导航放行的同一时刻同步 lastKnownRoute，使 isOnTab 驱动的视差动画与
+     * NavHost 转场动画同帧启动。原实现依赖 LaunchedEffect 在组合提交后异步回写，
+     * 视差总是比页面滑动晚一帧（约 16ms）启动，转场起始瞬间两层运动错位，
+     * 视觉上表现为"抖动"。同步后动画参数（时长/缓动/视差比例）完全不变，
+     * 仅消除启动时序错位。
+     */
+    val syncRoute = remember(navController) {
+        {
+            navController.currentDestination?.route?.let { lastKnownRoute = it }
+            Unit
+        }
+    }
+    val safeNavigate = remember(safeNavigateInner, syncRoute) {
+        { route: String ->
+            safeNavigateInner(route)
+            syncRoute()
+        }
+    }
+    val safePopBack = remember(safePopBackInner, syncRoute) {
+        {
+            safePopBackInner()
+            syncRoute()
         }
     }
     // Tab 页在 NavHost 外部管理，NavHost 在 placeholder 时表示当前在 Tab 页
@@ -147,7 +173,7 @@ fun AppRoot(
         safePopBack()
     }
 
-    val navigateToTab = remember(navController, currentTab, isOnTab, scope, navGuard) {
+    val navigateToTab = remember(navController, currentTab, isOnTab, scope, navGuard, syncRoute) {
         tab@{ pageIndex: Int ->
             val newTab = tabScreenAt(pageIndex)
             if (currentTab == newTab && isOnTab) return@tab
@@ -159,12 +185,20 @@ fun AppRoot(
                 }
                 navGuard.lastNavTimeMs = now
                 navController.popBackStack(TAB_PLACEHOLDER, inclusive = false)
+                // 与 safeNavigate/safePopBack 同步：pop 转场与视差回位动画同帧启动
+                syncRoute()
             }
             scope.launch { pagerState.animateScrollToPage(pageIndex) }
         }
     }
 
     val onOpenExternalStable = remember(onOpenExternal) { onOpenExternal }
+
+    // 稳定化 lambda 引用：AppRoot 每次重组（导航/路由变化）若新建 lambda，
+    // 会触发 AppBottomNavBar 内部 remember(selectedTabIndex) 重建与 LaunchedEffect 重启
+    //（值相同，行为不变，纯多余重组）
+    val selectedPage = remember(pagerState) { { pagerState.targetPage } }
+    val onTabSelected = remember(navigateToTab) { { index: Int -> navigateToTab(index) } }
 
     val changelogNotice by changelogNotifier.notice.collectAsStateWithLifecycle()
 
@@ -202,8 +236,8 @@ fun AppRoot(
             liquidBackdrop = liquidBackdrop,
             liquidGlassConfig = liquidGlassConfig,
             isFullScreenMode = isFullScreenMode,
-            selectedPage = { pagerState.targetPage },
-            onTabSelected = { index -> navigateToTab(index) },
+            selectedPage = selectedPage,
+            onTabSelected = onTabSelected,
             navBarBottomInset = navBarBottomInset,
             modifier = Modifier.align(Alignment.BottomCenter)
         )

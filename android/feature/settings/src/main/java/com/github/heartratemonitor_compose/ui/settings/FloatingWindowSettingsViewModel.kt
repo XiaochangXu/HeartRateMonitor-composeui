@@ -3,7 +3,6 @@ package com.github.heartratemonitor_compose.ui.settings
 import androidx.datastore.preferences.core.Preferences
 import androidx.lifecycle.viewModelScope
 import com.github.heartratemonitor_compose.data.repository.SettingsRepository
-import com.github.heartratemonitor_compose.data.settings.AppSettings
 import com.github.heartratemonitor_compose.data.settings.SettingsKeys
 import com.github.heartratemonitor_compose.ui.mvi.MviViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -25,7 +24,7 @@ import javax.inject.Inject
 class FloatingWindowSettingsViewModel @Inject constructor(
     private val settings: SettingsRepository
 ) : MviViewModel<FloatingWindowSettingsUiState, FloatingWindowSettingsIntent>(
-    initialFloatingWindowSettingsUiState()
+    initialFloatingWindowSettingsUiState(settings)
 ) {
 
     init {
@@ -100,17 +99,21 @@ data class FloatingWindowSettingsUiState(
     val borderColor: Int
 )
 
-/** 初始状态：默认值唯一来源为 [AppSettings.DEFAULTS]（契约 10.3）。 */
-internal fun initialFloatingWindowSettingsUiState(): FloatingWindowSettingsUiState =
+/**
+ * 初始状态：读 [SettingsRepository] 内存快照真实值（app 启动时已预热、零 IO），
+ * 消除进入页面时"先默认值后快照覆盖"的闪变；键缺失时 [SettingsRepository.get]
+ * 回落 [AppSettings.DEFAULTS]（契约 10.3）。
+ */
+internal fun initialFloatingWindowSettingsUiState(settings: SettingsRepository): FloatingWindowSettingsUiState =
     FloatingWindowSettingsUiState(
-        bpmTextEnabled = AppSettings.defaultFor(SettingsKeys.BPM_TEXT_ENABLED),
-        heartIconEnabled = AppSettings.defaultFor(SettingsKeys.HEART_ICON_ENABLED),
-        size = AppSettings.defaultFor(SettingsKeys.FLOATING_SIZE),
-        iconSize = AppSettings.defaultFor(SettingsKeys.FLOATING_ICON_SIZE),
-        cornerRadius = AppSettings.defaultFor(SettingsKeys.FLOATING_CORNER_RADIUS),
-        bgAlpha = AppSettings.defaultFor(SettingsKeys.FLOATING_BG_ALPHA),
-        borderAlpha = AppSettings.defaultFor(SettingsKeys.FLOATING_BORDER_ALPHA),
-        textColor = AppSettings.defaultFor(SettingsKeys.FLOATING_TEXT_COLOR),
-        bgColor = AppSettings.defaultFor(SettingsKeys.FLOATING_BG_COLOR),
-        borderColor = AppSettings.defaultFor(SettingsKeys.FLOATING_BORDER_COLOR)
+        bpmTextEnabled = settings.get(SettingsKeys.BPM_TEXT_ENABLED),
+        heartIconEnabled = settings.get(SettingsKeys.HEART_ICON_ENABLED),
+        size = settings.get(SettingsKeys.FLOATING_SIZE),
+        iconSize = settings.get(SettingsKeys.FLOATING_ICON_SIZE),
+        cornerRadius = settings.get(SettingsKeys.FLOATING_CORNER_RADIUS),
+        bgAlpha = settings.get(SettingsKeys.FLOATING_BG_ALPHA),
+        borderAlpha = settings.get(SettingsKeys.FLOATING_BORDER_ALPHA),
+        textColor = settings.get(SettingsKeys.FLOATING_TEXT_COLOR),
+        bgColor = settings.get(SettingsKeys.FLOATING_BG_COLOR),
+        borderColor = settings.get(SettingsKeys.FLOATING_BORDER_COLOR)
     )

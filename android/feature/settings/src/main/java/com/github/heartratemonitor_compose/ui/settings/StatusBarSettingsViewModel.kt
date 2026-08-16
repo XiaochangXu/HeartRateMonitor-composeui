@@ -4,7 +4,6 @@ import android.content.Intent
 import androidx.datastore.preferences.core.Preferences
 import androidx.lifecycle.viewModelScope
 import com.github.heartratemonitor_compose.data.repository.SettingsRepository
-import com.github.heartratemonitor_compose.data.settings.AppSettings
 import com.github.heartratemonitor_compose.data.settings.SettingsKeys
 import com.github.heartratemonitor_compose.data.system.OverlayPermissionProvider
 import com.github.heartratemonitor_compose.service.ServiceLauncher
@@ -32,7 +31,7 @@ class StatusBarSettingsViewModel @Inject constructor(
     private val overlayPermissionProvider: OverlayPermissionProvider,
     private val serviceLauncher: ServiceLauncher,
     private val suppressHideForExternalLaunch: @JvmSuppressWildcards (Boolean) -> Unit
-) : MviViewModel<StatusBarSettingsUiState, StatusBarSettingsIntent>(initialStatusBarSettingsUiState()) {
+) : MviViewModel<StatusBarSettingsUiState, StatusBarSettingsIntent>(initialStatusBarSettingsUiState(settings)) {
 
     init {
         // 设置真源投影：每次快照变化原子归约进 UiState，禁止本地双写（§3.5）
@@ -117,13 +116,17 @@ data class StatusBarSettingsUiState(
     val textColor: Int
 )
 
-/** 初始状态：默认值唯一来源为 [AppSettings.DEFAULTS]（契约 10.3）。 */
-internal fun initialStatusBarSettingsUiState(): StatusBarSettingsUiState = StatusBarSettingsUiState(
-    residentEnabled = AppSettings.defaultFor(SettingsKeys.STATUS_BAR_RESIDENT_ENABLED),
-    bpmTextEnabled = AppSettings.defaultFor(SettingsKeys.STATUS_BAR_BPM_TEXT_ENABLED),
-    xPosition = AppSettings.defaultFor(SettingsKeys.STATUS_BAR_X_POSITION),
-    yOffset = AppSettings.defaultFor(SettingsKeys.STATUS_BAR_Y_OFFSET),
-    size = AppSettings.defaultFor(SettingsKeys.STATUS_BAR_SIZE),
-    textThickness = AppSettings.defaultFor(SettingsKeys.STATUS_BAR_TEXT_THICKNESS),
-    textColor = AppSettings.defaultFor(SettingsKeys.STATUS_BAR_TEXT_COLOR)
+/**
+ * 初始状态：读 [SettingsRepository] 内存快照真实值（app 启动时已预热、零 IO），
+ * 消除进入页面时"先默认值后快照覆盖"的闪变；键缺失时 [SettingsRepository.get]
+ * 回落 [AppSettings.DEFAULTS]（契约 10.3）。
+ */
+internal fun initialStatusBarSettingsUiState(settings: SettingsRepository): StatusBarSettingsUiState = StatusBarSettingsUiState(
+    residentEnabled = settings.get(SettingsKeys.STATUS_BAR_RESIDENT_ENABLED),
+    bpmTextEnabled = settings.get(SettingsKeys.STATUS_BAR_BPM_TEXT_ENABLED),
+    xPosition = settings.get(SettingsKeys.STATUS_BAR_X_POSITION),
+    yOffset = settings.get(SettingsKeys.STATUS_BAR_Y_OFFSET),
+    size = settings.get(SettingsKeys.STATUS_BAR_SIZE),
+    textThickness = settings.get(SettingsKeys.STATUS_BAR_TEXT_THICKNESS),
+    textColor = settings.get(SettingsKeys.STATUS_BAR_TEXT_COLOR)
 )

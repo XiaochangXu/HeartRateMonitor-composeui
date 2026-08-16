@@ -15,7 +15,6 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -38,6 +37,7 @@ import com.github.heartratemonitor_compose.data.model.HeartRateSessionInfo
 import com.github.heartratemonitor_compose.ui.util.SheetTopShape
 import com.github.heartratemonitor_compose.ui.util.StatusBarScrim
 import com.github.heartratemonitor_compose.ui.util.cardShape
+import com.github.heartratemonitor_compose.ui.util.collectWhenActive
 import com.github.heartratemonitor_compose.ui.util.rememberExpandedSheetState
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.statusBars
@@ -49,11 +49,15 @@ import java.util.*
 fun HistoryScreen(
     onNavigateBack: () -> Unit,
     onNavigateToChart: (Long) -> Unit,
-    isInTab: Boolean = false
+    isInTab: Boolean = false,
+    isActive: Boolean = true
 ) {
     val context = LocalContext.current
     val viewModel: HistoryViewModel = hiltViewModel()
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    // 非前台（Tab 被遮挡 / 二级页面打开）时暂停 uiState 订阅：ViewModel 内的
+    // Room 流仍常驻维护状态（正确性不变），但 UI 不再每秒随心率记录重组重绘，
+    // 避免触发底层 pager 层（layerBackdrop 整屏录制）每秒重录
+    val uiState by viewModel.uiState.collectWhenActive(isActive, initial = HistoryUiState())
     val sessions = uiState.sessions
     val previewDataMap = uiState.previewDataMap
     // 多选态为业务状态（影响删除行为），归 ViewModel；弹窗显隐属纯瞬时态保留 UI

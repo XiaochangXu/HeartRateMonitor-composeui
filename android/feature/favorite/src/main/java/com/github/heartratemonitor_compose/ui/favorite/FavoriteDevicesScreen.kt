@@ -17,22 +17,24 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.github.heartratemonitor_compose.feature.favorite.R
 import com.github.heartratemonitor_compose.data.model.FavoriteDeviceInfo
 import com.github.heartratemonitor_compose.ui.util.SheetTopShape
 import com.github.heartratemonitor_compose.ui.util.StatusBarScrim
+import com.github.heartratemonitor_compose.ui.util.collectWhenActive
 import com.github.heartratemonitor_compose.ui.util.rememberExpandedSheetState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FavoriteDevicesScreen(
     onNavigateBack: () -> Unit,
-    isInTab: Boolean = false
+    isInTab: Boolean = false,
+    isActive: Boolean = true
 ) {
     val viewModel: FavoriteDevicesViewModel = hiltViewModel()
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    // 非前台时暂停订阅：ViewModel 内 Room 流常驻维护状态，UI 不随数据变化重组
+    val uiState by viewModel.uiState.collectWhenActive(isActive, initial = FavoriteDevicesUiState())
     val devices = uiState.devices
     var showDeleteDialog by remember { mutableStateOf(false) }
     var deviceToDelete by remember { mutableStateOf<FavoriteDeviceInfo?>(null) }

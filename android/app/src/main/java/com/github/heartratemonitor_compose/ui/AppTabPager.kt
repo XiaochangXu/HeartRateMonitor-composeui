@@ -52,13 +52,15 @@ fun AppTabPager(
                 HistoryScreen(
                     onNavigateBack = {},
                     onNavigateToChart = onChart,
-                    isInTab = true
+                    isInTab = true,
+                    isActive = isActive
                 )
             }
             2 -> {
                 FavoriteDevicesScreen(
                     onNavigateBack = {},
-                    isInTab = true
+                    isInTab = true,
+                    isActive = isActive
                 )
             }
             3 -> {
