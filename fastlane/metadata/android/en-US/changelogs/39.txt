@@ -1,0 +1,7 @@
+- Fixed an issue where the heart rate card on the home screen still displayed old data from the last disconnection after Bluetooth was disconnected and quickly reconnected.
+- Fixed an issue where heart rate was not displayed after a successful connection. Previously, if heart rate subscription failed (e.g., the watch started broadcasting late, or some devices allowed searching and connecting before enabling heart rate broadcasting), the App would show "Connected" but the home screen/floating window heart rate would remain at "--", requiring a disconnection and reconnection. Subscription failures now automatically retry without manual reconnection.
+- Fixed unstable/accidental connection interruptions. Previously, the auto-reconnect logic for the old device could interrupt the new connection when switching connected devices. Now, old tasks automatically abort reconnection once the user initiates a new connection.
+- Fixed page data update freezes caused by a single exception. Previously, an error in any data source would stop refreshing the home screen heart rate, connection status, and scan list altogether. Data channels are now isolated, so a single error does not affect others.
+- Fixed duplicate subscriptions in the floating window/notification bar.
+- Fixed duplicate data collection no longer occurring after the service is rebuilt by the system.
+- Optimize multilingual support

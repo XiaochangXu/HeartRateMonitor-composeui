@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UserControl x:Class="HeartRate.Views.NetworkSettingsControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:models="using:HeartRate.Models"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             d:DesignWidth="620"
+             d:DesignHeight="700">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <TextBlock x:Uid="Net_Header"
+                   Grid.Row="0"
+                   Text="网络传输"
+                   FontSize="20"
+                   FontWeight="SemiBold"
+                   Margin="20,0,0,12" />
+
+        <ScrollViewer Grid.Row="1" Padding="0,0,12,0">
+            <StackPanel Spacing="16">
+
+                <!-- ── HTTP 服务 ─────────────────────────────────────────────── -->
+                <Border Background="{ThemeResource LayerFillColorDefaultBrush}"
+                        BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}"
+                        BorderThickness="1"
+                        CornerRadius="{ThemeResource OverlayCornerRadius}"
+                        Padding="20">
+                    <StackPanel Spacing="12">
+                        <ToggleSwitch x:Uid="Net_HttpToggle"
+                                      IsOn="{x:Bind ViewModel.Network.HttpServerEnabled, Mode=TwoWay}"
+                                      Toggled="HttpToggle_Toggled" />
+                        <Grid ColumnSpacing="12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="110" />
+                                <ColumnDefinition Width="120" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock x:Uid="Net_HttpPort" Text="端口"
+                                       Grid.Column="0" VerticalAlignment="Center" />
+                            <TextBox Grid.Column="1"
+                                     Text="{x:Bind ViewModel.HttpPortText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                     InputScope="Number"
+                                     MaxLength="5" />
+                        </Grid>
+                        <StackPanel Spacing="2">
+                            <TextBlock x:Uid="Net_HttpUrlLabel" Text="访问地址"
+                                       Style="{ThemeResource CaptionTextBlockStyle}"
+                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                            <TextBlock Text="{x:Bind ViewModel.HttpUrl, Mode=OneWay}"
+                                       IsTextSelectionEnabled="True"
+                                       TextWrapping="Wrap"
+                                       FontFamily="Consolas" />
+                        </StackPanel>
+                        <TextBlock Text="{x:Bind ViewModel.HttpStatusText, Mode=OneWay}"
+                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                    </StackPanel>
+                </Border>
+
+                <!-- ── WebSocket 服务 ────────────────────────────────────────── -->
+                <Border Background="{ThemeResource LayerFillColorDefaultBrush}"
+                        BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}"
+                        BorderThickness="1"
+                        CornerRadius="{ThemeResource OverlayCornerRadius}"
+                        Padding="20">
+                    <StackPanel Spacing="12">
+                        <ToggleSwitch x:Uid="Net_WsToggle"
+                                      IsOn="{x:Bind ViewModel.Network.WebSocketServerEnabled, Mode=TwoWay}"
+                                      Toggled="WsToggle_Toggled" />
+                        <Grid ColumnSpacing="12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="110" />
+                                <ColumnDefinition Width="120" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock x:Uid="Net_WsPort" Text="端口"
+                                       Grid.Column="0" VerticalAlignment="Center" />
+                            <TextBox Grid.Column="1"
+                                     Text="{x:Bind ViewModel.WsPortText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                     InputScope="Number"
+                                     MaxLength="5" />
+                        </Grid>
+                        <StackPanel Spacing="2">
+                            <TextBlock x:Uid="Net_WsUrlLabel" Text="访问地址"
+                                       Style="{ThemeResource CaptionTextBlockStyle}"
+                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                            <TextBlock Text="{x:Bind ViewModel.WsUrl, Mode=OneWay}"
+                                       IsTextSelectionEnabled="True"
+                                       TextWrapping="Wrap"
+                                       FontFamily="Consolas" />
+                        </StackPanel>
+                        <TextBlock Text="{x:Bind ViewModel.WsStatusText, Mode=OneWay}"
+                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                    </StackPanel>
+                </Border>
+
+                <!-- ── Webhook 列表 ─────────────────────────────────────────── -->
+                <Border Background="{ThemeResource LayerFillColorDefaultBrush}"
+                        BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}"
+                        BorderThickness="1"
+                        CornerRadius="{ThemeResource OverlayCornerRadius}"
+                        Padding="20">
+                    <StackPanel Spacing="10">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock x:Uid="Net_Webhooks" Text="Webhook"
+                                       Grid.Column="0"
+                                       FontSize="15"
+                                       FontWeight="SemiBold"
+                                       VerticalAlignment="Center" />
+                            <Button x:Uid="Net_AddWebhook" Content="添加"
+                                    Grid.Column="1"
+                                    Click="AddWebhook_Click" />
+                        </Grid>
+
+                        <ItemsControl ItemsSource="{x:Bind ViewModel.Webhooks, Mode=OneWay}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="models:Webhook">
+                                    <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                            BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}"
+                                            BorderThickness="1"
+                                            CornerRadius="6"
+                                            Padding="12"
+                                            Margin="0,0,0,8">
+                                        <Grid ColumnSpacing="10">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel Grid.Column="0" Spacing="2">
+                                                <TextBlock Text="{x:Bind Name, Mode=OneWay}" FontWeight="SemiBold" />
+                                                <TextBlock Text="{x:Bind Url, Mode=OneWay}"
+                                                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                           TextTrimming="CharacterEllipsis"
+                                                           IsTextSelectionEnabled="True" />
+                                            </StackPanel>
+                                            <ToggleSwitch Grid.Column="1"
+                                                          IsOn="{x:Bind Enabled, Mode=TwoWay}"
+                                                          OnContent=""
+                                                          OffContent=""
+                                                          Toggled="OnWebhookEnabledToggled" />
+                                            <Button x:Uid="Net_Edit" Content="编辑"
+                                                    Grid.Column="2"
+                                                    Click="EditWebhook_Click" />
+                                            <Button x:Uid="Net_Delete" Content="删除"
+                                                    Grid.Column="3"
+                                                    Click="DeleteWebhook_Click" />
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</UserControl>

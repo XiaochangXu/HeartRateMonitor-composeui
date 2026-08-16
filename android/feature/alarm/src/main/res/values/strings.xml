@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="alarm_title">Heart Rate Alarm</string>
+    <string name="calibrated_samples">Calibrated ✓ (%1$d samples)</string>
+    <string name="not_calibrated">Not calibrated</string>
+    <string name="calibrating_format">Calibrating %1$s…</string>
+    <string name="remaining_seconds">%1$d seconds remaining</string>
+    <string name="calibrate_sitting">Calibrate Sitting</string>
+    <string name="calibrate_standing">Calibrate Standing</string>
+    <string name="calibration_status_format">Sitting: %1$s\nStanding: %2$s</string>
+    <string name="clear_calibration">Clear Calibration</string>
+    <string name="enable_alarm">Enable Heart Rate Alarm</string>
+    <string name="exclude_posture_detection">Exclude Posture Detection</string>
+    <string name="above_threshold">Above</string>
+    <string name="below_threshold">Below</string>
+    <string name="duration_label">Duration</string>
+    <string name="seconds_suffix"> sec</string>
+    <string name="repeat_alarm">Repeat Alarm</string>
+    <string name="alarm_interval">Alarm Interval</string>
+    <string name="minutes_suffix"> min</string>
+</resources>
+

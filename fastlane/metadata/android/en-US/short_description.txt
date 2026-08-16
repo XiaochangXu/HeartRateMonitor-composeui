@@ -1,0 +1,1 @@
+Monitor heart rate via BLE devices with real-time display, history, and alerts
