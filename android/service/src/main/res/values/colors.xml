@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- windowBackground 与 Compose colorScheme.surfaceDim (#DEDCE0) 对齐，
+         中性浅灰色，避免开屏色相突变 -->
+    <color name="surface_dim_light">#DEDCE0</color>
+    <!-- 低版本回退（Android 12 以下无系统 Monet 颜色） -->
+    <color name="window_background_light">@color/surface_dim_light</color>
+    <!-- windowBackground 低版本回退色（与 Compose ExpressSurfaceDimDark 对齐） -->
+    <color name="surface_dim_dark">#0E0E11</color>
+    <color name="window_background_dark">@color/surface_dim_dark</color>
+</resources>

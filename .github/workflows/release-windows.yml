@@ -1,0 +1,67 @@
+name: Release (Windows)
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: '版本号（如 4.4，将生成 tag v4.4）'
+        required: true
+        default: '4.4'
+
+jobs:
+  build-release:
+    runs-on: windows-latest
+    permissions:
+      contents: write
+    steps:
+      # 可选：开启长路径兜底
+      - name: Enable Windows long path
+        run: New-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem" -Name "LongPathsEnabled" -Value 1 -PropertyType DWORD -Force
+        shell: pwsh
+
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          # 排除android目录，彻底规避超长路径文件
+          sparse-checkout: |
+            /*
+            !android
+          sparse-checkout-cone-mode: false
+
+      - name: Setup .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Publish (self-contained, win-x64)
+        run: >
+          dotnet publish windows/HeartRate.csproj
+          -c Release
+          -r win-x64
+          --self-contained true
+          -p:WindowsPackageType=None
+          -o publish
+
+      - name: 压缩打包Zip
+        shell: pwsh
+        run: |
+          $ver = "${{ github.event.inputs.version }}"
+          $zip = "$PWD/HeartRateMonitor-v$ver-win-x64.zip"
+          $src = (Resolve-Path publish).Path
+          Add-Type -AssemblyName System.IO.Compression.FileSystem
+          $level = [System.IO.Compression.CompressionLevel]::Optimal
+          try { $level = [System.IO.Compression.CompressionLevel]::SmallestSize } catch {}
+          Remove-Item $zip -Force -ErrorAction SilentlyContinue
+          [System.IO.Compression.ZipFile]::CreateFromDirectory($src, $zip, $level, $false)
+          $size = [math]::Round((Get-Item $zip).Length / 1MB, 1)
+          Write-Host "打包完成：$zip ($size MB)"
+
+      - name: 上传至Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ github.event.inputs.version }}
+          name: v${{ github.event.inputs.version }}
+          generate_release_notes: true
+          files: HeartRateMonitor-v${{ github.event.inputs.version }}-win-x64.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,0 +1,4 @@
+- G2 fillet applied to all cards
+- Fixed some bugs
+- some of the details.
+- Refactored the code
