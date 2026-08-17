@@ -1,0 +1,7 @@
+- Fixed some bugs
+- some of the details.
+- Some controls realize the dynamic effect of pressing deformation
+- Navigation library migrated to Navigation 3, new transition animation
+- Removed red bar in full screen mode when heartbeat animation is not turned on
+- Optimize performance: Do not subscribe to heart rate data in the background when leaving the history page
+- UI modification: page background color changed to SurfaceContainer, card color changed to SurfaceBright

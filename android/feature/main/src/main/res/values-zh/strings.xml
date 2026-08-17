@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="cd_toggle_floating_window">切换悬浮窗</string>
+    <string name="cd_speed_dial">快捷操作</string>
+    <string name="cd_search_bluetooth">搜索蓝牙设备</string>
+    <string name="search_tip_title">注意事项</string>
+    <string name="scan_filter_on">已开启搜索过滤</string>
+    <string name="scan_filter_off">未开启搜索过滤</string>
+    <string name="search_tip_message">请先打开设备的心率广播，再点击搜索，否则找不到设备。</string>
+    <string name="got_it">我知道了</string>
+    <string name="available_devices">可用设备</string>
+    <string name="no_available_devices">暂无可用设备，请点击右上角搜索</string>
+    <string name="enter_fullscreen">进入全屏模式</string>
+    <string name="disconnect">断开连接</string>
+    <string name="please_disconnect_first">请先断开设备</string>
+    <string name="speed">速度</string>
+    <string name="cd_favorite">收藏</string>
+    <string name="bpm_unit">次/分</string>
+    <string name="heart_rate_data">心率数据</string>
+    <string name="heart_rate_statistics">心率统计</string>
+    <string name="heart_rate_ring_max">心率上限</string>
+    <string name="edit_heart_rate_ring_max">修改心率显示上限</string>
+    <string name="cd_edit_heart_rate_max">修改半圆环的心率上限</string>
+    <string name="fullscreen_exit_hint">点击屏幕或按返回键退出</string>
+    <string name="history_not_enabled">未开启历史记录</string>
+    <string name="device_not_connected">未连接设备</string>
+    <string name="connected_device">已连接设备</string>
+    <string name="max_heart_rate">最大心率</string>
+    <string name="min_heart_rate">最低心率</string>
+    <string name="reset">重置</string>
+</resources>
+

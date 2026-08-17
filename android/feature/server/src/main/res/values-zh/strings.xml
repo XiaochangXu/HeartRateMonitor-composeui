@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="lan_transfer_title">局域网传输</string>
+    <string name="lan_transfer_tip">使用前请在电脑端启动配套程序并保持与手机在同一 Wi-Fi/局域网。手机会自动发现电脑，点击设备发起配对，电脑端确认后即可实时推送心率。</string>
+    <string name="lan_scanning">正在扫描附近电脑…</string>
+    <string name="lan_no_devices">未发现电脑设备，请确认电脑端已启动并处于同一局域网</string>
+    <string name="lan_scan">扫描设备</string>
+    <string name="lan_pair_approved">电脑已允许连接，心率推送已开启</string>
+    <string name="lan_pair_rejected">电脑拒绝了连接请求</string>
+    <string name="lan_pair_failed">配对失败：%1$s</string>
+    <string name="lan_pair_timeout">配对超时，电脑未响应</string>
+    <string name="lan_disconnect">断开连接</string>
+    <string name="lan_connected_status">已连接电脑设备</string>
+    <string name="lan_status_pushing">推送中</string>
+    <string name="lan_ws_not_enabled">未启用 WebSocket 服务器，无法推送。请前往「HTTP &amp; WebSocket 服务」开启</string>
+    <string name="lan_open_server_settings">前往开启</string>
+    <string name="lan_pair_action">连接</string>
+    <string name="lan_device_unknown">未知电脑</string>
+    <string name="server_settings">服务器设置</string>
+    <string name="not_connected_network">未连接网络</string>
+    <string name="http_port_hint">HTTP 端口</string>
+    <string name="websocket_port_hint">WebSocket 端口</string>
+    <string name="enable_server_format">启用 %1$s 服务器</string>
+    <string name="access_url_format">访问地址: %1$s://%2$s:%3$s</string>
+    <string name="http_enabled_status">HTTP 服务器已启用</string>
+    <string name="http_disabled_status">HTTP 服务器已禁用</string>
+    <string name="http_access_url">访问地址: http://%1$s:%2$d/heartrate</string>
+    <string name="server_start_failed">服务器启动失败（端口可能被占用）</string>
+    <string name="ws_enabled_status">WebSocket 服务器已启用</string>
+    <string name="ws_disabled_status">WebSocket 服务器已禁用</string>
+    <string name="ws_access_url">访问地址: ws://%1$s:%2$d</string></resources>
+

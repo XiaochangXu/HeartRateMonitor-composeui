@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="cd_toggle_floating_window">Toggle floating window</string>
+    <string name="cd_speed_dial">Quick Actions</string>
+    <string name="cd_search_bluetooth">Search Bluetooth devices</string>
+    <string name="search_tip_title">Notice</string>
+    <string name="scan_filter_on">Scan filter on</string>
+    <string name="scan_filter_off">Scan filter off</string>
+    <string name="search_tip_message">Please turn on your device\'s heart rate broadcast first, then tap search. Otherwise the device cannot be found.</string>
+    <string name="got_it">Got it</string>
+    <string name="available_devices">Available Devices</string>
+    <string name="no_available_devices">No devices found. Tap search in the top right corner</string>
+    <string name="enter_fullscreen">Enter Fullscreen Mode</string>
+    <string name="disconnect">Disconnect</string>
+    <string name="please_disconnect_first">Please disconnect the device first</string>
+    <string name="speed">Speed</string>
+    <string name="cd_favorite">Favorite</string>
+    <string name="bpm_unit">bpm</string>
+    <string name="heart_rate_data">Heart Rate Data</string>
+    <string name="heart_rate_statistics">Heart Rate Statistics</string>
+    <string name="heart_rate_ring_max">Heart Rate Upper Limit</string>
+    <string name="edit_heart_rate_ring_max">Edit the upper limit of heart rate display</string>
+    <string name="cd_edit_heart_rate_max">Edit heart rate upper limit</string>
+    <string name="fullscreen_exit_hint">Tap screen or press back to exit</string>
+    <string name="history_not_enabled">History Not Enabled</string>
+    <string name="device_not_connected">Device Not Connected</string>
+    <string name="connected_device">Connected Device</string>
+    <string name="max_heart_rate">MAX</string>
+    <string name="min_heart_rate">MIN</string>
+    <string name="reset">Reset</string>
+</resources>

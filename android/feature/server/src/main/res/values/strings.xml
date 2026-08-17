@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="lan_transfer_title">LAN Transfer</string>
+    <string name="lan_transfer_tip">Make sure the companion PC app is running and on the same Wi-Fi/LAN as your phone. The phone auto-discovers the PC; tap a device to pair, after the PC confirms, heart rate will be pushed in real time.</string>
+    <string name="lan_scanning">Scanning for nearby PCs…</string>
+    <string name="lan_no_devices">No PCs found. Make sure the PC app is running and on the same network</string>
+    <string name="lan_scan">Scan</string>
+    <string name="lan_pair_approved">PC approved the connection. Heart rate push started</string>
+    <string name="lan_pair_rejected">PC rejected the connection</string>
+    <string name="lan_pair_failed">Pairing failed: %1$s</string>
+    <string name="lan_pair_timeout">Pairing timed out, no response from PC</string>
+    <string name="lan_disconnect">Disconnect</string>
+    <string name="lan_connected_status">Connected to PC</string>
+    <string name="lan_status_pushing">Pushing</string>
+    <string name="lan_ws_not_enabled">WebSocket server is disabled, cannot push. Enable it in "HTTP &amp; WebSocket Server"</string>
+    <string name="lan_open_server_settings">Open settings</string>
+    <string name="lan_pair_action">Connect</string>
+    <string name="lan_device_unknown">Unknown PC</string>
+    <string name="server_settings">Server Settings</string>
+    <string name="not_connected_network">Not connected to network</string>
+    <string name="http_port_hint">HTTP Port</string>
+    <string name="websocket_port_hint">WebSocket Port</string>
+    <string name="enable_server_format">Enable %1$s Server</string>
+    <string name="access_url_format">URL: %1$s://%2$s:%3$s</string>
+    <string name="http_enabled_status">HTTP Server Enabled</string>
+    <string name="http_disabled_status">HTTP Server Disabled</string>
+    <string name="http_access_url">URL: http://%1$s:%2$d/heartrate</string>
+    <string name="server_start_failed">Server start failed (port may be in use)</string>
+    <string name="ws_enabled_status">WebSocket Server Enabled</string>
+    <string name="ws_disabled_status">WebSocket Server Disabled</string>
+    <string name="ws_access_url">URL: ws://%1$s:%2$d</string></resources>
+

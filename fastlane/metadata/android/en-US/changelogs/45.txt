@@ -1,0 +1,1 @@
+- Fixed bug in previous version where bottom navigation bar could not control some secondary pages
