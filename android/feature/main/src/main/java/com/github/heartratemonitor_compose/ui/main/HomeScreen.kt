@@ -44,6 +44,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -102,7 +103,6 @@ fun HomeScreen(
     val sessionMinHr by remember { derivedStateOf { uiState.value.sessionMinHr } }
     val connectedDeviceName by remember { derivedStateOf { uiState.value.connectedDevice?.name } }
 
-    val navBarInset = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
     val onDisconnect = remember(viewModel) { { viewModel.dispatch(MainIntent.DisconnectDevice) } }
 
     Scaffold(
@@ -184,7 +184,6 @@ fun HomeScreen(
             // Speed Dial FAB：仅在已连接时显示
             HomeSpeedDialFab(
                 isConnected = isConnected,
-                navBarInset = navBarInset,
                 onEnterFullScreen = onEnterFullScreen,
                 onDisconnect = onDisconnect,
                 modifier = Modifier.align(Alignment.BottomEnd)
@@ -223,14 +222,14 @@ private fun HomeContent(
         entrancePlayed = true
     }
 
-    val navBarInset = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
     LazyColumn(
-        modifier = modifier,
+        modifier = modifier
+            .windowInsetsPadding(WindowInsets.navigationBars),
         contentPadding = PaddingValues(
             start = 16.dp,
             end = 16.dp,
             top = 8.dp,
-            bottom = 16.dp + 64.dp + 8.dp + navBarInset
+            bottom = 16.dp + 64.dp + 8.dp
         ),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {

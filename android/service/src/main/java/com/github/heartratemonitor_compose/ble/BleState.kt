@@ -3,7 +3,6 @@ package com.github.heartratemonitor_compose.ble
 import android.content.Context
 import androidx.annotation.StringRes
 import com.github.heartratemonitor_compose.service.R
-import com.juul.kable.Advertisement
 
 /**
  * 统一表示蓝牙连接的各种状态及其对应的 UI 信息，

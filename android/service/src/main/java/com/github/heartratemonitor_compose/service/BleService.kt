@@ -13,8 +13,8 @@ import com.github.heartratemonitor_compose.data.db.HeartRateDao
 import com.github.heartratemonitor_compose.data.repository.SessionRepository
 import com.github.heartratemonitor_compose.data.repository.SettingsRepository
 import com.github.heartratemonitor_compose.data.webhook.WebhookRepository
+import com.github.heartratemonitor_compose.data.model.ScannedDevice
 import com.github.heartratemonitor_compose.service.server.ServerHost
-import com.juul.kable.Advertisement
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -68,7 +68,7 @@ class BleService : Service(), FairMemoryReceiver.MemoryListener, BleConnectionMa
     override val heartRate: StateFlow<Int> get() = connectionHandler.heartRate
     override val heartRateMeasurement: StateFlow<HeartRateMeasurement> get() = connectionHandler.heartRateMeasurement
     override val speed: StateFlow<Float> get() = speedProvider.speed
-    override val scanResults: StateFlow<List<Advertisement>> get() = connectionHandler.scanResults
+    override val scanResults: StateFlow<List<ScannedDevice>> get() = connectionHandler.scanResults
     override val connectedDevice: StateFlow<ConnectedDevice?> get() = connectionHandler.connectedDevice
 
     override fun isDeviceConnected(): Boolean = connectionHandler.isDeviceConnected()

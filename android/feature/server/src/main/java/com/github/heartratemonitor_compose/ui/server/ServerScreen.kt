@@ -19,6 +19,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.graphics.painter.Painter
@@ -108,6 +109,7 @@ fun ServerScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .verticalScroll(rememberScrollState())
+                    .windowInsetsPadding(WindowInsets.navigationBars)
                     .padding(horizontal = 16.dp)
                     .padding(top = padding.calculateTopPadding() + 16.dp),
                 verticalArrangement = Arrangement.spacedBy(24.dp)
@@ -160,7 +162,7 @@ fun ServerScreen(
                 wsRunning = uiState.wsRunning
             )
             
-            Spacer(Modifier.height(16.dp + WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()))
+            Spacer(Modifier.height(16.dp))
             }
             StatusBarScrim()
         }

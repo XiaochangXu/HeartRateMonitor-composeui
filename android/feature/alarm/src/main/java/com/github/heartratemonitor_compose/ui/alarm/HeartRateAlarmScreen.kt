@@ -36,7 +36,9 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+
 import androidx.compose.runtime.getValue
+
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -125,6 +127,7 @@ fun HeartRateAlarmScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .verticalScroll(rememberScrollState())
+                    .windowInsetsPadding(WindowInsets.navigationBars)
                     .padding(horizontal = 16.dp)
             ) {
                 Spacer(Modifier.height(padding.calculateTopPadding() + 16.dp))
@@ -209,7 +212,7 @@ fun HeartRateAlarmScreen(
                 }
             )
             // 底部留出系统导航栏空间，避免内容被手势条遮挡
-            Spacer(Modifier.height(40.dp + WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()))
+            Spacer(Modifier.height(40.dp))
             }
             StatusBarScrim()
         }

@@ -6,6 +6,7 @@ import com.github.heartratemonitor_compose.service.R
 import com.github.heartratemonitor_compose.ble.BleManager
 import com.github.heartratemonitor_compose.ble.BleState
 import com.github.heartratemonitor_compose.ble.HeartRateMeasurement
+import com.github.heartratemonitor_compose.data.model.ScannedDevice
 import com.github.heartratemonitor_compose.data.settings.SettingsKeys
 import com.github.heartratemonitor_compose.data.WebhookTrigger
 import com.github.heartratemonitor_compose.data.repository.SettingsRepository
@@ -34,6 +35,7 @@ import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicLong
+import kotlin.math.abs
 import kotlin.time.Duration.Companion.seconds
 
 /**
@@ -65,8 +67,8 @@ class BleConnectionHandler(
     private val _heartRateMeasurement = MutableStateFlow(HeartRateMeasurement.EMPTY)
     override val heartRateMeasurement: StateFlow<HeartRateMeasurement> = _heartRateMeasurement.asStateFlow()
 
-    private val _scanResults = MutableStateFlow<List<Advertisement>>(emptyList())
-    override val scanResults: StateFlow<List<Advertisement>> = _scanResults.asStateFlow()
+    private val _scanResults = MutableStateFlow<List<ScannedDevice>>(emptyList())
+    override val scanResults: StateFlow<List<ScannedDevice>> = _scanResults.asStateFlow()
 
     override val speed: StateFlow<Float> get() = speedProvider.speed
 
@@ -97,6 +99,8 @@ class BleConnectionHandler(
         private const val AUTO_RECONNECT_MAX_DELAY_MS = 60_000L
         private const val MAX_OBSERVE_RETRY_ATTEMPTS = 5
         private const val OBSERVE_RETRY_BASE_DELAY_MS = 1000L
+        /** RSSI 节流阈值：变化幅度小于此值时不更新列表，避免扫描时频繁无效重组 */
+        private const val RSSI_THROTTLE_THRESHOLD = 3
     }
 
     fun initDeviceNameFallback(name: String) {
@@ -134,13 +138,16 @@ class BleConnectionHandler(
         val useFilter = settingsRepository.get(SettingsKeys.SCAN_FILTER_ENABLED)
 
         scanJob = scope.launch {
-            val foundDevicesMap = mutableMapOf<String, Advertisement>()
+            val foundDevicesMap = mutableMapOf<String, ScannedDevice>()
             try {
                 _bleState.value = BleState.Scanning
                 withTimeout(durationMillis) {
                     bleManager.scan(useServiceFilter = useFilter).collect { advertisement ->
-                        foundDevicesMap[advertisement.identifier] = advertisement
-                        _scanResults.value = foundDevicesMap.values.toList()
+                        val existing = foundDevicesMap[advertisement.identifier]
+                        if (shouldUpdateScanResult(existing?.rssi, advertisement.rssi)) {
+                            foundDevicesMap[advertisement.identifier] = advertisement.toScannedDevice()
+                            _scanResults.value = foundDevicesMap.values.toList()
+                        }
                     }
                 }
             } catch (_: TimeoutCancellationException) {
@@ -173,7 +180,7 @@ class BleConnectionHandler(
         val useFilter = settingsRepository.get(SettingsKeys.SCAN_FILTER_ENABLED)
 
         scanJob = scope.launch {
-            val foundDevicesMap = mutableMapOf<String, Advertisement>()
+            val foundDevicesMap = mutableMapOf<String, ScannedDevice>()
             var favoriteFound = false
             if (_bleState.value !is BleState.AutoReconnecting) {
                 _bleState.value = BleState.AutoConnecting
@@ -182,8 +189,11 @@ class BleConnectionHandler(
             try {
                 withTimeout(durationMillis) {
                     bleManager.scan(useServiceFilter = useFilter).collect { advertisement ->
-                        foundDevicesMap[advertisement.identifier] = advertisement
-                        _scanResults.value = foundDevicesMap.values.toList()
+                        val existing = foundDevicesMap[advertisement.identifier]
+                        if (shouldUpdateScanResult(existing?.rssi, advertisement.rssi)) {
+                            foundDevicesMap[advertisement.identifier] = advertisement.toScannedDevice()
+                            _scanResults.value = foundDevicesMap.values.toList()
+                        }
 
                         if (advertisement.identifier == favoriteDeviceId) {
                             favoriteFound = true
@@ -344,6 +354,15 @@ class BleConnectionHandler(
         connectionJob?.cancel()
     }
 
+    /**
+     * RSSI 节流：仅当设备首次出现或 RSSI 变化幅度 >= [RSSI_THROTTLE_THRESHOLD] 时更新列表。
+     * BLE 设备每秒广播数次，RSSI 抖动通常 ±1-2 dBm，过滤这些微小变化可大幅减少无效重组。
+     */
+    private fun shouldUpdateScanResult(oldRssi: Int?, newRssi: Int): Boolean {
+        if (oldRssi == null) return true
+        return abs(newRssi - oldRssi) >= RSSI_THROTTLE_THRESHOLD
+    }
+
     private suspend fun cleanupConnection(peripheral: Peripheral?, epoch: Long) {
         Log.d(TAG, "cleanupConnection: isManuallyDisconnected=$isManuallyDisconnected, epoch=$epoch, currentEpoch=${connectEpoch.get()}")
         // 无条件断开旧 peripheral（参数为本次连接的 peripheral，安全）
@@ -455,3 +474,15 @@ class BleConnectionHandler(
         }
     }
 }
+
+/**
+ * 将 Kable 的 [Advertisement] 映射为项目内部的稳定 [ScannedDevice]。
+ *
+ * 只提取 UI 需要的三个字段（identifier / name / rssi），
+ * 避免 Compose 编译器因第三方类型不稳定而无法跳过重组。
+ */
+private fun Advertisement.toScannedDevice() = ScannedDevice(
+    identifier = identifier,
+    name = name,
+    rssi = rssi
+)

@@ -27,11 +27,11 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.github.heartratemonitor_compose.data.model.ScannedDevice
 import com.github.heartratemonitor_compose.feature.main.R
 import com.github.heartratemonitor_compose.ui.theme.SignalMediumColor
 import com.github.heartratemonitor_compose.ui.theme.SignalStrongColor
 import com.github.heartratemonitor_compose.ui.theme.SignalWeakColor
-import com.juul.kable.Advertisement
 
 /**
  * 设备列表项：替代原 list_item_device.xml + DeviceAdapter。
@@ -39,13 +39,13 @@ import com.juul.kable.Advertisement
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 internal fun DeviceItem(
-    advertisement: Advertisement,
+    device: ScannedDevice,
     isFavorite: Boolean,
     isConnecting: Boolean,
     onDeviceClick: () -> Unit,
     onFavoriteClick: () -> Unit
 ) {
-    val rssi = advertisement.rssi
+    val rssi = device.rssi
     val strongColor = SignalStrongColor // primary_light
     val mediumColor = SignalMediumColor
     val weakColor = SignalWeakColor   // red_error
@@ -78,7 +78,7 @@ internal fun DeviceItem(
     ) {
         Column(modifier = Modifier.weight(1f)) {
             Text(
-                text = advertisement.name ?: "Unknown Device",
+                text = device.name ?: "Unknown Device",
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurface,
                 maxLines = 1,
@@ -86,7 +86,7 @@ internal fun DeviceItem(
             )
             Spacer(Modifier.height(4.dp))
             Text(
-                text = advertisement.identifier,
+                text = device.identifier,
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )

@@ -18,6 +18,7 @@ import androidx.compose.runtime.*
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
@@ -116,11 +117,12 @@ fun HistoryScreen(
                 LazyColumn(
                     modifier = Modifier
                         .fillMaxSize()
+                        .windowInsetsPadding(WindowInsets.navigationBars)
                         .padding(horizontal = 16.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                     contentPadding = PaddingValues(
                         top = padding.calculateTopPadding() + 16.dp,
-                        bottom = 8.dp + WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+                        bottom = 8.dp
                     )
                 ) {
                 items(sessions, key = { it.id }) { session ->

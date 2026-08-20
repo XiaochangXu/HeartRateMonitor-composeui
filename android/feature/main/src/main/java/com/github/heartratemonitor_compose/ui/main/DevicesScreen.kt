@@ -50,6 +50,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.github.heartratemonitor_compose.data.model.ScannedDevice
 import com.github.heartratemonitor_compose.feature.main.R
 import com.github.heartratemonitor_compose.service.ConnectedDevice
 import com.github.heartratemonitor_compose.ui.util.CapsuleShape
@@ -87,7 +88,7 @@ fun DevicesScreen(
 
     val sortedScanResults = remember(scanResults, favoriteDeviceId) {
         scanResults.sortedWith(
-            compareByDescending<com.juul.kable.Advertisement> { it.identifier == favoriteDeviceId }
+            compareByDescending<ScannedDevice> { it.identifier == favoriteDeviceId }
                 .thenByDescending { it.rssi }
         )
     }
@@ -282,7 +283,7 @@ fun DevicesScreen(
                         { viewModel.dispatch(MainIntent.ConnectToDevice(advertisement.identifier)) }
                     }
                     val onFavoriteClick = remember(advertisement.identifier) {
-                        { viewModel.dispatch(MainIntent.ToggleFavoriteDevice(advertisement)) }
+                        { viewModel.dispatch(MainIntent.ToggleFavoriteDevice(advertisement.identifier, advertisement.name)) }
                     }
                     Surface(
                         modifier = Modifier.fillMaxWidth(),
@@ -291,7 +292,7 @@ fun DevicesScreen(
                         contentColor = MaterialTheme.colorScheme.onSurface
                     ) {
                         DeviceItem(
-                            advertisement = advertisement,
+                            device = advertisement,
                             isFavorite = isFavorite,
                             isConnecting = isConnecting,
                             onDeviceClick = onDeviceClick,

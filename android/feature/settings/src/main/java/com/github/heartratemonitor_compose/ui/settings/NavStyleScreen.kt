@@ -35,10 +35,13 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.runtime.Composable
+
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import com.github.heartratemonitor_compose.ui.widgets.ExpressiveButton
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.painterResource
@@ -102,6 +105,7 @@ fun NavStyleScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .verticalScroll(rememberScrollState())
+                    .windowInsetsPadding(WindowInsets.navigationBars)
                     .padding(horizontal = 16.dp)
             ) {
                 Spacer(Modifier.height(padding.calculateTopPadding() + 16.dp))
@@ -118,7 +122,7 @@ fun NavStyleScreen(
                 NavigationEffectsSection(viewModel = viewModel)
             }
 
-              Spacer(Modifier.height(64.dp + 8.dp + WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()))
+              Spacer(Modifier.height(64.dp + 8.dp))
             }
             StatusBarScrim()
         }

@@ -17,7 +17,6 @@ import com.github.heartratemonitor_compose.service.KillStateSaver
 import com.github.heartratemonitor_compose.service.ServiceLauncher
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
-import com.juul.kable.Advertisement
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -188,7 +187,7 @@ class MainViewModel @Inject constructor(
                 bleServiceRef?.get()?.connectToDevice(intent.identifier)
             }
             MainIntent.DisconnectDevice -> bleServiceRef?.get()?.disconnectDevice()
-            is MainIntent.ToggleFavoriteDevice -> toggleFavoriteDevice(intent.advertisement)
+            is MainIntent.ToggleFavoriteDevice -> toggleFavoriteDevice(intent.identifier, intent.name)
             MainIntent.MarkSearchTipShown -> settings.set(SettingsKeys.SEARCH_TIP_SHOWN, true)
             is MainIntent.SetHeartRateRingMax ->
                 settings.set(SettingsKeys.HEART_RATE_RING_MAX, intent.value)
@@ -281,16 +280,15 @@ class MainViewModel @Inject constructor(
 
     internal val stateSnapshot: MainUiState get() = currentState
 
-    private fun toggleFavoriteDevice(ad: Advertisement) {
-        val id = ad.identifier
+    private fun toggleFavoriteDevice(identifier: String, name: String?) {
         val currentFavorite = currentState.favoriteDeviceId
-        if (currentFavorite == id) {
+        if (currentFavorite == identifier) {
             viewModelScope.launch {
-                favoriteDeviceRepository.deleteAndRestoreLatest(id)
+                favoriteDeviceRepository.deleteAndRestoreLatest(identifier)
             }
         } else {
-            favoriteDeviceRepository.setFavoriteDeviceId(id)
-            addToFavoriteHistory(id, ad.name ?: appContext.getString(com.github.heartratemonitor_compose.service.R.string.unknown_device))
+            favoriteDeviceRepository.setFavoriteDeviceId(identifier)
+            addToFavoriteHistory(identifier, name ?: appContext.getString(com.github.heartratemonitor_compose.service.R.string.unknown_device))
             if (currentFavorite != null) {
                 viewModelScope.launch {
                     favoriteDeviceRepository.deleteFavoriteDevice(currentFavorite)

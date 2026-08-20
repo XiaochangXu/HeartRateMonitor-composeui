@@ -15,6 +15,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.painterResource
@@ -56,14 +57,15 @@ fun SettingsScreen(
         }
     ) { padding ->
         Box(modifier = Modifier.fillMaxSize()) {
-            val navBarBottomPadding = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
             LazyColumn(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .windowInsetsPadding(WindowInsets.navigationBars),
                 contentPadding = PaddingValues(
                     start = 16.dp,
                     end = 16.dp,
                     top = padding.calculateTopPadding() + 16.dp,
-                    bottom = 64.dp + 8.dp + navBarBottomPadding
+                    bottom = 64.dp + 8.dp
                 ),
                 verticalArrangement = Arrangement.spacedBy(32.dp)
             ) {

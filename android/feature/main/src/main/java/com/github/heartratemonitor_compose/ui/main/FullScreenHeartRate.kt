@@ -76,7 +76,7 @@ private enum class FullscreenHrState { HIGH, LOW }
  * - 静态爱心 + 心率数值，按屏幕高度自适应放到最大
  * - ECG 滚动波形：屏幕底部持续左滚的心电波形，QRS 与实际心率同步
  * - 爱心在 QRS 波峰时产生微妙光晕脉冲（非缩放动画）
- * - 颜色读取设置页悬浮窗「文本颜色」选项（floating_text_color）
+ * - 颜色固定为红色（黑色背景下自定义文本颜色不可见）
  * - 点击屏幕或按返回键退出
  */
 @Composable
@@ -194,7 +194,8 @@ fun FullScreenHeartRate(
     }
 
     // 爱心光晕：QRS 波峰时最亮；alpha 计算移到 graphicsLayer 绘制阶段，避免每帧重组
-    val rPeakPhase = 0.2f
+    // rPeakPhase = 0.21f 对应 ecgWaveformValue 中 R 波的实际峰值位置
+    val rPeakPhase = 0.21f
 
     // 全屏沉浸模式：隐藏状态栏/导航栏 + 保持屏幕常亮，退出时恢复
     val fullscreenView = LocalView.current

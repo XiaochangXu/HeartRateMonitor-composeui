@@ -2,7 +2,7 @@ package com.github.heartratemonitor_compose.service
 
 import com.github.heartratemonitor_compose.ble.BleState
 import com.github.heartratemonitor_compose.ble.HeartRateMeasurement
-import com.juul.kable.Advertisement
+import com.github.heartratemonitor_compose.data.model.ScannedDevice
 import kotlinx.coroutines.flow.StateFlow
 
 /**
@@ -29,7 +29,7 @@ interface BleConnectionManager {
 
     val speed: StateFlow<Float>
 
-    val scanResults: StateFlow<List<Advertisement>>
+    val scanResults: StateFlow<List<ScannedDevice>>
 
     val connectedDevice: StateFlow<ConnectedDevice?>
 
