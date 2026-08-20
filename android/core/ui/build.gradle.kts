@@ -24,6 +24,8 @@ kotlin {
 }
 
 dependencies {
+    implementation(platform(libs.androidx.compose.bom))
+
     // api：FloatingBottomBar 公开参数暴露 LiquidGlassConfig（:core:designsystem）；
     // SoundModeUtils 公开参数暴露 SettingsRepository（:data:settings，3.3.1 允许的 core→data:settings）
     api(project(":core:designsystem"))

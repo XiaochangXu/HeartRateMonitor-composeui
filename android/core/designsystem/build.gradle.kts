@@ -25,6 +25,8 @@ kotlin {
 }
 
 dependencies {
+    implementation(platform(libs.androidx.compose.bom))
+
     // 3.3.3 唯一特例：designsystem → data:settings（ThemeState/LiquidGlassState 的持久化源，
     // Phase 6 迁入后生效）。implementation 足够：SettingsRepository 不在本模块公开 API 上。
     implementation(project(":data:settings"))

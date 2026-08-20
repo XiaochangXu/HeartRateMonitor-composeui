@@ -30,6 +30,8 @@ kotlin {
 }
 
 dependencies {
+    implementation(platform(libs.androidx.compose.bom))
+
     implementation(project(":core:ui"))
     implementation(project(":data:settings"))
     implementation(project(":data:repository"))

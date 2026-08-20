@@ -32,6 +32,8 @@ kotlin {
 }
 
 dependencies {
+    implementation(platform(libs.androidx.compose.bom))
+
     api(project(":core:model"))
     api(project(":core:designsystem"))
     api(project(":data:settings"))
