@@ -57,15 +57,14 @@ fun SettingsScreen(
         }
     ) { padding ->
         Box(modifier = Modifier.fillMaxSize()) {
+            val navBarBottomPadding = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
             LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .windowInsetsPadding(WindowInsets.navigationBars),
+                modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(
                     start = 16.dp,
                     end = 16.dp,
                     top = padding.calculateTopPadding() + 16.dp,
-                    bottom = 64.dp + 8.dp
+                    bottom = 64.dp + 8.dp + navBarBottomPadding
                 ),
                 verticalArrangement = Arrangement.spacedBy(32.dp)
             ) {

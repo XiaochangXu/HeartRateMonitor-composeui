@@ -117,12 +117,11 @@ fun HistoryScreen(
                 LazyColumn(
                     modifier = Modifier
                         .fillMaxSize()
-                        .windowInsetsPadding(WindowInsets.navigationBars)
                         .padding(horizontal = 16.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                     contentPadding = PaddingValues(
                         top = padding.calculateTopPadding() + 16.dp,
-                        bottom = 8.dp
+                        bottom = 8.dp + WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
                     )
                 ) {
                 items(sessions, key = { it.id }) { session ->

@@ -103,6 +103,7 @@ fun HomeScreen(
     val sessionMinHr by remember { derivedStateOf { uiState.value.sessionMinHr } }
     val connectedDeviceName by remember { derivedStateOf { uiState.value.connectedDevice?.name } }
 
+    val navBarInset = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
     val onDisconnect = remember(viewModel) { { viewModel.dispatch(MainIntent.DisconnectDevice) } }
 
     Scaffold(
@@ -184,6 +185,7 @@ fun HomeScreen(
             // Speed Dial FAB：仅在已连接时显示
             HomeSpeedDialFab(
                 isConnected = isConnected,
+                navBarInset = navBarInset,
                 onEnterFullScreen = onEnterFullScreen,
                 onDisconnect = onDisconnect,
                 modifier = Modifier.align(Alignment.BottomEnd)
@@ -222,14 +224,14 @@ private fun HomeContent(
         entrancePlayed = true
     }
 
+    val navBarInset = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
     LazyColumn(
-        modifier = modifier
-            .windowInsetsPadding(WindowInsets.navigationBars),
+        modifier = modifier,
         contentPadding = PaddingValues(
             start = 16.dp,
             end = 16.dp,
             top = 8.dp,
-            bottom = 16.dp + 64.dp + 8.dp
+            bottom = 16.dp + 64.dp + 8.dp + navBarInset
         ),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {

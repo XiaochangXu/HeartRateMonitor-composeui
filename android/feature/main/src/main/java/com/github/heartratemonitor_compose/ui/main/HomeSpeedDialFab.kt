@@ -8,10 +8,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.BluetoothDisabled
@@ -32,6 +29,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.github.heartratemonitor_compose.feature.main.R
 
@@ -42,11 +40,13 @@ import com.github.heartratemonitor_compose.feature.main.R
  * 内含展开状态管理（断开自动收起）与展开/收起时图标旋转 45° 的动画。
  *
  * @param modifier 调用方传入的对齐修饰（如 BoxScope 内的 align(BottomEnd)）
+ * @param navBarInset 导航栏底部内边距，用于计算悬浮位置
  */
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 internal fun HomeSpeedDialFab(
     isConnected: Boolean,
+    navBarInset: Dp,
     onEnterFullScreen: () -> Unit,
     onDisconnect: () -> Unit,
     modifier: Modifier = Modifier
@@ -71,12 +71,10 @@ internal fun HomeSpeedDialFab(
         modifier = modifier
     ) {
         FloatingActionButtonMenu(
-            modifier = Modifier
-                .windowInsetsPadding(WindowInsets.navigationBars)
-                .padding(
-                    end = 8.dp,
-                    bottom = 12.dp + 64.dp + 8.dp + 16.dp
-                ),
+            modifier = Modifier.padding(
+                end = 8.dp,
+                bottom = navBarInset + 12.dp + 64.dp + 8.dp + 16.dp
+            ),
             expanded = speedDialExpanded,
             button = {
                 ToggleFloatingActionButton(
