@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="lan_transfer_title">Transferência LAN</string>
+    <string name="lan_transfer_tip">Antes de usar, abra o aplicativo do PC e verifique se ele está na mesma rede Wi-Fi/LAN que o telefone. O telefone detectará o PC automaticamente; toque no dispositivo para emparelhar e, após a confirmação do PC, a frequência cardíaca será enviada em tempo real.</string>
+    <string name="lan_scanning">Escaneando PCs próximos…</string>
+    <string name="lan_no_devices">Nenhum PC encontrado. Verifique se o aplicativo do PC está em execução e se o PC está na mesma rede</string>
+    <string name="lan_scan">Escanear</string>
+    <string name="lan_pair_approved">O PC autorizou a conexão. Envio de frequência cardíaca iniciado</string>
+    <string name="lan_pair_rejected">O PC recusou a conexão</string>
+    <string name="lan_pair_failed">Falha no emparelhamento: %1$s</string>
+    <string name="lan_pair_timeout">Tempo de emparelhamento esgotado, o PC não respondeu</string>
+    <string name="lan_disconnect">Desconectar</string>
+    <string name="lan_connected_status">Conectado ao PC</string>
+    <string name="lan_status_pushing">Enviando</string>
+    <string name="lan_ws_not_enabled">O servidor WebSocket está desativado, não é possível enviar. Ative-o em «Servidor HTTP e WebSocket»</string>
+    <string name="lan_open_server_settings">Abrir configurações</string>
+    <string name="lan_pair_action">Conectar</string>
+    <string name="lan_device_unknown">PC desconhecido</string>
+    <string name="server_settings">Configurações do servidor</string>
+    <string name="not_connected_network">Não conectado à rede</string>
+    <string name="http_port_hint">Porta HTTP</string>
+    <string name="websocket_port_hint">Porta WebSocket</string>
+    <string name="enable_server_format">Ativar o servidor %1$s</string>
+    <string name="access_url_format">URL de acesso: %1$s://%2$s:%3$s</string>
+    <string name="http_enabled_status">Servidor HTTP: ativo</string>
+    <string name="http_disabled_status">Servidor HTTP: inativo</string>
+    <string name="http_access_url">URL de acesso: http://%1$s:%2$d/heartrate</string>
+    <string name="server_start_failed">Falha ao iniciar o servidor (a porta pode estar em uso)</string>
+    <string name="ws_enabled_status">Servidor WebSocket: ativo</string>
+    <string name="ws_disabled_status">Servidor WebSocket: inativo</string>
+    <string name="ws_access_url">URL de acesso: ws://%1$s:%2$d</string>
+</resources>

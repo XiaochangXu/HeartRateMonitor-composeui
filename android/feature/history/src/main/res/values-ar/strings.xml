@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="history_title">السجل</string>
+    <string name="no_history">لا توجد سجلات بعد</string>
+    <string name="confirm_delete">تأكيد الحذف</string>
+    <string name="delete_history_confirm">هل تريد حذف السجلات المحددة (%1$d)؟ لا يمكن التراجع عن هذا الإجراء.</string>
+    <string name="deleted_records">تم حذف %1$d سجلاً</string>
+    <string name="delete_failed">فشل الحذف: %1$s</string>
+    <string name="confirm_text">موافق</string>
+    <string name="selected_count">تم تحديد %1$d</string>
+    <string name="cd_select_all">تحديد الكل</string>
+    <string name="in_progress">جارٍ</string>
+    <string name="stats_format">المتوسط %1$d · الأدنى %2$d · الأعلى %3$d · %4$d سجلاً</string>
+    <string name="chart_detail">تفاصيل معدل ضربات القلب</string>
+    <string name="cd_rotate_screen">تدوير الشاشة</string>
+    <string name="no_heart_rate_data">لا توجد بيانات معدل ضربات القلب للعرض</string>
+    <string name="marker_heart_rate">معدل ضربات القلب: %1$d bpm\nالوقت: %2$s</string>
+    <string name="stat_avg">المتوسط</string>
+    <string name="stat_min">الأدنى</string>
+    <string name="stat_max">الأعلى</string>
+    <string name="stat_time">الوقت</string>
+    <string name="stat_bpm_value">%1$d bpm</string>
+    <string name="stat_time_range">%1$s - %2$s</string>
+</resources>

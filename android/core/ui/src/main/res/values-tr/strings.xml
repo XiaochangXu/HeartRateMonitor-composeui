@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="cd_back">Geri</string>
+    <string name="cancel">İptal</string>
+    <string name="cd_delete">Sil</string>
+    <string name="ok">Tamam</string>
+    <string name="confirm">Tamam</string>
+    <string name="nav_home">Ana Sayfa</string>
+</resources>

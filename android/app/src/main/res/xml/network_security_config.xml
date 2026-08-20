@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <!-- 全局允许明文流量：局域网传输（HTTP 配对 + ws:// 推送）需要访问动态局域网 IP -->
+    <base-config cleartextTrafficPermitted="true" />
+</network-security-config>

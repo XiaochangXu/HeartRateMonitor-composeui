@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- WebhookManager -->
+    <string name="webhook_test_response">Risposta del test Webhook</string>
+    <string name="webhook_send_failed_headers">Invio non riuscito: gli headers non sono JSON valido: %1$s</string>
+    <string name="webhook_send_error">Errore sconosciuto durante l\'invio: %1$s</string>
+    <string name="webhook_sent">Webhook inviato</string>
+    <string name="webhook_resp_name">Nome</string>
+    <string name="webhook_resp_trigger">Trigger</string>
+    <string name="webhook_resp_status">Codice di stato</string>
+    <string name="webhook_resp_body">Corpo della risposta</string>
+</resources>

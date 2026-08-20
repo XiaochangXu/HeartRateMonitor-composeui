@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="history_title">Riwayat</string>
+    <string name="no_history">Belum ada catatan riwayat</string>
+    <string name="confirm_delete">Konfirmasi penghapusan</string>
+    <string name="delete_history_confirm">Apakah Anda ingin menghapus catatan yang dipilih (%1$d)? Tindakan ini tidak dapat dibatalkan.</string>
+    <string name="deleted_records">%1$d catatan dihapus</string>
+    <string name="delete_failed">Gagal menghapus: %1$s</string>
+    <string name="confirm_text">OK</string>
+    <string name="selected_count">%1$d dipilih</string>
+    <string name="cd_select_all">Pilih semua</string>
+    <string name="in_progress">Sedang berlangsung</string>
+    <string name="stats_format">Rata %1$d · Min %2$d · Maks %3$d · %4$d data</string>
+    <string name="chart_detail">Detail detak jantung</string>
+    <string name="cd_rotate_screen">Putar layar</string>
+    <string name="no_heart_rate_data">Tidak ada data detak jantung untuk ditampilkan</string>
+    <string name="marker_heart_rate">Detak jantung: %1$d bpm\nWaktu: %2$s</string>
+    <string name="stat_avg">Rata</string>
+    <string name="stat_min">Min</string>
+    <string name="stat_max">Maks</string>
+    <string name="stat_time">Waktu</string>
+    <string name="stat_bpm_value">%1$d bpm</string>
+    <string name="stat_time_range">%1$s - %2$s</string>
+</resources>

@@ -1,0 +1,95 @@
+<resources>
+
+    <!-- Navigation -->
+    <string name="nav_history">履歴</string>
+    <string name="nav_favorite">お気に入り</string>
+    <string name="nav_settings">設定</string>
+
+    <!-- HomeScreen -->
+    <string name="cd_view_history">履歴を見る</string>
+
+    <!-- SettingsScreen - General -->
+    <string name="general">一般</string>
+    <string name="sound_settings">サウンド設定</string>
+    <string name="sound_preview">サウンドプレビュー</string>
+    <string name="subtitle_favorite_devices">保存済みBluetoothデバイスの管理</string>
+
+    <!-- SettingsScreen - Bluetooth -->
+    <string name="bluetooth">Bluetooth</string>
+
+    <!-- SettingsScreen - Integration -->
+    <string name="integration">連携 &amp; 外部アクセス</string>
+
+    <!-- LanTransferScreen -->
+    <string name="lan_stop_scan">停止</string>
+    <string name="lan_pairing">ペアリング中…</string>
+    <string name="lan_connected_format">接続済み: %1$s</string>
+    <string name="lan_status_idle">待機中</string>
+
+    <!-- SettingsScreen - Status Bar -->
+    <string name="status_bar_resident">ステータスバー常駐</string>
+
+
+    <!-- SettingsScreen - Floating Window -->
+    <string name="floating_window_style">フローティングウィンドウスタイル</string>
+
+    <!-- SettingsScreen - About -->
+    <string name="about">バージョン情報</string>
+
+    <!-- Color Picker Dialog -->
+
+    <!-- HistoryScreen -->
+
+    <!-- ChartScreen -->
+
+    <!-- FavoriteDevicesScreen -->
+
+    <!-- HeartRateAlarmScreen -->
+    <string name="posture_calibration">姿勢キャリブレーション</string>
+    <string name="alarm_settings">アラーム設定</string>
+
+    <!-- ServerScreen -->
+    <string name="http_server_passive">HTTPサーバー（プル型）</string>
+    <string name="websocket_server_active">WebSocketサーバー（プッシュ型）</string>
+    <string name="server_status">サーバー状態</string>
+
+    <!-- WebhookScreen -->
+
+    <!-- FairMemoryScreen -->
+
+    <!-- FairMemory notifications -->
+
+    <!-- BleState messages -->
+
+    <!-- BleService dynamic messages -->
+    <string name="ble_connect_cancelled">接続がキャンセルされました: %1$s</string>
+
+    <!-- MainActivity Toast messages -->
+    <string name="toast_connected">接続しました</string>
+    <string name="toast_auto_reconnecting">接続が切断されました。自動再接続を試みています...</string>
+    <string name="toast_reconnect_failed">再接続に失敗しました</string>
+    <string name="toast_auto_connect_failed">お気に入りデバイスへの接続に失敗しました</string>
+    <string name="toast_permissions_denied">一部の権限が拒否されました。一部機能が制限される場合があります。</string>
+    <string name="toast_permissions_denied_dialog">設定でこれらの権限を手動で許可してください。</string>
+    <string name="permission_request_reason">デバイスを検出し速度を計算するために、これらの権限が必要です。</string>
+    <string name="permission_forward_title">権限を許可</string>
+
+    <!-- BleService notification -->
+
+    <!-- UpdateChecker -->
+
+    <!-- Heart Rate Alarm Service notifications -->
+
+    <!-- Status Bar Resident Service notifications -->
+
+    <!-- Floating Window Service notifications -->
+
+    <!-- ThemeSettings -->
+
+    <!-- NavStyle (Navigation Style) -->
+
+    <!-- LiquidGlass (navigation bar) -->
+    <string name="nav_settings_section">ナビゲーション</string>
+    <string name="liquid_glass_distortion_unsupported">ゆがみ効果にはAndroid 13以上が必要です</string>
+
+</resources>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- WebhookManager -->
+    <string name="webhook_test_response">Webhook परीक्षण प्रतिक्रिया</string>
+    <string name="webhook_send_failed_headers">भेजना विफल: Headers मान्य JSON नहीं है: %1$s</string>
+    <string name="webhook_send_error">भेजते समय अज्ञात त्रुटि: %1$s</string>
+    <string name="webhook_sent">Webhook भेजा गया</string>
+    <string name="webhook_resp_name">नाम</string>
+    <string name="webhook_resp_trigger">ट्रिगर</string>
+    <string name="webhook_resp_status">स्थिति कोड</string>
+    <string name="webhook_resp_body">प्रतिक्रिया बॉडी</string>
+</resources>

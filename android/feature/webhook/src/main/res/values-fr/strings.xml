@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="webhook_title">Paramètres Webhook</string>
+    <string name="cd_add_webhook">Ajouter un Webhook</string>
+    <string name="no_webhooks">Aucun Webhook. Appuyez sur + pour en ajouter</string>
+    <string name="new_webhook">Nouveau Webhook</string>
+    <string name="close">Fermer</string>
+    <string name="cd_edit">Modifier</string>
+    <string name="enable_this_webhook">Activer ce Webhook</string>
+    <string name="trigger_types">Types de déclencheur (plusieurs choix possibles)</string>
+    <string name="name_label">Nom</string>
+    <string name="test_send">Envoi test (fréquence cardiaque : 88)</string>
+    <string name="save">Enregistrer</string>
+    <string name="trigger_heart_rate_updated">Lorsque la fréquence cardiaque est mise à jour</string>
+    <string name="trigger_connected">Lorsque l\'appareil est connecté</string>
+    <string name="trigger_disconnected">Lorsque l\'appareil est déconnecté</string>
+    <string name="webhook_url_label">URL</string>
+    <string name="webhook_body_label">Corps (JSON)</string>
+    <string name="webhook_headers_label">En-têtes (JSON)</string>
+</resources>

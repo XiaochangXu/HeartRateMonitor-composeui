@@ -1,0 +1,95 @@
+<resources>
+
+    <!-- Navigation -->
+    <string name="nav_history">السجل</string>
+    <string name="nav_favorite">المفضلة</string>
+    <string name="nav_settings">الإعدادات</string>
+
+    <!-- HomeScreen -->
+    <string name="cd_view_history">عرض السجل</string>
+
+    <!-- SettingsScreen - General -->
+    <string name="general">عام</string>
+    <string name="sound_settings">إعدادات الصوت</string>
+    <string name="sound_preview">معاينة الصوت</string>
+    <string name="subtitle_favorite_devices">إدارة أجهزة البلوتوث المحفوظة</string>
+
+    <!-- SettingsScreen - Bluetooth -->
+    <string name="bluetooth">البلوتوث</string>
+
+    <!-- SettingsScreen - Integration -->
+    <string name="integration">التكامل والوصول الخارجي</string>
+
+    <!-- LanTransferScreen -->
+    <string name="lan_stop_scan">إيقاف</string>
+    <string name="lan_pairing">جارٍ الاقتران…</string>
+    <string name="lan_connected_format">متصل: %1$s</string>
+    <string name="lan_status_idle">خامل</string>
+
+    <!-- SettingsScreen - Status Bar -->
+    <string name="status_bar_resident">دائم في شريط الحالة</string>
+
+
+    <!-- SettingsScreen - Floating Window -->
+    <string name="floating_window_style">نمط النافذة العائمة</string>
+
+    <!-- SettingsScreen - About -->
+    <string name="about">حول التطبيق</string>
+
+    <!-- Color Picker Dialog -->
+
+    <!-- HistoryScreen -->
+
+    <!-- ChartScreen -->
+
+    <!-- FavoriteDevicesScreen -->
+
+    <!-- HeartRateAlarmScreen -->
+    <string name="posture_calibration">معايرة الوضعية</string>
+    <string name="alarm_settings">إعدادات التنبيه</string>
+
+    <!-- ServerScreen -->
+    <string name="http_server_passive">خادم HTTP (سحب سلبي)</string>
+    <string name="websocket_server_active">خادم WebSocket (دفع نشط)</string>
+    <string name="server_status">حالة الخادم</string>
+
+    <!-- WebhookScreen -->
+
+    <!-- FairMemoryScreen -->
+
+    <!-- FairMemory notifications -->
+
+    <!-- BleState messages -->
+
+    <!-- BleService dynamic messages -->
+    <string name="ble_connect_cancelled">تم إلغاء الاتصال: %1$s</string>
+
+    <!-- MainActivity Toast messages -->
+    <string name="toast_connected">متصل</string>
+    <string name="toast_auto_reconnecting">انقطع الاتصال، جارٍ محاولة إعادة الاتصال تلقائيًا...</string>
+    <string name="toast_reconnect_failed">فشلت إعادة الاتصال</string>
+    <string name="toast_auto_connect_failed">فشل الاتصال بالجهاز المفضل</string>
+    <string name="toast_permissions_denied">تم رفض بعض الأذونات. قد تكون بعض الميزات محدودة!</string>
+    <string name="toast_permissions_denied_dialog">يرجى منح هذه الأذونات يدويًا في الإعدادات.</string>
+    <string name="permission_request_reason">يحتاج التطبيق إلى هذه الأذونات للعثور على الأجهزة وحساب السرعة.</string>
+    <string name="permission_forward_title">منح الأذونات</string>
+
+    <!-- BleService notification -->
+
+    <!-- UpdateChecker -->
+
+    <!-- Heart Rate Alarm Service notifications -->
+
+    <!-- Status Bar Resident Service notifications -->
+
+    <!-- Floating Window Service notifications -->
+
+    <!-- ThemeSettings -->
+
+    <!-- NavStyle (Navigation Style) -->
+
+    <!-- LiquidGlass (navigation bar) -->
+    <string name="nav_settings_section">التنقل</string>
+    <string name="liquid_glass_distortion_unsupported">يتطلب تأثير التشوه Android 13+</string>
+
+</resources>

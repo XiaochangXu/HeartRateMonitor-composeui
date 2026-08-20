@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="cd_toggle_floating_window">Mostrar/ocultar janela flutuante</string>
+    <string name="cd_speed_dial">Ações rápidas</string>
+    <string name="cd_search_bluetooth">Buscar dispositivos Bluetooth</string>
+    <string name="search_tip_title">Aviso</string>
+    <string name="scan_filter_on">Filtro: ativo</string>
+    <string name="scan_filter_off">Filtro: inativo</string>
+    <string name="search_tip_message">Ative primeiro a transmissão de frequência cardíaca do dispositivo e depois toque em buscar. Caso contrário, o dispositivo não será encontrado.</string>
+    <string name="got_it">Entendi</string>
+    <string name="available_devices">Dispositivos disponíveis</string>
+    <string name="no_available_devices">Nenhum dispositivo disponível. Toque em buscar no canto superior direito</string>
+    <string name="enter_fullscreen">Entrar em tela cheia</string>
+    <string name="disconnect">Desconectar</string>
+    <string name="please_disconnect_first">Desconecte primeiro o dispositivo</string>
+    <string name="speed">Velocidade</string>
+    <string name="cd_favorite">Favoritos</string>
+    <string name="bpm_unit">bpm</string>
+    <string name="heart_rate_data">Dados de frequência cardíaca</string>
+    <string name="heart_rate_statistics">Estatísticas de frequência cardíaca</string>
+    <string name="heart_rate_ring_max">FC máx.</string>
+    <string name="edit_heart_rate_ring_max">Editar o valor máximo do anel de frequência cardíaca</string>
+    <string name="cd_edit_heart_rate_max">Editar o limite superior da frequência cardíaca</string>
+    <string name="fullscreen_exit_hint">Toque na tela ou pressione a tecla voltar para sair</string>
+    <string name="history_not_enabled">Histórico não ativado</string>
+    <string name="device_not_connected">Dispositivo não conectado</string>
+    <string name="connected_device">Dispositivo conectado</string>
+    <string name="max_heart_rate">Máx</string>
+    <string name="min_heart_rate">Mín</string>
+    <string name="reset">Redefinir</string>
+</resources>

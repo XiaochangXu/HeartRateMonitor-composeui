@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="lan_transfer_title">LAN-Übertragung</string>
+    <string name="lan_transfer_tip">Stellen Sie sicher, dass die PC-App ausgeführt wird und sich im selben Wi-Fi/LAN wie Ihr Telefon befindet. Das Telefon erkennt den PC automatisch. Tippen Sie auf ein Gerät, um es zu koppeln. Nach der Bestätigung durch den PC wird die Herzfrequenz in Echtzeit übertragen.</string>
+    <string name="lan_scanning">PCs in der Nähe werden gescannt…</string>
+    <string name="lan_no_devices">Keine PCs gefunden. Stellen Sie sicher, dass die PC-App ausgeführt wird und sich im selben Netzwerk befindet</string>
+    <string name="lan_scan">Scannen</string>
+    <string name="lan_pair_approved">PC hat die Verbindung genehmigt. Herzfrequenz-Übertragung gestartet</string>
+    <string name="lan_pair_rejected">PC hat die Verbindung abgelehnt</string>
+    <string name="lan_pair_failed">Kopplung fehlgeschlagen: %1$s</string>
+    <string name="lan_pair_timeout">Kopplung abgelaufen, keine Antwort vom PC</string>
+    <string name="lan_disconnect">Trennen</string>
+    <string name="lan_connected_status">Mit PC verbunden</string>
+    <string name="lan_status_pushing">Wird gesendet</string>
+    <string name="lan_ws_not_enabled">WebSocket-Server ist deaktiviert und kann nicht senden. Aktivieren Sie ihn unter „HTTP &amp; WebSocket-Server"</string>
+    <string name="lan_open_server_settings">Einstellungen öffnen</string>
+    <string name="lan_pair_action">Verbinden</string>
+    <string name="lan_device_unknown">Unbekannter PC</string>
+    <string name="server_settings">Servereinstellungen</string>
+    <string name="not_connected_network">Keine Netzwerkverbindung</string>
+    <string name="http_port_hint">HTTP-Port</string>
+    <string name="websocket_port_hint">WebSocket-Port</string>
+    <string name="enable_server_format">%1$s-Server aktivieren</string>
+    <string name="access_url_format">Zugriffs-URL: %1$s://%2$s:%3$s</string>
+    <string name="http_enabled_status">HTTP-Server: aktiviert</string>
+    <string name="http_disabled_status">HTTP-Server: deaktiviert</string>
+    <string name="http_access_url">Zugriffs-URL: http://%1$s:%2$d/heartrate</string>
+    <string name="server_start_failed">Serverstart fehlgeschlagen (Port möglicherweise belegt)</string>
+    <string name="ws_enabled_status">WebSocket-Server: aktiviert</string>
+    <string name="ws_disabled_status">WebSocket-Server: deaktiviert</string>
+    <string name="ws_access_url">Zugriffs-URL: ws://%1$s:%2$d</string>
+</resources>

@@ -1,0 +1,16 @@
+- BLE optimization: use Kable's onServicesDiscovered callback to call requestMtu, negotiating a larger MTU (517) after connection — reduces heart rate data fragmentation and improves transfer reliability; automatically falls back to the default on negotiation failure without affecting the connection
+- BLE optimization: call Kable's AndroidPeripheral.requestConnectionPriority once connected to request high connection priority (minimum connection interval), lowering heart rate notification latency for more real-time data
+- BLE optimization: configure phy via the Kable Peripheral builder to prefer the LE 2M PHY (Bluetooth 5.0+, 2x physical layer data rate), with automatic fallback to LE 1M on unsupported devices
+- BLE optimization: configure disconnectTimeout via the Kable Peripheral builder, extending the disconnect wait from 5s to 10s so cleanup (session persistence, etc.) completes reliably
+- New "Enable Scan Filter" toggle (Function Settings → Connection & Background): when enabled, uses Kable Scanner's native Filter.Service to only scan devices advertising the Heart Rate Service 0x180D — filtered at the system radio level to save battery, disabled by default
+- Fixed drag indicator at bottom of liquid glass navigation bar becoming heavy after exiting from full screen mode
+- Fixed full-screen mode tone confusion during rapid heart rate alternation
+- Fix connected device but heart rate has not refreshed when entering full screen mode will not automatically update voice status
+- Fixed bottom navigation bar unable to drag pointer control tab after falling back to Surface mode
+- Fix: If the device fails to measure (display--) and no new data is pushed for a long time in the connected state, the APP heart rate still stays at the value before the measurement fails.
+- Fix flashing when custom theme color is turned on when cold start app
+- Optimized animation stabilization for faster response to real-time interruptions
+- Change Material3 Expressive's LinearWavyProgressIndicator to a progress bar (wavy line)
+- Modify all pop-ups to BottomSheet
+- Go to full screen mode/disconnect and merge into Fab
+- Reconstructed the UI of the home page

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="cd_toggle_floating_window">Schwebefenster ein-/ausblenden</string>
+    <string name="cd_speed_dial">Schnellaktionen</string>
+    <string name="cd_search_bluetooth">Bluetooth-Geräte suchen</string>
+    <string name="search_tip_title">Hinweis</string>
+    <string name="scan_filter_on">Scanfilter an</string>
+    <string name="scan_filter_off">Scanfilter aus</string>
+    <string name="search_tip_message">Bitte aktivieren Sie zuerst die Herzfrequenz-Übertragung Ihres Geräts und tippen Sie dann auf „Suchen". Andernfalls wird das Gerät nicht gefunden.</string>
+    <string name="got_it">Verstanden</string>
+    <string name="available_devices">Verfügbare Geräte</string>
+    <string name="no_available_devices">Keine Geräte gefunden. Tippen Sie oben rechts auf „Suchen"</string>
+    <string name="enter_fullscreen">Vollbildmodus starten</string>
+    <string name="disconnect">Trennen</string>
+    <string name="please_disconnect_first">Bitte trennen Sie zuerst das Gerät</string>
+    <string name="speed">Geschwindigkeit</string>
+    <string name="cd_favorite">Favorit</string>
+    <string name="bpm_unit">bpm</string>
+    <string name="heart_rate_data">Herzfrequenzdaten</string>
+    <string name="heart_rate_statistics">Herzfrequenz-Statistik</string>
+    <string name="heart_rate_ring_max">Max. Puls</string>
+    <string name="edit_heart_rate_ring_max">Maximalwert des Herzfrequenz-Rings ändern</string>
+    <string name="cd_edit_heart_rate_max">Obergrenze der Herzfrequenz ändern</string>
+    <string name="fullscreen_exit_hint">Tippen Sie auf den Bildschirm oder drücken Sie „Zurück", um zu beenden</string>
+    <string name="history_not_enabled">Verlauf nicht aktiviert</string>
+    <string name="device_not_connected">Kein Gerät verbunden</string>
+    <string name="connected_device">Verbundenes Gerät</string>
+    <string name="max_heart_rate">MAX</string>
+    <string name="min_heart_rate">MIN</string>
+    <string name="reset">Zurücksetzen</string>
+</resources>

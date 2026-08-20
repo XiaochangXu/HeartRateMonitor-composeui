@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="webhook_title">Webhook Settings</string>
+    <string name="cd_add_webhook">Add Webhook</string>
+    <string name="no_webhooks">No webhooks. Tap + to add</string>
+    <string name="new_webhook">New Webhook</string>
+    <string name="close">Close</string>
+    <string name="cd_edit">Edit</string>
+    <string name="enable_this_webhook">Enable this Webhook</string>
+    <string name="trigger_types">Trigger Types (multiple allowed)</string>
+    <string name="name_label">Name</string>
+    <string name="test_send">Test Send (HR: 88)</string>
+    <string name="save">Save</string>
+    <string name="trigger_heart_rate_updated">On heart rate update</string>
+    <string name="trigger_connected">On device connected</string>
+    <string name="trigger_disconnected">On device disconnected</string>
+    <string name="webhook_url_label">URL</string>
+    <string name="webhook_body_label">Body (JSON)</string>
+    <string name="webhook_headers_label">Headers (JSON)</string>
+</resources>
+

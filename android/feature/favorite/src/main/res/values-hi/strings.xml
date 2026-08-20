@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="favorite_devices">पसंदीदा डिवाइस</string>
+    <string name="cd_clear_all_favorites">सभी पसंदीदा डिवाइस साफ करें</string>
+    <string name="no_favorite_devices">कोई पसंदीदा डिवाइस नहीं</string>
+    <string name="delete_favorite_title">पसंदीदा डिवाइस हटाएं</string>
+    <string name="delete_favorite_confirm">क्या आप %1$s के लिए पसंदीदा रिकॉर्ड हटाना चाहते हैं?</string>
+    <string name="delete">हटाएँ</string>
+    <string name="clear_all_favorites_title">सभी पसंदीदा साफ करें</string>
+    <string name="clear_all_favorites_confirm">क्या आप सभी %1$d पसंदीदा डिवाइस हटाना चाहते हैं? यह कार्रवाई पूर्ववत नहीं की जा सकती।</string>
+    <string name="delete_all">सभी हटाएं</string>
+</resources>

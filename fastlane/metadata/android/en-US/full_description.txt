@@ -1,0 +1,19 @@
+A lightweight heart rate monitoring app for Android, built with Jetpack Compose and Material 3. Connect to BLE heart rate monitors and track your heart rate in real time.
+
+Features:
+
+- Bluetooth LE heart rate monitoring: scan and connect to any BLE heart rate device
+- Real-time heart rate display with animated heart icon
+- Floating window overlay for always-on heart rate display
+- Status bar heart rate indicator with auto color adaptation
+- Heart rate history with chart analysis (powered by Vico)
+- Heart rate alerts with posture detection (sitting/standing/exercising)
+- HTTP server and WebSocket server for real-time data streaming
+- Webhook support for pushing heart rate data to external services
+- Favorite devices with auto-connect
+- Fully customizable UI: colors, opacity, corner radius, size
+- Material 3 design with dynamic color support (Android 12+)
+- Fair memory management for Chinese OEM devices (vivo, Xiaomi, OPPO, Honor)
+- Privacy-friendly: no tracking, no ads, no analytics
+
+Open source under MIT License.

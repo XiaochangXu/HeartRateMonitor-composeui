@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- WebhookManager -->
+    <string name="webhook_test_response">Тестовый ответ Webhook</string>
+    <string name="webhook_send_failed_headers">Не удалось отправить: Headers не является корректным JSON: %1$s</string>
+    <string name="webhook_send_error">Неизвестная ошибка при отправке: %1$s</string>
+    <string name="webhook_sent">Webhook отправлен</string>
+    <string name="webhook_resp_name">Имя</string>
+    <string name="webhook_resp_trigger">Триггер</string>
+    <string name="webhook_resp_status">Код состояния</string>
+    <string name="webhook_resp_body">Тело ответа</string>
+</resources>

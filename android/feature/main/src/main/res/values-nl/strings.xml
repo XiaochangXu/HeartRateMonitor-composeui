@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="cd_toggle_floating_window">Zwevend venster tonen/verbergen</string>
+    <string name="cd_speed_dial">Snelle acties</string>
+    <string name="cd_search_bluetooth">Bluetooth-apparaten zoeken</string>
+    <string name="search_tip_title">Let op</string>
+    <string name="scan_filter_on">Filter: aan</string>
+    <string name="scan_filter_off">Filter: uit</string>
+    <string name="search_tip_message">Schakel eerst de hartslaguitzending van het apparaat in en tik daarna op zoeken. Anders wordt het apparaat niet gevonden.</string>
+    <string name="got_it">Begrepen</string>
+    <string name="available_devices">Beschikbare apparaten</string>
+    <string name="no_available_devices">Geen beschikbare apparaten. Tik rechtsboven op zoeken</string>
+    <string name="enter_fullscreen">Volledig scherm openen</string>
+    <string name="disconnect">Verbinding verbreken</string>
+    <string name="please_disconnect_first">Verbind het apparaat eerst los</string>
+    <string name="speed">Snelheid</string>
+    <string name="cd_favorite">Favorieten</string>
+    <string name="bpm_unit">bpm</string>
+    <string name="heart_rate_data">Hartslaggegevens</string>
+    <string name="heart_rate_statistics">Hartslagstatistieken</string>
+    <string name="heart_rate_ring_max">Max. hartslag</string>
+    <string name="edit_heart_rate_ring_max">Maximale waarde van de hartslagring bewerken</string>
+    <string name="cd_edit_heart_rate_max">Bovenste hartslaggrens bewerken</string>
+    <string name="fullscreen_exit_hint">Tik op het scherm of druk op terug om te verlaten</string>
+    <string name="history_not_enabled">Geschiedenis niet ingeschakeld</string>
+    <string name="device_not_connected">Apparaat niet verbonden</string>
+    <string name="connected_device">Verbonden apparaat</string>
+    <string name="max_heart_rate">Max</string>
+    <string name="min_heart_rate">Min</string>
+    <string name="reset">Resetten</string>
+</resources>

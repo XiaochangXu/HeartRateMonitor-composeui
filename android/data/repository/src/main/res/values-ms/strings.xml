@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- WebhookManager -->
+    <string name="webhook_test_response">Respons ujian Webhook</string>
+    <string name="webhook_send_failed_headers">Penghantaran gagal: Headers bukan JSON sah: %1$s</string>
+    <string name="webhook_send_error">Ralat tidak diketahui semasa menghantar: %1$s</string>
+    <string name="webhook_sent">Webhook dihantar</string>
+    <string name="webhook_resp_name">Nama</string>
+    <string name="webhook_resp_trigger">Pencetus</string>
+    <string name="webhook_resp_status">Kod status</string>
+    <string name="webhook_resp_body">Kandungan respons</string>
+</resources>

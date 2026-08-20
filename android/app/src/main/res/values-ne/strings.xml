@@ -1,0 +1,95 @@
+<resources>
+
+    <!-- Navigation -->
+    <string name="nav_history">इतिहास</string>
+    <string name="nav_favorite">मनपर्ने</string>
+    <string name="nav_settings">सेटिङहरू</string>
+
+    <!-- HomeScreen -->
+    <string name="cd_view_history">इतिहास हेर्नुहोस्</string>
+
+    <!-- SettingsScreen - General -->
+    <string name="general">सामान्य</string>
+    <string name="sound_settings">ध्वनि सेटिङहरू</string>
+    <string name="sound_preview">ध्वनि पूर्वावलोकन</string>
+    <string name="subtitle_favorite_devices">सुरक्षित ब्लुटुथ यन्त्रहरू व्यवस्थापन गर्नुहोस्</string>
+
+    <!-- SettingsScreen - Bluetooth -->
+    <string name="bluetooth">ब्लुटुथ</string>
+
+    <!-- SettingsScreen - Integration -->
+    <string name="integration">एकीकरण र बाह्य पहुँच</string>
+
+    <!-- LanTransferScreen -->
+    <string name="lan_stop_scan">रोक्नुहोस्</string>
+    <string name="lan_pairing">पेयरिङ हुँदै…</string>
+    <string name="lan_connected_format">जडान भयो: %1$s</string>
+    <string name="lan_status_idle">निष्क्रिय</string>
+
+    <!-- SettingsScreen - Status Bar -->
+    <string name="status_bar_resident">स्टेटस बारमा स्थायी</string>
+
+
+    <!-- SettingsScreen - Floating Window -->
+    <string name="floating_window_style">फ्लोटिङ विन्डो शैली</string>
+
+    <!-- SettingsScreen - About -->
+    <string name="about">एप बारे</string>
+
+    <!-- Color Picker Dialog -->
+
+    <!-- HistoryScreen -->
+
+    <!-- ChartScreen -->
+
+    <!-- FavoriteDevicesScreen -->
+
+    <!-- HeartRateAlarmScreen -->
+    <string name="posture_calibration">मुद्रा क्यालिब्रेसन</string>
+    <string name="alarm_settings">अलार्म सेटिङहरू</string>
+
+    <!-- ServerScreen -->
+    <string name="http_server_passive">HTTP सर्भर (निष्क्रिय तान्ने)</string>
+    <string name="websocket_server_active">WebSocket सर्भर (सक्रिय धकेल्ने)</string>
+    <string name="server_status">सर्भर स्थिति</string>
+
+    <!-- WebhookScreen -->
+
+    <!-- FairMemoryScreen -->
+
+    <!-- FairMemory notifications -->
+
+    <!-- BleState messages -->
+
+    <!-- BleService dynamic messages -->
+    <string name="ble_connect_cancelled">जडान रद्द भयो: %1$s</string>
+
+    <!-- MainActivity Toast messages -->
+    <string name="toast_connected">जडान भयो</string>
+    <string name="toast_auto_reconnecting">जडान काटियो, स्वचालित पुन:जडान हुँदै...</string>
+    <string name="toast_reconnect_failed">पुन:जडान असफल भयो</string>
+    <string name="toast_auto_connect_failed">मनपर्ने यन्त्रमा जडान असफल भयो</string>
+    <string name="toast_permissions_denied">केही अनुमतिहरू अस्वीकृत भए। केही सुविधाहरू सीमित हुन सक्छन्!</string>
+    <string name="toast_permissions_denied_dialog">कृपया सेटिङहरूमा यी अनुमतिहरू म्यानुअल रूपमा दिनुहोस्।</string>
+    <string name="permission_request_reason">यन्त्रहरू फेला पार्न र गति गणना गर्न एपलाई यी अनुमतिहरू चाहिन्छ।</string>
+    <string name="permission_forward_title">अनुमति दिनुहोस्</string>
+
+    <!-- BleService notification -->
+
+    <!-- UpdateChecker -->
+
+    <!-- Heart Rate Alarm Service notifications -->
+
+    <!-- Status Bar Resident Service notifications -->
+
+    <!-- Floating Window Service notifications -->
+
+    <!-- ThemeSettings -->
+
+    <!-- NavStyle (Navigation Style) -->
+
+    <!-- LiquidGlass (navigation bar) -->
+    <string name="nav_settings_section">नेभिगेसन</string>
+    <string name="liquid_glass_distortion_unsupported">विकृति प्रभावका लागि Android 13+ आवश्यक</string>
+
+</resources>

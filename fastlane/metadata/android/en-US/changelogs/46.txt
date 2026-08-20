@@ -1,0 +1,10 @@
+- Fixed two identical background gradient overlays in the bottom navigation bar area
+- Fixed bug where BottomSheet pop-up window could not be closed by side-sliding gesture
+- Fixed an issue where icon icons in the center of the History and Favorites page would blink
+- Fixed an issue with loading animation and plotting from zero after re-entering the home page of the app
+- Fixed an issue where the home page status is inconsistent with the actual connection status when the app is restored from the background after the background is hidden after the app is opened and exited
+- Fixed abnormal reset of heart rate chart and broken history record when the application resumes from background after hiding background after opening and exiting the application
+- Added http server and websocket server port conflict detection, UI will no longer show successful opening when conflict is detected
+- Fixed a problem where the heart rate would suddenly refresh when dragging the heart rate floating window. Now the heart rate update only caches the state during dragging and does not write to avoid reorganization.
+- Performance optimization: enter the exit heart rate warning page and no longer restart the sensor repeatedly
+- Continue to refine details

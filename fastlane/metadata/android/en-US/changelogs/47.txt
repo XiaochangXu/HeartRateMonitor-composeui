@@ -1,0 +1,4 @@
+- Fix bug
+- Optimization specific
+- Optimize performance and reduce reassembly
+- Supports 24 languages on Earth and can be switched freely in settings

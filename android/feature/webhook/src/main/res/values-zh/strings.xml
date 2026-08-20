@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="webhook_title">Webhook 设置</string>
+    <string name="cd_add_webhook">新增 Webhook</string>
+    <string name="no_webhooks">暂无 Webhook，点击 + 添加</string>
+    <string name="new_webhook">新的 Webhook</string>
+    <string name="close">关闭</string>
+    <string name="cd_edit">编辑</string>
+    <string name="enable_this_webhook">启用此 Webhook</string>
+    <string name="trigger_types">触发器类型 (可多选)</string>
+    <string name="name_label">名称</string>
+    <string name="test_send">测试发送 (心率: 88)</string>
+    <string name="save">保存</string>
+    <string name="trigger_heart_rate_updated">心率刷新时</string>
+    <string name="trigger_connected">设备连接时</string>
+    <string name="trigger_disconnected">设备断开时</string>
+    <string name="webhook_url_label">URL</string>
+    <string name="webhook_body_label">请求体 (JSON)</string>
+    <string name="webhook_headers_label">请求头 (JSON)</string>
+</resources>
+

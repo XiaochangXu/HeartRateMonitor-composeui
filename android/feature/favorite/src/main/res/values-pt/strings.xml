@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="favorite_devices">Dispositivos favoritos</string>
+    <string name="cd_clear_all_favorites">Limpar todos os dispositivos favoritos</string>
+    <string name="no_favorite_devices">Nenhum dispositivo favorito</string>
+    <string name="delete_favorite_title">Excluir dispositivo favorito</string>
+    <string name="delete_favorite_confirm">Deseja excluir o registro favorito de "%1$s"?</string>
+    <string name="delete">Excluir</string>
+    <string name="clear_all_favorites_title">Limpar todos os favoritos</string>
+    <string name="clear_all_favorites_confirm">Deseja excluir todos os dispositivos favoritos (%1$d)? Esta ação é irreversível.</string>
+    <string name="delete_all">Excluir tudo</string>
+</resources>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="cd_back">رجوع</string>
+    <string name="cancel">إلغاء</string>
+    <string name="cd_delete">حذف</string>
+    <string name="ok">موافق</string>
+    <string name="confirm">موافق</string>
+    <string name="nav_home">الرئيسية</string>
+</resources>

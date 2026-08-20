@@ -1,0 +1,95 @@
+<resources>
+
+    <!-- Navigation -->
+    <string name="nav_history">Lịch sử</string>
+    <string name="nav_favorite">Yêu thích</string>
+    <string name="nav_settings">Cài đặt</string>
+
+    <!-- HomeScreen -->
+    <string name="cd_view_history">Xem lịch sử</string>
+
+    <!-- SettingsScreen - General -->
+    <string name="general">Chung</string>
+    <string name="sound_settings">Cài đặt âm thanh</string>
+    <string name="sound_preview">Xem trước âm thanh</string>
+    <string name="subtitle_favorite_devices">Quản lý thiết bị Bluetooth đã lưu</string>
+
+    <!-- SettingsScreen - Bluetooth -->
+    <string name="bluetooth">Bluetooth</string>
+
+    <!-- SettingsScreen - Integration -->
+    <string name="integration">Tích hợp và truy cập bên ngoài</string>
+
+    <!-- LanTransferScreen -->
+    <string name="lan_stop_scan">Dừng</string>
+    <string name="lan_pairing">Đang ghép nối…</string>
+    <string name="lan_connected_format">Đã kết nối: %1$s</string>
+    <string name="lan_status_idle">Chờ</string>
+
+    <!-- SettingsScreen - Status Bar -->
+    <string name="status_bar_resident">Thường trực trên thanh trạng thái</string>
+
+
+    <!-- SettingsScreen - Floating Window -->
+    <string name="floating_window_style">Kiểu cửa sổ nổi</string>
+
+    <!-- SettingsScreen - About -->
+    <string name="about">Về ứng dụng</string>
+
+    <!-- Color Picker Dialog -->
+
+    <!-- HistoryScreen -->
+
+    <!-- ChartScreen -->
+
+    <!-- FavoriteDevicesScreen -->
+
+    <!-- HeartRateAlarmScreen -->
+    <string name="posture_calibration">Hiệu chuẩn tư thế</string>
+    <string name="alarm_settings">Cài đặt báo động</string>
+
+    <!-- ServerScreen -->
+    <string name="http_server_passive">Máy chủ HTTP (kéo bị động)</string>
+    <string name="websocket_server_active">Máy chủ WebSocket (đẩy chủ động)</string>
+    <string name="server_status">Trạng thái máy chủ</string>
+
+    <!-- WebhookScreen -->
+
+    <!-- FairMemoryScreen -->
+
+    <!-- FairMemory notifications -->
+
+    <!-- BleState messages -->
+
+    <!-- BleService dynamic messages -->
+    <string name="ble_connect_cancelled">Đã hủy kết nối: %1$s</string>
+
+    <!-- MainActivity Toast messages -->
+    <string name="toast_connected">Đã kết nối</string>
+    <string name="toast_auto_reconnecting">Mất kết nối, đang tự động kết nối lại...</string>
+    <string name="toast_reconnect_failed">Kết nối lại thất bại</string>
+    <string name="toast_auto_connect_failed">Kết nối thiết bị yêu thích thất bại</string>
+    <string name="toast_permissions_denied">Một số quyền đã bị từ chối. Một số tính năng có thể bị hạn chế!</string>
+    <string name="toast_permissions_denied_dialog">Vui lòng cấp các quyền này thủ công trong cài đặt.</string>
+    <string name="permission_request_reason">Ứng dụng cần các quyền này để tìm thiết bị và tính tốc độ.</string>
+    <string name="permission_forward_title">Cấp quyền</string>
+
+    <!-- BleService notification -->
+
+    <!-- UpdateChecker -->
+
+    <!-- Heart Rate Alarm Service notifications -->
+
+    <!-- Status Bar Resident Service notifications -->
+
+    <!-- Floating Window Service notifications -->
+
+    <!-- ThemeSettings -->
+
+    <!-- NavStyle (Navigation Style) -->
+
+    <!-- LiquidGlass (navigation bar) -->
+    <string name="nav_settings_section">Điều hướng</string>
+    <string name="liquid_glass_distortion_unsupported">Hiệu ứng biến dạng yêu cầu Android 13+</string>
+
+</resources>

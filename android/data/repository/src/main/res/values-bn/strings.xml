@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- WebhookManager -->
+    <string name="webhook_test_response">Webhook পরীক্ষা প্রতিক্রিয়া</string>
+    <string name="webhook_send_failed_headers">প্রেরণ ব্যর্থ: Headers বৈধ JSON নয়: %1$s</string>
+    <string name="webhook_send_error">প্রেরণের সময় অজানা ত্রুটি: %1$s</string>
+    <string name="webhook_sent">Webhook প্রেরণ করা হয়েছে</string>
+    <string name="webhook_resp_name">নাম</string>
+    <string name="webhook_resp_trigger">ট্রিগার</string>
+    <string name="webhook_resp_status">স্ট্যাটাস কোড</string>
+    <string name="webhook_resp_body">প্রতিক্রিয়া বডি</string>
+</resources>

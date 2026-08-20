@@ -1,0 +1,95 @@
+<resources>
+
+    <!-- Navigation -->
+    <string name="nav_history">ইতিহাস</string>
+    <string name="nav_favorite">প্রিয়</string>
+    <string name="nav_settings">সেটিংস</string>
+
+    <!-- HomeScreen -->
+    <string name="cd_view_history">ইতিহাস দেখুন</string>
+
+    <!-- SettingsScreen - General -->
+    <string name="general">সাধারণ</string>
+    <string name="sound_settings">সাউন্ড সেটিংস</string>
+    <string name="sound_preview">সাউন্ড প্রিভিউ</string>
+    <string name="subtitle_favorite_devices">সংরক্ষিত ব্লুটুথ ডিভাইস পরিচালনা করুন</string>
+
+    <!-- SettingsScreen - Bluetooth -->
+    <string name="bluetooth">ব্লুটুথ</string>
+
+    <!-- SettingsScreen - Integration -->
+    <string name="integration">ইন্টিগ্রেশন এবং বাহ্যিক অ্যাক্সেস</string>
+
+    <!-- LanTransferScreen -->
+    <string name="lan_stop_scan">বন্ধ করুন</string>
+    <string name="lan_pairing">পেয়ারিং হচ্ছে…</string>
+    <string name="lan_connected_format">সংযুক্ত: %1$s</string>
+    <string name="lan_status_idle">নিষ্ক্রিয়</string>
+
+    <!-- SettingsScreen - Status Bar -->
+    <string name="status_bar_resident">স্ট্যাটাস বারে স্থায়ী</string>
+
+
+    <!-- SettingsScreen - Floating Window -->
+    <string name="floating_window_style">ফ্লোটিং উইন্ডো স্টাইল</string>
+
+    <!-- SettingsScreen - About -->
+    <string name="about">অ্যাপ সম্পর্কে</string>
+
+    <!-- Color Picker Dialog -->
+
+    <!-- HistoryScreen -->
+
+    <!-- ChartScreen -->
+
+    <!-- FavoriteDevicesScreen -->
+
+    <!-- HeartRateAlarmScreen -->
+    <string name="posture_calibration">ভঙ্গি ক্রমাঙ্কন</string>
+    <string name="alarm_settings">অ্যালার্ম সেটিংস</string>
+
+    <!-- ServerScreen -->
+    <string name="http_server_passive">HTTP সার্ভার (প্যাসিভ পুল)</string>
+    <string name="websocket_server_active">WebSocket সার্ভার (অ্যাক্টিভ পুশ)</string>
+    <string name="server_status">সার্ভার স্ট্যাটাস</string>
+
+    <!-- WebhookScreen -->
+
+    <!-- FairMemoryScreen -->
+
+    <!-- FairMemory notifications -->
+
+    <!-- BleState messages -->
+
+    <!-- BleService dynamic messages -->
+    <string name="ble_connect_cancelled">সংযোগ বাতিল হয়েছে: %1$s</string>
+
+    <!-- MainActivity Toast messages -->
+    <string name="toast_connected">সংযুক্ত হয়েছে</string>
+    <string name="toast_auto_reconnecting">সংযোগ বিচ্ছিন্ন হয়েছে, স্বয়ংক্রিয় পুনঃসংযোগের চেষ্টা হচ্ছে...</string>
+    <string name="toast_reconnect_failed">পুনঃসংযোগ ব্যর্থ হয়েছে</string>
+    <string name="toast_auto_connect_failed">প্রিয় ডিভাইসে সংযোগ ব্যর্থ হয়েছে</string>
+    <string name="toast_permissions_denied">কিছু অনুমতি প্রত্যাখ্যান করা হয়েছে। কিছু ফিচার সীমিত হতে পারে!</string>
+    <string name="toast_permissions_denied_dialog">অনুগ্রহ করে সেটিংসে এই অনুমতিগুলি ম্যানুয়ালি দিন।</string>
+    <string name="permission_request_reason">ডিভাইস খুঁজতে এবং গতি গণনা করতে অ্যাপের এই অনুমতিগুলি প্রয়োজন।</string>
+    <string name="permission_forward_title">অনুমতি দিন</string>
+
+    <!-- BleService notification -->
+
+    <!-- UpdateChecker -->
+
+    <!-- Heart Rate Alarm Service notifications -->
+
+    <!-- Status Bar Resident Service notifications -->
+
+    <!-- Floating Window Service notifications -->
+
+    <!-- ThemeSettings -->
+
+    <!-- NavStyle (Navigation Style) -->
+
+    <!-- LiquidGlass (navigation bar) -->
+    <string name="nav_settings_section">নেভিগেশন</string>
+    <string name="liquid_glass_distortion_unsupported">বিকৃতি ইফেক্টের জন্য Android 13+ প্রয়োজন</string>
+
+</resources>

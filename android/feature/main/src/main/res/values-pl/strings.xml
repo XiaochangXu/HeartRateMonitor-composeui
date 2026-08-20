@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="cd_toggle_floating_window">Pokaż/ukryj pływające okno</string>
+    <string name="cd_speed_dial">Szybkie akcje</string>
+    <string name="cd_search_bluetooth">Szukaj urządzeń Bluetooth</string>
+    <string name="search_tip_title">Uwaga</string>
+    <string name="scan_filter_on">Filtr: wł.</string>
+    <string name="scan_filter_off">Filtr: wył.</string>
+    <string name="search_tip_message">Najpierw włącz transmisję tętna na urządzeniu, a następnie naciśnij „Szukaj". W przeciwnym razie urządzenie nie zostanie znalezione.</string>
+    <string name="got_it">Rozumiem</string>
+    <string name="available_devices">Dostępne urządzenia</string>
+    <string name="no_available_devices">Brak dostępnych urządzeń. Naciśnij ikonę wyszukiwania w prawym górnym rogu</string>
+    <string name="enter_fullscreen">Wejdź w tryb pełnoekranowy</string>
+    <string name="disconnect">Rozłącz</string>
+    <string name="please_disconnect_first">Najpierw rozłącz urządzenie</string>
+    <string name="speed">Prędkość</string>
+    <string name="cd_favorite">Ulubione</string>
+    <string name="bpm_unit">uderz./min</string>
+    <string name="heart_rate_data">Dane tętna</string>
+    <string name="heart_rate_statistics">Statystyki tętna</string>
+    <string name="heart_rate_ring_max">Maks. tętno</string>
+    <string name="edit_heart_rate_ring_max">Zmień maksymalną wartość pierścienia tętna</string>
+    <string name="cd_edit_heart_rate_max">Zmień górny limit tętna</string>
+    <string name="fullscreen_exit_hint">Naciśnij ekran lub klawisz „Wstecz", aby wyjść</string>
+    <string name="history_not_enabled">Historia nie włączona</string>
+    <string name="device_not_connected">Urządzenie niepodłączone</string>
+    <string name="connected_device">Podłączone urządzenie</string>
+    <string name="max_heart_rate">MAKS</string>
+    <string name="min_heart_rate">MIN</string>
+    <string name="reset">Resetuj</string>
+</resources>

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="alarm_title">Báo động nhịp tim</string>
+    <string name="calibrated_samples">Đã hiệu chuẩn ✓ (%1$d mẫu)</string>
+    <string name="not_calibrated">Chưa hiệu chuẩn</string>
+    <string name="calibrating_format">Đang hiệu chuẩn %1$s…</string>
+    <string name="remaining_seconds">Còn %1$d giây</string>
+    <string name="calibrate_sitting">Hiệu chuẩn ngồi</string>
+    <string name="calibrate_standing">Hiệu chuẩn đứng</string>
+    <string name="calibration_status_format">Ngồi: %1$s\nĐứng: %2$s</string>
+    <string name="clear_calibration">Xóa hiệu chuẩn</string>
+    <string name="enable_alarm">Bật báo động nhịp tim</string>
+    <string name="exclude_posture_detection">Loại trừ phát hiện tư thế</string>
+    <string name="above_threshold">Trên</string>
+    <string name="below_threshold">Dưới</string>
+    <string name="duration_label">Thời lượng</string>
+    <string name="seconds_suffix"> giây</string>
+    <string name="repeat_alarm">Lặp lại báo động</string>
+    <string name="alarm_interval">Khoảng cách báo động</string>
+    <string name="minutes_suffix"> phút</string>
+</resources>

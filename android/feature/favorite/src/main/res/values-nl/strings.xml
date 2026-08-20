@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="favorite_devices">Favoriete apparaten</string>
+    <string name="cd_clear_all_favorites">Alle favoriete apparaten wissen</string>
+    <string name="no_favorite_devices">Geen favoriete apparaten</string>
+    <string name="delete_favorite_title">Favoriet apparaat verwijderen</string>
+    <string name="delete_favorite_confirm">Wilt u het favorietenrecord van "%1$s" verwijderen?</string>
+    <string name="delete">Verwijderen</string>
+    <string name="clear_all_favorites_title">Alle favorieten wissen</string>
+    <string name="clear_all_favorites_confirm">Wilt u alle favoriete apparaten (%1$d) verwijderen? Deze actie kan niet ongedaan worden gemaakt.</string>
+    <string name="delete_all">Alles verwijderen</string>
+</resources>

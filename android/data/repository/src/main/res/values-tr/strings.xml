@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- WebhookManager -->
+    <string name="webhook_test_response">Webhook test yanıtı</string>
+    <string name="webhook_send_failed_headers">Gönderilemedi: Headers geçerli JSON değil: %1$s</string>
+    <string name="webhook_send_error">Gönderilirken bilinmeyen hata: %1$s</string>
+    <string name="webhook_sent">Webhook gönderildi</string>
+    <string name="webhook_resp_name">Ad</string>
+    <string name="webhook_resp_trigger">Tetikleyici</string>
+    <string name="webhook_resp_status">Durum kodu</string>
+    <string name="webhook_resp_body">Yanıt gövdesi</string>
+</resources>

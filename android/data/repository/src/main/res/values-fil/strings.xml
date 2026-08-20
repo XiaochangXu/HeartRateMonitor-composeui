@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- WebhookManager -->
+    <string name="webhook_test_response">Tugon sa pagsubok ng Webhook</string>
+    <string name="webhook_send_failed_headers">Nabigo ang pagpapadala: hindi valid na JSON ang Headers: %1$s</string>
+    <string name="webhook_send_error">Hindi kilalang error habang nagpapadala: %1$s</string>
+    <string name="webhook_sent">Naipadala ang Webhook</string>
+    <string name="webhook_resp_name">Pangalan</string>
+    <string name="webhook_resp_trigger">Trigger</string>
+    <string name="webhook_resp_status">Status code</string>
+    <string name="webhook_resp_body">Body ng tugon</string>
+</resources>

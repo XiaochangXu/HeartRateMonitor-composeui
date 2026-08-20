@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="favorite_devices">อุปกรณ์ในรายการโปรด</string>
+    <string name="cd_clear_all_favorites">ล้างอุปกรณ์ในรายการโปรดทั้งหมด</string>
+    <string name="no_favorite_devices">ไม่มีอุปกรณ์ในรายการโปรด</string>
+    <string name="delete_favorite_title">ลบอุปกรณ์ในรายการโปรด</string>
+    <string name="delete_favorite_confirm">ต้องการลบบันทึกรายการโปรดของ "%1$s" หรือไม่?</string>
+    <string name="delete">ลบ</string>
+    <string name="clear_all_favorites_title">ล้างรายการโปรดทั้งหมด</string>
+    <string name="clear_all_favorites_confirm">ต้องการลบอุปกรณ์ในรายการโปรดทั้งหมด (%1$d) หรือไม่? การดำเนินการนี้ไม่สามารถย้อนกลับได้</string>
+    <string name="delete_all">ลบทั้งหมด</string>
+</resources>

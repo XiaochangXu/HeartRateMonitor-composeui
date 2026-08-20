@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="favorite_devices">الأجهزة المفضلة</string>
+    <string name="cd_clear_all_favorites">مسح جميع الأجهزة المفضلة</string>
+    <string name="no_favorite_devices">لا توجد أجهزة مفضلة</string>
+    <string name="delete_favorite_title">حذف الجهاز المفضل</string>
+    <string name="delete_favorite_confirm">هل تريد حذف السجل المفضل لـ "%1$s"؟</string>
+    <string name="delete">حذف</string>
+    <string name="clear_all_favorites_title">مسح جميع المفضلة</string>
+    <string name="clear_all_favorites_confirm">هل تريد حذف جميع الأجهزة المفضلة (%1$d)؟ لا يمكن التراجع عن هذا الإجراء.</string>
+    <string name="delete_all">حذف الكل</string>
+</resources>

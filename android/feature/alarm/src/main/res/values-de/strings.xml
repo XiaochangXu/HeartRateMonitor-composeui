@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="alarm_title">Herzfrequenz-Alarm</string>
+    <string name="calibrated_samples">Kalibriert ✓ (%1$d Proben)</string>
+    <string name="not_calibrated">Nicht kalibriert</string>
+    <string name="calibrating_format">%1$s wird kalibriert…</string>
+    <string name="remaining_seconds">Noch %1$d Sekunden</string>
+    <string name="calibrate_sitting">Sitzend kalibrieren</string>
+    <string name="calibrate_standing">Stehend kalibrieren</string>
+    <string name="calibration_status_format">Sitzend: %1$s\nStehend: %2$s</string>
+    <string name="clear_calibration">Kalibrierung zurücksetzen</string>
+    <string name="enable_alarm">Herzfrequenz-Alarm aktivieren</string>
+    <string name="exclude_posture_detection">Haltungserkennung ausschließen</string>
+    <string name="above_threshold">Über</string>
+    <string name="below_threshold">Unter</string>
+    <string name="duration_label">Dauer</string>
+    <string name="seconds_suffix"> Sek.</string>
+    <string name="repeat_alarm">Alarm wiederholen</string>
+    <string name="alarm_interval">Alarmintervall</string>
+    <string name="minutes_suffix"> Min.</string>
+</resources>

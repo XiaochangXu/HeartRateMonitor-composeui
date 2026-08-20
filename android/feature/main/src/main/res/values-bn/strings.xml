@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="cd_toggle_floating_window">ফ্লোটিং উইন্ডো টগল করুন</string>
+    <string name="cd_speed_dial">দ্রুত কাজ</string>
+    <string name="cd_search_bluetooth">ব্লুটুথ ডিভাইস খুঁজুন</string>
+    <string name="search_tip_title">লক্ষ্য করুন</string>
+    <string name="scan_filter_on">ফিল্টার: চালু</string>
+    <string name="scan_filter_off">ফিল্টার: বন্ধ</string>
+    <string name="search_tip_message">অনুগ্রহ করে আগে ডিভাইসের হৃদস্পন্দন ব্রডকাস্ট চালু করুন, তারপর খুঁজুন ট্যাপ করুন। অন্যথায় ডিভাইস পাওয়া যাবে না।</string>
+    <string name="got_it">বুঝেছি</string>
+    <string name="available_devices">উপলব্ধ ডিভাইস</string>
+    <string name="no_available_devices">কোনো উপলব্ধ ডিভাইস নেই। উপরে ডানদিকে খুঁজুন ট্যাপ করুন</string>
+    <string name="enter_fullscreen">ফুলস্ক্রিন মোডে প্রবেশ করুন</string>
+    <string name="disconnect">সংযোগ বিচ্ছিন্ন করুন</string>
+    <string name="please_disconnect_first">অনুগ্রহ করে আগে ডিভাইস সংযোগ বিচ্ছিন্ন করুন</string>
+    <string name="speed">গতি</string>
+    <string name="cd_favorite">প্রিয়</string>
+    <string name="bpm_unit">bpm</string>
+    <string name="heart_rate_data">হৃদস্পন্দন ডেটা</string>
+    <string name="heart_rate_statistics">হৃদস্পন্দন পরিসংখ্যান</string>
+    <string name="heart_rate_ring_max">সর্বোচ্চ হৃদস্পন্দন</string>
+    <string name="edit_heart_rate_ring_max">হৃদস্পন্দন রিংয়ের সর্বোচ্চ মান পরিবর্তন করুন</string>
+    <string name="cd_edit_heart_rate_max">অর্ধ-রিং হৃদস্পন্দনের উপরের সীমা পরিবর্তন করুন</string>
+    <string name="fullscreen_exit_hint">বের হতে স্ক্রিনে ট্যাপ করুন বা ব্যাক কী চাপুন</string>
+    <string name="history_not_enabled">ইতিহাস সক্রিয় নেই</string>
+    <string name="device_not_connected">ডিভাইস সংযুক্ত নেই</string>
+    <string name="connected_device">সংযুক্ত ডিভাইস</string>
+    <string name="max_heart_rate">সর্বোচ্চ</string>
+    <string name="min_heart_rate">সর্বনিম্ন</string>
+    <string name="reset">রিসেট</string>
+</resources>

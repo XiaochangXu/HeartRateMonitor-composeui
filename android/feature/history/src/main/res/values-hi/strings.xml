@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="history_title">इतिहास</string>
+    <string name="no_history">अभी तक कोई इतिहास रिकॉर्ड नहीं</string>
+    <string name="confirm_delete">हटाने की पुष्टि करें</string>
+    <string name="delete_history_confirm">क्या आप चयनित %1$d रिकॉर्ड हटाना चाहते हैं? यह कार्रवाई पूर्ववत नहीं की जा सकती।</string>
+    <string name="deleted_records">%1$d रिकॉर्ड हटाए गए</string>
+    <string name="delete_failed">हटाना विफल: %1$s</string>
+    <string name="confirm_text">ठीक है</string>
+    <string name="selected_count">%1$d चयनित</string>
+    <string name="cd_select_all">सभी चुनें</string>
+    <string name="in_progress">जारी</string>
+    <string name="stats_format">औसत %1$d · न्यून %2$d · अधिकतम %3$d · %4$d रिकॉर्ड</string>
+    <string name="chart_detail">हृदय गति विवरण</string>
+    <string name="cd_rotate_screen">स्क्रीन घुमाएं</string>
+    <string name="no_heart_rate_data">प्रदर्शित करने के लिए कोई हृदय गति डेटा नहीं</string>
+    <string name="marker_heart_rate">हृदय गति: %1$d bpm\nसमय: %2$s</string>
+    <string name="stat_avg">औसत</string>
+    <string name="stat_min">न्यूनतम</string>
+    <string name="stat_max">अधिकतम</string>
+    <string name="stat_time">समय</string>
+    <string name="stat_bpm_value">%1$d bpm</string>
+    <string name="stat_time_range">%1$s - %2$s</string>
+</resources>

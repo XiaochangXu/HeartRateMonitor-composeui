@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="favorite_devices">প্রিয় ডিভাইস</string>
+    <string name="cd_clear_all_favorites">সব প্রিয় ডিভাইস মুছুন</string>
+    <string name="no_favorite_devices">কোনো প্রিয় ডিভাইস নেই</string>
+    <string name="delete_favorite_title">প্রিয় ডিভাইস মুছুন</string>
+    <string name="delete_favorite_confirm">"%1$s"-এর প্রিয় রেকর্ডটি মুছতে চান?</string>
+    <string name="delete">মুছুন</string>
+    <string name="clear_all_favorites_title">সব প্রিয় মুছুন</string>
+    <string name="clear_all_favorites_confirm">সব %1$dটি প্রিয় ডিভাইস মুছতে চান? এই কাজটি পূর্বাবস্থায় ফেরানো যাবে না।</string>
+    <string name="delete_all">সব মুছুন</string>
+</resources>

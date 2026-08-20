@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="history_title">Historia</string>
+    <string name="no_history">Brak wpisów w historii</string>
+    <string name="confirm_delete">Potwierdź usunięcie</string>
+    <string name="delete_history_confirm">Usunąć wybrane wpisy (%1$d)? Tej operacji nie można cofnąć.</string>
+    <string name="deleted_records">Usunięto wpisów: %1$d</string>
+    <string name="delete_failed">Nie udało się usunąć: %1$s</string>
+    <string name="confirm_text">OK</string>
+    <string name="selected_count">Wybrano: %1$d</string>
+    <string name="cd_select_all">Zaznacz wszystko</string>
+    <string name="in_progress">W trakcie</string>
+    <string name="stats_format">Średnie %1$d · Min %2$d · Maks %3$d · Wpisów: %4$d</string>
+    <string name="chart_detail">Szczegóły tętna</string>
+    <string name="cd_rotate_screen">Obróć ekran</string>
+    <string name="no_heart_rate_data">Brak danych tętna do wyświetlenia</string>
+    <string name="marker_heart_rate">Tętno: %1$d bpm\nCzas: %2$s</string>
+    <string name="stat_avg">Średnie</string>
+    <string name="stat_min">Min</string>
+    <string name="stat_max">Maks</string>
+    <string name="stat_time">Czas</string>
+    <string name="stat_bpm_value">%1$d bpm</string>
+    <string name="stat_time_range">%1$s - %2$s</string>
+</resources>

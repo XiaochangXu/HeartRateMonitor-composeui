@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="webhook_title">Ustawienia Webhook</string>
+    <string name="cd_add_webhook">Dodaj Webhook</string>
+    <string name="no_webhooks">Brak Webhook. Naciśnij +, aby dodać</string>
+    <string name="new_webhook">Nowy Webhook</string>
+    <string name="close">Zamknij</string>
+    <string name="cd_edit">Edytuj</string>
+    <string name="enable_this_webhook">Włącz ten Webhook</string>
+    <string name="trigger_types">Typy wyzwalaczy (można wybrać wiele)</string>
+    <string name="name_label">Nazwa</string>
+    <string name="test_send">Testowe wysłanie (Tętno: 88)</string>
+    <string name="save">Zapisz</string>
+    <string name="trigger_heart_rate_updated">Po aktualizacji tętna</string>
+    <string name="trigger_connected">Po podłączeniu urządzenia</string>
+    <string name="trigger_disconnected">Po rozłączeniu urządzenia</string>
+    <string name="webhook_url_label">URL</string>
+    <string name="webhook_body_label">Treść (JSON)</string>
+    <string name="webhook_headers_label">Nagłówki (JSON)</string>
+</resources>

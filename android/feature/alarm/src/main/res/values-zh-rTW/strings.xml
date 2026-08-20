@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="alarm_title">心率預警</string>
+    <string name="calibrated_samples">已校正 ✓（%1$d 個樣本）</string>
+    <string name="not_calibrated">未校正</string>
+    <string name="calibrating_format">正在校正%1$s…</string>
+    <string name="remaining_seconds">剩餘 %1$d 秒</string>
+    <string name="calibrate_sitting">校正靜坐</string>
+    <string name="calibrate_standing">校正站立</string>
+    <string name="calibration_status_format">靜坐：%1$s\n站立：%2$s</string>
+    <string name="clear_calibration">清除校正</string>
+    <string name="enable_alarm">啟用心率預警</string>
+    <string name="exclude_posture_detection">排除姿勢偵測</string>
+    <string name="above_threshold">超過</string>
+    <string name="below_threshold">低於</string>
+    <string name="duration_label">持續</string>
+    <string name="seconds_suffix"> 秒</string>
+    <string name="repeat_alarm">重複警報</string>
+    <string name="alarm_interval">警報間隔</string>
+    <string name="minutes_suffix"> 分鐘</string>
+</resources>

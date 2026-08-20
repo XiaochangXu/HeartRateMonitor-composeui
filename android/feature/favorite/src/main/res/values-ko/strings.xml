@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="favorite_devices">즐겨찾기 기기</string>
+    <string name="cd_clear_all_favorites">모든 즐겨찾기 기기 삭제</string>
+    <string name="no_favorite_devices">즐겨찾기 기기가 없습니다</string>
+    <string name="delete_favorite_title">즐겨찾기 기기 삭제</string>
+    <string name="delete_favorite_confirm">「%1$s」의 즐겨찾기 기록을 삭제하시겠습니까?</string>
+    <string name="delete">삭제</string>
+    <string name="clear_all_favorites_title">모든 즐겨찾기 삭제</string>
+    <string name="clear_all_favorites_confirm">모든 %1$d개의 즐겨찾기 기기를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.</string>
+    <string name="delete_all">모두 삭제</string>
+</resources>
