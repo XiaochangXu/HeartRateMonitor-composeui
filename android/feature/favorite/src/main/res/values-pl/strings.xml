@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="favorite_devices">Ulubione urządzenia</string>
+    <string name="cd_clear_all_favorites">Wyczyść wszystkie ulubione urządzenia</string>
+    <string name="no_favorite_devices">Brak ulubionych urządzeń</string>
+    <string name="delete_favorite_title">Usuń ulubione urządzenie</string>
+    <string name="delete_favorite_confirm">Usunąć rekord ulubionego urządzenia „%1$s"?</string>
+    <string name="delete">Usuń</string>
+    <string name="clear_all_favorites_title">Wyczyść wszystkie ulubione</string>
+    <string name="clear_all_favorites_confirm">Usunąć wszystkie ulubione urządzenia (%1$d)? Tej operacji nie można cofnąć.</string>
+    <string name="delete_all">Usuń wszystko</string>
+</resources>

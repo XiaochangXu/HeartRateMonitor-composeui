@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="favorite_devices">Устройства из избранного</string>
+    <string name="cd_clear_all_favorites">Очистить все устройства из избранного</string>
+    <string name="no_favorite_devices">Нет устройств из избранного</string>
+    <string name="delete_favorite_title">Удалить устройство из избранного</string>
+    <string name="delete_favorite_confirm">Удалить запись об устройстве «%1$s» из избранного?</string>
+    <string name="delete">Удалить</string>
+    <string name="clear_all_favorites_title">Очистить всё избранное</string>
+    <string name="clear_all_favorites_confirm">Удалить все устройства из избранного (%1$d)? Это действие нельзя отменить.</string>
+    <string name="delete_all">Удалить все</string>
+</resources>

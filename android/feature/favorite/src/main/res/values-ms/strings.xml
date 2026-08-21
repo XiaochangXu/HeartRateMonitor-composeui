@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="favorite_devices">Peranti kegemaran</string>
+    <string name="cd_clear_all_favorites">Kosongkan semua peranti kegemaran</string>
+    <string name="no_favorite_devices">Tiada peranti kegemaran</string>
+    <string name="delete_favorite_title">Padam peranti kegemaran</string>
+    <string name="delete_favorite_confirm">Adakah anda mahu memadam rekod kegemaran "%1$s"?</string>
+    <string name="delete">Padam</string>
+    <string name="clear_all_favorites_title">Kosongkan semua kegemaran</string>
+    <string name="clear_all_favorites_confirm">Adakah anda mahu memadam semua peranti kegemaran (%1$d)? Tindakan ini tidak boleh dibatalkan.</string>
+    <string name="delete_all">Padam semua</string>
+</resources>

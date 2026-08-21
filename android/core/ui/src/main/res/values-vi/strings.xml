@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="cd_back">Quay lại</string>
+    <string name="cancel">Hủy</string>
+    <string name="cd_delete">Xóa</string>
+    <string name="ok">OK</string>
+    <string name="confirm">OK</string>
+    <string name="nav_home">Trang chủ</string>
+</resources>

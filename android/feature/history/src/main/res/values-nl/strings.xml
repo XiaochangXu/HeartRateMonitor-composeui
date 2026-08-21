@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="history_title">Geschiedenis</string>
+    <string name="no_history">Nog geen geschiedenisrecords</string>
+    <string name="confirm_delete">Verwijdering bevestigen</string>
+    <string name="delete_history_confirm">Wilt u de geselecteerde records (%1$d) verwijderen? Deze actie kan niet ongedaan worden gemaakt.</string>
+    <string name="deleted_records">%1$d records verwijderd</string>
+    <string name="delete_failed">Verwijderen mislukt: %1$s</string>
+    <string name="confirm_text">OK</string>
+    <string name="selected_count">%1$d geselecteerd</string>
+    <string name="cd_select_all">Alles selecteren</string>
+    <string name="in_progress">Bezig</string>
+    <string name="stats_format">Gem. %1$d · Min %2$d · Max %3$d · %4$d rec.</string>
+    <string name="chart_detail">Hartslagdetail</string>
+    <string name="cd_rotate_screen">Scherm draaien</string>
+    <string name="no_heart_rate_data">Geen hartslaggegevens om weer te geven</string>
+    <string name="marker_heart_rate">Hartslag: %1$d bpm\nTijd: %2$s</string>
+    <string name="stat_avg">Gem.</string>
+    <string name="stat_min">Min</string>
+    <string name="stat_max">Max</string>
+    <string name="stat_time">Tijd</string>
+    <string name="stat_bpm_value">%1$d bpm</string>
+    <string name="stat_time_range">%1$s - %2$s</string>
+    <string name="max_records_hint">Maximaal 30 records</string>
+</resources>

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="history_title">Lịch sử</string>
+    <string name="no_history">Chưa có bản ghi lịch sử</string>
+    <string name="confirm_delete">Xác nhận xóa</string>
+    <string name="delete_history_confirm">Bạn có muốn xóa các bản ghi đã chọn (%1$d) không? Hành động này không thể hoàn tác.</string>
+    <string name="deleted_records">Đã xóa %1$d bản ghi</string>
+    <string name="delete_failed">Xóa thất bại: %1$s</string>
+    <string name="confirm_text">OK</string>
+    <string name="selected_count">Đã chọn %1$d</string>
+    <string name="cd_select_all">Chọn tất cả</string>
+    <string name="in_progress">Đang thực hiện</string>
+    <string name="stats_format">TB %1$d · Min %2$d · Max %3$d · %4$d bản ghi</string>
+    <string name="chart_detail">Chi tiết nhịp tim</string>
+    <string name="cd_rotate_screen">Xoay màn hình</string>
+    <string name="no_heart_rate_data">Không có dữ liệu nhịp tim để hiển thị</string>
+    <string name="marker_heart_rate">Nhịp tim: %1$d bpm\nThời gian: %2$s</string>
+    <string name="stat_avg">TB</string>
+    <string name="stat_min">Min</string>
+    <string name="stat_max">Max</string>
+    <string name="stat_time">Thời gian</string>
+    <string name="stat_bpm_value">%1$d bpm</string>
+    <string name="stat_time_range">%1$s - %2$s</string>
+    <string name="max_records_hint">Tối đa 30 bản ghi</string>
+</resources>

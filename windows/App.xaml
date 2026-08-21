@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Application
+    x:Class="HeartRate.App"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:converters="using:HeartRate.Converters">
+
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <XamlControlsResources xmlns="using:Microsoft.UI.Xaml.Controls" />
+            </ResourceDictionary.MergedDictionaries>
+
+            <!-- 连接状态画笔 -->
+            <SolidColorBrush x:Key="StatusActiveBrush" Color="{ThemeResource SystemFillColorSuccess}" />
+            <SolidColorBrush x:Key="StatusInactiveBrush" Color="{ThemeResource SystemFillColorNeutral}" />
+
+            <!-- 爱心红色 -->
+            <SolidColorBrush x:Key="HeartBrush" Color="#FFEB3C50" />
+
+            <!-- 状态指示点画笔 -->
+            <SolidColorBrush x:Key="StateNeutralBrush" Color="{ThemeResource SystemFillColorNeutral}" />
+            <SolidColorBrush x:Key="StateSuccessBrush" Color="#48C78E" />
+            <SolidColorBrush x:Key="StateErrorBrush" Color="{ThemeResource SystemFillColorCritical}" />
+
+            <!-- 信号强度分级画笔（绿 ≥ -60 / 黄 -60~-80 / 红 < -80 / 未知中性色） -->
+            <SolidColorBrush x:Key="SignalStrongBrush" Color="{ThemeResource SystemFillColorSuccess}" />
+            <SolidColorBrush x:Key="SignalMediumBrush" Color="{ThemeResource SystemFillColorCaution}" />
+            <SolidColorBrush x:Key="SignalWeakBrush" Color="{ThemeResource SystemFillColorCritical}" />
+            <SolidColorBrush x:Key="SignalUnknownBrush" Color="{ThemeResource TextFillColorTertiary}" />
+
+            <!-- 转换器 -->
+            <converters:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+            <converters:InverseBooleanToVisibilityConverter x:Key="InverseBooleanToVisibilityConverter" />
+            <converters:BooleanToBrushConverter x:Key="RunningStatusBrushConverter"
+                                                TrueBrush="{StaticResource StatusActiveBrush}"
+                                                FalseBrush="{StaticResource StatusInactiveBrush}" />
+            <converters:RssiToBrushConverter x:Key="RssiToBrushConverter" />
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>

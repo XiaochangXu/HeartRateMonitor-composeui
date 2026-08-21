@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+      windowLightNavigationBar 需 API 27+（Android 8.1）。
+      navigationBarColor 虽然 API 21 就有，但与 windowLightNavigationBar 配合使用才有完整效果，
+      放在 v27 覆盖 values/themes.xml 中的同名项，确保导航栏浅色背景下图标可见。
+      Compose 主题侧（Theme.kt）已通过 WindowCompat.getInsetsController 设置
+      isAppearanceLightNavigationBars，此处仅为窗口初始化前的预设值，避免首帧闪烁。
+    -->
+    <style name="Theme.HeartRateMonitorMobile" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowLightNavigationBar">true</item>
+        <item name="android:windowBackground">@color/window_background_light</item>
+    </style>
+</resources>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- WebhookManager -->
+    <string name="webhook_test_response">Webhookテストレスポンス</string>
+    <string name="webhook_send_failed_headers">送信に失敗しました: Headersが有効なJSONではありません: %1$s</string>
+    <string name="webhook_send_error">送信中に不明なエラーが発生しました: %1$s</string>
+    <string name="webhook_sent">Webhookを送信しました</string>
+    <string name="webhook_resp_name">名前</string>
+    <string name="webhook_resp_trigger">トリガー</string>
+    <string name="webhook_resp_status">ステータス</string>
+    <string name="webhook_resp_body">レスポンス本文</string>
+</resources>

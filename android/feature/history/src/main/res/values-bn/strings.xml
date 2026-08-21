@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="history_title">ইতিহাস</string>
+    <string name="no_history">এখনও কোনো ইতিহাস রেকর্ড নেই</string>
+    <string name="confirm_delete">মুছে ফেলার নিশ্চিতকরণ</string>
+    <string name="delete_history_confirm">নির্বাচিত %1$dটি রেকর্ড মুছতে চান? এই কাজটি পূর্বাবস্থায় ফেরানো যাবে না।</string>
+    <string name="deleted_records">%1$dটি রেকর্ড মুছে ফেলা হয়েছে</string>
+    <string name="delete_failed">মুছে ফেলতে ব্যর্থ: %1$s</string>
+    <string name="confirm_text">ঠিক আছে</string>
+    <string name="selected_count">%1$dটি নির্বাচিত</string>
+    <string name="cd_select_all">সব নির্বাচন করুন</string>
+    <string name="in_progress">চলছে</string>
+    <string name="stats_format">গড় %1$d · সর্বনিম্ন %2$d · সর্বোচ্চ %3$d · %4$dটি রেকর্ড</string>
+    <string name="chart_detail">হৃদস্পন্দনের বিস্তারিত</string>
+    <string name="cd_rotate_screen">স্ক্রিন ঘোরান</string>
+    <string name="no_heart_rate_data">প্রদর্শনের জন্য কোনো হৃদস্পন্দন ডেটা নেই</string>
+    <string name="marker_heart_rate">হৃদস্পন্দন: %1$d bpm\nসময়: %2$s</string>
+    <string name="stat_avg">গড়</string>
+    <string name="stat_min">সর্বনিম্ন</string>
+    <string name="stat_max">সর্বোচ্চ</string>
+    <string name="stat_time">সময়</string>
+    <string name="stat_bpm_value">%1$d bpm</string>
+    <string name="stat_time_range">%1$s - %2$s</string>
+    <string name="max_records_hint">সর্বোচ্চ ৩০টি রেকর্ড সংরক্ষিত</string>
+</resources>

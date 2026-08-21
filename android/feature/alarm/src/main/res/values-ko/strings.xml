@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="alarm_title">심박수 알림</string>
+    <string name="calibrated_samples">캘리브레이션 완료 ✓ (%1$d개 샘플)</string>
+    <string name="not_calibrated">미캘리브레이션</string>
+    <string name="calibrating_format">%1$s 캘리브레이션 중…</string>
+    <string name="remaining_seconds">%1$d초 남음</string>
+    <string name="calibrate_sitting">앉은 자세 캘리브레이션</string>
+    <string name="calibrate_standing">선 자세 캘리브레이션</string>
+    <string name="calibration_status_format">앉은 자세: %1$s\n선 자세: %2$s</string>
+    <string name="clear_calibration">캘리브레이션 초기화</string>
+    <string name="enable_alarm">심박수 알림 사용</string>
+    <string name="exclude_posture_detection">자세 감지 제외</string>
+    <string name="above_threshold">초과</string>
+    <string name="below_threshold">미만</string>
+    <string name="duration_label">지속</string>
+    <string name="seconds_suffix"> 초</string>
+    <string name="repeat_alarm">반복 알림</string>
+    <string name="alarm_interval">알림 간격</string>
+    <string name="minutes_suffix"> 분</string>
+</resources>

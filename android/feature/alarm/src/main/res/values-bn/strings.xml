@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="alarm_title">হৃদস্পন্দন অ্যালার্ম</string>
+    <string name="calibrated_samples">ক্রমাঙ্কিত ✓ (%1$dটি নমুনা)</string>
+    <string name="not_calibrated">ক্রমাঙ্কিত নয়</string>
+    <string name="calibrating_format">%1$s ক্রমাঙ্কিত হচ্ছে…</string>
+    <string name="remaining_seconds">%1$d সেকেন্ড বাকি</string>
+    <string name="calibrate_sitting">বসা ক্রমাঙ্কিত করুন</string>
+    <string name="calibrate_standing">দাঁড়ানো ক্রমাঙ্কিত করুন</string>
+    <string name="calibration_status_format">বসা: %1$s\nদাঁড়ানো: %2$s</string>
+    <string name="clear_calibration">ক্রমাঙ্কন মুছুন</string>
+    <string name="enable_alarm">হৃদস্পন্দন অ্যালার্ম সক্রিয় করুন</string>
+    <string name="exclude_posture_detection">ভঙ্গি শনাক্তকরণ বাদ দিন</string>
+    <string name="above_threshold">বেশি</string>
+    <string name="below_threshold">কম</string>
+    <string name="duration_label">সময়কাল</string>
+    <string name="seconds_suffix"> সেকেন্ড</string>
+    <string name="repeat_alarm">বারবার অ্যালার্ম</string>
+    <string name="alarm_interval">অ্যালার্ম ব্যবধান</string>
+    <string name="minutes_suffix"> মিনিট</string>
+</resources>

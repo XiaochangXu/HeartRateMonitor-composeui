@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- WebhookManager -->
+    <string name="webhook_test_response">استجابة اختبار Webhook</string>
+    <string name="webhook_send_failed_headers">فشل الإرسال: Headers ليس JSON صالحًا: %1$s</string>
+    <string name="webhook_send_error">خطأ غير معروف أثناء الإرسال: %1$s</string>
+    <string name="webhook_sent">تم إرسال Webhook</string>
+    <string name="webhook_resp_name">الاسم</string>
+    <string name="webhook_resp_trigger">المشغل</string>
+    <string name="webhook_resp_status">رمز الحالة</string>
+    <string name="webhook_resp_body">نص الاستجابة</string>
+</resources>

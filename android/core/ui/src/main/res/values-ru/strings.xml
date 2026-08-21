@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="cd_back">Назад</string>
+    <string name="cancel">Отмена</string>
+    <string name="cd_delete">Удалить</string>
+    <string name="ok">ОК</string>
+    <string name="confirm">ОК</string>
+    <string name="nav_home">Главная</string>
+</resources>

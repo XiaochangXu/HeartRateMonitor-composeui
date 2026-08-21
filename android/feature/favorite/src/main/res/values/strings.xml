@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="favorite_devices">Favorite Devices</string>
+    <string name="cd_clear_all_favorites">Clear all favorite devices</string>
+    <string name="no_favorite_devices">No favorite devices</string>
+    <string name="delete_favorite_title">Delete Favorite Device</string>
+    <string name="delete_favorite_confirm">Are you sure you want to delete the favorite record for \"%1$s\"?</string>
+    <string name="delete">Delete</string>
+    <string name="clear_all_favorites_title">Clear All Favorites</string>
+    <string name="clear_all_favorites_confirm">Are you sure you want to delete all %1$d favorite devices? This action cannot be undone.</string>
+    <string name="delete_all">Delete All</string>
+</resources>
+

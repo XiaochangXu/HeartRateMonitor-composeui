@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="cd_toggle_floating_window">تبديل النافذة العائمة</string>
+    <string name="cd_speed_dial">إجراءات سريعة</string>
+    <string name="cd_search_bluetooth">البحث عن أجهزة البلوتوث</string>
+    <string name="search_tip_title">تنبيه</string>
+    <string name="scan_filter_on">المرشح: مفعل</string>
+    <string name="scan_filter_off">المرشح: معطل</string>
+    <string name="search_tip_message">يرجى تشغيل بث معدل ضربات القلب للجهاز أولاً، ثم اضغط بحث. وإلا فلن يتم العثور على الجهاز.</string>
+    <string name="got_it">فهمت</string>
+    <string name="available_devices">الأجهزة المتاحة</string>
+    <string name="no_available_devices">لا توجد أجهزة متاحة. اضغط على بحث في الأعلى يمينًا</string>
+    <string name="enter_fullscreen">الدخول إلى وضع ملء الشاشة</string>
+    <string name="disconnect">قطع الاتصال</string>
+    <string name="please_disconnect_first">يرجى قطع اتصال الجهاز أولاً</string>
+    <string name="speed">السرعة</string>
+    <string name="cd_favorite">المفضلة</string>
+    <string name="bpm_unit">bpm</string>
+    <string name="heart_rate_data">بيانات معدل ضربات القلب</string>
+    <string name="heart_rate_statistics">إحصائيات معدل ضربات القلب</string>
+    <string name="heart_rate_ring_max">أقصى نبض</string>
+    <string name="edit_heart_rate_ring_max">تعديل القيمة القصوى لحلقة معدل ضربات القلب</string>
+    <string name="cd_edit_heart_rate_max">تعديل الحد الأعلى لمعدل ضربات القلب للحلقة النصفية</string>
+    <string name="fullscreen_exit_hint">اضغط على الشاشة أو زر الرجوع للخروج</string>
+    <string name="history_not_enabled">السجل غير مفعل</string>
+    <string name="device_not_connected">الجهاز غير متصل</string>
+    <string name="connected_device">الجهاز المتصل</string>
+    <string name="max_heart_rate">الأقصى</string>
+    <string name="min_heart_rate">الأدنى</string>
+    <string name="reset">إعادة تعيين</string>
+</resources>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="favorite_devices">मनपर्ने यन्त्रहरू</string>
+    <string name="cd_clear_all_favorites">सबै मनपर्ने यन्त्रहरू मेट्नुहोस्</string>
+    <string name="no_favorite_devices">कुनै मनपर्ने यन्त्र छैन</string>
+    <string name="delete_favorite_title">मनपर्ने यन्त्र मेट्नुहोस्</string>
+    <string name="delete_favorite_confirm">"%1$s" को मनपर्ने रेकर्ड मेट्न चाहनुहुन्छ?</string>
+    <string name="delete">मेट्नुहोस्</string>
+    <string name="clear_all_favorites_title">सबै मनपर्ने मेट्नुहोस्</string>
+    <string name="clear_all_favorites_confirm">सबै %1$d मनपर्ने यन्त्रहरू मेट्न चाहनुहुन्छ? यो कार्य उल्टाउन सकिँदैन।</string>
+    <string name="delete_all">सबै मेट्नुहोस्</string>
+</resources>

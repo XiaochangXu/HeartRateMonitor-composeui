@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="webhook_title">Webhook設定</string>
+    <string name="cd_add_webhook">Webhookを追加</string>
+    <string name="no_webhooks">Webhookはありません。+ をタップして追加</string>
+    <string name="new_webhook">新しいWebhook</string>
+    <string name="close">閉じる</string>
+    <string name="cd_edit">編集</string>
+    <string name="enable_this_webhook">このWebhookを有効にする</string>
+    <string name="trigger_types">トリガータイプ（複数選択可）</string>
+    <string name="name_label">名前</string>
+    <string name="test_send">テスト送信（心拍数: 88）</string>
+    <string name="save">保存</string>
+    <string name="trigger_heart_rate_updated">心拍数更新時</string>
+    <string name="trigger_connected">デバイス接続時</string>
+    <string name="trigger_disconnected">デバイス切断時</string>
+    <string name="webhook_url_label">URL</string>
+    <string name="webhook_body_label">本文 (JSON)</string>
+    <string name="webhook_headers_label">ヘッダー (JSON)</string>
+</resources>

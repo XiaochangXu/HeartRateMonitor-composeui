@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="cd_back">戻る</string>
+    <string name="cancel">キャンセル</string>
+    <string name="cd_delete">削除</string>
+    <string name="ok">OK</string>
+    <string name="confirm">OK</string>
+    <string name="nav_home">ホーム</string>
+</resources>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="favorite_devices">Favorit-Geräte</string>
+    <string name="cd_clear_all_favorites">Alle Favorit-Geräte löschen</string>
+    <string name="no_favorite_devices">Keine Favorit-Geräte</string>
+    <string name="delete_favorite_title">Favorit-Gerät löschen</string>
+    <string name="delete_favorite_confirm">Möchten Sie den Favoriten für „%1$s" wirklich löschen?</string>
+    <string name="delete">Löschen</string>
+    <string name="clear_all_favorites_title">Alle Favoriten löschen</string>
+    <string name="clear_all_favorites_confirm">Möchten Sie wirklich alle %1$d Favorit-Geräte löschen? Diese Aktion kann nicht rückgängig gemacht werden.</string>
+    <string name="delete_all">Alle löschen</string>
+</resources>

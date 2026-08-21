@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="webhook_title">Webhook 設定</string>
+    <string name="cd_add_webhook">新增 Webhook</string>
+    <string name="no_webhooks">暫無 Webhook，點擊 + 新增</string>
+    <string name="new_webhook">新的 Webhook</string>
+    <string name="close">關閉</string>
+    <string name="cd_edit">編輯</string>
+    <string name="enable_this_webhook">啟用此 Webhook</string>
+    <string name="trigger_types">觸發器類型 (可多選)</string>
+    <string name="name_label">名稱</string>
+    <string name="test_send">測試發送 (心率: 88)</string>
+    <string name="save">儲存</string>
+    <string name="trigger_heart_rate_updated">心率刷新時</string>
+    <string name="trigger_connected">裝置連接時</string>
+    <string name="trigger_disconnected">裝置斷開連接時</string>
+    <string name="webhook_url_label">URL</string>
+    <string name="webhook_body_label">請求體 (JSON)</string>
+    <string name="webhook_headers_label">請求頭 (JSON)</string>
+</resources>

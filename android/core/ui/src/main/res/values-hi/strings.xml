@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="cd_back">वापस</string>
+    <string name="cancel">रद्द करें</string>
+    <string name="cd_delete">हटाएँ</string>
+    <string name="ok">ठीक है</string>
+    <string name="confirm">ठीक है</string>
+    <string name="nav_home">होम</string>
+</resources>

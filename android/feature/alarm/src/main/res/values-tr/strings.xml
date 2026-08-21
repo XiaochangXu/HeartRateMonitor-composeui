@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="alarm_title">Kalp atış hızı alarmı</string>
+    <string name="calibrated_samples">Kalibre edildi ✓ (%1$d örnek)</string>
+    <string name="not_calibrated">Kalibre edilmedi</string>
+    <string name="calibrating_format">%1$s kalibre ediliyor…</string>
+    <string name="remaining_seconds">%1$d saniye kaldı</string>
+    <string name="calibrate_sitting">Oturmayı kalibre et</string>
+    <string name="calibrate_standing">Ayakta durmayı kalibre et</string>
+    <string name="calibration_status_format">Oturma: %1$s\nAyakta: %2$s</string>
+    <string name="clear_calibration">Kalibrasyonu temizle</string>
+    <string name="enable_alarm">Kalp atış hızı alarmını etkinleştir</string>
+    <string name="exclude_posture_detection">Duruş algılamayı hariç tut</string>
+    <string name="above_threshold">Üzerinde</string>
+    <string name="below_threshold">Altında</string>
+    <string name="duration_label">Süre</string>
+    <string name="seconds_suffix"> sn</string>
+    <string name="repeat_alarm">Alarmı tekrarla</string>
+    <string name="alarm_interval">Alarm aralığı</string>
+    <string name="minutes_suffix"> dk</string>
+</resources>

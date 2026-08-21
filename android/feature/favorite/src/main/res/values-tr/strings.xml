@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="favorite_devices">Favori cihazlar</string>
+    <string name="cd_clear_all_favorites">Tüm favori cihazları temizle</string>
+    <string name="no_favorite_devices">Favori cihaz yok</string>
+    <string name="delete_favorite_title">Favori cihazı sil</string>
+    <string name="delete_favorite_confirm">"%1$s" favori kaydını silmek istiyor musunuz?</string>
+    <string name="delete">Sil</string>
+    <string name="clear_all_favorites_title">Tüm favorileri temizle</string>
+    <string name="clear_all_favorites_confirm">Tüm favori cihazları (%1$d) silmek istiyor musunuz? Bu işlem geri alınamaz.</string>
+    <string name="delete_all">Tümünü sil</string>
+</resources>

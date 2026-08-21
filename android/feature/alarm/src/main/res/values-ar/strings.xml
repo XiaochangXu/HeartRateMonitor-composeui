@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="alarm_title">تنبيه معدل ضربات القلب</string>
+    <string name="calibrated_samples">تمت المعايرة ✓ (%1$d عينات)</string>
+    <string name="not_calibrated">غير معاير</string>
+    <string name="calibrating_format">جارٍ معايرة %1$s…</string>
+    <string name="remaining_seconds">متبقي %1$d ثانية</string>
+    <string name="calibrate_sitting">معايرة الجلوس</string>
+    <string name="calibrate_standing">معايرة الوقوف</string>
+    <string name="calibration_status_format">الجلوس: %1$s\nالوقوف: %2$s</string>
+    <string name="clear_calibration">مسح المعايرة</string>
+    <string name="enable_alarm">تمكين تنبيه معدل ضربات القلب</string>
+    <string name="exclude_posture_detection">استبعاد كشف الوضعية</string>
+    <string name="above_threshold">أعلى من</string>
+    <string name="below_threshold">أقل من</string>
+    <string name="duration_label">المدة</string>
+    <string name="seconds_suffix"> ثانية</string>
+    <string name="repeat_alarm">تكرار التنبيه</string>
+    <string name="alarm_interval">فترة التنبيه</string>
+    <string name="minutes_suffix"> دقيقة</string>
+</resources>

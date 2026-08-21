@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="lan_transfer_title">LAN ট্রান্সফার</string>
+    <string name="lan_transfer_tip">ব্যবহারের আগে PC অ্যাপ চালু করুন এবং নিশ্চিত করুন এটি ফোনের মতো একই Wi-Fi/LAN-এ আছে। ফোন PC স্বয়ংক্রিয়ভাবে খুঁজে পাবে; পেয়ার করতে ডিভাইসে ট্যাপ করুন, PC নিশ্চিত করার পর হৃদস্পন্দন রিয়েল-টাইমে পাঠানো হবে।</string>
+    <string name="lan_scanning">কাছের PC স্ক্যান হচ্ছে…</string>
+    <string name="lan_no_devices">কোনো PC পাওয়া যায়নি। নিশ্চিত করুন PC অ্যাপ চলছে এবং PC একই নেটওয়ার্কে আছে</string>
+    <string name="lan_scan">স্ক্যান করুন</string>
+    <string name="lan_pair_approved">PC সংযোগ অনুমোদন করেছে। হৃদস্পন্দন পাঠানো শুরু হয়েছে</string>
+    <string name="lan_pair_rejected">PC সংযোগ প্রত্যাখ্যান করেছে</string>
+    <string name="lan_pair_failed">পেয়ারিং ব্যর্থ: %1$s</string>
+    <string name="lan_pair_timeout">পেয়ারিংয়ের সময় শেষ, PC সাড়া দেয়নি</string>
+    <string name="lan_disconnect">সংযোগ বিচ্ছিন্ন করুন</string>
+    <string name="lan_connected_status">PC-তে সংযুক্ত</string>
+    <string name="lan_status_pushing">পাঠানো হচ্ছে</string>
+    <string name="lan_ws_not_enabled">WebSocket সার্ভার নিষ্ক্রিয়, পাঠানো সম্ভব নয়। "HTTP এবং WebSocket সার্ভার" এ সক্রিয় করুন</string>
+    <string name="lan_open_server_settings">সেটিংস খুলুন</string>
+    <string name="lan_pair_action">সংযোগ করুন</string>
+    <string name="lan_device_unknown">অজানা PC</string>
+    <string name="server_settings">সার্ভার সেটিংস</string>
+    <string name="not_connected_network">নেটওয়ার্কে সংযুক্ত নেই</string>
+    <string name="http_port_hint">HTTP পোর্ট</string>
+    <string name="websocket_port_hint">WebSocket পোর্ট</string>
+    <string name="enable_server_format">%1$s সার্ভার সক্রিয় করুন</string>
+    <string name="access_url_format">অ্যাক্সেস URL: %1$s://%2$s:%3$s</string>
+    <string name="http_enabled_status">HTTP সার্ভার: চালু</string>
+    <string name="http_disabled_status">HTTP সার্ভার: বন্ধ</string>
+    <string name="http_access_url">অ্যাক্সেস URL: http://%1$s:%2$d/heartrate</string>
+    <string name="server_start_failed">সার্ভার শুরু করতে ব্যর্থ (পোর্ট ব্যবহার হতে পারে)</string>
+    <string name="ws_enabled_status">WebSocket সার্ভার: চালু</string>
+    <string name="ws_disabled_status">WebSocket সার্ভার: বন্ধ</string>
+    <string name="ws_access_url">অ্যাক্সেস URL: ws://%1$s:%2$d</string>
+</resources>

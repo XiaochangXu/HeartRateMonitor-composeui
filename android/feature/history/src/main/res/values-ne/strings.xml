@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="history_title">इतिहास</string>
+    <string name="no_history">अहिलेसम्म कुनै इतिहास रेकर्ड छैन</string>
+    <string name="confirm_delete">मेट्ने पुष्टि</string>
+    <string name="delete_history_confirm">छानिएका %1$d रेकर्डहरू मेट्न चाहनुहुन्छ? यो कार्य उल्टाउन सकिँदैन।</string>
+    <string name="deleted_records">%1$d रेकर्डहरू मेटियो</string>
+    <string name="delete_failed">मेट्न असफल: %1$s</string>
+    <string name="confirm_text">ठीक छ</string>
+    <string name="selected_count">%1$d छानियो</string>
+    <string name="cd_select_all">सबै छान्नुहोस्</string>
+    <string name="in_progress">हुँदै</string>
+    <string name="stats_format">औसत %1$d · न्यूनतम %2$d · अधिकतम %3$d · %4$d रेकर्ड</string>
+    <string name="chart_detail">मुटुको धड्कन विवरण</string>
+    <string name="cd_rotate_screen">स्क्रिन घुमाउनुहोस्</string>
+    <string name="no_heart_rate_data">देखाउन कुनै मुटुको धड्कन डेटा छैन</string>
+    <string name="marker_heart_rate">मुटुको धड्कन: %1$d bpm\nसमय: %2$s</string>
+    <string name="stat_avg">औसत</string>
+    <string name="stat_min">न्यूनतम</string>
+    <string name="stat_max">अधिकतम</string>
+    <string name="stat_time">समय</string>
+    <string name="stat_bpm_value">%1$d bpm</string>
+    <string name="stat_time_range">%1$s - %2$s</string>
+    <string name="max_records_hint">अधिकतम ३० रेकर्डहरू सेभ गरिन्छ</string>
+</resources>

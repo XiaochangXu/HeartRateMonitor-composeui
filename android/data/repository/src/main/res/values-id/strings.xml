@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- WebhookManager -->
+    <string name="webhook_test_response">Respons uji Webhook</string>
+    <string name="webhook_send_failed_headers">Pengiriman gagal: Headers bukan JSON yang valid: %1$s</string>
+    <string name="webhook_send_error">Kesalahan tidak dikenal saat mengirim: %1$s</string>
+    <string name="webhook_sent">Webhook terkirim</string>
+    <string name="webhook_resp_name">Nama</string>
+    <string name="webhook_resp_trigger">Pemicu</string>
+    <string name="webhook_resp_status">Kode status</string>
+    <string name="webhook_resp_body">Isi respons</string>
+</resources>

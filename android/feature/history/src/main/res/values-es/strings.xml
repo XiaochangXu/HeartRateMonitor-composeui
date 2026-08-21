@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="history_title">Historial</string>
+    <string name="no_history">Aún no hay registros de historial</string>
+    <string name="confirm_delete">Confirmar eliminación</string>
+    <string name="delete_history_confirm">¿Quiere eliminar los registros seleccionados (%1$d)? Esta acción es irreversible.</string>
+    <string name="deleted_records">%1$d registros eliminados</string>
+    <string name="delete_failed">Error al eliminar: %1$s</string>
+    <string name="confirm_text">Aceptar</string>
+    <string name="selected_count">%1$d seleccionados</string>
+    <string name="cd_select_all">Seleccionar todo</string>
+    <string name="in_progress">En curso</string>
+    <string name="stats_format">Prom. %1$d · Mín %2$d · Máx %3$d · %4$d reg.</string>
+    <string name="chart_detail">Detalle de frecuencia cardíaca</string>
+    <string name="cd_rotate_screen">Rotar pantalla</string>
+    <string name="no_heart_rate_data">No hay datos de frecuencia cardíaca para mostrar</string>
+    <string name="marker_heart_rate">Frecuencia cardíaca: %1$d bpm\nHora: %2$s</string>
+    <string name="stat_avg">Prom.</string>
+    <string name="stat_min">Mín</string>
+    <string name="stat_max">Máx</string>
+    <string name="stat_time">Hora</string>
+    <string name="stat_bpm_value">%1$d bpm</string>
+    <string name="stat_time_range">%1$s - %2$s</string>
+    <string name="max_records_hint">Máximo 30 registros</string>
+</resources>

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="history_title">기록</string>
+    <string name="no_history">아직 기록이 없습니다</string>
+    <string name="confirm_delete">삭제 확인</string>
+    <string name="delete_history_confirm">선택한 %1$d개의 기록을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.</string>
+    <string name="deleted_records">%1$d개의 기록이 삭제되었습니다</string>
+    <string name="delete_failed">삭제 실패: %1$s</string>
+    <string name="confirm_text">확인</string>
+    <string name="selected_count">%1$d개 선택됨</string>
+    <string name="cd_select_all">전체 선택</string>
+    <string name="in_progress">측정 중</string>
+    <string name="stats_format">평균 %1$d · 최저 %2$d · 최고 %3$d · %4$d개 기록</string>
+    <string name="chart_detail">심박수 상세</string>
+    <string name="cd_rotate_screen">방향 전환</string>
+    <string name="no_heart_rate_data">표시할 심박수 데이터가 없습니다</string>
+    <string name="marker_heart_rate">심박수: %1$d bpm\n시간: %2$s</string>
+    <string name="stat_avg">평균</string>
+    <string name="stat_min">최저</string>
+    <string name="stat_max">최고</string>
+    <string name="stat_time">시간</string>
+    <string name="stat_bpm_value">%1$d bpm</string>
+    <string name="stat_time_range">%1$s - %2$s</string>
+    <string name="max_records_hint">최대 30개까지 저장</string>
+</resources>

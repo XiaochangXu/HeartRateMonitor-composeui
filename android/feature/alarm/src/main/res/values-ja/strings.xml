@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="alarm_title">心拍数アラーム</string>
+    <string name="calibrated_samples">キャリブレーション済み ✓（%1$d サンプル）</string>
+    <string name="not_calibrated">未キャリブレーション</string>
+    <string name="calibrating_format">%1$sをキャリブレーション中…</string>
+    <string name="remaining_seconds">残り %1$d 秒</string>
+    <string name="calibrate_sitting">座位をキャリブレーション</string>
+    <string name="calibrate_standing">立位をキャリブレーション</string>
+    <string name="calibration_status_format">座位: %1$s\n立位: %2$s</string>
+    <string name="clear_calibration">キャリブレーションをクリア</string>
+    <string name="enable_alarm">心拍数アラームを有効にする</string>
+    <string name="exclude_posture_detection">姿勢検出を除外</string>
+    <string name="above_threshold">超過</string>
+    <string name="below_threshold">未満</string>
+    <string name="duration_label">持続</string>
+    <string name="seconds_suffix"> 秒</string>
+    <string name="repeat_alarm">繰り返しアラーム</string>
+    <string name="alarm_interval">アラーム間隔</string>
+    <string name="minutes_suffix"> 分</string>
+</resources>

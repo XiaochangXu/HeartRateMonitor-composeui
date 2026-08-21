@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- WebhookManager -->
+    <string name="webhook_test_response">Webhook 测试响应</string>
+    <string name="webhook_send_failed_headers">发送失败: Headers不是有效的JSON格式: %1$s</string>
+    <string name="webhook_send_error">发送时发生未知错误: %1$s</string>
+    <string name="webhook_sent">Webhook 已发送</string>
+    <string name="webhook_resp_name">名称</string>
+    <string name="webhook_resp_trigger">触发于</string>
+    <string name="webhook_resp_status">状态码</string>
+    <string name="webhook_resp_body">响应体</string>
+</resources>

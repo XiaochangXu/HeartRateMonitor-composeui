@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="alarm_title">Hartslagalarm</string>
+    <string name="calibrated_samples">Gekalibreerd ✓ (%1$d samples)</string>
+    <string name="not_calibrated">Niet gekalibreerd</string>
+    <string name="calibrating_format">%1$s kalibreren…</string>
+    <string name="remaining_seconds">%1$d seconden resterend</string>
+    <string name="calibrate_sitting">Zittend kalibreren</string>
+    <string name="calibrate_standing">Staand kalibreren</string>
+    <string name="calibration_status_format">Zittend: %1$s\nStaand: %2$s</string>
+    <string name="clear_calibration">Kalibratie wissen</string>
+    <string name="enable_alarm">Hartslagalarm inschakelen</string>
+    <string name="exclude_posture_detection">Houdingsdetectie uitsluiten</string>
+    <string name="above_threshold">Boven</string>
+    <string name="below_threshold">Onder</string>
+    <string name="duration_label">Duur</string>
+    <string name="seconds_suffix"> s</string>
+    <string name="repeat_alarm">Alarm herhalen</string>
+    <string name="alarm_interval">Alarminterval</string>
+    <string name="minutes_suffix"> min</string>
+</resources>

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="alarm_title">Alarm sa rate ng puso</string>
+    <string name="calibrated_samples">Naka-calibrate ✓ (%1$d sample)</string>
+    <string name="not_calibrated">Hindi naka-calibrate</string>
+    <string name="calibrating_format">Ini-calibrate ang %1$s…</string>
+    <string name="remaining_seconds">%1$d segundo ang natitira</string>
+    <string name="calibrate_sitting">I-calibrate ang nakaupo</string>
+    <string name="calibrate_standing">I-calibrate ang nakatayo</string>
+    <string name="calibration_status_format">Nakaupo: %1$s\nNakatayo: %2$s</string>
+    <string name="clear_calibration">I-clear ang kalibrasyon</string>
+    <string name="enable_alarm">I-enable ang alarm sa rate ng puso</string>
+    <string name="exclude_posture_detection">Ibukod ang pagtuklas ng postura</string>
+    <string name="above_threshold">Higit sa</string>
+    <string name="below_threshold">Mababa sa</string>
+    <string name="duration_label">Tagal</string>
+    <string name="seconds_suffix"> seg</string>
+    <string name="repeat_alarm">Ulitin ang alarm</string>
+    <string name="alarm_interval">Interval ng alarm</string>
+    <string name="minutes_suffix"> min</string>
+</resources>

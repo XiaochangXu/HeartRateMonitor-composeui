@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="cd_back">Kembali</string>
+    <string name="cancel">Batal</string>
+    <string name="cd_delete">Padam</string>
+    <string name="ok">OK</string>
+    <string name="confirm">OK</string>
+    <string name="nav_home">Utama</string>
+</resources>

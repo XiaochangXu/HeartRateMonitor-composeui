@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!--
+      :service 模块的组件声明（AGP 合并进最终 app manifest）。
+      组件名使用完整类名：library manifest 的相对名以模块 namespace 为基准解析，
+      而 ServiceBootInitializer 位于 com.github.heartratemonitor_compose.init 包（非本模块 namespace 下）。
+      权限统一保留在 :app manifest。
+    -->
+    <application>
+        <service
+            android:name="com.github.heartratemonitor_compose.service.BleService"
+            android:foregroundServiceType="connectedDevice|location"
+            android:exported="false" />
+
+        <service
+            android:name="com.github.heartratemonitor_compose.service.FloatingWindowService"
+            android:exported="false" />
+
+        <service
+            android:name="com.github.heartratemonitor_compose.service.StatusBarResidentService"
+            android:exported="false"
+            android:foregroundServiceType="specialUse">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="Heart rate status bar overlay" />
+        </service>
+
+        <service
+            android:name="com.github.heartratemonitor_compose.service.HeartRateAlarmService"
+            android:exported="false"
+            android:foregroundServiceType="specialUse">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="Heart rate alarm monitoring" />
+        </service>
+
+        <provider
+            android:name="com.github.heartratemonitor_compose.init.ServiceBootInitializer"
+            android:authorities="${applicationId}.boot_init"
+            android:exported="false" />
+    </application>
+
+</manifest>

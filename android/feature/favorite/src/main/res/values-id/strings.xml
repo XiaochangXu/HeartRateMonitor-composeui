@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="favorite_devices">Perangkat favorit</string>
+    <string name="cd_clear_all_favorites">Hapus semua perangkat favorit</string>
+    <string name="no_favorite_devices">Tidak ada perangkat favorit</string>
+    <string name="delete_favorite_title">Hapus perangkat favorit</string>
+    <string name="delete_favorite_confirm">Apakah Anda ingin menghapus catatan favorit "%1$s"?</string>
+    <string name="delete">Hapus</string>
+    <string name="clear_all_favorites_title">Hapus semua favorit</string>
+    <string name="clear_all_favorites_confirm">Apakah Anda ingin menghapus semua perangkat favorit (%1$d)? Tindakan ini tidak dapat dibatalkan.</string>
+    <string name="delete_all">Hapus semua</string>
+</resources>

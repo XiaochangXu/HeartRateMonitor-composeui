@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- WebhookManager -->
+    <string name="webhook_test_response">การตอบสนองทดสอบ Webhook</string>
+    <string name="webhook_send_failed_headers">ส่งล้มเหลว: Headers ไม่ใช่ JSON ที่ถูกต้อง: %1$s</string>
+    <string name="webhook_send_error">เกิดข้อผิดพลาดที่ไม่รู้จักขณะส่ง: %1$s</string>
+    <string name="webhook_sent">ส่ง Webhook แล้ว</string>
+    <string name="webhook_resp_name">ชื่อ</string>
+    <string name="webhook_resp_trigger">ทริกเกอร์</string>
+    <string name="webhook_resp_status">รหัสสถานะ</string>
+    <string name="webhook_resp_body">เนื้อหาการตอบสนอง</string>
+</resources>
