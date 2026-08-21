@@ -43,6 +43,7 @@ class HeartRateRecorder(
             startTime = System.currentTimeMillis()
         )
         currentSessionId = dao.insertSession(session)
+        trimOldSessionsIfNeeded()
         startRecordFlushLoop()
         return currentSessionId
     }
@@ -56,6 +57,7 @@ class HeartRateRecorder(
                 startTime = System.currentTimeMillis()
             )
             currentSessionId = dao.insertSession(session)
+            trimOldSessionsIfNeeded()
             startRecordFlushLoop()
         }
 
@@ -160,8 +162,24 @@ class HeartRateRecorder(
         }
     }
 
+    /**
+     * 清理超出保留数量限制的最旧会话（级联删除其下心率记录）。
+     *
+     * 在每次创建新 session 后调用，保证历史记录总数不超过 [MAX_SESSIONS] 条。
+     * 异常就地消化，不影响主流程。
+     */
+    private suspend fun trimOldSessionsIfNeeded() {
+        try {
+            dao.trimOldSessions(MAX_SESSIONS, currentSessionId)
+        } catch (e: Exception) {
+            Log.e(TAG, "清理旧会话失败", e)
+        }
+    }
+
     companion object {
         private const val TAG = "HeartRateRecorder"
         private const val BATCH_FLUSH_INTERVAL_MS = 5000L
+        /** 历史会话最大保留数量，超出时自动删除最旧的。 */
+        private const val MAX_SESSIONS = 30
     }
 }

@@ -153,18 +153,22 @@ fun AppRoot(
             // 这样导航条悬浮区域也能被渐变覆盖，避免导航条背景透明无渐变。
             // windowInsetsBottomHeight 只等于系统导航条高度，需额外加上
             // FLOATING_NAV_HEIGHT + FLOATING_NAV_BOTTOM_MARGIN 才能覆盖应用导航条。
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(bottomGradientHeightDp)
-                    .align(Alignment.BottomCenter)
-                    .background(
-                        Brush.verticalGradient(
-                            0f to Color.Transparent,
-                            1f to MaterialTheme.colorScheme.surfaceContainer.copy(alpha = 0.9f)
+            // 仅 Tab 页显示：Tab 页有悬浮导航条需要渐变覆盖；
+            // 二级页面无悬浮导航条，不显示底部渐变。
+            if (isOnTab) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(bottomGradientHeightDp)
+                        .align(Alignment.BottomCenter)
+                        .background(
+                            Brush.verticalGradient(
+                                0f to Color.Transparent,
+                                1f to MaterialTheme.colorScheme.surfaceContainer.copy(alpha = 0.9f)
+                            )
                         )
-                    )
-            )
+                )
+            }
 
             if (isFullScreenMode) {
                 val onExitFullScreen = remember { { isFullScreenMode = false } }

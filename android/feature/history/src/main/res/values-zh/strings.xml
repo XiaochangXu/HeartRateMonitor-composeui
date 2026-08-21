@@ -21,5 +21,6 @@
     <string name="stat_time">时间</string>
     <string name="stat_bpm_value">%1$d bpm</string>
     <string name="stat_time_range">%1$s - %2$s</string>
+    <string name="max_records_hint">记录最多保存30条</string>
 </resources>
 

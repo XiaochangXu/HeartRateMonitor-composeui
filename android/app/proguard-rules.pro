@@ -114,13 +114,21 @@
 
 # ----------------------------------------------------------------------------
 # 11a. Hilt / Dagger 生成代码（迁移 Phase 1~8 后经 R8 release 实证，无需额外规则）
-#     - @HiltViewModel（6 个 ViewModel）：Hilt 以 @LazyClassKey(Xxx.class) 代码引用
-#       注册，R8 重命名后运行时 getName() 自洽；seeds.txt 实测全部保留。
+#     - @HiltViewModel（16 个 ViewModel，含 MainViewModel / HistoryViewModel /
+#       ChartViewModel / FavoriteDevicesViewModel / HeartRateAlarmViewModel /
+#       ServerSettingsViewModel / LanTransferViewModel / WebhookViewModel /
+#       ThemeSettingsViewModel / StatusBarSettingsViewModel / NavStyleViewModel /
+#       LanguageSettingsViewModel / FunctionSettingsViewModel /
+#       FullscreenSoundViewModel / FloatingWindowSettingsViewModel /
+#       AboutDetailsViewModel）：Hilt KSP 为每个 @HiltViewModel 生成
+#       META-INF/proguard/*_LazyClassKeys.pro（-keep,allowobfuscation,allowshrinking），
+#       R8 重命名后运行时 getName() 自洽。
 #     - @HiltWorker（FlushRecordsWorker）：androidx.hilt:hilt-work 自带
 #       -keepnames @HiltWorker class * extends ListenableWorker；上方第 11 节另有
 #       显式 keep 双保险（Worker 类名是 Hilt multibinding map key，禁止混淆）。
-#     - @EntryPoint（MainDependencies / ServerDependencies / SettingsDependencies）：
-#       hilt-android 自带 -keep,allowobfuscation,allowshrinking @EntryPoint class *。
+#     - @EntryPoint：已全部移除（MainDependencies / ServerDependencies /
+#       SettingsDependencies cast 链已删除），当前无使用方，hilt-android 自带的
+#       -keep,allowobfuscation,allowshrinking @EntryPoint class * 仍作兜底。
 #     - @AndroidEntryPoint 组件基类（Hilt_*）：manifest 引用 + 上方第 11 节保留。
 #     - 生成组件（Dagger*_HiltComponents / *_Factory）：R8 正常处理，未用子组件
 #       （Fragment/View）自动收缩，usage.txt 已验证为成员级优化。
@@ -209,6 +217,24 @@
 -dontwarn coil3.**
 
 # ----------------------------------------------------------------------------
+# 19a. Backdrop / Capsule / Shapes（io.github.kyant0 液态玻璃 / 连续曲率形状）
+#      纯 Kotlin Compose 库，无反射、无注解处理、无 consumer-rules.pro，
+#      通过 Modifier 扩展函数 + RenderNode 工作；R8 正常混淆不影响运行。
+#      仅 -dontwarn 兜底防止传递依赖（androidx compose 等）的 missing class 警告。
+# ----------------------------------------------------------------------------
+-dontwarn com.kyant.backdrop.**
+-dontwarn com.kyant.capsule.**
+-dontwarn com.kyant.shapes.**
+
+# ----------------------------------------------------------------------------
+# 19b. Vico 图表（com.patrykandpatrick.vico，心率历史折线图）
+#      纯 Kotlin Compose 库，KMP 打包无 consumer-rules.pro，
+#      Compose 层经 rememberXxx() 创建状态对象，无反射；R8 正常处理。
+#      仅 -dontwarn 兜底。
+# ----------------------------------------------------------------------------
+-dontwarn com.patrykandpatrick.vico.**
+
+# ----------------------------------------------------------------------------
 # 20. MaterialKolor PaletteStyle：枚举名被持久化到 DataStore
 #     ThemeState 通过 PaletteStyle.valueOf(String) 反射读取持久化的枚举名，
 #     通用枚举规则（第 14 节）只保留 valueOf 方法签名，不保留枚举常量字段名，
@@ -217,3 +243,10 @@
 -keepclassmembers enum com.materialkolor.PaletteStyle {
     <fields>;
 }
+
+# ----------------------------------------------------------------------------
+# 21. kotlin.uuid（Kable 0.44.x 使用 Kotlin 2.x 标准 UUID）
+#     项目 Kotlin 2.4.10，kotlin.uuid 为标准库内联类，不会缺失；
+#     第 2 节 -dontwarn kotlin.** 已覆盖此包，无需重复声明。
+#     Kable 自带 consumer-rules 已覆盖核心 BLE 类，第 6 节另有显式 keep。
+# ----------------------------------------------------------------------------

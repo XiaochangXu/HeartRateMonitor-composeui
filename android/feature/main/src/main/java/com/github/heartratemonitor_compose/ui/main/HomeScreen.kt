@@ -165,7 +165,7 @@ fun HomeScreen(
             HomeContent(
                 modifier = Modifier
                     .fillMaxSize()
-                    // 仅应用顶部 padding（TopAppBar 高度），底部不应用 padding 让内容延伸到屏幕底部
+                    // 底部不应用 padding 让内容延伸到屏幕底部
                     .padding(top = padding.calculateTopPadding()),
                 heartRate = heartRate,
                 appStatus = appStatus,
@@ -235,7 +235,7 @@ private fun HomeContent(
         ),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        item(key = "heart_rate_card") {
+        item(key = "heart_rate_card", contentType = "heart_rate_card") {
             val entrance = rememberEntrance(order = 0, play = playEntrance)
             HeartRateCard(
                 modifier = Modifier
@@ -248,7 +248,7 @@ private fun HomeContent(
             )
         }
 
-        item(key = "session_stats") {
+        item(key = "session_stats", contentType = "session_stats") {
             val entrance = rememberEntrance(order = 1, play = playEntrance)
             SessionStatsRow(
                 modifier = Modifier.entranceGraphics(entrance),
@@ -257,7 +257,7 @@ private fun HomeContent(
             )
         }
 
-        item(key = "chart") {
+        item(key = "chart", contentType = "chart") {
             val entrance = rememberEntrance(order = 2, play = playEntrance)
             when {
                 isConnected && isHistoryEnabled -> {
@@ -293,7 +293,7 @@ private fun HomeContent(
             }
         }
 
-        item(key = "device_entry") {
+        item(key = "device_entry", contentType = "device_entry") {
             val availableDevicesText = stringResource(R.string.available_devices)
             val connectedDeviceText = stringResource(R.string.connected_device)
             val isConnecting = appStatus == AppStatus.CONNECTING

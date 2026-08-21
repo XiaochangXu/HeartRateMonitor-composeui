@@ -122,13 +122,16 @@ fun FavoriteDevicesScreen(
                     bottom = 8.dp + WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
                     )
                 ) {
-                items(devices, key = { it.id }) { device ->
-                    DeviceCard(
-                        device = device,
-                        onDelete = {
+                items(devices, key = { it.id }, contentType = { "favorite_device" }) { device ->
+                    val onDelete = remember(device) {
+                        {
                             deviceToDelete = device
                             showDeleteDialog = true
                         }
+                    }
+                    DeviceCard(
+                        device = device,
+                        onDelete = onDelete
                     )
                 }
             }

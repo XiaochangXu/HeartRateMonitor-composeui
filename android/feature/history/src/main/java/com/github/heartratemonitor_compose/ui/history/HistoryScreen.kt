@@ -37,6 +37,7 @@ import com.github.heartratemonitor_compose.feature.history.R
 import com.github.heartratemonitor_compose.data.model.HeartRateSessionInfo
 import com.github.heartratemonitor_compose.ui.util.SheetTopShape
 import com.github.heartratemonitor_compose.ui.util.StatusBarScrim
+import com.github.heartratemonitor_compose.ui.util.CapsuleShape
 import com.github.heartratemonitor_compose.ui.util.cardShape
 import com.github.heartratemonitor_compose.ui.util.collectWhenActive
 import com.github.heartratemonitor_compose.ui.util.rememberExpandedSheetState
@@ -124,27 +125,35 @@ fun HistoryScreen(
                         bottom = 8.dp + WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
                     )
                 ) {
-                items(sessions, key = { it.id }) { session ->
+                items(sessions, key = { it.id }, contentType = { "session_card" }) { session ->
+                    val sessionId = session.id
+                    val onClick = remember(isMultiSelectMode, sessionId, onNavigateToChart) {
+                        {
+                            if (isMultiSelectMode) {
+                                viewModel.dispatch(HistoryIntent.ToggleSelection(sessionId, exitIfEmpty = false))
+                            } else {
+                                onNavigateToChart(sessionId)
+                            }
+                        }
+                    }
+                    val onLongClick = remember(isMultiSelectMode, sessionId) {
+                        {
+                            if (!isMultiSelectMode) {
+                                viewModel.dispatch(HistoryIntent.EnterMultiSelect(sessionId))
+                            }
+                        }
+                    }
+                    val onCheckToggle = remember(sessionId) {
+                        { viewModel.dispatch(HistoryIntent.ToggleSelection(sessionId, exitIfEmpty = true)) }
+                    }
                     SessionCard(
                         session = session,
                         previewData = previewDataMap[session.id],
                         isMultiSelectMode = isMultiSelectMode,
-                        isSelected = selectedIds.contains(session.id),
-                        onClick = {
-                            if (isMultiSelectMode) {
-                                viewModel.dispatch(HistoryIntent.ToggleSelection(session.id, exitIfEmpty = false))
-                            } else {
-                                onNavigateToChart(session.id)
-                            }
-                        },
-                        onLongClick = {
-                            if (!isMultiSelectMode) {
-                                viewModel.dispatch(HistoryIntent.EnterMultiSelect(session.id))
-                            }
-                        },
-                        onCheckToggle = {
-                            viewModel.dispatch(HistoryIntent.ToggleSelection(session.id, exitIfEmpty = true))
-                        }
+                        isSelected = selectedIds.contains(sessionId),
+                        onClick = onClick,
+                        onLongClick = onLongClick,
+                        onCheckToggle = onCheckToggle
                     )
                 }
             }
@@ -253,7 +262,27 @@ private fun HistoryTopBar(
             }
         },
         actions = {
-            if (isMultiSelectMode) {
+            if (!isMultiSelectMode) {
+                Surface(
+                    modifier = Modifier
+                        .height(40.dp)
+                        .padding(end = 4.dp),
+                    shape = CapsuleShape,
+                    color = MaterialTheme.colorScheme.surfaceBright
+                ) {
+                    Box(
+                        modifier = Modifier.fillMaxHeight(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = stringResource(R.string.max_records_hint),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(horizontal = 12.dp)
+                        )
+                    }
+                }
+            } else {
                 IconButton(onClick = onSelectAll) {
                     Icon(
                         Icons.Default.Check,

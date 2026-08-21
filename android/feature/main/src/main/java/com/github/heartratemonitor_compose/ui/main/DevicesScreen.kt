@@ -32,7 +32,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -63,6 +62,8 @@ import com.github.heartratemonitor_compose.ui.util.StatusBarScrim
 import com.github.heartratemonitor_compose.ui.util.rememberExpandedSheetState
 import com.github.heartratemonitor_compose.ui.util.rememberSheetDismissHandler
 import com.github.heartratemonitor_compose.ui.widgets.ExpressiveButton
+import com.github.heartratemonitor_compose.ui.widgets.ExpressiveButtonStyle
+import com.github.heartratemonitor_compose.ui.widgets.IconContainer
 import com.github.heartratemonitor_compose.ui.widgets.ExpressiveTextButton
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.statusBars
@@ -215,17 +216,17 @@ fun DevicesScreen(
                 verticalArrangement = Arrangement.spacedBy(2.dp)
             ) {
                 connectedDevice?.let { device ->
-                item(key = "connected") {
+                item(key = "connected", contentType = "connected_card") {
                     val onDisconnect = remember(viewModel) { { viewModel.dispatch(MainIntent.DisconnectDevice) } }
                     ConnectedDeviceCard(
                         device = device,
                         onDisconnect = onDisconnect
                     )
                 }
-            item(key = "gap_connected_available") { Spacer(Modifier.height(14.dp)) }
+            item(key = "gap_connected_available", contentType = "spacer") { Spacer(Modifier.height(14.dp)) }
             }
 
-            item(key = "available_header") {
+            item(key = "available_header", contentType = "header") {
                 Surface(
                     modifier = Modifier.fillMaxWidth(),
                     shape = SegmentTopShape,
@@ -238,17 +239,25 @@ fun DevicesScreen(
                             .padding(horizontal = 16.dp, vertical = 14.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
+                        IconContainer(
+                            icon = Icons.Filled.Search,
+                            containerSize = 36.dp,
+                            iconSize = 20.dp,
+                            containerColor = MaterialTheme.colorScheme.primaryContainer,
+                            iconTint = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
+                        Spacer(Modifier.width(12.dp))
                         Text(
                             text = stringResource(R.string.available_devices),
                             style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.primary
+                            color = MaterialTheme.colorScheme.onSurface
                         )
                     }
                 }
             }
 
             if (sortedScanResults.isEmpty()) {
-                item(key = "available_empty") {
+                item(key = "available_empty", contentType = "empty") {
                     Surface(
                         modifier = Modifier.fillMaxWidth(),
                         shape = SegmentBottomShape,
@@ -269,7 +278,8 @@ fun DevicesScreen(
             } else {
                 items(
                     items = sortedScanResults,
-                    key = { it.identifier }
+                    key = { it.identifier },
+                    contentType = { "device_item" }
                 ) { advertisement ->
                     val isLast = advertisement == sortedScanResults.last()
                     val shape = if (isLast) {
@@ -378,17 +388,18 @@ private fun ConnectedDeviceCard(
                     .padding(horizontal = 16.dp, vertical = 14.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(
-                    imageVector = Icons.Filled.Bluetooth,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(20.dp)
+                IconContainer(
+                    icon = Icons.Filled.Bluetooth,
+                    containerSize = 36.dp,
+                    iconSize = 20.dp,
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    iconTint = MaterialTheme.colorScheme.onPrimaryContainer
                 )
                 Spacer(Modifier.width(12.dp))
                 Text(
                     text = stringResource(R.string.connected_device),
                     style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.primary,
+                    color = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier.weight(1f)
                 )
                 Icon(
@@ -415,6 +426,7 @@ private fun ConnectedDeviceCard(
                     Text(
                         text = device.name.ifBlank { stringResource(com.github.heartratemonitor_compose.service.R.string.unknown_device) },
                         style = MaterialTheme.typography.bodyLarge,
+                        fontWeight = FontWeight.Medium,
                         color = MaterialTheme.colorScheme.onSurface,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
@@ -427,16 +439,11 @@ private fun ConnectedDeviceCard(
                         overflow = TextOverflow.Ellipsis
                     )
                 }
-                TextButton(
+                ExpressiveButton(
+                    label = stringResource(R.string.disconnect),
                     onClick = onDisconnect,
-                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
-                ) {
-                    Text(
-                        text = stringResource(R.string.disconnect),
-                        color = MaterialTheme.colorScheme.error,
-                        style = MaterialTheme.typography.labelLarge
-                    )
-                }
+                    style = ExpressiveButtonStyle.Danger
+                )
             }
         }
     }

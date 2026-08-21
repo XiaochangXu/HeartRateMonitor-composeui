@@ -68,10 +68,10 @@ fun SettingsScreen(
                 ),
                 verticalArrangement = Arrangement.spacedBy(32.dp)
             ) {
-                item { GeneralSection(onNavigate) }
-                item { IntegrationSection(onNavigate) }
-                item { OverlaySettingsSection(onNavigate) }
-                item { AboutSection(onNavigate) }
+                item(contentType = "settings_section") { GeneralSection(onNavigate) }
+                item(contentType = "settings_section") { IntegrationSection(onNavigate) }
+                item(contentType = "settings_section") { OverlaySettingsSection(onNavigate) }
+                item(contentType = "settings_section") { AboutSection(onNavigate) }
             }
             StatusBarScrim()
         }

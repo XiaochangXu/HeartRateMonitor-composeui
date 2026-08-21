@@ -72,6 +72,28 @@ interface HeartRateDao {
     suspend fun getLastRecordTimestampForSession(sessionId: Long): Long?
 
     /**
+     * 删除超出保留数量的最旧会话（级联删除其下心率记录）。
+     *
+     * 保留按 startTime DESC 排序的前 [keep] 条（排除 [excludeSessionId] 指定的当前活跃会话），
+     * 其余删除。在事务中执行，避免删除过程中新查询返回不一致的中间态。
+     */
+    @Transaction
+    suspend fun trimOldSessions(keep: Int, excludeSessionId: Long?) {
+        val ids = getExcessSessionIds(keep, excludeSessionId)
+        if (ids.isNotEmpty()) {
+            deleteSessionsByIds(ids)
+        }
+    }
+
+    @Query("""
+        SELECT id FROM heart_rate_sessions
+        WHERE (:excludeSessionId IS NULL OR id != :excludeSessionId)
+        ORDER BY startTime DESC
+        LIMIT -1 OFFSET :keep
+    """)
+    suspend fun getExcessSessionIds(keep: Int, excludeSessionId: Long?): List<Long>
+
+    /**
      * 替代 HistoryScreen 中对每个 session 单独查询的 N+1 模式，单次 SQL 完成聚合。
      */
     @Query("""

@@ -25,6 +25,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -84,8 +85,10 @@ fun FullScreenHeartRate(
     viewModel: MainViewModel,
     onExit: () -> Unit
 ) {
+    // derivedStateOf 隔离：只有 heartRate 值真正变化时才触发读取位置的重组，
+    // 避免 MainUiState 其他字段（speed/statusMessage 等）变化导致的无效重组。
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val heartRate = uiState.heartRate
+    val heartRate by remember { derivedStateOf { uiState.heartRate } }
     val context = LocalContext.current
     // 全屏模式始终使用红色：黑色背景下悬浮窗/状态栏的自定义颜色不可见
     val heartColor = remember { ComposeColor.Red }

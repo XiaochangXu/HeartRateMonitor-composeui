@@ -21,4 +21,5 @@
     <string name="stat_time">Ora</string>
     <string name="stat_bpm_value">%1$d bpm</string>
     <string name="stat_time_range">%1$s - %2$s</string>
+    <string name="max_records_hint">Massimo 30 registrazioni</string>
 </resources>
