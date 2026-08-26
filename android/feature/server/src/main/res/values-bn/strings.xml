@@ -4,12 +4,16 @@
     <string name="lan_transfer_tip">ব্যবহারের আগে PC অ্যাপ চালু করুন এবং নিশ্চিত করুন এটি ফোনের মতো একই Wi-Fi/LAN-এ আছে। ফোন PC স্বয়ংক্রিয়ভাবে খুঁজে পাবে; পেয়ার করতে ডিভাইসে ট্যাপ করুন, PC নিশ্চিত করার পর হৃদস্পন্দন রিয়েল-টাইমে পাঠানো হবে।</string>
     <string name="lan_scanning">কাছের PC স্ক্যান হচ্ছে…</string>
     <string name="lan_no_devices">কোনো PC পাওয়া যায়নি। নিশ্চিত করুন PC অ্যাপ চলছে এবং PC একই নেটওয়ার্কে আছে</string>
+    <string name="lan_no_devices_hint">কোনো উপলব্ধ ডিভাইস নেই। উপরের ডানদিকে সার্চ করুন</string>
+    <string name="lan_connected_device">সংযুক্ত ডিভাইস</string>
+    <string name="lan_available_devices">উপলব্ধ ডিভাইস</string>
     <string name="lan_scan">স্ক্যান করুন</string>
     <string name="lan_pair_approved">PC সংযোগ অনুমোদন করেছে। হৃদস্পন্দন পাঠানো শুরু হয়েছে</string>
     <string name="lan_pair_rejected">PC সংযোগ প্রত্যাখ্যান করেছে</string>
     <string name="lan_pair_failed">পেয়ারিং ব্যর্থ: %1$s</string>
     <string name="lan_pair_timeout">পেয়ারিংয়ের সময় শেষ, PC সাড়া দেয়নি</string>
     <string name="lan_disconnect">সংযোগ বিচ্ছিন্ন করুন</string>
+    <string name="lan_please_disconnect_first">অনুগ্রহ করে আগে ডিভাইস সংযোগ বিচ্ছিন্ন করুন</string>
     <string name="lan_connected_status">PC-তে সংযুক্ত</string>
     <string name="lan_status_pushing">পাঠানো হচ্ছে</string>
     <string name="lan_ws_not_enabled">WebSocket সার্ভার নিষ্ক্রিয়, পাঠানো সম্ভব নয়। "HTTP এবং WebSocket সার্ভার" এ সক্রিয় করুন</string>
@@ -29,4 +33,6 @@
     <string name="ws_enabled_status">WebSocket সার্ভার: চালু</string>
     <string name="ws_disabled_status">WebSocket সার্ভার: বন্ধ</string>
     <string name="ws_access_url">অ্যাক্সেস URL: ws://%1$s:%2$d</string>
+    <string name="obs_tip">OBS ব্রাউজার সোর্স (এই URL টি OBS এ যোগ করুন):</string>
+    <string name="obs_url">http://%1$s:%2$d/</string>
 </resources>

@@ -1,5 +1,6 @@
 plugins {
     alias(libs.plugins.android.library)
+    alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.ksp)
 }
 
@@ -34,6 +35,9 @@ dependencies {
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
 
+    // kotlinx-serialization：WebhookRepository.sendRequest 解析用户输入的 headers JSON
+    implementation(libs.kotlinx.serialization.json)
+
     // 单元测试：FavoriteDeviceRepository 迁移逻辑（Robolectric + Room 内存库 + DataStore）
     testImplementation(libs.junit)
     testImplementation(libs.robolectric)
@@ -42,5 +46,4 @@ dependencies {
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation("androidx.room3:room3-testing:3.0.0")
     testImplementation(libs.androidx.sqlite.framework)
-    testImplementation("org.json:json:20240303")
 }

@@ -37,6 +37,8 @@ dependencies {
     implementation(libs.androidx.compose.material.icons.core)
     implementation(libs.androidx.material3)
     implementation(libs.androidx.ui)
+    // ImmutableList/ImmutableMap：UiState 集合字段稳定化（Compose 可跳过）
+    api(libs.kotlinx.collections.immutable)
 
     // Hilt：@HiltViewModel + hiltViewModel()
     implementation(libs.hilt.android)

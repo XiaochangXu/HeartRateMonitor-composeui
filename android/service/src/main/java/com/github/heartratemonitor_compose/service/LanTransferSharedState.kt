@@ -14,6 +14,13 @@ class LanTransferSharedState @Inject constructor() {
 
     val webSocketClientCount = MutableStateFlow(0)
 
+    /**
+     * 当前已连接的 WebSocket 客户端（PC）信息。
+     * 无连接时为 null；有连接时携带从 User-Agent 解析的 OS 名称与 remoteIpAddress。
+     * 由 WebSocketServerManager 写入，LanTransferViewModel 读取。
+     */
+    val connectedClientInfo = MutableStateFlow<ConnectedClientInfo?>(null)
+
     @Volatile
     var disconnectWebSocketClients: (() -> Unit)? = null
 
@@ -41,4 +48,16 @@ class LanTransferSharedState @Inject constructor() {
 data class ServerRuntimeStatus(
     val httpRunning: Boolean? = null,
     val wsRunning: Boolean? = null
+)
+
+/**
+ * 已连接的 WebSocket 客户端（PC）信息。
+ *
+ * @param name 从 HTTP User-Agent 头解析出的操作系统名称（如 "Windows"、"macOS"），
+ *             解析失败时回退为 "PC"。
+ * @param ip 客户端的局域网 IP 地址（NanoHTTPD IHTTPSession.remoteIpAddress）。
+ */
+data class ConnectedClientInfo(
+    val name: String,
+    val ip: String
 )

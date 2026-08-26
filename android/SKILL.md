@@ -435,6 +435,17 @@
    禁止 SharedFlow 事件总线。
 5. Composable 对 VM 的调用仅剩 `uiState` 收集与 `dispatch`；豁免见 10.3。
    新增页面一律按 MVI 形态实现。
+6. **UiState 集合字段必须使用 `kotlinx.collections.immutable` 的不可变集合类型**
+   （`ImmutableList`/`ImmutableMap`/`ImmutableSet`），禁止在 UiState 中使用
+   `List`/`Map`/`Set`。原因：Compose 编译器将标准库集合接口推断为不稳定类型，
+   导致接收这些参数的 Composable 永远不可跳过重组。ViewModel `setState` 时使用
+   `.toImmutableList()` / `.toImmutableMap()` / `.toImmutableSet()` 转换；空集合
+   默认值使用 `persistentListOf()` / `persistentMapOf()` / `persistentSetOf()`。
+   Composable 的集合参数同样应使用 Immutable 类型（如 `MiniChart(samples: ImmutableList<Int>)`）。
+   Domain Model 中含 `List` 字段的类（如 `Webhook.triggers`）也必须稳定化——
+   在 `:core:model` 添加 immutable 依赖后将字段替换为 `ImmutableList`。
+   `Webhook.triggers` 与 `PostureCalibration.sittingSamples/standingSamples`
+   已于 2026-08 完成替换。
 
 ### 10.1 判定标准（四条全部满足）
 

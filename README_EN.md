@@ -50,6 +50,7 @@ This repository contains two platform-specific applications with no shared code;
 - 📊 **Heart Rate History & Charts**: Auto-recording, history list, batch management, chart analysis, landscape view
 - 🎨 **Personalization**: Feature toggles, floating window style customization
 - 📡 **Data Interfaces**: HTTP server, WebSocket server, Webhook push
+- 🖥️ **OBS Browser Source Display**: Built-in HTML page — add a browser source in OBS with the server address to display real-time heart rate, with customizable color, size, font, and more via URL parameters
 - 🖼️ **Floating Heart Rate Display**: Shows your heart rate over any app on your phone screen
 - 📌 **Status Bar Heart Rate**: Display real-time heart rate in the status bar
 - 🔔 **Heart Rate Alert**: Posture detection combined with threshold-based notifications and vibration
@@ -163,6 +164,7 @@ bin\Debug\net10.0-windows10.0.19041.0\win-x64\HeartRate.exe
 5. **Status bar persistence**: Settings → Status Bar Heart Rate, enable to show heart rate in the status bar
 6. **Heart rate alerts**: Settings → Heart Rate Alert, configure thresholds and posture calibration
 7. **Data interfaces**: Settings → Data & Services, configure HTTP/WebSocket/Webhook
+8. **OBS heart rate display**: Enable HTTP or WebSocket server, add a browser source in OBS with the address shown in the app (e.g. `http://<IP>:8001/`), customize style via URL params (`?color=#ff0000&size=80&unit=1`)
 
 ### Windows
 
@@ -223,6 +225,7 @@ bin\Debug\net10.0-windows10.0.19041.0\win-x64\HeartRate.exe
 - [x] Heart-rate history & chart analysis
 - [x] Floating window / status-bar persistent heart rate
 - [x] HTTP / WebSocket / Webhook data interfaces
+- [x] OBS browser source heart rate display (built-in HTML page + dual-mode auto-switching)
 - [x] Heart-rate alert + posture detection
 - [x] Material 3 dynamic color
 - [x] Self-drawn HSV color picker

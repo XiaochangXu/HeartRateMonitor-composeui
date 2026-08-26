@@ -7,6 +7,8 @@ import com.github.heartratemonitor_compose.data.settings.AppSettings
 import com.github.heartratemonitor_compose.data.settings.SettingsKeys
 import com.github.heartratemonitor_compose.service.ConnectedDevice
 import com.github.heartratemonitor_compose.ui.util.resolveSoundMode
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 
 enum class AppStatus {
     DISCONNECTED,
@@ -31,7 +33,7 @@ data class MainUiState(
     val appStatus: AppStatus = AppStatus.DISCONNECTED,
     val statusMessage: String = "",
     val connectingDeviceId: String? = null,
-    val scanResults: List<ScannedDevice> = emptyList(),
+    val scanResults: ImmutableList<ScannedDevice> = persistentListOf(),
     val connectedDevice: ConnectedDevice? = null,
     val favoriteDeviceId: String? = null,
     val chartDataSnapshot: ChartDataSnapshot? = null,
@@ -58,7 +60,7 @@ data class MainUiState(
  */
 data class DevicesUiState(
     val appStatus: AppStatus = AppStatus.DISCONNECTED,
-    val scanResults: List<ScannedDevice> = emptyList(),
+    val scanResults: ImmutableList<ScannedDevice> = persistentListOf(),
     val connectingDeviceId: String? = null,
     val connectedDevice: ConnectedDevice? = null,
     val favoriteDeviceId: String? = null,

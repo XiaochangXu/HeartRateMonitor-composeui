@@ -4,12 +4,16 @@
     <string name="lan_transfer_tip">Przed użyciem uruchom aplikację na PC i upewnij się, że jest w tej samej sieci Wi-Fi/LAN co telefon. Telefon automatycznie wykryje PC; dotknij urządzenia, aby je sparować, a po potwierdzeniu na PC tętno będzie przesyłane w czasie rzeczywistym.</string>
     <string name="lan_scanning">Skanowanie pobliskich komputerów PC…</string>
     <string name="lan_no_devices">Nie znaleziono komputerów PC. Upewnij się, że aplikacja na PC działa i PC jest w tej samej sieci</string>
+    <string name="lan_no_devices_hint">Brak dostępnych urządzeń. Stuknij szukaj w prawym górnym rogu</string>
+    <string name="lan_connected_device">Połączone urządzenie</string>
+    <string name="lan_available_devices">Dostępne urządzenia</string>
     <string name="lan_scan">Skanuj</string>
     <string name="lan_pair_approved">PC zaakceptował połączenie. Przesyłanie tętna rozpoczęte</string>
     <string name="lan_pair_rejected">PC odrzucił połączenie</string>
     <string name="lan_pair_failed">Parowanie nieudane: %1$s</string>
     <string name="lan_pair_timeout">Przekroczono czas parowania, PC nie odpowiedział</string>
     <string name="lan_disconnect">Rozłącz</string>
+    <string name="lan_please_disconnect_first">Najpierw rozłącz urządzenie</string>
     <string name="lan_connected_status">Połączono z PC</string>
     <string name="lan_status_pushing">Wysyłanie</string>
     <string name="lan_ws_not_enabled">Serwer WebSocket jest wyłączony, wysyłanie niemożliwe. Włącz go w sekcji „Serwer HTTP &amp; WebSocket"</string>
@@ -29,4 +33,6 @@
     <string name="ws_enabled_status">Serwer WebSocket: wł.</string>
     <string name="ws_disabled_status">Serwer WebSocket: wył.</string>
     <string name="ws_access_url">URL dostępu: ws://%1$s:%2$d</string>
+    <string name="obs_tip">Źródło przeglądarki OBS (dodaj ten URL do OBS):</string>
+    <string name="obs_url">http://%1$s:%2$d/</string>
 </resources>

@@ -29,6 +29,9 @@ import com.github.heartratemonitor_compose.feature.webhook.R
 import com.github.heartratemonitor_compose.data.Webhook
 import com.github.heartratemonitor_compose.data.WebhookTrigger
 import com.github.heartratemonitor_compose.ui.util.SheetTopShape
+import kotlinx.collections.immutable.ImmutableSet
+import kotlinx.collections.immutable.toImmutableList
+import kotlinx.collections.immutable.toImmutableSet
 import com.github.heartratemonitor_compose.ui.util.StatusBarScrim
 import com.github.heartratemonitor_compose.ui.util.rememberExpandedSheetState
 import com.github.heartratemonitor_compose.ui.util.rememberSheetDismissHandler
@@ -128,9 +131,9 @@ fun WebhookScreen(
             onDismiss = { showEditDialog = null },
             onSave = { updated ->
                 val updatedList = if (editIndex != null) {
-                    webhooks.toMutableList().apply { this[editIndex] = updated }
+                    webhooks.toMutableList().apply { this[editIndex] = updated }.toImmutableList()
                 } else {
-                    webhooks + updated
+                    (webhooks + updated).toImmutableList()
                 }
                 viewModel.dispatch(WebhookIntent.Save(updatedList))
                 showEditDialog = null
@@ -260,11 +263,11 @@ private fun WebhookEditDialog(
     var enabled by remember { mutableStateOf(webhook.enabled) }
     var body by remember { mutableStateOf(webhook.body) }
     var headers by remember { mutableStateOf(webhook.headers) }
-    var triggers by remember { mutableStateOf(webhook.triggers.toMutableSet()) }
+    var triggers by remember { mutableStateOf(webhook.triggers.toImmutableSet()) }
     val sheetState = rememberExpandedSheetState()
     val dismissWithAnimation = rememberSheetDismissHandler(sheetState, onDismiss)
     val saveWithAnimation = rememberSheetDismissHandler(sheetState) {
-        onSave(Webhook(name, url, enabled, body, headers, triggers.toList()))
+        onSave(Webhook(name, url, enabled, body, headers, triggers.toImmutableList()))
     }
 
     ModalBottomSheet(
@@ -291,7 +294,12 @@ private fun WebhookEditDialog(
                 }
 
                 Text(stringResource(R.string.trigger_types), style = MaterialTheme.typography.labelLarge)
-                TriggerCheckboxes(triggers) { newTriggers -> triggers = newTriggers }
+                TriggerCheckboxes(
+                    triggers = triggers,
+                    onTriggerToggled = { trigger ->
+                        triggers = if (triggers.contains(trigger)) (triggers - trigger).toImmutableSet() else (triggers + trigger).toImmutableSet()
+                    }
+                )
 
                 OutlinedTextField(
                     value = name,
@@ -328,7 +336,7 @@ private fun WebhookEditDialog(
                 ExpressiveButton(
                     label = stringResource(R.string.test_send),
                     onClick = {
-                        onTest(Webhook(name, url, enabled, body, headers, triggers.toList()))
+                        onTest(Webhook(name, url, enabled, body, headers, triggers.toImmutableList()))
                     },
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -354,8 +362,8 @@ private fun WebhookEditDialog(
 
 @Composable
 private fun TriggerCheckboxes(
-    triggers: MutableSet<WebhookTrigger>,
-    onTriggersChanged: (MutableSet<WebhookTrigger>) -> Unit
+    triggers: ImmutableSet<WebhookTrigger>,
+    onTriggerToggled: (WebhookTrigger) -> Unit
 ) {
     val options = listOf(WebhookTrigger.HEART_RATE_UPDATED, WebhookTrigger.CONNECTED, WebhookTrigger.DISCONNECTED)
     val labels = mapOf(
@@ -372,11 +380,7 @@ private fun TriggerCheckboxes(
             ) {
                 Checkbox(
                     checked = triggers.contains(trigger),
-                    onCheckedChange = { checked ->
-                        val newTriggers = triggers.toMutableSet()
-                        if (checked) newTriggers.add(trigger) else newTriggers.remove(trigger)
-                        onTriggersChanged(newTriggers)
-                    }
+                    onCheckedChange = { onTriggerToggled(trigger) }
                 )
                 Text(labels[trigger] ?: trigger.name, style = MaterialTheme.typography.bodyMedium)
             }

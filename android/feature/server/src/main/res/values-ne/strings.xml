@@ -4,12 +4,16 @@
     <string name="lan_transfer_tip">प्रयोग गर्नुअघि PC एप खोल्नुहोस् र फोनसँग एउटै Wi-Fi/LAN मा रहेको सुनिश्चित गर्नुहोस्। फोनले PC स्वचालित रूपमा भेट्टाउँछ; पेयर गर्न यन्त्रमा थिच्नुहोस्, PC पुष्टि गरेपछि मुटुको धड्कन वास्तविक-समयमा पठाइनेछ।</string>
     <string name="lan_scanning">नजिकका PC स्क्यान हुँदै…</string>
     <string name="lan_no_devices">कुनै PC भेटिएन। PC एप चलिरहेको र PC एउटै नेटवर्कमा रहेको सुनिश्चित गर्नुहोस्</string>
+    <string name="lan_no_devices_hint">कुनै उपलब्ध यन्त्र छैन। माथि दायाँ खोज्नुहोस् मा थिच्नुहोस्</string>
+    <string name="lan_connected_device">जडान भएको यन्त्र</string>
+    <string name="lan_available_devices">उपलब्ध यन्त्र</string>
     <string name="lan_scan">स्क्यान</string>
     <string name="lan_pair_approved">PC ले जडान स्वीकृत गर्‍यो। मुटुको धड्कन पठाउन सुरु भयो</string>
     <string name="lan_pair_rejected">PC ले जडान अस्वीकार गर्‍यो</string>
     <string name="lan_pair_failed">पेयरिङ असफल: %1$s</string>
     <string name="lan_pair_timeout">पेयरिङ समय समाप्त, PC ले प्रतिक्रिया दिएन</string>
     <string name="lan_disconnect">जडान विच्छेद गर्नुहोस्</string>
+    <string name="lan_please_disconnect_first">कृपया पहिले यन्त्र जडान विच्छेद गर्नुहोस्</string>
     <string name="lan_connected_status">PC मा जडान भयो</string>
     <string name="lan_status_pushing">पठाउँदै</string>
     <string name="lan_ws_not_enabled">WebSocket सर्भर निष्क्रिय छ, पठाउन सकिँदैन। "HTTP र WebSocket सर्भर" मा सक्रिय गर्नुहोस्</string>
@@ -29,4 +33,6 @@
     <string name="ws_enabled_status">WebSocket सर्भर: सक्रिय</string>
     <string name="ws_disabled_status">WebSocket सर्भर: निष्क्रिय</string>
     <string name="ws_access_url">पहुँच URL: ws://%1$s:%2$d</string>
+    <string name="obs_tip">OBS ब्राउजर स्रोत (यो URL OBS मा थप्नुहोस्):</string>
+    <string name="obs_url">http://%1$s:%2$d/</string>
 </resources>

@@ -42,6 +42,8 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(libs.androidx.ui)
     implementation(libs.vico.compose.m3)
+    // ImmutableList：UiState 集合字段稳定化（Compose 可跳过）
+    api(libs.kotlinx.collections.immutable)
 
     implementation(libs.kable.core.android) {
         exclude(group = "io.opencensus", module = "opencensus-api")

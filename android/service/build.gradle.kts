@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt)
 }
@@ -39,6 +40,9 @@ dependencies {
     api(project(":data:settings"))
     api(project(":data:database"))
     api(project(":data:repository"))
+
+    // kotlinx-serialization：PostureCalibration 持久化到 DataStore 时序列化/反序列化
+    implementation(libs.kotlinx.serialization.json)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.service)

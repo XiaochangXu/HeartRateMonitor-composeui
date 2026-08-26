@@ -1,0 +1,1166 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<title>Heart Rate Monitor</title>
+<style>
+  :root {
+    --text-color: #ff3333;
+    --bg-color: #000000;
+    --border-color: #888888;
+    --bg-alpha: 10;
+    --border-alpha: 100;
+    --font-size: 120px;
+    --icon-size-ratio: 0.6;
+    --corner-radius: 20;
+    --overall-scale: 100;
+    --font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+    --font-weight: 900;
+    --show-unit: none;
+    --show-heart: inline;
+    --heart-color: #ff3333;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body {
+    width: 100%; height: 100%;
+    background: transparent;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* ── 心率显示容器 ── */
+  #container {
+    display: flex;
+    align-items: center;
+    gap: 0.08em;
+    padding: 0.12em 0.2em;
+    border-radius: calc(var(--corner-radius) * 1px);
+    background: rgba(0,0,0,0);
+    border: 1px solid rgba(0,0,0,0);
+    transform: scale(calc(var(--overall-scale) / 100));
+    transform-origin: center center;
+  }
+
+  /* ── 心形 SVG ── */
+  #heart-wrap {
+    display: var(--show-heart);
+    width: calc(var(--font-size) * var(--icon-size-ratio));
+    height: calc(var(--font-size) * var(--icon-size-ratio));
+    flex-shrink: 0;
+    overflow: visible;
+  }
+  #heart-svg {
+    width: 100%; height: 100%;
+    overflow: visible;
+    filter: drop-shadow(0 0 calc(var(--font-size) * 0.08) rgba(0,0,0,0.5));
+  }
+  #heart-path {
+    fill: var(--heart-color);
+    transform-origin: 50% 50%;
+    animation: heartbeat 1s ease-in-out infinite;
+    vector-effect: non-scaling-stroke;
+  }
+
+  @keyframes heartbeat {
+    0%   { transform: scale(1); }
+    50%  { transform: scale(1.2); }
+    100% { transform: scale(1); }
+  }
+
+  /* ── 心率数值 ── */
+  #hr {
+    font-family: var(--font-family);
+    font-size: var(--font-size);
+    font-weight: var(--font-weight);
+    color: var(--text-color);
+    line-height: 1;
+    text-shadow: 0 0 calc(var(--font-size) * 0.15) rgba(0,0,0,0.5);
+  }
+  #unit {
+    font-family: var(--font-family);
+    font-size: calc(var(--font-size) * 0.35);
+    font-weight: var(--font-weight);
+    color: var(--text-color);
+    line-height: 1;
+    display: var(--show-unit);
+    opacity: 0.8;
+    text-shadow: 0 0 calc(var(--font-size) * 0.15) rgba(0,0,0,0.5);
+    margin-left: 0.05em;
+  }
+
+  /* ── 设置面板 ── */
+  #settings-toggle {
+    position: fixed;
+    top: 12px;
+    right: 12px;
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(40,40,40,0.85);
+    color: #fff;
+    cursor: pointer;
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s, transform 0.2s;
+    backdrop-filter: blur(4px);
+    pointer-events: auto;
+  }
+  #settings-toggle svg {
+    width: 20px; height: 20px;
+    fill: #fff;
+    pointer-events: none;
+  }
+  #settings-toggle:hover {
+    background: rgba(60,60,60,0.95);
+    transform: rotate(60deg);
+  }
+
+  #settings-panel {
+    position: fixed;
+    top: 62px;
+    right: 12px;
+    width: 300px;
+    max-height: calc(100vh - 80px);
+    overflow-y: auto;
+    background: rgba(28,28,32,0.95);
+    color: #e0e0e0;
+    border-radius: 12px;
+    padding: 16px;
+    z-index: 9999;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    font-size: 13px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255,255,255,0.1);
+    display: none;
+  }
+  #settings-panel.open { display: block; }
+
+  .settings-section {
+    margin-bottom: 14px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+  .settings-section:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+
+  .section-title {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #aaa;
+    margin-bottom: 10px;
+    font-weight: 600;
+  }
+
+  .control-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+  .control-row:last-child { margin-bottom: 0; }
+  .control-label {
+    flex: 1;
+    font-size: 13px;
+    color: #ccc;
+  }
+  .control-value {
+    min-width: 40px;
+    text-align: right;
+    font-size: 12px;
+    color: #888;
+    font-variant-numeric: tabular-nums;
+  }
+
+  input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 4px;
+    border-radius: 2px;
+    background: rgba(255,255,255,0.15);
+    outline: none;
+    margin: 4px 0 10px 0;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    background: #ff3333;
+    cursor: pointer;
+    border: 2px solid #fff;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+  }
+  input[type="range"]::-moz-range-thumb {
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    background: #ff3333;
+    cursor: pointer;
+    border: 2px solid #fff;
+  }
+
+  .color-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+  .color-row label { font-size: 13px; color: #ccc; }
+  .color-row input[type="color"] {
+    width: 32px; height: 24px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    background: none;
+    padding: 0;
+  }
+  .color-row input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
+  .color-row input[type="color"]::-webkit-color-swatch { border: 1px solid rgba(255,255,255,0.2); border-radius: 4px; }
+
+  .toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+  .toggle-row label { font-size: 13px; color: #ccc; cursor: pointer; }
+  .toggle-switch {
+    position: relative;
+    width: 36px; height: 20px;
+    background: rgba(255,255,255,0.15);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .toggle-switch.on { background: #ff3333; }
+  .toggle-switch::after {
+    content: '';
+    position: absolute;
+    top: 2px; left: 2px;
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    background: #fff;
+    transition: transform 0.2s;
+  }
+  .toggle-switch.on::after { transform: translateX(16px); }
+
+  .preset-row {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .preset-btn {
+    flex: 1;
+    min-width: 0;
+    padding: 6px 4px;
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 6px;
+    background: rgba(255,255,255,0.05);
+    color: #ccc;
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .preset-btn:hover {
+    background: rgba(255,255,255,0.12);
+    border-color: rgba(255,255,255,0.3);
+  }
+
+  .reset-btn {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid rgba(255,80,80,0.3);
+    border-radius: 6px;
+    background: rgba(255,80,80,0.08);
+    color: #ff6666;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .reset-btn:hover {
+    background: rgba(255,80,80,0.15);
+  }
+
+  .lang-select {
+    width: 100%;
+    padding: 6px 8px;
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 6px;
+    background: rgba(255,255,255,0.05);
+    color: #ccc;
+    font-size: 12px;
+    cursor: pointer;
+    outline: none;
+  }
+  .lang-select option { background: #1c1c20; color: #ccc; }
+
+  /* 连接状态指示器和设置按钮默认显示，body.obs-mode 下隐藏 */
+  body.obs-mode #settings-toggle,
+  body.obs-mode #status-dot {
+    display: none !important;
+  }
+
+  #status-dot {
+    position: fixed;
+    bottom: 8px;
+    left: 8px;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: #666;
+    z-index: 1000;
+    transition: background 0.3s;
+  }
+  #status-dot.connected { background: #44ff44; }
+  #status-dot.connecting { background: #ffaa00; animation: pulse-status 1s infinite; }
+  @keyframes pulse-status { 50% { opacity: 0.3; } }
+</style>
+</head>
+<body>
+  <div id="container">
+    <div id="heart-wrap">
+      <svg id="heart-svg" viewBox="0 0 24 24" overflow="visible">
+        <path id="heart-path" d="M12,21.35l-1.45-1.32C5.4,15.36,2,12.28,2,8.5C2,5.42,4.42,3,7.5,3c1.74,0,3.41,0.81,4.5,2.09C13.09,3.81,14.76,3,16.5,3 C19.58,3,22,5.42,22,8.5c0,3.78-3.4,6.86-8.55,11.54L12,21.35z"/>
+      </svg>
+    </div>
+    <span id="hr">--</span><span id="unit">BPM</span>
+  </div>
+
+  <button id="settings-toggle" title="">
+    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.07-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.74,8.87 C2.62,9.08,2.68,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.8,11.69,4.8,12s0.02,0.64,0.07,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.44-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.47-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/></svg>
+  </button>
+
+  <div id="settings-panel">
+    <div class="settings-section">
+      <div class="section-title" data-i18n="language">Language</div>
+      <select class="lang-select" id="lang-select"></select>
+    </div>
+
+    <div class="settings-section">
+      <div class="section-title" data-i18n="presets">Presets</div>
+      <div class="preset-row">
+        <button class="preset-btn" data-preset="red" data-i18n="red">Red</button>
+        <button class="preset-btn" data-preset="white" data-i18n="white">White</button>
+        <button class="preset-btn" data-preset="green" data-i18n="green">Green</button>
+        <button class="preset-btn" data-preset="blue" data-i18n="blue">Blue</button>
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <div class="section-title" data-i18n="colors">Colors</div>
+      <div class="color-row">
+        <label data-i18n="text_label">Text</label>
+        <input type="color" id="pick-text" value="#ff3333">
+      </div>
+      <div class="color-row">
+        <label data-i18n="heart_label">Heart</label>
+        <input type="color" id="pick-heart" value="#ff3333">
+      </div>
+      <div class="color-row">
+        <label data-i18n="background_label">Background</label>
+        <input type="color" id="pick-bg" value="#000000">
+      </div>
+      <div class="color-row">
+        <label data-i18n="border_label">Border</label>
+        <input type="color" id="pick-border" value="#888888">
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <div class="section-title" data-i18n="opacity">Opacity</div>
+      <div class="control-row">
+        <span class="control-label" data-i18n="bg_opacity">Background Opacity</span>
+        <span class="control-value" id="val-bg-alpha">0%</span>
+      </div>
+      <input type="range" id="slider-bg-alpha" min="0" max="100" value="0">
+
+      <div class="control-row">
+        <span class="control-label" data-i18n="border_opacity">Border Opacity</span>
+        <span class="control-value" id="val-border-alpha">0%</span>
+      </div>
+      <input type="range" id="slider-border-alpha" min="0" max="100" value="0">
+    </div>
+
+    <div class="settings-section">
+      <div class="section-title" data-i18n="size_shape">Size &amp; Shape</div>
+      <div class="control-row">
+        <span class="control-label" data-i18n="overall_size">Overall Size</span>
+        <span class="control-value" id="val-scale">120%</span>
+      </div>
+      <input type="range" id="slider-scale" min="50" max="200" value="120">
+
+      <div class="control-row">
+        <span class="control-label" data-i18n="font_size">Font Size</span>
+        <span class="control-value" id="val-font">120px</span>
+      </div>
+      <input type="range" id="slider-font" min="40" max="300" value="120">
+
+      <div class="control-row">
+        <span class="control-label" data-i18n="icon_size">Icon Size</span>
+        <span class="control-value" id="val-icon">120%</span>
+      </div>
+      <input type="range" id="slider-icon" min="20" max="120" value="120">
+
+      <div class="control-row">
+        <span class="control-label" data-i18n="corner_radius">Corner Radius</span>
+        <span class="control-value" id="val-radius">20px</span>
+      </div>
+      <input type="range" id="slider-radius" min="0" max="100" value="20">
+    </div>
+
+    <div class="settings-section">
+      <div class="section-title" data-i18n="display_options">Display</div>
+      <div class="toggle-row">
+        <label data-i18n="show_heart_icon">Heart Icon</label>
+        <div class="toggle-switch on" id="toggle-heart"></div>
+      </div>
+      <div class="toggle-row">
+        <label data-i18n="show_bpm_unit">BPM Unit</label>
+        <div class="toggle-switch" id="toggle-unit"></div>
+      </div>
+      <div class="toggle-row">
+        <label data-i18n="sync_heart_color">Sync Heart Color</label>
+        <div class="toggle-switch on" id="toggle-sync"></div>
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <button class="reset-btn" id="btn-reset" data-i18n="reset_defaults">Reset to Defaults</button>
+    </div>
+  </div>
+
+  <div id="status-dot" title=""></div>
+
+<script>
+(function() {
+  'use strict';
+
+  // ═══════════════════════════════════════════════════
+  //  OBS 模式检测：隐藏设置按钮和状态点
+  // ═══════════════════════════════════════════════════
+  var params = new URLSearchParams(location.search);
+  var isObsMode = params.get('overlay') === '1' ||
+    /OBS\/|obs-project\.com/i.test(navigator.userAgent);
+  if (isObsMode) {
+    document.body.classList.add('obs-mode');
+  }
+
+  var root = document.documentElement;
+
+  // ═══════════════════════════════════════════════════
+  //  多语言翻译表
+  // ═══════════════════════════════════════════════════
+  var I18N = {
+    'en': {
+      settings: 'Settings', language: 'Language', presets: 'Presets',
+      red: 'Red', white: 'White', green: 'Green', blue: 'Blue',
+      colors: 'Colors', text_label: 'Text', heart_label: 'Heart',
+      background_label: 'Background', border_label: 'Border',
+      opacity: 'Opacity', bg_opacity: 'Background Opacity', border_opacity: 'Border Opacity',
+      size_shape: 'Size & Shape', overall_size: 'Overall Size', font_size: 'Font Size',
+      icon_size: 'Icon Size', corner_radius: 'Corner Radius',
+      display_options: 'Display', show_heart_icon: 'Heart Icon', show_bpm_unit: 'BPM Unit',
+      sync_heart_color: 'Sync Heart Color', reset_defaults: 'Reset to Defaults',
+      connected: 'Connected', connecting: 'Connecting...', disconnected: 'Disconnected',
+      auto: 'Auto Follow'
+    },
+    'zh': {
+      settings: '设置', language: '语言', presets: '预设方案',
+      red: '红色', white: '白色', green: '绿色', blue: '蓝色',
+      colors: '颜色选择', text_label: '文字', heart_label: '爱心',
+      background_label: '背景', border_label: '边框',
+      opacity: '不透明度', bg_opacity: '背景不透明度', border_opacity: '边框不透明度',
+      size_shape: '大小与形状', overall_size: '整体大小', font_size: '字体大小',
+      icon_size: '图标大小', corner_radius: '圆角半径',
+      display_options: '显示选项', show_heart_icon: '显示心形图标', show_bpm_unit: '显示 BPM 单位',
+      sync_heart_color: '爱心跟随文字色', reset_defaults: '恢复默认设置',
+      connected: '已连接', connecting: '连接中…', disconnected: '已断开',
+      auto: '自动跟随'
+    },
+    'zh-TW': {
+      settings: '設定', language: '語言', presets: '預設方案',
+      red: '紅色', white: '白色', green: '綠色', blue: '藍色',
+      colors: '顏色選擇', text_label: '文字', heart_label: '愛心',
+      background_label: '背景', border_label: '邊框',
+      opacity: '不透明度', bg_opacity: '背景不透明度', border_opacity: '邊框不透明度',
+      size_shape: '大小與形狀', overall_size: '整體大小', font_size: '字體大小',
+      icon_size: '圖示大小', corner_radius: '圓角半徑',
+      display_options: '顯示選項', show_heart_icon: '顯示心形圖示', show_bpm_unit: '顯示 BPM 單位',
+      sync_heart_color: '愛心跟隨文字色', reset_defaults: '恢復預設設定',
+      connected: '已連線', connecting: '連線中…', disconnected: '已斷線',
+      auto: '自動跟隨'
+    },
+    'zh-HK': {
+      settings: '設定', language: '語言', presets: '預設方案',
+      red: '紅色', white: '白色', green: '綠色', blue: '藍色',
+      colors: '顏色選擇', text_label: '文字', heart_label: '愛心',
+      background_label: '背景', border_label: '邊框',
+      opacity: '不透明度', bg_opacity: '背景不透明度', border_opacity: '邊框不透明度',
+      size_shape: '大小與形狀', overall_size: '整體大小', font_size: '字體大小',
+      icon_size: '圖標大小', corner_radius: '圓角半徑',
+      display_options: '顯示選項', show_heart_icon: '顯示心形圖標', show_bpm_unit: '顯示 BPM 單位',
+      sync_heart_color: '愛心跟隨文字色', reset_defaults: '恢復預設設定',
+      connected: '已連線', connecting: '連線中…', disconnected: '已斷線',
+      auto: '自動跟隨'
+    },
+    'ja': {
+      settings: '設定', language: '言語', presets: 'プリセット',
+      red: '赤', white: '白', green: '緑', blue: '青',
+      colors: '色の選択', text_label: 'テキスト', heart_label: 'ハート',
+      background_label: '背景', border_label: '枠線',
+      opacity: '不透明度', bg_opacity: '背景の不透明度', border_opacity: '枠線の不透明度',
+      size_shape: 'サイズと形状', overall_size: '全体サイズ', font_size: 'フォントサイズ',
+      icon_size: 'アイコンサイズ', corner_radius: '角丸半径',
+      display_options: '表示設定', show_heart_icon: 'ハートアイコンを表示', show_bpm_unit: 'BPM単位を表示',
+      sync_heart_color: 'ハート色を同期', reset_defaults: 'デフォルトに戻す',
+      connected: '接続済み', connecting: '接続中…', disconnected: '切断されました',
+      auto: '自動追従'
+    },
+    'ko': {
+      settings: '설정', language: '언어', presets: '프리셋',
+      red: '빨강', white: '흰색', green: '초록', blue: '파랑',
+      colors: '색상 선택', text_label: '텍스트', heart_label: '하트',
+      background_label: '배경', border_label: '테두리',
+      opacity: '불투명도', bg_opacity: '배경 불투명도', border_opacity: '테두리 불투명도',
+      size_shape: '크기 및 모양', overall_size: '전체 크기', font_size: '폰트 크기',
+      icon_size: '아이콘 크기', corner_radius: '모서리 반경',
+      display_options: '표시 옵션', show_heart_icon: '하트 아이콘 표시', show_bpm_unit: 'BPM 단위 표시',
+      sync_heart_color: '하트 색상 동기화', reset_defaults: '기본값으로 재설정',
+      connected: '연결됨', connecting: '연결 중…', disconnected: '연결 끊김',
+      auto: '자동 따르기'
+    },
+    'ar': {
+      settings: 'الإعدادات', language: 'اللغة', presets: 'الإعدادات المسبقة',
+      red: 'أحمر', white: 'أبيض', green: 'أخضر', blue: 'أزرق',
+      colors: 'اختيار الألوان', text_label: 'النص', heart_label: 'القلب',
+      background_label: 'الخلفية', border_label: 'الحدود',
+      opacity: 'العتامة', bg_opacity: 'عتامة الخلفية', border_opacity: 'عتامة الحدود',
+      size_shape: 'الحجم والشكل', overall_size: 'الحجم الكلي', font_size: 'حجم الخط',
+      icon_size: 'حجم الأيقونة', corner_radius: 'نصف قطر الزاوية',
+      display_options: 'خيارات العرض', show_heart_icon: 'أيقونة القلب', show_bpm_unit: 'وحدة BPM',
+      sync_heart_color: 'مزامنة لون القلب', reset_defaults: 'إعادة التعيين',
+      connected: 'متصل', connecting: 'جارٍ الاتصال...', disconnected: 'غير متصل',
+      auto: 'تلقائي'
+    },
+    'bn': {
+      settings: 'সেটিংস', language: 'ভাষা', presets: 'প্রিসেট',
+      red: 'লাল', white: 'সাদা', green: 'সবুজ', blue: 'নীল',
+      colors: 'রঙ নির্বাচন', text_label: 'টেক্সট', heart_label: 'হৃদয়',
+      background_label: 'পটভূমি', border_label: 'সীমানা',
+      opacity: 'অস্বচ্ছতা', bg_opacity: 'পটভূমির অস্বচ্ছতা', border_opacity: 'সীমানার অস্বচ্ছতা',
+      size_shape: 'আকার ও আকৃতি', overall_size: 'সামগ্রিক আকার', font_size: 'ফন্টের আকার',
+      icon_size: 'আইকনের আকার', corner_radius: 'কোণার ব্যাসার্ধ',
+      display_options: 'প্রদর্শন বিকল্প', show_heart_icon: 'হৃদয় আইকন', show_bpm_unit: 'BPM একক',
+      sync_heart_color: 'হৃদয়ের রঙ সিঙ্ক', reset_defaults: 'ডিফল্টে রিসেট',
+      connected: 'সংযুক্ত', connecting: 'সংযোগ হচ্ছে...', disconnected: 'সংযোগ বিচ্ছিন্ন',
+      auto: 'স্বয়ংক্রিয়'
+    },
+    'de': {
+      settings: 'Einstellungen', language: 'Sprache', presets: 'Voreinstellungen',
+      red: 'Rot', white: 'Weiß', green: 'Grün', blue: 'Blau',
+      colors: 'Farben', text_label: 'Text', heart_label: 'Herz',
+      background_label: 'Hintergrund', border_label: 'Rahmen',
+      opacity: 'Deckkraft', bg_opacity: 'Hintergrunddeckkraft', border_opacity: 'Rahmendeckkraft',
+      size_shape: 'Größe & Form', overall_size: 'Gesamtgröße', font_size: 'Schriftgröße',
+      icon_size: 'Symbolgröße', corner_radius: 'Eckradius',
+      display_options: 'Anzeige', show_heart_icon: 'Herzsymbol', show_bpm_unit: 'BPM-Einheit',
+      sync_heart_color: 'Herzfarbe synchronisieren', reset_defaults: 'Auf Standard zurücksetzen',
+      connected: 'Verbunden', connecting: 'Verbindung wird hergestellt...', disconnected: 'Getrennt',
+      auto: 'Automatisch folgen'
+    },
+    'es': {
+      settings: 'Ajustes', language: 'Idioma', presets: 'Preajustes',
+      red: 'Rojo', white: 'Blanco', green: 'Verde', blue: 'Azul',
+      colors: 'Colores', text_label: 'Texto', heart_label: 'Corazón',
+      background_label: 'Fondo', border_label: 'Borde',
+      opacity: 'Opacidad', bg_opacity: 'Opacidad de fondo', border_opacity: 'Opacidad de borde',
+      size_shape: 'Tamaño y forma', overall_size: 'Tamaño total', font_size: 'Tamaño de fuente',
+      icon_size: 'Tamaño de icono', corner_radius: 'Radio de esquina',
+      display_options: 'Opciones de visualización', show_heart_icon: 'Icono de corazón', show_bpm_unit: 'Unidad BPM',
+      sync_heart_color: 'Sincronizar color del corazón', reset_defaults: 'Restablecer valores',
+      connected: 'Conectado', connecting: 'Conectando...', disconnected: 'Desconectado',
+      auto: 'Seguir automáticamente'
+    },
+    'fil': {
+      settings: 'Mga Setting', language: 'Wika', presets: 'Mga Preset',
+      red: 'Pula', white: 'Puti', green: 'Berde', blue: 'Asul',
+      colors: 'Mga Kulay', text_label: 'Teksto', heart_label: 'Puso',
+      background_label: 'Background', border_label: 'Border',
+      opacity: 'Opacity', bg_opacity: 'Background Opacity', border_opacity: 'Border Opacity',
+      size_shape: 'Sukat at Hugis', overall_size: 'Kabuuang Sukat', font_size: 'Laki ng Font',
+      icon_size: 'Laki ng Icon', corner_radius: 'Radius ng Sulok',
+      display_options: 'Mga Opsyon sa Display', show_heart_icon: 'Icon ng Puso', show_bpm_unit: 'BPM Unit',
+      sync_heart_color: 'I-sync ang Kulay ng Puso', reset_defaults: 'I-reset sa Default',
+      connected: 'Nakakonekta', connecting: 'Kumokonekta...', disconnected: 'Nadiskonekta',
+      auto: 'Awtomatikong sundan'
+    },
+    'fr': {
+      settings: 'Paramètres', language: 'Langue', presets: 'Préréglages',
+      red: 'Rouge', white: 'Blanc', green: 'Vert', blue: 'Bleu',
+      colors: 'Couleurs', text_label: 'Texte', heart_label: 'Cœur',
+      background_label: 'Fond', border_label: 'Bordure',
+      opacity: 'Opacité', bg_opacity: 'Opacité du fond', border_opacity: 'Opacité de bordure',
+      size_shape: 'Taille et forme', overall_size: 'Taille globale', font_size: 'Taille de police',
+      icon_size: 'Taille d\'icône', corner_radius: 'Rayon des coins',
+      display_options: 'Options d\'affichage', show_heart_icon: 'Icône cœur', show_bpm_unit: 'Unité BPM',
+      sync_heart_color: 'Synchroniser couleur du cœur', reset_defaults: 'Réinitialiser',
+      connected: 'Connecté', connecting: 'Connexion...', disconnected: 'Déconnecté',
+      auto: 'Suivre automatiquement'
+    },
+    'hi': {
+      settings: 'सेटिंग्स', language: 'भाषा', presets: 'प्रीसेट',
+      red: 'लाल', white: 'सफेद', green: 'हरा', blue: 'नीला',
+      colors: 'रंग चयन', text_label: 'टेक्स्ट', heart_label: 'हृदय',
+      background_label: 'पृष्ठभूमि', border_label: 'बॉर्डर',
+      opacity: 'अपारदर्शिता', bg_opacity: 'पृष्ठभूमि अपारदर्शिता', border_opacity: 'बॉर्डर अपारदर्शिता',
+      size_shape: 'आकार और आकृति', overall_size: 'कुल आकार', font_size: 'फ़ॉन्ट आकार',
+      icon_size: 'आइकन आकार', corner_radius: 'कोना त्रिज्या',
+      display_options: 'प्रदर्शन विकल्प', show_heart_icon: 'हृदय आइकन', show_bpm_unit: 'BPM इकाई',
+      sync_heart_color: 'हृदय रंग सिंक', reset_defaults: 'डिफ़ॉल्ट पर रीसेट',
+      connected: 'जुड़ा हुआ', connecting: 'कनेक्ट हो रहा है...', disconnected: 'डिस्कनेक्ट हो गया',
+      auto: 'स्वचालित अनुसरण'
+    },
+    'id': {
+      settings: 'Pengaturan', language: 'Bahasa', presets: 'Preset',
+      red: 'Merah', white: 'Putih', green: 'Hijau', blue: 'Biru',
+      colors: 'Warna', text_label: 'Teks', heart_label: 'Hati',
+      background_label: 'Latar', border_label: 'Bingkai',
+      opacity: 'Opasitas', bg_opacity: 'Opasitas Latar', border_opacity: 'Opasitas Bingkai',
+      size_shape: 'Ukuran & Bentuk', overall_size: 'Ukuran Keseluruhan', font_size: 'Ukuran Font',
+      icon_size: 'Ukuran Ikon', corner_radius: 'Radius Sudut',
+      display_options: 'Opsi Tampilan', show_heart_icon: 'Ikon Hati', show_bpm_unit: 'Satuan BPM',
+      sync_heart_color: 'Sinkron Warna Hati', reset_defaults: 'Reset ke Default',
+      connected: 'Terhubung', connecting: 'Menghubungkan...', disconnected: 'Terputus',
+      auto: 'Ikuti otomatis'
+    },
+    'it': {
+      settings: 'Impostazioni', language: 'Lingua', presets: 'Preimpostazioni',
+      red: 'Rosso', white: 'Bianco', green: 'Verde', blue: 'Blu',
+      colors: 'Colori', text_label: 'Testo', heart_label: 'Cuore',
+      background_label: 'Sfondo', border_label: 'Bordo',
+      opacity: 'Opacità', bg_opacity: 'Opacità sfondo', border_opacity: 'Opacità bordo',
+      size_shape: 'Dimensione e forma', overall_size: 'Dimensione totale', font_size: 'Dimensione font',
+      icon_size: 'Dimensione icona', corner_radius: 'Raggio angoli',
+      display_options: 'Opzioni di visualizzazione', show_heart_icon: 'Icona cuore', show_bpm_unit: 'Unità BPM',
+      sync_heart_color: 'Sincronizza colore cuore', reset_defaults: 'Ripristina predefiniti',
+      connected: 'Connesso', connecting: 'Connessione...', disconnected: 'Disconnesso',
+      auto: 'Segui automaticamente'
+    },
+    'ms': {
+      settings: 'Tetapan', language: 'Bahasa', presets: 'Pratetap',
+      red: 'Merah', white: 'Putih', green: 'Hijau', blue: 'Biru',
+      colors: 'Warna', text_label: 'Teks', heart_label: 'Jantung',
+      background_label: 'Latar belakang', border_label: 'Sempadan',
+      opacity: 'Kelegapan', bg_opacity: 'Kelegapan latar', border_opacity: 'Kelegapan sempadan',
+      size_shape: 'Saiz & Bentuk', overall_size: 'Saiz Keseluruhan', font_size: 'Saiz Font',
+      icon_size: 'Saiz Ikon', corner_radius: 'Radius Sudut',
+      display_options: 'Pilihan Paparan', show_heart_icon: 'Ikon Jantung', show_bpm_unit: 'Unit BPM',
+      sync_heart_color: 'Segerak Warna Jantung', reset_defaults: 'Reset ke Default',
+      connected: 'Bersambung', connecting: 'Menyambung...', disconnected: 'Terputus',
+      auto: 'Ikut automatik'
+    },
+    'ne': {
+      settings: 'सेटिङ', language: 'भाषा', presets: 'प्रिसेट',
+      red: 'रातो', white: 'सेतो', green: 'हरियो', blue: 'नीलो',
+      colors: 'रङ छनोट', text_label: 'पाठ', heart_label: 'मुटु',
+      background_label: 'पृष्ठभूमि', border_label: 'किनारा',
+      opacity: 'अपारदर्शिता', bg_opacity: 'पृष्ठभूमि अपारदर्शिता', border_opacity: 'किनारा अपारदर्शिता',
+      size_shape: 'आकार र आकृति', overall_size: 'समग्र आकार', font_size: 'फन्ट आकार',
+      icon_size: 'आइकन आकार', corner_radius: 'कुनाको त्रिज्या',
+      display_options: 'प्रदर्शन विकल्प', show_heart_icon: 'मुटु आइकन', show_bpm_unit: 'BPM एकाइ',
+      sync_heart_color: 'मुटु रङ सिङ्क', reset_defaults: 'पूर्वनिर्धारितमा रिसेट',
+      connected: 'जडित', connecting: 'जडान हुँदै...', disconnected: 'विच्छेदित',
+      auto: 'स्वचालित अनुसरण'
+    },
+    'nl': {
+      settings: 'Instellingen', language: 'Taal', presets: 'Voorinstellingen',
+      red: 'Rood', white: 'Wit', green: 'Groen', blue: 'Blauw',
+      colors: 'Kleuren', text_label: 'Tekst', heart_label: 'Hart',
+      background_label: 'Achtergrond', border_label: 'Rand',
+      opacity: 'Doorzichtigheid', bg_opacity: 'Achtergronddoorzichtigheid', border_opacity: 'Randdoorzichtigheid',
+      size_shape: 'Grootte & Vorm', overall_size: 'Totale grootte', font_size: 'Lettergrootte',
+      icon_size: 'Pictogramgrootte', corner_radius: 'Hoekradius',
+      display_options: 'Weergave', show_heart_icon: 'Hartpictogram', show_bpm_unit: 'BPM-eenheid',
+      sync_heart_color: 'Hartkleur synchroniseren', reset_defaults: 'Naar standaard herstellen',
+      connected: 'Verbonden', connecting: 'Verbinden...', disconnected: 'Niet verbonden',
+      auto: 'Automatisch volgen'
+    },
+    'pl': {
+      settings: 'Ustawienia', language: 'Język', presets: 'Ustawienia wstępne',
+      red: 'Czerwony', white: 'Biały', green: 'Zielony', blue: 'Niebieski',
+      colors: 'Kolory', text_label: 'Tekst', heart_label: 'Serce',
+      background_label: 'Tło', border_label: 'Obramowanie',
+      opacity: 'Nieprzezroczystość', bg_opacity: 'Nieprzezroczystość tła', border_opacity: 'Nieprzezroczystość obramowania',
+      size_shape: 'Rozmiar i kształt', overall_size: 'Rozmiar ogólny', font_size: 'Rozmiar czcionki',
+      icon_size: 'Rozmiar ikony', corner_radius: 'Promień rogów',
+      display_options: 'Opcje wyświetlania', show_heart_icon: 'Ikona serca', show_bpm_unit: 'Jednostka BPM',
+      sync_heart_color: 'Synchronizuj kolor serca', reset_defaults: 'Przywróć domyślne',
+      connected: 'Połączono', connecting: 'Łączenie...', disconnected: 'Rozłączono',
+      auto: 'Śledź automatycznie'
+    },
+    'pt': {
+      settings: 'Configurações', language: 'Idioma', presets: 'Predefinições',
+      red: 'Vermelho', white: 'Branco', green: 'Verde', blue: 'Azul',
+      colors: 'Cores', text_label: 'Texto', heart_label: 'Coração',
+      background_label: 'Fundo', border_label: 'Borda',
+      opacity: 'Opacidade', bg_opacity: 'Opacidade do fundo', border_opacity: 'Opacidade da borda',
+      size_shape: 'Tamanho e forma', overall_size: 'Tamanho geral', font_size: 'Tamanho da fonte',
+      icon_size: 'Tamanho do ícone', corner_radius: 'Raio dos cantos',
+      display_options: 'Opções de exibição', show_heart_icon: 'Ícone de coração', show_bpm_unit: 'Unidade BPM',
+      sync_heart_color: 'Sincronizar cor do coração', reset_defaults: 'Restaurar padrões',
+      connected: 'Conectado', connecting: 'Conectando...', disconnected: 'Desconectado',
+      auto: 'Seguir automaticamente'
+    },
+    'ru': {
+      settings: 'Настройки', language: 'Язык', presets: 'Предустановки',
+      red: 'Красный', white: 'Белый', green: 'Зелёный', blue: 'Синий',
+      colors: 'Цвета', text_label: 'Текст', heart_label: 'Сердце',
+      background_label: 'Фон', border_label: 'Рамка',
+      opacity: 'Непрозрачность', bg_opacity: 'Непрозрачность фона', border_opacity: 'Непрозрачность рамки',
+      size_shape: 'Размер и форма', overall_size: 'Общий размер', font_size: 'Размер шрифта',
+      icon_size: 'Размер значка', corner_radius: 'Радиус скругления',
+      display_options: 'Параметры отображения', show_heart_icon: 'Значок сердца', show_bpm_unit: 'Единица BPM',
+      sync_heart_color: 'Синхронизация цвета сердца', reset_defaults: 'Сбросить настройки',
+      connected: 'Подключено', connecting: 'Подключение...', disconnected: 'Отключено',
+      auto: 'Автоследование'
+    },
+    'th': {
+      settings: 'การตั้งค่า', language: 'ภาษา', presets: 'พรีเซ็ต',
+      red: 'แดง', white: 'ขาว', green: 'เขียว', blue: 'น้ำเงิน',
+      colors: 'สี', text_label: 'ข้อความ', heart_label: 'หัวใจ',
+      background_label: 'พื้นหลัง', border_label: 'ขอบ',
+      opacity: 'ความทึบ', bg_opacity: 'ความทึบพื้นหลัง', border_opacity: 'ความทึบขอบ',
+      size_shape: 'ขนาดและรูปร่าง', overall_size: 'ขนาดทั้งหมด', font_size: 'ขนาดตัวอักษร',
+      icon_size: 'ขนาดไอคอน', corner_radius: 'รัศมีมุม',
+      display_options: 'ตัวเลือกการแสดงผล', show_heart_icon: 'ไอคอนหัวใจ', show_bpm_unit: 'หน่วย BPM',
+      sync_heart_color: 'ซิงค์สีหัวใจ', reset_defaults: 'รีเซ็ตเป็นค่าเริ่มต้น',
+      connected: 'เชื่อมต่อแล้ว', connecting: 'กำลังเชื่อมต่อ...', disconnected: 'ยกเลิกการเชื่อมต่อ',
+      auto: 'ติดตามอัตโนมัติ'
+    },
+    'tr': {
+      settings: 'Ayarlar', language: 'Dil', presets: 'Hazır Ayarlar',
+      red: 'Kırmızı', white: 'Beyaz', green: 'Yeşil', blue: 'Mavi',
+      colors: 'Renkler', text_label: 'Metin', heart_label: 'Kalp',
+      background_label: 'Arka plan', border_label: 'Kenarlık',
+      opacity: 'Opaklık', bg_opacity: 'Arka plan opaklığı', border_opacity: 'Kenarlık opaklığı',
+      size_shape: 'Boyut ve Şekil', overall_size: 'Genel Boyut', font_size: 'Yazı Boyutu',
+      icon_size: 'Simge Boyutu', corner_radius: 'Köşe Yarıçapı',
+      display_options: 'Görüntüleme Seçenekleri', show_heart_icon: 'Kalp Simgesi', show_bpm_unit: 'BPM Birimi',
+      sync_heart_color: 'Kalp Rengini Senkronize Et', reset_defaults: 'Varsayılana Sıfırla',
+      connected: 'Bağlı', connecting: 'Bağlanıyor...', disconnected: 'Bağlantı kesildi',
+      auto: 'Otomatik takip et'
+    },
+    'vi': {
+      settings: 'Cài đặt', language: 'Ngôn ngữ', presets: 'Cài đặt trước',
+      red: 'Đỏ', white: 'Trắng', green: 'Xanh lá', blue: 'Xanh dương',
+      colors: 'Màu sắc', text_label: 'Văn bản', heart_label: 'Tim',
+      background_label: 'Nền', border_label: 'Viền',
+      opacity: 'Độ mờ', bg_opacity: 'Độ mờ nền', border_opacity: 'Độ mờ viền',
+      size_shape: 'Kích thước & Hình dạng', overall_size: 'Kích thước tổng thể', font_size: 'Cỡ chữ',
+      icon_size: 'Kích thước biểu tượng', corner_radius: 'Bán kính góc',
+      display_options: 'Tùy chọn hiển thị', show_heart_icon: 'Biểu tượng tim', show_bpm_unit: 'Đơn vị BPM',
+      sync_heart_color: 'Đồng bộ màu tim', reset_defaults: 'Đặt lại về mặc định',
+      connected: 'Đã kết nối', connecting: 'Đang kết nối...', disconnected: 'Đã ngắt kết nối',
+      auto: 'Tự động theo dõi'
+    }
+  };
+
+  // 语言代码 → 显示名称（用各自语言表示）
+  var LANG_NAMES = {
+    'auto': 'Auto', 'en': 'English', 'zh': '简体中文', 'zh-TW': '繁體中文',
+    'zh-HK': '繁體中文(港)', 'ja': '日本語', 'ko': '한국어',
+    'ar': 'العربية', 'bn': 'বাংলা', 'de': 'Deutsch', 'es': 'Español',
+    'fil': 'Filipino', 'fr': 'Français', 'hi': 'हिन्दी', 'id': 'Bahasa Indonesia',
+    'it': 'Italiano', 'ms': 'Bahasa Melayu', 'ne': 'नेपाली', 'nl': 'Nederlands',
+    'pl': 'Polski', 'pt': 'Português', 'ru': 'Русский', 'th': 'ไทย',
+    'tr': 'Türkçe', 'vi': 'Tiếng Việt'
+  };
+
+  // 语言选项顺序
+  var LANG_ORDER = ['auto','en','zh','zh-TW','zh-HK','ja','ko','ar','bn','de','es','fil','fr','hi','id','it','ms','ne','nl','pl','pt','ru','th','tr','vi'];
+
+  // ═══════════════════════════════════════════════════
+  //  语言检测
+  // ═══════════════════════════════════════════════════
+  var LANG_STORAGE_KEY = 'obs_hr_lang';
+
+  function detectLang() {
+    // 1. URL 参数 ?lang=xx
+    var urlLang = params.get('lang');
+    if (urlLang && (I18N[urlLang] || urlLang === 'auto')) return urlLang;
+    // 2. localStorage
+    try {
+      var saved = localStorage.getItem(LANG_STORAGE_KEY);
+      if (saved && (I18N[saved] || saved === 'auto')) return saved;
+    } catch (e) {}
+    // 3. 浏览器语言自动匹配
+    var bl = (navigator.language || 'en').toLowerCase();
+    if (bl.startsWith('zh')) {
+      if (bl.includes('tw') || bl.includes('hant')) return 'zh-TW';
+      if (bl.includes('hk')) return 'zh-HK';
+      return 'zh';
+    }
+    for (var code in I18N) {
+      if (bl.startsWith(code.toLowerCase())) return code;
+    }
+    return 'en';
+  }
+
+  function resolveLang(lang) {
+    if (lang === 'auto') {
+      var bl = (navigator.language || 'en').toLowerCase();
+      if (bl.startsWith('zh')) {
+        if (bl.includes('tw') || bl.includes('hant')) return 'zh-TW';
+        if (bl.includes('hk')) return 'zh-HK';
+        return 'zh';
+      }
+      for (var code in I18N) {
+        if (bl.startsWith(code.toLowerCase())) return code;
+      }
+      return 'en';
+    }
+    return lang;
+  }
+
+  var currentLang = detectLang();
+
+  function t(key) {
+    var lang = resolveLang(currentLang);
+    var dict = I18N[lang] || I18N['en'];
+    return dict[key] !== undefined ? dict[key] : (I18N['en'][key] !== undefined ? I18N['en'][key] : key);
+  }
+
+  function applyI18n() {
+    var els = document.querySelectorAll('[data-i18n]');
+    for (var i = 0; i < els.length; i++) {
+      var key = els[i].getAttribute('data-i18n');
+      els[i].textContent = t(key);
+    }
+    // 设置按钮 title 和状态点 title
+    document.getElementById('settings-toggle').title = t('settings');
+  }
+
+  // 填充语言下拉
+  var langSelect = document.getElementById('lang-select');
+  for (var i = 0; i < LANG_ORDER.length; i++) {
+    var code = LANG_ORDER[i];
+    var opt = document.createElement('option');
+    opt.value = code;
+    opt.textContent = LANG_NAMES[code] || code;
+    if (code === currentLang) opt.selected = true;
+    langSelect.appendChild(opt);
+  }
+  langSelect.addEventListener('change', function() {
+    currentLang = this.value;
+    try { localStorage.setItem(LANG_STORAGE_KEY, currentLang); } catch (e) {}
+    applyI18n();
+    updateConnectionTitle();
+  });
+
+  // ═══════════════════════════════════════════════════
+  //  默认值
+  // ═══════════════════════════════════════════════════
+  var DEFAULTS = {
+    textColor:   '#ff3333',
+    heartColor:  '#ff3333',
+    bgColor:     '#000000',
+    borderColor: '#888888',
+    bgAlpha:     0,
+    borderAlpha: 0,
+    overallScale: 120,
+    fontSize:    120,
+    iconRatio:   120,
+    cornerRadius: 20,
+    showHeart:   true,
+    showUnit:    false,
+    syncHeart:   true
+  };
+
+  var PRESETS = {
+    red:   { textColor: '#ff3333', heartColor: '#ff3333' },
+    white: { textColor: '#ffffff', heartColor: '#ffffff' },
+    green: { textColor: '#33ff33', heartColor: '#33ff33' },
+    blue:  { textColor: '#3399ff', heartColor: '#3399ff' }
+  };
+
+  // ═══════════════════════════════════════════════════
+  //  设置状态管理
+  // ═══════════════════════════════════════════════════
+  var STORAGE_KEY = 'obs_hr_settings';
+
+  function loadSettings() {
+    var s = {};
+    try {
+      var saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) s = JSON.parse(saved);
+    } catch (e) {}
+    if (params.get('color')) s.textColor = params.get('color');
+    if (params.get('heartColor')) s.heartColor = params.get('heartColor');
+    if (params.get('bg')) s.bgColor = params.get('bg') || '#000000';
+    if (params.get('borderColor')) s.borderColor = params.get('borderColor');
+    if (params.get('size')) s.fontSize = parseInt(params.get('size')) || DEFAULTS.fontSize;
+    if (params.get('iconSize')) s.iconRatio = parseInt(params.get('iconSize')) || DEFAULTS.iconRatio;
+    if (params.get('radius')) s.cornerRadius = parseInt(params.get('radius')) || DEFAULTS.cornerRadius;
+    if (params.get('scale')) s.overallScale = parseInt(params.get('scale')) || DEFAULTS.overallScale;
+    if (params.get('bgAlpha') !== null) s.bgAlpha = parseInt(params.get('bgAlpha')) || 0;
+    if (params.get('borderAlpha') !== null) s.borderAlpha = parseInt(params.get('borderAlpha')) || 0;
+    if (params.get('unit') === '0' || params.get('unit') === 'false') s.showUnit = false;
+    if (params.get('unit') === '1' || params.get('unit') === 'true') s.showUnit = true;
+    if (params.get('heart') === '0' || params.get('heart') === 'false') s.showHeart = false;
+    if (params.get('heart') === '1' || params.get('heart') === 'true') s.showHeart = true;
+    for (var k in DEFAULTS) {
+      if (s[k] === undefined) s[k] = DEFAULTS[k];
+    }
+    return s;
+  }
+
+  function saveSettings() {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(settings)); } catch (e) {}
+  }
+
+  var settings = loadSettings();
+
+  // ═══════════════════════════════════════════════════
+  //  应用样式
+  // ═══════════════════════════════════════════════════
+  function hexToRgba(hex, alpha) {
+    hex = hex.replace('#', '');
+    if (hex.length === 3) hex = hex[0]+hex[0]+hex[1]+hex[1]+hex[2]+hex[2];
+    var r = parseInt(hex.substr(0,2), 16);
+    var g = parseInt(hex.substr(2,2), 16);
+    var b = parseInt(hex.substr(4,2), 16);
+    return 'rgba(' + r + ',' + g + ',' + b + ',' + (alpha / 100) + ')';
+  }
+
+  function applyStyles() {
+    var c = document.getElementById('container');
+    root.style.setProperty('--text-color', settings.textColor);
+    root.style.setProperty('--heart-color', settings.syncHeart ? settings.textColor : settings.heartColor);
+    root.style.setProperty('--bg-color', settings.bgColor);
+    root.style.setProperty('--border-color', settings.borderColor);
+    root.style.setProperty('--bg-alpha', settings.bgAlpha);
+    root.style.setProperty('--border-alpha', settings.borderAlpha);
+    root.style.setProperty('--font-size', settings.fontSize + 'px');
+    root.style.setProperty('--icon-size-ratio', (settings.iconRatio / 100));
+    root.style.setProperty('--corner-radius', settings.cornerRadius);
+    root.style.setProperty('--overall-scale', settings.overallScale);
+    root.style.setProperty('--show-unit', settings.showUnit ? 'inline' : 'none');
+    root.style.setProperty('--show-heart', settings.showHeart ? 'flex' : 'none');
+    c.style.background = hexToRgba(settings.bgColor, settings.bgAlpha);
+    c.style.borderColor = hexToRgba(settings.borderColor, settings.borderAlpha);
+  }
+
+  // ═══════════════════════════════════════════════════
+  //  UI 控件绑定
+  // ═══════════════════════════════════════════════════
+  function updateControlValues() {
+    document.getElementById('pick-text').value = settings.textColor;
+    document.getElementById('pick-heart').value = settings.heartColor;
+    document.getElementById('pick-bg').value = settings.bgColor;
+    document.getElementById('pick-border').value = settings.borderColor;
+    document.getElementById('slider-bg-alpha').value = settings.bgAlpha;
+    document.getElementById('val-bg-alpha').textContent = settings.bgAlpha + '%';
+    document.getElementById('slider-border-alpha').value = settings.borderAlpha;
+    document.getElementById('val-border-alpha').textContent = settings.borderAlpha + '%';
+    document.getElementById('slider-scale').value = settings.overallScale;
+    document.getElementById('val-scale').textContent = settings.overallScale + '%';
+    document.getElementById('slider-font').value = settings.fontSize;
+    document.getElementById('val-font').textContent = settings.fontSize + 'px';
+    document.getElementById('slider-icon').value = settings.iconRatio;
+    document.getElementById('val-icon').textContent = settings.iconRatio + '%';
+    document.getElementById('slider-radius').value = settings.cornerRadius;
+    document.getElementById('val-radius').textContent = settings.cornerRadius + 'px';
+    document.getElementById('toggle-heart').classList.toggle('on', settings.showHeart);
+    document.getElementById('toggle-unit').classList.toggle('on', settings.showUnit);
+    document.getElementById('toggle-sync').classList.toggle('on', settings.syncHeart);
+  }
+
+  function bindColorPicker(id, key) {
+    document.getElementById(id).addEventListener('input', function(e) {
+      settings[key] = e.target.value;
+      applyStyles(); saveSettings();
+    });
+  }
+
+  function bindSlider(id, valId, key, suffix) {
+    var slider = document.getElementById(id);
+    var valEl = document.getElementById(valId);
+    slider.addEventListener('input', function(e) {
+      var v = parseInt(e.target.value);
+      settings[key] = v;
+      valEl.textContent = v + suffix;
+      applyStyles(); saveSettings();
+    });
+  }
+
+  function bindToggle(id, key) {
+    var el = document.getElementById(id);
+    el.addEventListener('click', function() {
+      settings[key] = !settings[key];
+      el.classList.toggle('on', settings[key]);
+      applyStyles(); saveSettings();
+    });
+  }
+
+  bindColorPicker('pick-text', 'textColor');
+  bindColorPicker('pick-heart', 'heartColor');
+  bindColorPicker('pick-bg', 'bgColor');
+  bindColorPicker('pick-border', 'borderColor');
+  bindSlider('slider-bg-alpha', 'val-bg-alpha', 'bgAlpha', '%');
+  bindSlider('slider-border-alpha', 'val-border-alpha', 'borderAlpha', '%');
+  bindSlider('slider-scale', 'val-scale', 'overallScale', '%');
+  bindSlider('slider-font', 'val-font', 'fontSize', 'px');
+  bindSlider('slider-icon', 'val-icon', 'iconRatio', '%');
+  bindSlider('slider-radius', 'val-radius', 'cornerRadius', 'px');
+  bindToggle('toggle-heart', 'showHeart');
+  bindToggle('toggle-unit', 'showUnit');
+  bindToggle('toggle-sync', 'syncHeart');
+
+  var presetBtns = document.querySelectorAll('.preset-btn');
+  for (var i = 0; i < presetBtns.length; i++) {
+    presetBtns[i].addEventListener('click', function() {
+      var preset = PRESETS[this.dataset.preset];
+      if (preset) {
+        for (var k in preset) settings[k] = preset[k];
+        applyStyles(); updateControlValues(); saveSettings();
+      }
+    });
+  }
+
+  document.getElementById('btn-reset').addEventListener('click', function() {
+    settings = {};
+    for (var k in DEFAULTS) settings[k] = DEFAULTS[k];
+    applyStyles(); updateControlValues(); saveSettings();
+  });
+
+  var panel = document.getElementById('settings-panel');
+  var toggleBtn = document.getElementById('settings-toggle');
+  if (toggleBtn && panel) {
+    toggleBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      panel.classList.toggle('open');
+    }, true);
+    document.addEventListener('click', function(e) {
+      if (panel.classList.contains('open') &&
+          !panel.contains(e.target) &&
+          !toggleBtn.contains(e.target)) {
+        panel.classList.remove('open');
+      }
+    });
+  }
+
+  // ═══════════════════════════════════════════════════
+  //  心率数据 & 心跳动画
+  // ═══════════════════════════════════════════════════
+  var hrEl = document.getElementById('hr');
+  var heartPath = document.getElementById('heart-path');
+  var statusDot = document.getElementById('status-dot');
+  var connectionState = '';
+
+  function updateConnectionTitle() {
+    statusDot.title = connectionState === 'connected' ? t('connected') :
+                      connectionState === 'connecting' ? t('connecting') : t('disconnected');
+  }
+
+  function setConnectionState(state) {
+    connectionState = state;
+    statusDot.className = state;
+    updateConnectionTitle();
+  }
+
+  function updateHr(hr) {
+    if (typeof hr === 'number' && hr > 0) {
+      hrEl.textContent = hr.toString();
+      var beatDuration = 60 / hr;
+      heartPath.style.animationDuration = beatDuration + 's';
+    } else {
+      hrEl.textContent = '--';
+      heartPath.style.animationDuration = '1s';
+    }
+  }
+
+  // ═══════════════════════════════════════════════════
+  //  数据获取
+  // ═══════════════════════════════════════════════════
+  var config = window.__WS_CONFIG__ || {};
+  var wsUrl = params.get('ws') || config.wsUrl || '';
+  var token = params.get('token') || config.token || '';
+
+  if (wsUrl) {
+    var ws = null;
+    var reconnectTimer = null;
+    var heartbeatTimer = null;
+
+    function connect() {
+      setConnectionState('connecting');
+      var url = wsUrl;
+      if (token) {
+        url += (url.indexOf('?') >= 0 ? '&' : '?') + 'token=' + encodeURIComponent(token);
+      }
+      try { ws = new WebSocket(url); }
+      catch (e) { setConnectionState(''); scheduleReconnect(); return; }
+
+      ws.onopen = function() {
+        setConnectionState('connected');
+        heartbeatTimer = setInterval(function() {
+          if (ws && ws.readyState === WebSocket.OPEN) {
+            try { ws.send('ping'); } catch (e) {}
+          }
+        }, 10000);
+      };
+      ws.onmessage = function(event) {
+        try { var data = JSON.parse(event.data); updateHr(data.heart_rate); } catch (e) {}
+      };
+      ws.onclose = function() {
+        setConnectionState(''); clearInterval(heartbeatTimer); scheduleReconnect();
+      };
+      ws.onerror = function() {
+        setConnectionState(''); clearInterval(heartbeatTimer);
+        try { ws.close(); } catch (e) {}
+      };
+    }
+
+    function scheduleReconnect() {
+      clearTimeout(reconnectTimer);
+      reconnectTimer = setTimeout(connect, 3000);
+    }
+    connect();
+  } else {
+    var pollUrl = '/heartrate';
+    if (token) pollUrl += '?token=' + encodeURIComponent(token);
+
+    function poll() {
+      fetch(pollUrl)
+        .then(function(r) {
+          if (r.ok) { setConnectionState('connected'); return r.json(); }
+          throw new Error('HTTP ' + r.status);
+        })
+        .then(function(data) { updateHr(data.heart_rate); })
+        .catch(function() { setConnectionState(''); })
+        .finally(function() { setTimeout(poll, 1000); });
+    }
+    poll();
+  }
+
+  // ═══════════════════════════════════════════════════
+  //  初始化
+  // ═══════════════════════════════════════════════════
+  applyI18n();
+  applyStyles();
+  updateControlValues();
+})();
+</script>
+</body>
+</html>

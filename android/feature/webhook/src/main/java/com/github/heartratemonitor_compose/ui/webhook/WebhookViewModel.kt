@@ -9,6 +9,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toImmutableList
 
 /**
  * Webhook 配置页面的 ViewModel（MVI 架构，Phase 2）。
@@ -29,17 +32,17 @@ class WebhookViewModel @Inject constructor(
     override suspend fun handleIntent(intent: WebhookIntent) {
         when (intent) {
             WebhookIntent.Load -> {
-                val loaded = withContext(Dispatchers.IO) { webhookRepository.getWebhooks() }
+                val loaded = withContext(Dispatchers.IO) { webhookRepository.getWebhooks().toImmutableList() }
                 setState { it.copy(webhooks = loaded) }
             }
             is WebhookIntent.Save -> withContext(Dispatchers.IO) {
                 webhookRepository.saveWebhooks(intent.webhooks)
-                setState { it.copy(webhooks = webhookRepository.getWebhooks()) }
+                setState { it.copy(webhooks = webhookRepository.getWebhooks().toImmutableList()) }
             }
             is WebhookIntent.Delete -> withContext(Dispatchers.IO) {
-                val updated = currentState.webhooks.toMutableList().apply { removeAt(intent.index) }
+                val updated = currentState.webhooks.toMutableList().apply { removeAt(intent.index) }.toImmutableList()
                 webhookRepository.saveWebhooks(updated)
-                setState { it.copy(webhooks = webhookRepository.getWebhooks()) }
+                setState { it.copy(webhooks = webhookRepository.getWebhooks().toImmutableList()) }
             }
             is WebhookIntent.Test -> {
                 // 结果经回调回传（§3.4 方案 1）：测试响应由 UI 瞬时态 testResponse 展示
@@ -54,7 +57,7 @@ class WebhookViewModel @Inject constructor(
 /** Webhook 配置页用户意图。 */
 sealed interface WebhookIntent {
     data object Load : WebhookIntent
-    data class Save(val webhooks: List<Webhook>) : WebhookIntent
+    data class Save(val webhooks: ImmutableList<Webhook>) : WebhookIntent
     data class Delete(val index: Int) : WebhookIntent
 
     /** 测试发送；结果经 [onResult] 回调（一次性事件走 VM 回调，§3.4 方案 1）。 */
@@ -63,5 +66,5 @@ sealed interface WebhookIntent {
 
 /** Webhook 配置页 UI 状态（只读快照）。 */
 data class WebhookUiState(
-    val webhooks: List<Webhook> = emptyList()
+    val webhooks: ImmutableList<Webhook> = persistentListOf()
 )

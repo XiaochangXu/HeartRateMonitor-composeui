@@ -1,5 +1,7 @@
 package com.github.heartratemonitor_compose.service.server
 
+import android.app.Application
+import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -29,12 +31,14 @@ class WebSocketServerManagerTest {
     private val authToken = ""
     private val stateFlow = MutableSharedFlow<String>(replay = 1)
     private val clientCountFlow = MutableStateFlow(0)
+    private val context: Application = ApplicationProvider.getApplicationContext()
 
     private lateinit var serverManager: WebSocketServerManager
 
     @Before
     fun setup() {
         serverManager = WebSocketServerManager(
+            context = context,
             port = testPort,
             authToken = authToken,
             stateFlow = stateFlow,
@@ -125,6 +129,7 @@ class WebSocketServerManagerTest {
     @Test
     fun `server with auth token starts successfully`() {
         val securedManager = WebSocketServerManager(
+            context = context,
             port = 18302,
             authToken = "secret-token",
             stateFlow = stateFlow,

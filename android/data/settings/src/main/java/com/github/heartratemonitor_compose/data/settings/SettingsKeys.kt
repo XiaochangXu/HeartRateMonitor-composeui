@@ -100,4 +100,7 @@ object SettingsKeys {
 
     /** 应用语言设置。null = 自动跟随系统，非 null = 语言 Tag（如 "zh-CN"、"en"、"de"）。 */
     val APP_LANGUAGE = stringPreferencesKey("app_language")
+
+    /** Webhook 配置列表（kotlinx.serialization JSON 字符串）。null = 未配置。 */
+    val WEBHOOKS_JSON = stringPreferencesKey("webhooks_json")
 }

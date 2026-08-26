@@ -28,6 +28,9 @@ hilt = "2.60.1"
 androidxHilt = "1.4.0"
 datastore = "1.2.1"
 coroutines = "1.11.0"
+# kotlinx-collections-immutable：ImmutableList/ImmutableMap/ImmutableSet 被 Compose 编译器识别为稳定类型，
+# 使接收这些类型的 Composable 可被跳过重组（解决 UiState 集合字段不稳定问题）
+immutableCollections = "0.5.1"
 coil = "3.5.0"
 robolectric = "4.16.1"
 truth = "1.4.5"
@@ -102,8 +105,12 @@ truth = { group = "com.google.truth", name = "truth", version.ref = "truth" }
 androidx-test-core = { group = "androidx.test", name = "core", version.ref = "androidxTestCore" }
 # Room 3 测试与 sqlite-framework（:data:database 的 AppDatabaseTest 随迁使用，版本与 :app 既有硬编码一致）
 kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "coroutines" }
-# kotlinx-serialization：navigation3 rememberNavBackStack 持久化返回栈要求 NavKey 为 @Serializable
+# kotlinx-collections-immutable：UiState 集合字段稳定化（ImmutableList/ImmutableMap/ImmutableSet）
+kotlinx-collections-immutable = { group = "org.jetbrains.kotlinx", name = "kotlinx-collections-immutable", version.ref = "immutableCollections" }
+# kotlinx-serialization：navigation3 rememberNavBackStack 持久化返回栈要求 NavKey 为 @Serializable；
+# Webhook / PostureCalibration 持久化到 DataStore 时也用于序列化/反序列化
 kotlinx-serialization-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-core", version = "1.9.0" }
+kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version = "1.9.0" }
 androidx-sqlite-framework = { group = "androidx.sqlite", name = "sqlite-framework", version = "2.7.0" }
 # WorkManager：销毁时异步落盘心率记录，避免主线程 runBlocking ANR
 androidx-work-runtime-ktx = { group = "androidx.work", name = "work-runtime-ktx", version.ref = "work" }

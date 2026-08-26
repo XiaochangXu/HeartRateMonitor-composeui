@@ -19,6 +19,9 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import javax.inject.Inject
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toImmutableList
 
 /**
  * 局域网传输页面的 ViewModel（MVI 架构，Phase 3）。
@@ -66,7 +69,18 @@ class LanTransferViewModel @Inject constructor(
                 setState { it.copy(isConnected = connected) }
                 stopScanInternal()
                 if (!connected) {
-                    setState { it.copy(devices = emptyList()) }
+                    setState { it.copy(devices = persistentListOf()) }
+                }
+            }
+        }
+        // 已连接客户端信息（OS 名称 + IP）下行至 UI，供「已连接设备」卡片展示
+        viewModelScope.launch {
+            lanTransferSharedState.connectedClientInfo.collectLatest { info ->
+                setState {
+                    it.copy(
+                        connectedClientName = info?.name,
+                        connectedClientIp = info?.ip
+                    )
                 }
             }
         }
@@ -85,11 +99,11 @@ class LanTransferViewModel @Inject constructor(
 
     private fun startScanInternal() {
         if (currentState.isScanning || currentState.isConnected) return
-        setState { it.copy(isScanning = true, devices = emptyList()) }
+        setState { it.copy(isScanning = true, devices = persistentListOf()) }
         scanJob = viewModelScope.launch {
             try {
                 nsdDiscoverer.discover().collectLatest { list ->
-                    setState { it.copy(devices = list) }
+                    setState { it.copy(devices = list.toImmutableList()) }
                 }
             } finally {
                 setState { it.copy(isScanning = false) }
@@ -160,7 +174,7 @@ class LanTransferViewModel @Inject constructor(
         pairJob = null
         setState { it.copy(pairingPc = null, pairResult = null, pairError = null) }
         stopScanInternal()
-        setState { it.copy(devices = emptyList()) }
+        setState { it.copy(devices = persistentListOf()) }
 
         lanTransferSharedState.disconnectWebSocketClients?.invoke()
     }
@@ -183,8 +197,12 @@ data class LanTransferUiState(
     val wsEnabled: Boolean = false,
     val isConnected: Boolean = false,
     val isScanning: Boolean = false,
-    val devices: List<NsdDiscoverer.DiscoveredPc> = emptyList(),
+    val devices: ImmutableList<NsdDiscoverer.DiscoveredPc> = persistentListOf(),
     val pairingPc: NsdDiscoverer.DiscoveredPc? = null,
     val pairResult: PairClient.PairResponse? = null,
-    val pairError: String? = null
+    val pairError: String? = null,
+    /** 已连接电脑的 OS 名称（如 "Windows"），未连接时为 null */
+    val connectedClientName: String? = null,
+    /** 已连接电脑的局域网 IP，未连接时为 null */
+    val connectedClientIp: String? = null
 )

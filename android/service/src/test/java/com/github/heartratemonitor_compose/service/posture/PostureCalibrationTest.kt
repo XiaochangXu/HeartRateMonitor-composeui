@@ -1,5 +1,6 @@
 package com.github.heartratemonitor_compose.service.posture
 
+import kotlinx.collections.immutable.persistentListOf
 import org.json.JSONObject
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -15,18 +16,18 @@ class PostureCalibrationTest {
 
     @Test
     fun `isComplete requires both sitting and standing samples`() {
-        val empty = PostureCalibration(emptyList(), emptyList())
+        val empty = PostureCalibration(persistentListOf(), persistentListOf())
         assertFalse(empty.isComplete())
 
         val onlySitting = PostureCalibration(
-            sittingSamples = listOf(PostureFeatures(0f, 0f, 9.8f, 0.1f, 10)),
-            standingSamples = emptyList()
+            sittingSamples = persistentListOf(PostureFeatures(0f, 0f, 9.8f, 0.1f, 10)),
+            standingSamples = persistentListOf()
         )
         assertFalse(onlySitting.isComplete())
 
         val complete = PostureCalibration(
-            sittingSamples = listOf(PostureFeatures(0f, 0f, 9.8f, 0.1f, 10)),
-            standingSamples = listOf(PostureFeatures(0f, 9.8f, 0f, 0.1f, 10))
+            sittingSamples = persistentListOf(PostureFeatures(0f, 0f, 9.8f, 0.1f, 10)),
+            standingSamples = persistentListOf(PostureFeatures(0f, 9.8f, 0f, 0.1f, 10))
         )
         assertTrue(complete.isComplete())
     }
@@ -34,8 +35,8 @@ class PostureCalibrationTest {
     @Test
     fun `toJson and fromJson round trip preserves samples`() {
         val original = PostureCalibration(
-            sittingSamples = listOf(PostureFeatures(1f, 2f, 3f, 0.5f, 50)),
-            standingSamples = listOf(
+            sittingSamples = persistentListOf(PostureFeatures(1f, 2f, 3f, 0.5f, 50)),
+            standingSamples = persistentListOf(
                 PostureFeatures(4f, 5f, 6f, 0.6f, 60),
                 PostureFeatures(7f, 8f, 9f, 0.7f, 70)
             ),

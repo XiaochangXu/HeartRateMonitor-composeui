@@ -4,12 +4,16 @@
     <string name="lan_transfer_tip">Перед использованием запустите приложение на ПК и убедитесь, что оно находится в той же Wi-Fi/LAN-сети, что и телефон. Телефон автоматически обнаружит ПК; коснитесь устройства для сопряжения, после подтверждения на ПК пульс будет передаваться в реальном времени.</string>
     <string name="lan_scanning">Сканирование ближайших ПК…</string>
     <string name="lan_no_devices">ПК не найдены. Убедитесь, что приложение на ПК запущено и ПК находится в той же сети</string>
+    <string name="lan_no_devices_hint">Нет доступных устройств. Нажмите поиск в правом верхнем углу</string>
+    <string name="lan_connected_device">Подключённое устройство</string>
+    <string name="lan_available_devices">Доступные устройства</string>
     <string name="lan_scan">Сканировать</string>
     <string name="lan_pair_approved">ПК разрешил подключение. Передача пульса запущена</string>
     <string name="lan_pair_rejected">ПК отклонил запрос на подключение</string>
     <string name="lan_pair_failed">Не удалось выполнить сопряжение: %1$s</string>
     <string name="lan_pair_timeout">Истекло время сопряжения, ПК не ответил</string>
     <string name="lan_disconnect">Отключиться</string>
+    <string name="lan_please_disconnect_first">Сначала отключите устройство</string>
     <string name="lan_connected_status">Подключено к ПК</string>
     <string name="lan_status_pushing">Передача</string>
     <string name="lan_ws_not_enabled">WebSocket-сервер отключён, передача невозможна. Включите его в разделе «HTTP &amp; WebSocket-сервер»</string>
@@ -29,4 +33,6 @@
     <string name="ws_enabled_status">WebSocket-сервер: вкл.</string>
     <string name="ws_disabled_status">WebSocket-сервер: выкл.</string>
     <string name="ws_access_url">URL доступа: ws://%1$s:%2$d</string>
+    <string name="obs_tip">Источник браузера OBS (добавьте этот URL в OBS):</string>
+    <string name="obs_url">http://%1$s:%2$d/</string>
 </resources>

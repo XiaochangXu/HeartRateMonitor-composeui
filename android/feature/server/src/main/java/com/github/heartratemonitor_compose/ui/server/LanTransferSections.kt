@@ -12,9 +12,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ContainedLoadingIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -24,22 +21,26 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.github.heartratemonitor_compose.feature.server.R
 import com.github.heartratemonitor_compose.service.server.NsdDiscoverer
+import com.github.heartratemonitor_compose.ui.util.SegmentBottomShape
+import com.github.heartratemonitor_compose.ui.util.SegmentMiddleShape
+import com.github.heartratemonitor_compose.ui.util.SegmentTopShape
 import com.github.heartratemonitor_compose.ui.util.SheetTopShape
 import com.github.heartratemonitor_compose.ui.util.rememberExpandedSheetState
 import com.github.heartratemonitor_compose.ui.util.rememberSheetDismissHandler
 import com.github.heartratemonitor_compose.ui.widgets.ExpressiveButton
+import com.github.heartratemonitor_compose.ui.widgets.ExpressiveButtonStyle
 import com.github.heartratemonitor_compose.ui.widgets.IconContainer
 
 /** 局域网传输页顶部提示卡片 */
@@ -116,115 +117,229 @@ internal fun WebSocketStatusCard(
     }
 }
 
-/** 扫描/连接状态卡片：点击切换扫描 */
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+/**
+ * 已连接设备分组卡片（参考 DevicesScreen 的 ConnectedDeviceCard）。
+ *
+ * 上方：标题行（电脑 icon + "已连接设备" + check 图标）
+ * 下方：设备名称（如 Windows）+ 局域网 IP + 断开连接按钮
+ */
 @Composable
-internal fun ScanStateCard(
-    isConnected: Boolean,
-    isScanning: Boolean,
-    foundCount: Int,
-    onClick: () -> Unit
+internal fun ConnectedDeviceSection(
+    deviceName: String,
+    deviceIp: String,
+    onDisconnect: () -> Unit
 ) {
-    val containerColor = if (isConnected) MaterialTheme.colorScheme.primaryContainer
-        else MaterialTheme.colorScheme.surfaceBright
-    val onContainerColor = if (isConnected) MaterialTheme.colorScheme.onPrimaryContainer
-        else MaterialTheme.colorScheme.onSurface
-
-    Surface(
+    Column(
         modifier = Modifier.fillMaxWidth(),
-        shape = MaterialTheme.shapes.extraLarge,
-        color = containerColor,
-        contentColor = onContainerColor,
-        onClick = onClick
+        verticalArrangement = Arrangement.spacedBy(2.dp)
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 14.dp),
-            verticalAlignment = Alignment.CenterVertically
+        // 标题行
+        Surface(
+            modifier = Modifier.fillMaxWidth(),
+            shape = SegmentTopShape,
+            color = MaterialTheme.colorScheme.surfaceBright,
+            contentColor = MaterialTheme.colorScheme.onSurface
         ) {
-            Icon(
-                painter = painterResource(com.github.heartratemonitor_compose.ui.widgets.R.drawable.ic_computer),
-                contentDescription = null,
-                tint = onContainerColor,
-                modifier = Modifier.size(18.dp)
-            )
-            Spacer(Modifier.width(12.dp))
-            Text(
-                text = when {
-                    isConnected -> stringResource(R.string.lan_connected_status)
-                    isScanning -> stringResource(R.string.lan_scanning)
-                    foundCount == 0 -> stringResource(R.string.lan_no_devices)
-                    else -> "$foundCount PC"
-                },
-                style = MaterialTheme.typography.titleMedium,
-                color = onContainerColor,
-                modifier = Modifier.weight(1f),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-            if (!isConnected && isScanning) {
-                ContainedLoadingIndicator(
-                    modifier = Modifier.size(40.dp)
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 14.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                IconContainer(
+                    icon = painterResource(com.github.heartratemonitor_compose.ui.widgets.R.drawable.ic_computer),
+                    containerSize = 36.dp,
+                    iconSize = 20.dp,
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    iconTint = MaterialTheme.colorScheme.onPrimaryContainer
                 )
-            } else if (!isConnected && foundCount > 0) {
+                Spacer(Modifier.width(12.dp))
                 Text(
-                    text = stringResource(R.string.lan_status_pushing),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    text = stringResource(R.string.lan_connected_device),
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.weight(1f)
+                )
+                Icon(
+                    painter = painterResource(com.github.heartratemonitor_compose.ui.widgets.R.drawable.ic_check_circle),
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(18.dp)
+                )
+            }
+        }
+        // 内容行：设备名 + IP + 断开按钮
+        Surface(
+            modifier = Modifier.fillMaxWidth(),
+            shape = SegmentBottomShape,
+            color = MaterialTheme.colorScheme.surfaceBright,
+            contentColor = MaterialTheme.colorScheme.onSurface
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 14.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = deviceName,
+                        style = MaterialTheme.typography.bodyLarge,
+                        fontWeight = FontWeight.Medium,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    Text(
+                        text = deviceIp,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.padding(top = 2.dp)
+                    )
+                }
+                ExpressiveButton(
+                    label = stringResource(R.string.lan_disconnect),
+                    onClick = onDisconnect,
+                    style = ExpressiveButtonStyle.Danger
                 )
             }
         }
     }
 }
 
-/** 发现的 PC 设备卡片：显示名称/地址与配对按钮 */
+/**
+ * 可用设备分组卡片（参考 DevicesScreen 的 available_header + 列表）。
+ *
+ * 上方：标题行（搜索 icon + "可用设备"）
+ * 下方：空状态（"暂无可用设备，请点击右上角搜索"）或设备列表
+ */
+@Composable
+internal fun AvailableDevicesSection(
+    isScanning: Boolean,
+    devices: List<NsdDiscoverer.DiscoveredPc>,
+    pairingPc: NsdDiscoverer.DiscoveredPc?,
+    onPair: (NsdDiscoverer.DiscoveredPc) -> Unit
+) {
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(2.dp)
+    ) {
+        // 标题行
+        Surface(
+            modifier = Modifier.fillMaxWidth(),
+            shape = SegmentTopShape,
+            color = MaterialTheme.colorScheme.surfaceBright,
+            contentColor = MaterialTheme.colorScheme.onSurface
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 14.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                IconContainer(
+                    icon = painterResource(com.github.heartratemonitor_compose.ui.widgets.R.drawable.ic_computer),
+                    containerSize = 36.dp,
+                    iconSize = 20.dp,
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    iconTint = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+                Spacer(Modifier.width(12.dp))
+                Text(
+                    text = stringResource(R.string.lan_available_devices),
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.weight(1f)
+                )
+            }
+        }
+
+        if (devices.isEmpty()) {
+            // 空状态
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                shape = SegmentBottomShape,
+                color = MaterialTheme.colorScheme.surfaceBright,
+                contentColor = MaterialTheme.colorScheme.onSurface
+            ) {
+                Text(
+                    text = stringResource(R.string.lan_no_devices_hint),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 24.dp)
+                )
+            }
+        } else {
+            // 设备列表
+            devices.forEachIndexed { index, pc ->
+                val isLast = index == devices.lastIndex
+                val shape = if (isLast) SegmentBottomShape else SegmentMiddleShape
+                val pairing = pairingPc?.serviceName == pc.serviceName
+                Surface(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = shape,
+                    color = MaterialTheme.colorScheme.surfaceBright,
+                    contentColor = MaterialTheme.colorScheme.onSurface
+                ) {
+                    DeviceItem(
+                        pc = pc,
+                        pairing = pairing,
+                        onPair = { onPair(pc) }
+                    )
+                }
+            }
+        }
+    }
+}
+
+/** 发现的 PC 设备行：显示名称/地址与配对按钮 */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-internal fun DeviceCard(
+private fun DeviceItem(
     pc: NsdDiscoverer.DiscoveredPc,
     pairing: Boolean,
     onPair: () -> Unit
 ) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = MaterialTheme.shapes.extraLarge,
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceBright)
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 14.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 14.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            IconContainer(icon = painterResource(com.github.heartratemonitor_compose.ui.widgets.R.drawable.ic_computer))
-            Spacer(Modifier.width(16.dp))
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = pc.name.ifBlank { stringResource(R.string.lan_device_unknown) },
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = FontWeight.Medium,
-                    maxLines = 1
-                )
-                Text(
-                    text = "${pc.host}:${pc.pairPort}",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1,
-                    modifier = Modifier.padding(top = 2.dp)
-                )
-            }
-            Spacer(Modifier.width(8.dp))
-            if (pairing) {
-                ContainedLoadingIndicator(
-                    modifier = Modifier.size(40.dp)
-                )
-            } else {
-                Button(onClick = onPair) {
-                    Text(stringResource(R.string.lan_pair_action))
-                }
-            }
+        IconContainer(icon = painterResource(com.github.heartratemonitor_compose.ui.widgets.R.drawable.ic_computer))
+        Spacer(Modifier.width(16.dp))
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = pc.name.ifBlank { stringResource(R.string.lan_device_unknown) },
+                style = MaterialTheme.typography.bodyLarge,
+                fontWeight = FontWeight.Medium,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            Text(
+                text = "${pc.host}:${pc.pairPort}",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.padding(top = 2.dp)
+            )
+        }
+        Spacer(Modifier.width(8.dp))
+        if (pairing) {
+            ContainedLoadingIndicator(
+                modifier = Modifier.size(40.dp)
+            )
+        } else {
+            ExpressiveButton(
+                label = stringResource(R.string.lan_pair_action),
+                onClick = onPair
+            )
         }
     }
 }

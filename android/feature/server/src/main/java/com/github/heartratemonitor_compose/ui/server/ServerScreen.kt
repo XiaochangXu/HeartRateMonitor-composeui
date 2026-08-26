@@ -303,12 +303,28 @@ private fun ServerStatusCard(
                 }
                 if (httpEnabled) {
                     when (httpRunning) {
-                        true -> Text(
-                            text = context.getString(R.string.http_access_url, ipAddress, httpPort),
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.padding(top = 8.dp, start = 40.dp)
-                        )
+                        true -> {
+                            Text(
+                                text = context.getString(R.string.http_access_url, ipAddress, httpPort),
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.padding(top = 8.dp, start = 40.dp)
+                            )
+                            Spacer(Modifier.height(4.dp))
+                            Text(
+                                text = stringResource(R.string.obs_tip),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.padding(start = 40.dp)
+                            )
+                            Spacer(Modifier.height(2.dp))
+                            Text(
+                                text = stringResource(R.string.obs_url, ipAddress, httpPort),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.padding(start = 40.dp)
+                            )
+                        }
                         false -> Text(
                             // 设置已启用但服务器实际未运行（端口冲突等）
                             text = stringResource(R.string.server_start_failed),
@@ -345,12 +361,28 @@ private fun ServerStatusCard(
                 }
                 if (wsEnabled) {
                     when (wsRunning) {
-                        true -> Text(
-                            text = context.getString(R.string.ws_access_url, ipAddress, wsPort),
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.padding(top = 8.dp, start = 40.dp)
-                        )
+                        true -> {
+                            Text(
+                                text = context.getString(R.string.ws_access_url, ipAddress, wsPort),
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.padding(top = 8.dp, start = 40.dp)
+                            )
+                            Spacer(Modifier.height(4.dp))
+                            Text(
+                                text = stringResource(R.string.obs_tip),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.padding(start = 40.dp)
+                            )
+                            Spacer(Modifier.height(2.dp))
+                            Text(
+                                text = stringResource(R.string.obs_url, ipAddress, wsPort),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.padding(start = 40.dp)
+                            )
+                        }
                         false -> Text(
                             // 设置已启用但服务器实际未运行（端口冲突等）
                             text = stringResource(R.string.server_start_failed),

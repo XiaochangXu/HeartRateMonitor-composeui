@@ -155,13 +155,15 @@ class BleService : Service(), FairMemoryReceiver.MemoryListener, BleConnectionMa
     )
 
     private fun createServerHost(): ServerHost = ServerHost(
+        context = applicationContext,
         settingsRepository = settingsRepository,
         heartRate = connectionHandler.heartRate,
         speed = speedProvider.speed,
         isDeviceConnected = connectionHandler::isDeviceConnected,
         getStatusMessage = { connectionHandler.bleState.value.getMessage(applicationContext) },
         webSocketClientCount = lanTransferSharedState.webSocketClientCount,
-        serverRuntimeStatus = lanTransferSharedState.serverRuntimeStatus
+        serverRuntimeStatus = lanTransferSharedState.serverRuntimeStatus,
+        connectedClientInfo = lanTransferSharedState.connectedClientInfo
     )
 
     private fun createBroadcastManager(): BleBroadcastManager = BleBroadcastManager(
@@ -205,6 +207,7 @@ class BleService : Service(), FairMemoryReceiver.MemoryListener, BleConnectionMa
         super.onDestroy()
         lanTransferSharedState.disconnectWebSocketClients = null
         lanTransferSharedState.webSocketClientCount.value = 0
+        lanTransferSharedState.connectedClientInfo.value = null
         fairMemoryReceiver.removeMemoryListener(this)
         // 从缓冲区取出待写入记录并交给 WorkManager 异步落盘。
         // 不在主线程阻塞等待 I/O，消除 ANR 风险；

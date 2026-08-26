@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.github.heartratemonitor_compose.feature.history.R
 import com.github.heartratemonitor_compose.data.model.HeartRateRecordInfo
+import kotlinx.collections.immutable.ImmutableList
 import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
 import com.patrykandpatrick.vico.compose.cartesian.axis.rememberAxisGuidelineComponent
 import com.patrykandpatrick.vico.compose.cartesian.rememberVicoScrollState
@@ -50,7 +51,7 @@ import java.util.Date
 /** 心率历史详情图表（Vico）：逐拍心率折线 + 时间轴 + 触摸标记 */
 @Composable
 internal fun HeartRateChart(
-    records: List<HeartRateRecordInfo>,
+    records: ImmutableList<HeartRateRecordInfo>,
     startTime: Long,
     timeFormat: SimpleDateFormat,
     modifier: Modifier = Modifier

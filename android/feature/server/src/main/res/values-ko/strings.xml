@@ -4,12 +4,16 @@
     <string name="lan_transfer_tip">사용 전에 PC용 앱을 실행하고 휴대폰과 동일한 Wi-Fi/LAN에 연결하세요. 휴대폰이 PC를 자동 감지하며 기기를 탭하여 페어링하면 PC에서 확인 후 심박수가 실시간으로 전송됩니다.</string>
     <string name="lan_scanning">주변 PC 스캔 중…</string>
     <string name="lan_no_devices">PC를 찾지 못했습니다. PC 앱이 실행 중이고 동일한 네트워크에 연결되어 있는지 확인하세요</string>
+    <string name="lan_no_devices_hint">사용 가능한 기기가 없습니다. 우측 상단의 검색을 탭하세요</string>
+    <string name="lan_connected_device">연결된 기기</string>
+    <string name="lan_available_devices">사용 가능한 기기</string>
     <string name="lan_scan">스캔</string>
     <string name="lan_pair_approved">PC가 연결을 승인했습니다. 심박수 전송이 시작되었습니다</string>
     <string name="lan_pair_rejected">PC가 연결을 거부했습니다</string>
     <string name="lan_pair_failed">페어링 실패: %1$s</string>
     <string name="lan_pair_timeout">페어링 시간 초과, PC 응답 없음</string>
     <string name="lan_disconnect">연결 끊기</string>
+    <string name="lan_please_disconnect_first">먼저 기기 연결을 해제하세요</string>
     <string name="lan_connected_status">PC에 연결됨</string>
     <string name="lan_status_pushing">전송 중</string>
     <string name="lan_ws_not_enabled">WebSocket 서버가 비활성화되어 전송할 수 없습니다. 「HTTP &amp; WebSocket 서버」에서 활성화하세요</string>
@@ -29,4 +33,6 @@
     <string name="ws_enabled_status">WebSocket 서버: 활성화됨</string>
     <string name="ws_disabled_status">WebSocket 서버: 비활성화됨</string>
     <string name="ws_access_url">액세스 URL: ws://%1$s:%2$d</string>
+    <string name="obs_tip">OBS 브라우저 소스 (이 URL을 OBS에 추가):</string>
+    <string name="obs_url">http://%1$s:%2$d/</string>
 </resources>

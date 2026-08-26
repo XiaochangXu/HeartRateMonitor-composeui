@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.supervisorScope
+import kotlinx.collections.immutable.toImmutableList
 
 /**
  * Phase 5 按域拆分，契约 4。自原 MainViewModel.initializeDataStreams 逐行迁出，
@@ -50,7 +51,7 @@ internal fun MainViewModel.bindBleDataStreams(manager: BleConnectionManager): Jo
 
             launch {
                 try {
-                    manager.scanResults.collect { reduceState { s -> s.copy(scanResults = it) } }
+                    manager.scanResults.collect { reduceState { s -> s.copy(scanResults = it.toImmutableList()) } }
                 } catch (e: CancellationException) {
                     throw e
                 } catch (e: Exception) {

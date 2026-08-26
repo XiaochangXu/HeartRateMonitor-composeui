@@ -1,5 +1,6 @@
 package com.github.heartratemonitor_compose.service.server
 
+import android.content.Context
 import android.util.Log
 import com.github.heartratemonitor_compose.data.settings.SettingsKeys
 import com.github.heartratemonitor_compose.data.repository.SettingsRepository
@@ -20,13 +21,15 @@ import kotlin.concurrent.withLock
  * 下行至 UI，使设置页能区分「用户已启用」与「服务器实际在运行」。
  */
 class ServerHost(
+    private val context: Context,
     private val settingsRepository: SettingsRepository,
     private val heartRate: StateFlow<Int>,
     private val speed: StateFlow<Float>,
     private val isDeviceConnected: () -> Boolean,
     private val getStatusMessage: () -> String,
     private val webSocketClientCount: MutableStateFlow<Int>,
-    private val serverRuntimeStatus: MutableStateFlow<ServerRuntimeStatus>
+    private val serverRuntimeStatus: MutableStateFlow<ServerRuntimeStatus>,
+    private val connectedClientInfo: MutableStateFlow<com.github.heartratemonitor_compose.service.ConnectedClientInfo?> = MutableStateFlow(null)
 ) {
 
     private var httpServerManager: HttpServerManager? = null
@@ -103,12 +106,15 @@ class ServerHost(
                 // 先标记为「启动中」(null)，避免 UI 在启动完成前闪烁「启动失败」
                 setHttpRunning(null)
                 httpServerManager = HttpServerManager(
+                    context = context,
                     port = port,
                     authToken = authToken,
                     heartRateFlow = heartRate,
                     speedFlow = speed,
                     isDeviceConnected = isDeviceConnected,
-                    getStatusMessage = getStatusMessage
+                    getStatusMessage = getStatusMessage,
+                    wsPortProvider = { settingsRepository.get(SettingsKeys.WEBSOCKET_SERVER_PORT) },
+                    wsEnabledProvider = { settingsRepository.get(SettingsKeys.WEBSOCKET_SERVER_ENABLED) }
                 )
                 val success = httpServerManager!!.start()
                 if (success) {
@@ -141,7 +147,7 @@ class ServerHost(
                 webSocketServerManager?.stop()
                 // 先标记为「启动中」(null)，避免 UI 在启动完成前闪烁「启动失败」
                 setWsRunning(null)
-                webSocketServerManager = WebSocketServerManager(port, authToken, webSocketStateFlow, webSocketClientCount)
+                webSocketServerManager = WebSocketServerManager(context, port, authToken, webSocketStateFlow, webSocketClientCount, connectedClientInfo)
                 val success = webSocketServerManager!!.start()
                 if (success) {
                     currentWebSocketPort = port

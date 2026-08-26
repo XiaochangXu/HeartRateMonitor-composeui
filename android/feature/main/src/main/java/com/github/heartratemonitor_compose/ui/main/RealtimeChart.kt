@@ -175,7 +175,7 @@ internal fun RealtimeChart(
     val modelProducer = remember { CartesianChartModelProducer() }
 
     // 直接使用 MainViewModel 维护的已格式化坐标快照，UI 层不再每拍全量转换/拷贝。
-    // 快照列表在 ViewModel 中已复制为不可变 List，避免 runTransaction 挂起期间被并发修改。
+    // 快照列表在 ViewModel 中已转为 ImmutableList，避免 runTransaction 挂起期间被并发修改。
     LaunchedEffect(chartDataSnapshot) {
         val snapshot = chartDataSnapshot ?: return@LaunchedEffect
         if (appStatus != AppStatus.CONNECTED || snapshot.xValues.isEmpty()) return@LaunchedEffect

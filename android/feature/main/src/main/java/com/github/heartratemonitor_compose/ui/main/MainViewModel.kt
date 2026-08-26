@@ -29,6 +29,7 @@ import kotlinx.coroutines.launch
 import com.github.heartratemonitor_compose.ui.mvi.MviViewModel
 import java.lang.ref.WeakReference
 import javax.inject.Inject
+import kotlinx.collections.immutable.persistentListOf
 
 /**
  * MVI 架构，Phase 5。仅 BLE 状态订阅 + 组件编排 + 对外单一 [uiState]；
@@ -315,7 +316,7 @@ class MainViewModel @Inject constructor(
         chartDataManager.releaseOnTrim(notifyType)
 
         if (currentState.appStatus != AppStatus.SCANNING) {
-            setState { it.copy(scanResults = emptyList()) }
+            setState { it.copy(scanResults = persistentListOf()) }
             Log.i("MainViewModel", "TRIM(${if (isPss) "PSS" else "HEAP"}): 已清空扫描结果缓存")
         }
     }

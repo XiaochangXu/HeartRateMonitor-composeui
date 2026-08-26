@@ -9,6 +9,9 @@ import com.github.heartratemonitor_compose.ui.mvi.MviViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toImmutableList
 
 /**
  * MVI 架构，Phase 2。收藏设备列表与当前收藏 ID 归约进单一 UiState，
@@ -28,7 +31,7 @@ class FavoriteDevicesViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             favoriteDeviceRepository.getAllFavorites().collect { list ->
-                setState { it.copy(devices = list, isLoading = false) }
+                setState { it.copy(devices = list.toImmutableList(), isLoading = false) }
             }
         }
         viewModelScope.launch {
@@ -65,7 +68,7 @@ sealed interface FavoriteDevicesIntent {
 
 /** 收藏设备页 UI 状态（只读快照）。 */
 data class FavoriteDevicesUiState(
-    val devices: List<FavoriteDeviceInfo> = emptyList(),
+    val devices: ImmutableList<FavoriteDeviceInfo> = persistentListOf(),
     val favoriteDeviceId: String? = null,
     val isLoading: Boolean = true
 )

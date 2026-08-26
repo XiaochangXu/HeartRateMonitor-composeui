@@ -5,6 +5,8 @@ import com.github.heartratemonitor_compose.ble.HeartRateMeasurement
 import com.github.heartratemonitor_compose.service.FairMemoryReceiver
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -21,8 +23,8 @@ data class HeartRatePoint(
  * 由 ChartDataManager 在发布快照时一并计算，避免 UI 层重复遍历 yValues。
  */
 data class ChartDataSnapshot(
-    val xValues: List<Double>,
-    val yValues: List<Double>,
+    val xValues: ImmutableList<Double>,
+    val yValues: ImmutableList<Double>,
     val windowMaxY: Double = 0.0,
     val windowMinY: Double = 0.0
 )
@@ -181,8 +183,8 @@ class ChartDataManager(private val scope: CoroutineScope) {
             if (y < wMin) wMin = y
         }
         _chartDataSnapshot.value = ChartDataSnapshot(
-            xValues = chartXValues.toList(),
-            yValues = chartYValues.toList(),
+            xValues = chartXValues.toImmutableList(),
+            yValues = chartYValues.toImmutableList(),
             windowMaxY = if (wMax > 0.0) wMax else 0.0,
             windowMinY = if (wMin < Double.MAX_VALUE && wMin > 0.0) wMin else 0.0
         )
@@ -280,8 +282,8 @@ class ChartDataManager(private val scope: CoroutineScope) {
                     if (y < trimMin) trimMin = y
                 }
                 _chartDataSnapshot.value = ChartDataSnapshot(
-                    xValues = chartXValues.toList(),
-                    yValues = chartYValues.toList(),
+                    xValues = chartXValues.toImmutableList(),
+                    yValues = chartYValues.toImmutableList(),
                     windowMaxY = if (trimMax > 0.0) trimMax else 0.0,
                     windowMinY = if (trimMin < Double.MAX_VALUE && trimMin > 0.0) trimMin else 0.0
                 )

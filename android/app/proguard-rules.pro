@@ -75,16 +75,26 @@
 -dontwarn com.guolindev.permissionx.**
 
 # ----------------------------------------------------------------------------
-# 9. 项目数据类：Webhook / WebhookTrigger
-#    - Webhook：通过 org.json.JSONObject put/get 显式按字符串字面量访问
-#      （put("name", name) / getString("name")），字段名被混淆不影响 JSON
-#      key（key 是源码中的字符串字面量）。无需 keep 字段。
-#    - WebhookTrigger：valueOf(String) 和 .name 走反射，必须保留枚举常量名。
+# 9. 项目数据类：Webhook / WebhookTrigger / PostureCalibration
+#    - Webhook：通过 kotlinx.serialization 序列化到 DataStore，
+#      $$serializer 由库自带 consumer-rules 覆盖，
+#      此处保留类名与字段名（序列化输出的 JSON key 需稳定）。
+#    - WebhookTrigger：kotlinx.serialization 自定义序列化器输出小写枚举名，
+#      通用枚举规则（第 14 节）保留 valueOf 方法签名，此处显式保留常量名。
+#    - PostureCalibration / PostureFeatures：同理通过 kotlinx.serialization
+#      序列化到 DataStore，保留类名与字段名。
 # ----------------------------------------------------------------------------
--keep class com.github.heartratemonitor_compose.data.WebhookTrigger { *; }
+-keep,includedescriptorclasses class com.github.heartratemonitor_compose.data.Webhook { *; }
+-keep,includedescriptorclasses class com.github.heartratemonitor_compose.data.WebhookTrigger { *; }
 -keepclassmembers enum com.github.heartratemonitor_compose.data.WebhookTrigger {
     <fields>;
 }
+# kotlinx.serialization 自定义序列化器 object（被 @Serializable(with = ...) 引用）
+-keep class com.github.heartratemonitor_compose.data.ImmutableWebhookTriggerListSerializer { *; }
+-keep class com.github.heartratemonitor_compose.data.WebhookTriggerSerializer { *; }
+-keep,includedescriptorclasses class com.github.heartratemonitor_compose.service.posture.PostureCalibration { *; }
+-keep,includedescriptorclasses class com.github.heartratemonitor_compose.service.posture.PostureFeatures { *; }
+-keep class com.github.heartratemonitor_compose.service.posture.ImmutablePostureFeaturesListSerializer { *; }
 
 # ----------------------------------------------------------------------------
 # 10. AndroidX / Compose 通用

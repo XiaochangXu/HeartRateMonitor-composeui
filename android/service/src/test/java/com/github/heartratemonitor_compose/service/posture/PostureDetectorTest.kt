@@ -1,5 +1,6 @@
 package com.github.heartratemonitor_compose.service.posture
 
+import kotlinx.collections.immutable.persistentListOf
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
@@ -69,8 +70,8 @@ class PostureDetectorTest {
         val sitting = PostureFeatures(meanX = 0f, meanY = 0f, meanZ = 9.8f, stdMagnitude = 0.1f, sampleCount = 100)
         val standing = PostureFeatures(meanX = 0f, meanY = 9.8f, meanZ = 0f, stdMagnitude = 0.1f, sampleCount = 100)
         return PostureCalibration(
-            sittingSamples = listOf(sitting),
-            standingSamples = listOf(standing),
+            sittingSamples = persistentListOf(sitting),
+            standingSamples = persistentListOf(standing),
             motionThreshold = 1.5f,
             calibratedAt = 0L
         )

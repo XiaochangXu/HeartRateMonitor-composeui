@@ -11,6 +11,15 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import com.github.heartratemonitor_compose.service.FairMemoryReceiver
 import javax.inject.Inject
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.ImmutableMap
+import kotlinx.collections.immutable.ImmutableSet
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.persistentMapOf
+import kotlinx.collections.immutable.persistentSetOf
+import kotlinx.collections.immutable.toImmutableList
+import kotlinx.collections.immutable.toImmutableMap
+import kotlinx.collections.immutable.toImmutableSet
 
 /**
  * MVI 架构，Phase 2。历史会话列表、统计/迷你图采样、多选态归约进单一 UiState
@@ -27,8 +36,9 @@ class HistoryViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             repository.allSessions.collect { list ->
-                setState { it.copy(sessions = list, isLoading = false) }
-                loadStatsForSessions(list)
+                val immutableList = list.toImmutableList()
+                setState { it.copy(sessions = immutableList, isLoading = false) }
+                loadStatsForSessions(immutableList)
             }
         }
         fairMemoryReceiver.addMemoryListener(this)
@@ -38,9 +48,9 @@ class HistoryViewModel @Inject constructor(
         when (intent) {
             is HistoryIntent.DeleteSessions -> repository.deleteSessionsByIds(intent.ids)
             is HistoryIntent.EnterMultiSelect ->
-                setState { it.copy(isMultiSelectMode = true, selectedIds = setOf(intent.initialId)) }
+                setState { it.copy(isMultiSelectMode = true, selectedIds = persistentSetOf(intent.initialId)) }
             HistoryIntent.ExitMultiSelect ->
-                setState { it.copy(isMultiSelectMode = false, selectedIds = emptySet()) }
+                setState { it.copy(isMultiSelectMode = false, selectedIds = persistentSetOf()) }
             is HistoryIntent.ToggleSelection -> setState { state ->
                 val current = state.selectedIds
                 val updated =
@@ -49,16 +59,16 @@ class HistoryViewModel @Inject constructor(
                 // 取消选中后无剩余选中项时是否自动退出多选
                 //（原页面语义：复选框回调退出、卡片点击不退出）；联动字段一次归约
                 val stillMultiSelect = state.isMultiSelectMode && !(intent.exitIfEmpty && updated.isEmpty())
-                state.copy(selectedIds = updated, isMultiSelectMode = stillMultiSelect)
+                state.copy(selectedIds = updated.toImmutableSet(), isMultiSelectMode = stillMultiSelect)
             }
             HistoryIntent.SelectAll ->
-                setState { it.copy(selectedIds = currentState.sessions.map { s -> s.id }.toSet()) }
+                setState { it.copy(selectedIds = currentState.sessions.map { s -> s.id }.toImmutableSet()) }
         }
     }
 
     private suspend fun loadStatsForSessions(currentSessions: List<HeartRateSessionInfo>) {
         if (currentSessions.isEmpty()) {
-            setState { it.copy(previewDataMap = emptyMap()) }
+            setState { it.copy(previewDataMap = persistentMapOf()) }
             return
         }
         val statsList = repository.getSessionStats()
@@ -75,7 +85,7 @@ class HistoryViewModel @Inject constructor(
                 }
                 async {
                     val step = maxOf(1, stats.recordCount / 50)
-                    val samples = repository.getSampledHeartRatesForSession(session.id, step)
+                    val samples = repository.getSampledHeartRatesForSession(session.id, step).toImmutableList()
                     session.id to SessionPreviewData(
                         recordCount = stats.recordCount,
                         avgHeartRate = stats.avgHeartRate?.toDouble() ?: 0.0,
@@ -87,13 +97,13 @@ class HistoryViewModel @Inject constructor(
             }.filterNotNull().awaitAll()
         }
 
-        val previewMap = previews.associate { it.first to it.second }
+        val previewMap = previews.associate { it.first to it.second }.toImmutableMap()
         setState { it.copy(previewDataMap = previewMap) }
     }
 
     /** 公平运行内存 TRIM：清空历史预览采样数据，释放内存。 */
     override fun onTrimMemory(notifyType: Int) {
-        setState { it.copy(previewDataMap = emptyMap()) }
+        setState { it.copy(previewDataMap = persistentMapOf()) }
     }
 
     /** 公平运行内存 KILL：历史数据已由 Room 持久化，无需额外保存。 */
@@ -128,10 +138,10 @@ sealed interface HistoryIntent {
 
 /** 历史记录页 UI 状态（只读快照）。 */
 data class HistoryUiState(
-    val sessions: List<HeartRateSessionInfo> = emptyList(),
-    val previewDataMap: Map<Long, SessionPreviewData> = emptyMap(),
+    val sessions: ImmutableList<HeartRateSessionInfo> = persistentListOf(),
+    val previewDataMap: ImmutableMap<Long, SessionPreviewData> = persistentMapOf(),
     val isMultiSelectMode: Boolean = false,
-    val selectedIds: Set<Long> = emptySet(),
+    val selectedIds: ImmutableSet<Long> = persistentSetOf(),
     val isLoading: Boolean = true
 )
 
@@ -140,5 +150,5 @@ data class SessionPreviewData(
     val avgHeartRate: Double,
     val minHeartRate: Int,
     val maxHeartRate: Int,
-    val heartRateSamples: List<Int>
+    val heartRateSamples: ImmutableList<Int>
 )

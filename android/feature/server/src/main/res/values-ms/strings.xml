@@ -4,12 +4,16 @@
     <string name="lan_transfer_tip">Sebelum digunakan, buka aplikasi PC dan pastikan ia berada pada Wi-Fi/LAN yang sama dengan telefon. Telefon akan mengesan PC secara automatik; tekan peranti untuk memasangkan, dan selepas PC mengesahkan, kadar jantung akan dihantar secara masa nyata.</string>
     <string name="lan_scanning">Mengimbas PC berhampiran…</string>
     <string name="lan_no_devices">Tiada PC ditemui. Pastikan aplikasi PC berjalan dan PC berada pada rangkaian yang sama</string>
+    <string name="lan_no_devices_hint">Tiada peranti tersedia. Ketik cari di sebelah kanan atas</string>
+    <string name="lan_connected_device">Peranti disambung</string>
+    <string name="lan_available_devices">Peranti tersedia</string>
     <string name="lan_scan">Imbas</string>
     <string name="lan_pair_approved">PC meluluskan sambungan. Penghantaran kadar jantung bermula</string>
     <string name="lan_pair_rejected">PC menolak sambungan</string>
     <string name="lan_pair_failed">Pemasangan gagal: %1$s</string>
     <string name="lan_pair_timeout">Masa pemasangan tamat, PC tidak bertindak balas</string>
     <string name="lan_disconnect">Putuskan sambungan</string>
+    <string name="lan_please_disconnect_first">Sila putuskan dahulu sambungan peranti</string>
     <string name="lan_connected_status">Disambung ke PC</string>
     <string name="lan_status_pushing">Menghantar</string>
     <string name="lan_ws_not_enabled">Pelayan WebSocket dimatikan, tidak boleh menghantar. Aktifkannya dalam «Pelayan HTTP dan WebSocket»</string>
@@ -29,4 +33,6 @@
     <string name="ws_enabled_status">Pelayan WebSocket: aktif</string>
     <string name="ws_disabled_status">Pelayan WebSocket: tidak aktif</string>
     <string name="ws_access_url">URL akses: ws://%1$s:%2$d</string>
+    <string name="obs_tip">Sumber Pelayar OBS (tambahkan URL ini dalam OBS):</string>
+    <string name="obs_url">http://%1$s:%2$d/</string>
 </resources>

@@ -68,7 +68,7 @@ class BleConnectionHandlerTest {
             .edit().clear().apply()
         runBlocking { context.settingsDataStore.edit { it.clear() } }
         settingsRepository = SettingsRepository(context, CoroutineScope(Dispatchers.Unconfined))
-        webhookRepository = WebhookRepository(context)
+        webhookRepository = WebhookRepository(context, settingsRepository)
 
         database = Room.inMemoryDatabaseBuilder<AppDatabase>(context)
             .setQueryCoroutineContext(Dispatchers.IO)

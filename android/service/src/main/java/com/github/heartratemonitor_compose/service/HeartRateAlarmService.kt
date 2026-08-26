@@ -43,6 +43,8 @@ import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.launch
 import kotlin.math.sqrt
 import javax.inject.Inject
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toImmutableList
 
 /**
  * specialUse 前台服务，绑定 BleService 获取实时心率，注册加速度传感器运行 PostureDetector，
@@ -353,11 +355,11 @@ class HeartRateAlarmService : Service() {
 
         val features = PostureFeatures(meanX, meanY, meanZ, stdMag, n)
         val existing = _currentCalibration.value
-        val sitSamples = existing?.sittingSamples ?: emptyList()
-        val standSamples = existing?.standingSamples ?: emptyList()
+        val sitSamples = existing?.sittingSamples ?: persistentListOf()
+        val standSamples = existing?.standingSamples ?: persistentListOf()
         val updated = if (isSitting) {
             PostureCalibration(
-                sittingSamples = sitSamples + features,
+                sittingSamples = (sitSamples + features).toImmutableList(),
                 standingSamples = standSamples,
                 motionThreshold = existing?.motionThreshold ?: 1.5f,
                 calibratedAt = System.currentTimeMillis()
@@ -365,7 +367,7 @@ class HeartRateAlarmService : Service() {
         } else {
             PostureCalibration(
                 sittingSamples = sitSamples,
-                standingSamples = standSamples + features,
+                standingSamples = (standSamples + features).toImmutableList(),
                 motionThreshold = existing?.motionThreshold ?: 1.5f,
                 calibratedAt = System.currentTimeMillis()
             )

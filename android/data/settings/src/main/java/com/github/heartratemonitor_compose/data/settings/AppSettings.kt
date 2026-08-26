@@ -235,6 +235,8 @@ data class AppSettings(
 )
             put(SettingsKeys.SEARCH_TIP_SHOWN, false)
             put(SettingsKeys.APP_LANGUAGE, null)
+            // Webhook 配置默认值：null 表示未配置，由 WebhookRepository 独立管理
+            put(SettingsKeys.WEBHOOKS_JSON, null)
         }
 
         /** 键未登记时抛异常（快速失败，防止漏登记）。 */

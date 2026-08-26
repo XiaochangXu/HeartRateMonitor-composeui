@@ -5,15 +5,18 @@ import android.util.Log
 import com.github.heartratemonitor_compose.data.repository.R
 import com.github.heartratemonitor_compose.data.Webhook
 import com.github.heartratemonitor_compose.data.WebhookTrigger
+import com.github.heartratemonitor_compose.data.settings.SettingsKeys
+import com.github.heartratemonitor_compose.data.repository.SettingsRepository
+import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.json.JSONArray
-import org.json.JSONException
-import org.json.JSONObject
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import java.io.BufferedReader
 import java.io.File
 import java.io.InputStreamReader
@@ -27,15 +30,24 @@ import javax.inject.Singleton
 
 /**
  * 从原 `ui.webhook.WebhookManager` 下沉到数据层，避免 UI 包直接持有网络管理类。
+ *
+ * 持久化由 DataStore（经 [SettingsRepository]）承载，值为 kotlinx.serialization
+ * 序列化的 JSON 字符串。旧版 `config_webhook.json` 文件在首次启动时一次性迁移。
  */
 @Singleton
-class WebhookRepository @Inject constructor(application: Application) {
+class WebhookRepository @Inject constructor(
+    application: Application,
+    private val settingsRepository: SettingsRepository
+) {
 
     private val appContext = application.applicationContext
-    private val webhookFile = File(application.filesDir, "config_webhook.json")
+    private val legacyWebhookFile = File(application.filesDir, "config_webhook.json")
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
-    // 内存缓存：避免每次 triggerWebhooks（每个心率包）都读盘解析 JSON
+    // 用于解析用户输入的 headers JSON 字符串（非持久化，运行时 HTTP 请求设置请求头）
+    private val json = Json { ignoreUnknownKeys = true }
+
+    // 内存缓存：避免每次 triggerWebhooks（每个心率包）都读盘
     @Volatile
     private var webhooksCache: List<Webhook> = emptyList()
     private val cacheLock = Any()
@@ -44,35 +56,56 @@ class WebhookRepository @Inject constructor(application: Application) {
     // 时间窗口内不重复发送，避免高频心率包触发大量 HTTP 请求导致网络拥塞。
     private val lastSentAtMs = ConcurrentHashMap<String, Long>()
 
+    // 标记旧文件是否已迁移
+    @Volatile
+    private var migrated = false
+
     init {
         refreshCache()
     }
 
-    private fun refreshCache() {
-        synchronized(cacheLock) {
-            webhooksCache = loadWebhooksFromDisk()
+    /**
+     * 首次启动时迁移旧 `config_webhook.json` 文件到 DataStore。
+     * 旧文件的 JSON 格式与新格式键名一致，直接用 [Webhook.listFromJson] 解析即可。
+     * 迁移完成后删除旧文件，后续启动跳过。
+     */
+    private fun migrateLegacyFileIfNeeded() {
+        if (migrated) return
+        val data = settingsRepository.getNullable(SettingsKeys.WEBHOOKS_JSON)
+        if (data != null) {
+            // DataStore 已有数据，无需迁移
+            migrated = true
+            return
+        }
+        if (!legacyWebhookFile.exists()) {
+            migrated = true
+            return
+        }
+        try {
+            val jsonString = legacyWebhookFile.readText()
+            val webhooks = Webhook.listFromJson(jsonString)
+            settingsRepository.set(SettingsKeys.WEBHOOKS_JSON, Webhook.listToJson(webhooks))
+            Log.i("WebhookRepository", "旧 config_webhook.json 已迁移到 DataStore")
+        } catch (e: Exception) {
+            Log.e("WebhookRepository", "迁移旧 webhook 文件失败", e)
+        } finally {
+            // 无论成功与否都删除旧文件，避免反复尝试失败的迁移
+            legacyWebhookFile.delete()
+            migrated = true
         }
     }
 
-    private fun loadWebhooksFromDisk(): List<Webhook> {
-        if (!webhookFile.exists()) return emptyList()
-        return try {
-            val jsonString = webhookFile.readText()
-            val jsonArray = JSONArray(jsonString)
-            val webhooks = mutableListOf<Webhook>()
-            for (i in 0 until jsonArray.length()) {
-                // 逐条容错：单条 webhook 解析失败不污染其余配置
-                try {
-                    webhooks.add(Webhook.fromJson(jsonArray.getJSONObject(i)))
-                } catch (e: Exception) {
-                    Log.e("WebhookRepository", "跳过无法解析的 webhook #${i}", e)
-                }
-            }
-            webhooks
-        } catch (e: Exception) {
-            Log.e("WebhookRepository", "获取Webhooks失败", e)
-            emptyList()
+    private fun refreshCache() {
+        migrateLegacyFileIfNeeded()
+        synchronized(cacheLock) {
+            webhooksCache = loadWebhooksFromDataStore()
         }
+    }
+
+    private fun loadWebhooksFromDataStore(): List<Webhook> {
+        val jsonString = settingsRepository.getNullable(SettingsKeys.WEBHOOKS_JSON)
+            ?: return emptyList()
+        return Webhook.listFromJson(jsonString)
     }
 
     fun triggerWebhooks(trigger: WebhookTrigger, heartRate: Int = 0, speed: Float = 0f) {
@@ -147,11 +180,11 @@ class WebhookRepository @Inject constructor(application: Application) {
             connection.readTimeout = 10000
 
             try {
-                val headersJson = JSONObject(headersString)
-                headersJson.keys().forEach { key ->
-                    connection.setRequestProperty(key, headersJson.getString(key))
+                val headersJson = json.parseToJsonElement(headersString) as JsonObject
+                headersJson.forEach { (key, value) ->
+                    connection.setRequestProperty(key, value.jsonPrimitive.content)
                 }
-            } catch (e: JSONException) {
+            } catch (e: Exception) {
                 return@withContext appContext.getString(R.string.webhook_send_failed_headers, e.message)
             }
             if (connection.getRequestProperty("Content-Type") == null) {
@@ -214,11 +247,9 @@ class WebhookRepository @Inject constructor(application: Application) {
         return synchronized(cacheLock) { webhooksCache.toList() }
     }
 
-    fun saveWebhooks(webhooks: List<Webhook>) {
+    fun saveWebhooks(webhooks: ImmutableList<Webhook>) {
         try {
-            val jsonArray = JSONArray()
-            webhooks.forEach { jsonArray.put(it.toJson()) }
-            webhookFile.writeText(jsonArray.toString(4))
+            settingsRepository.set(SettingsKeys.WEBHOOKS_JSON, Webhook.listToJson(webhooks))
             refreshCache()
         } catch (e: Exception) {
             Log.e("WebhookRepository", "保存Webhooks失败", e)

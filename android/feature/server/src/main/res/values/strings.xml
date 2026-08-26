@@ -4,12 +4,16 @@
     <string name="lan_transfer_tip">Make sure the companion PC app is running and on the same Wi-Fi/LAN as your phone. The phone auto-discovers the PC; tap a device to pair, after the PC confirms, heart rate will be pushed in real time.</string>
     <string name="lan_scanning">Scanning for nearby PCs…</string>
     <string name="lan_no_devices">No PCs found. Make sure the PC app is running and on the same network</string>
+    <string name="lan_no_devices_hint">No available devices. Tap search in the top right</string>
+    <string name="lan_connected_device">Connected device</string>
+    <string name="lan_available_devices">Available devices</string>
     <string name="lan_scan">Scan</string>
     <string name="lan_pair_approved">PC approved the connection. Heart rate push started</string>
     <string name="lan_pair_rejected">PC rejected the connection</string>
     <string name="lan_pair_failed">Pairing failed: %1$s</string>
     <string name="lan_pair_timeout">Pairing timed out, no response from PC</string>
     <string name="lan_disconnect">Disconnect</string>
+    <string name="lan_please_disconnect_first">Please disconnect the device first</string>
     <string name="lan_connected_status">Connected to PC</string>
     <string name="lan_status_pushing">Pushing</string>
     <string name="lan_ws_not_enabled">WebSocket server is disabled, cannot push. Enable it in "HTTP &amp; WebSocket Server"</string>
@@ -28,5 +32,8 @@
     <string name="server_start_failed">Server start failed (port may be in use)</string>
     <string name="ws_enabled_status">WebSocket Server Enabled</string>
     <string name="ws_disabled_status">WebSocket Server Disabled</string>
-    <string name="ws_access_url">URL: ws://%1$s:%2$d</string></resources>
+    <string name="ws_access_url">URL: ws://%1$s:%2$d</string>
+    <string name="obs_tip">OBS Browser Source (add this URL):</string>
+    <string name="obs_url">http://%1$s:%2$d/</string>
+</resources>
 

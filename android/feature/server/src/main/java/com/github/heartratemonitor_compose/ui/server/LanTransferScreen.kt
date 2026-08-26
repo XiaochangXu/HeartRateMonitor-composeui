@@ -1,11 +1,11 @@
 package com.github.heartratemonitor_compose.ui.server
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.fillMaxSize
@@ -33,13 +33,12 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -51,7 +50,7 @@ import com.github.heartratemonitor_compose.ui.util.StatusBarScrim
 /**
  * 局域网传输页：
  * 状态与流程编排（扫描/配对/断开）归 [LanTransferViewModel]，本文件仅渲染 + 事件回调；
- * 子组件见 LanTransferSections.kt（TipCard / WebSocketStatusCard / ScanStateCard / DeviceCard / PairResultDialog）。
+ * 子组件见 LanTransferSections.kt（TipCard / WebSocketStatusCard / ConnectedDeviceSection / AvailableDevicesSection / PairResultDialog）。
  */
 @OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -60,6 +59,7 @@ fun LanTransferScreen(
 ) {
     val viewModel: LanTransferViewModel = hiltViewModel()
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+    val context = LocalContext.current
 
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val isScanning = uiState.isScanning
@@ -97,26 +97,14 @@ fun LanTransferScreen(
                     }
                 },
                     actions = {
-                    if (isConnected) {
-                        IconButton(onClick = { viewModel.dispatch(LanTransferIntent.Disconnect) }) {
-                            Surface(
-                                modifier = Modifier.size(40.dp),
-                                shape = CircleShape,
-                                color = MaterialTheme.colorScheme.surfaceBright
-                            ) {
-                                Box(contentAlignment = Alignment.Center) {
-                                    Icon(
-                                        painter = painterResource(com.github.heartratemonitor_compose.ui.widgets.R.drawable.ic_link_off),
-                                        contentDescription = stringResource(R.string.lan_disconnect),
-                                        tint = MaterialTheme.colorScheme.error
-                                    )
-                                }
-                            }
-                        }
-                    }
                     IconButton(onClick = {
-                        if (isScanning) viewModel.dispatch(LanTransferIntent.StopScan)
-                        else viewModel.dispatch(LanTransferIntent.StartScan)
+                        if (isConnected) {
+                            Toast.makeText(context, R.string.lan_please_disconnect_first, Toast.LENGTH_SHORT).show()
+                        } else if (isScanning) {
+                            viewModel.dispatch(LanTransferIntent.StopScan)
+                        } else {
+                            viewModel.dispatch(LanTransferIntent.StartScan)
+                        }
                     }) {
                         if (isScanning) {
                             // 扫描中：顶栏搜索按钮切换为 ContainedLoadingIndicator，再点可停止
@@ -156,30 +144,24 @@ fun LanTransferScreen(
             ) {
                 TipCard()
 
-            
             WebSocketStatusCard(
                 enabled = wsEnabled,
                 onOpenServerSettings = { onNavigateBack() }
             )
 
-             ScanStateCard(
-                isConnected = isConnected,
-                isScanning = isScanning,
-                foundCount = devices.size,
-                onClick = {
-                    if (isScanning) viewModel.dispatch(LanTransferIntent.StopScan)
-                    else viewModel.dispatch(LanTransferIntent.StartScan)
-                }
-            )
-
-           if (!isConnected) {
-                devices.forEach { pc ->
-                    DeviceCard(
-                        pc = pc,
-                        pairing = pairingPc?.serviceName == pc.serviceName,
-                        onPair = { viewModel.dispatch(LanTransferIntent.StartPairing(pc)) }
-                    )
-                }
+            if (isConnected) {
+                ConnectedDeviceSection(
+                    deviceName = uiState.connectedClientName ?: "PC",
+                    deviceIp = uiState.connectedClientIp ?: "",
+                    onDisconnect = { viewModel.dispatch(LanTransferIntent.Disconnect) }
+                )
+            } else {
+                AvailableDevicesSection(
+                    isScanning = isScanning,
+                    devices = devices,
+                    pairingPc = pairingPc,
+                    onPair = { pc -> viewModel.dispatch(LanTransferIntent.StartPairing(pc)) }
+                )
             }
 
             Spacer(Modifier.height(16.dp))

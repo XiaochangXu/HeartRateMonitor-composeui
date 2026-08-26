@@ -1,5 +1,7 @@
 package com.github.heartratemonitor_compose.service.server
 
+import android.app.Application
+import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.junit.After
@@ -26,18 +28,22 @@ class HttpServerManagerTest {
     private val heartRateFlow = MutableStateFlow(75)
     private val speedFlow = MutableStateFlow(0f)
     private val clientConnectedFlow = MutableStateFlow(false)
+    private val context: Application = ApplicationProvider.getApplicationContext()
 
     private lateinit var serverManager: HttpServerManager
 
     @Before
     fun setup() {
         serverManager = HttpServerManager(
+            context = context,
             port = testPort,
             authToken = "",
             heartRateFlow = heartRateFlow,
             speedFlow = speedFlow,
             isDeviceConnected = { clientConnectedFlow.value },
-            getStatusMessage = { "Idle" }
+            getStatusMessage = { "Idle" },
+            wsPortProvider = { 8001 },
+            wsEnabledProvider = { true }
         )
     }
 
@@ -83,12 +89,15 @@ class HttpServerManagerTest {
     @Test
     fun `server with auth token starts successfully`() {
         val securedManager = HttpServerManager(
+            context = context,
             port = 18402,
             authToken = "my-secret",
             heartRateFlow = heartRateFlow,
             speedFlow = speedFlow,
             isDeviceConnected = { false },
-            getStatusMessage = { "Idle" }
+            getStatusMessage = { "Idle" },
+            wsPortProvider = { 8001 },
+            wsEnabledProvider = { true }
         )
         securedManager.start()
         securedManager.stop()

@@ -49,6 +49,7 @@ import com.github.heartratemonitor_compose.ui.widgets.EmptyState
 import com.github.heartratemonitor_compose.ui.widgets.ExpressiveButton
 import com.github.heartratemonitor_compose.ui.widgets.ExpressiveButtonStyle
 import com.github.heartratemonitor_compose.ui.widgets.ExpressiveTextButton
+import kotlinx.collections.immutable.ImmutableList
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -421,7 +422,7 @@ private fun SessionCard(
 
 @Composable
 private fun MiniChart(
-    samples: List<Int>,
+    samples: ImmutableList<Int>,
     modifier: Modifier = Modifier,
     lineColor: Color,
     gridColor: Color

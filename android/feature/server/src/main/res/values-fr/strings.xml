@@ -4,12 +4,16 @@
     <string name="lan_transfer_tip">Avant utilisation, veuillez ouvrir l\'application PC et vérifier qu\'elle est sur le même Wi-Fi/LAN que le téléphone. Le téléphone détectera le PC automatiquement ; appuyez sur l\'appareil pour l\'appairer, puis la fréquence cardiaque sera envoyée en temps réel après confirmation du PC.</string>
     <string name="lan_scanning">Scan des PC à proximité…</string>
     <string name="lan_no_devices">Aucun PC trouvé. Vérifiez que l\'application PC fonctionne et que le PC est sur le même réseau</string>
+    <string name="lan_no_devices_hint">Aucun appareil disponible. Appuyez sur rechercher en haut à droite</string>
+    <string name="lan_connected_device">Appareil connecté</string>
+    <string name="lan_available_devices">Appareils disponibles</string>
     <string name="lan_scan">Scanner</string>
     <string name="lan_pair_approved">Le PC a autorisé la connexion. Envoi de la fréquence cardiaque démarré</string>
     <string name="lan_pair_rejected">Le PC a refusé la connexion</string>
     <string name="lan_pair_failed">Échec de l\'appairage : %1$s</string>
     <string name="lan_pair_timeout">Délai d\'appairage dépassé, le PC n\'a pas répondu</string>
     <string name="lan_disconnect">Déconnecter</string>
+    <string name="lan_please_disconnect_first">Veuillez d\'abord déconnecter l\'appareil</string>
     <string name="lan_connected_status">Connecté au PC</string>
     <string name="lan_status_pushing">Envoi</string>
     <string name="lan_ws_not_enabled">Le serveur WebSocket est désactivé, impossible d\'envoyer. Activez-le dans « Serveur HTTP et WebSocket »</string>
@@ -29,4 +33,6 @@
     <string name="ws_enabled_status">Serveur WebSocket : actif</string>
     <string name="ws_disabled_status">Serveur WebSocket : inactif</string>
     <string name="ws_access_url">URL d\'accès : ws://%1$s:%2$d</string>
+    <string name="obs_tip">Source navigateur OBS (ajoutez cette URL dans OBS) :</string>
+    <string name="obs_url">http://%1$s:%2$d/</string>
 </resources>
