@@ -82,58 +82,52 @@ android {
     }
 }
 
-project.afterEvaluate {
-    
-    val localProps = project.rootProject.file("local.properties")
-    val sdkDir: File? = if (localProps.exists()) {
-        localProps.readLines()
-            .firstOrNull { it.startsWith("sdk.dir=") }
-            ?.substringAfter("sdk.dir=")
-            ?.trim()
-            ?.let { File(it) }
-    } else null
-        ?: System.getenv("ANDROID_HOME")?.let { File(it) }
-        ?: System.getenv("ANDROID_SDK_ROOT")?.let { File(it) }
+val localProps = rootProject.file("local.properties")
+val sdkDir: File? = if (localProps.exists()) {
+    localProps.readLines()
+        .firstOrNull { it.startsWith("sdk.dir=") }
+        ?.substringAfter("sdk.dir=")
+        ?.trim()
+        ?.let { File(it) }
+} else null
+    ?: System.getenv("ANDROID_HOME")?.let { File(it) }
+    ?: System.getenv("ANDROID_SDK_ROOT")?.let { File(it) }
 
-    if (sdkDir == null || !sdkDir.isDirectory) {
-        logger.warn("未找到 Android SDK 目录，跳过 --strip-all")
-        return@afterEvaluate
+val exeSuffix =
+    if (System.getProperty("os.name").lowercase().startsWith("win")) ".exe" else ""
+val objcopyPath: File? = sdkDir?.takeIf { it.isDirectory }
+    ?.resolve("ndk")
+    ?.listFiles()
+    ?.filter { it.isDirectory }
+    ?.sortedByDescending { it.name }
+    ?.firstNotNullOfOrNull { ndk ->
+        ndk.resolve("toolchains/llvm/prebuilt")
+            .listFiles()?.firstOrNull()
+            ?.resolve("bin/llvm-objcopy$exeSuffix")
+            ?.takeIf { it.exists() }
     }
 
-    val exeSuffix =
-        if (System.getProperty("os.name").lowercase().startsWith("win")) ".exe" else ""
-    val objcopy = sdkDir.resolve("ndk")
-        .listFiles()
-        ?.filter { it.isDirectory }
-        ?.sortedByDescending { it.name }
-        ?.firstNotNullOfOrNull { ndk ->
-            ndk.resolve("toolchains/llvm/prebuilt")
-                .listFiles()?.firstOrNull()
-                ?.resolve("bin/llvm-objcopy$exeSuffix")
-                ?.takeIf { it.exists() }
-        }
-
-    if (objcopy == null) {
-        logger.warn("llvm-objcopy 未在 NDK 中找到，跳过 --strip-all")
-        return@afterEvaluate
-    }
-
-    val rootDir = project.rootDir
+if (objcopyPath == null) {
+    logger.warn("llvm-objcopy 未在 NDK 中找到，跳过 --strip-all")
+} else {
+    val rootDirFile = rootDir
+    val objcopyFile = objcopyPath
+    val libDirProvider = layout.buildDirectory.dir(
+        "intermediates/stripped_native_libs/release/stripReleaseDebugSymbols/out/lib"
+    )
     tasks.matching { it.name == "stripReleaseDebugSymbols" }.configureEach {
         doLast {
-            val libDir = layout.buildDirectory
-                .dir("intermediates/stripped_native_libs/release/stripReleaseDebugSymbols/out/lib")
-                .get().asFile
+            val libDir = libDirProvider.get().asFile
             if (!libDir.isDirectory) return@doLast
             libDir.walkTopDown()
                 .filter { it.isFile && it.extension == "so" }
                 .forEach { so ->
-                    val proc = ProcessBuilder(objcopy.absolutePath, "--strip-all", so.absolutePath)
+                    val proc = ProcessBuilder(objcopyFile.absolutePath, "--strip-all", so.absolutePath)
                         .redirectErrorStream(true)
                         .start()
                     val exitCode = proc.waitFor()
                     if (exitCode == 0) {
-                        logger.lifecycle("已完全剥离符号: ${so.relativeTo(rootDir)}")
+                        logger.lifecycle("已完全剥离符号: ${so.relativeTo(rootDirFile)}")
                     } else {
                         logger.warn("剥离失败 (exit $exitCode): ${so.name} — ${proc.inputStream.bufferedReader().readText()}")
                     }
@@ -239,6 +233,5 @@ dependencies {
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
     implementation(libs.hilt.navigation.compose)
-    // Phase 6：HeartRateApp 实现 Configuration.Provider 注入 HiltWorkerFactory
     implementation(libs.hilt.work)
 }
