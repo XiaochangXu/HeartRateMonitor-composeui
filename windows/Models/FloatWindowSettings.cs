@@ -116,7 +116,7 @@ public partial class FloatWindowSettings : ObservableObject
     private bool _autoReconnectEnabled = DefaultAutoReconnect;
 
     // ── 应用设置：搜索过滤 ────────────────────────────────────────────────
-    public const bool DefaultFilterHeartRateOnly = false;
+    public const bool DefaultFilterHeartRateOnly = true;
 
     /// <summary>开启后仅接收声明了心率服务 (0x180D) 的 BLE 设备广播，过滤无关设备。</summary>
     [ObservableProperty]
