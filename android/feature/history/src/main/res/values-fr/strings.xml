@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="history_title">Historique</string>
+    <string name="no_history">Aucun enregistrement pour l\'instant</string>
+    <string name="confirm_delete">Confirmer la suppression</string>
+    <string name="delete_history_confirm">Voulez-vous supprimer les enregistrements sélectionnés (%1$s) ? Cette action est irréversible.</string>
+    <string name="deleted_records">%1$s enregistrements supprimés</string>
+    <string name="delete_failed">Échec de la suppression : %1$s</string>
+    <string name="confirm_text">OK</string>
+    <string name="selected_count">%1$s sélectionné(s)</string>
+    <string name="cd_select_all">Tout sélectionner</string>
+    <string name="in_progress">En cours</string>
+    <string name="stats_format">Moy. %1$s · Min %2$s · Max %3$s · %4$s enr.</string>
+    <string name="chart_detail">Détails de la fréquence cardiaque</string>
+    <string name="cd_rotate_screen">Faire pivoter l\'écran</string>
+    <string name="no_heart_rate_data">Aucune donnée de fréquence cardiaque à afficher</string>
+    <string name="marker_heart_rate">Fréquence cardiaque : %1$s bpm\nHeure : %2$s</string>
+    <string name="stat_avg">Moy.</string>
+    <string name="stat_min">Min</string>
+    <string name="stat_max">Max</string>
+    <string name="stat_time">Heure</string>
+    <string name="stat_bpm_value">%1$s bpm</string>
+    <string name="stat_time_range">%1$s - %2$s</string>
+    <string name="max_records_hint">Jusqu\'à 30 enregistrements</string>
+</resources>

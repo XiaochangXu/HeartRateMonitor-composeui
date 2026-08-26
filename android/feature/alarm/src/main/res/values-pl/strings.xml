@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="alarm_title">Alarm tętna</string>
+    <string name="calibrated_samples">Skalibrowano ✓ (próbek: %1$s)</string>
+    <string name="not_calibrated">Nieskalibrowane</string>
+    <string name="calibrating_format">Kalibracja: %1$s…</string>
+    <string name="remaining_seconds">Pozostało sekund: %1$s</string>
+    <string name="calibrate_sitting">Kalibracja (siedząca)</string>
+    <string name="calibrate_standing">Kalibracja (stojąca)</string>
+    <string name="calibration_status_format">Siedząca: %1$s\nStojąca: %2$s</string>
+    <string name="clear_calibration">Wyczyść kalibrację</string>
+    <string name="enable_alarm">Włącz alarm tętna</string>
+    <string name="exclude_posture_detection">Wyłącz wykrywanie postawy</string>
+    <string name="above_threshold">Powyżej</string>
+    <string name="below_threshold">Poniżej</string>
+    <string name="duration_label">Czas trwania</string>
+    <string name="seconds_suffix"> s</string>
+    <string name="repeat_alarm">Powtarzaj alarm</string>
+    <string name="alarm_interval">Interwał alarmu</string>
+    <string name="minutes_suffix"> min</string>
+</resources>

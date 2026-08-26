@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="lan_transfer_title">LAN ट्रांसफर</string>
+    <string name="lan_transfer_tip">उपयोग से पहले PC ऐप चलाएं और सुनिश्चित करें कि वह आपके फोन के समान Wi-Fi/LAN पर है। फोन PC को स्वचालित रूप से खोजेगा; पेयर करने के लिए डिवाइस पर टैप करें, PC की पुष्टि के बाद हृदय गति रीयल-टाइम में भेजी जाएगी।</string>
+    <string name="lan_scanning">पास के PC खोजे जा रहे हैं…</string>
+    <string name="lan_no_devices">कोई PC नहीं मिला। सुनिश्चित करें कि PC ऐप चल रहा है और PC उसी नेटवर्क पर है</string>
+    <string name="lan_no_devices_hint">कोई उपलब्ध डिवाइस नहीं। ऊपर दाएं खोज टैप करें</string>
+    <string name="lan_connected_device">कनेक्टेड डिवाइस</string>
+    <string name="lan_available_devices">उपलब्ध डिवाइस</string>
+    <string name="lan_scan">स्कैन करें</string>
+    <string name="lan_pair_approved">PC ने कनेक्शन स्वीकार किया। हृदय गति भेजना शुरू हुआ</string>
+    <string name="lan_pair_rejected">PC ने कनेक्शन अस्वीकार किया</string>
+    <string name="lan_pair_failed">पेयरिंग विफल: %1$s</string>
+    <string name="lan_pair_timeout">पेयरिंग टाइमआउट, PC से कोई प्रतिक्रिया नहीं</string>
+    <string name="lan_disconnect">डिस्कनेक्ट करें</string>
+    <string name="lan_please_disconnect_first">कृपया पहले डिवाइस डिस्कनेक्ट करें</string>
+    <string name="lan_connected_status">PC से कनेक्टेड</string>
+    <string name="lan_status_pushing">भेजा जा रहा है</string>
+    <string name="lan_ws_not_enabled">WebSocket सर्वर अक्षम है, भेजना संभव नहीं। इसे "HTTP &amp; WebSocket सर्वर" में सक्षम करें</string>
+    <string name="lan_open_server_settings">सेटिंग्स खोलें</string>
+    <string name="lan_pair_action">कनेक्ट करें</string>
+    <string name="lan_device_unknown">अज्ञात PC</string>
+    <string name="server_settings">सर्वर सेटिंग्स</string>
+    <string name="not_connected_network">नेटवर्क से कनेक्टेड नहीं</string>
+    <string name="http_port_hint">HTTP पोर्ट</string>
+    <string name="websocket_port_hint">WebSocket पोर्ट</string>
+    <string name="enable_server_format">%1$s सर्वर सक्षम करें</string>
+    <string name="access_url_format">एक्सेस URL: %1$s://%2$s:%3$s</string>
+    <string name="http_enabled_status">HTTP सर्वर: चालू</string>
+    <string name="http_disabled_status">HTTP सर्वर: बंद</string>
+    <string name="http_access_url">एक्सेस URL: http://%1$s:%2$s/heartrate</string>
+    <string name="server_start_failed">सर्वर शुरू करने में विफल (पोर्ट उपयोग में हो सकता है)</string>
+    <string name="ws_enabled_status">WebSocket सर्वर: चालू</string>
+    <string name="ws_disabled_status">WebSocket सर्वर: बंद</string>
+    <string name="ws_access_url">एक्सेस URL: ws://%1$s:%2$s</string>
+    <string name="obs_tip">OBS ब्राउज़र स्रोत (यह URL OBS में जोड़ें):</string>
+    <string name="obs_url">http://%1$s:%2$s/</string>
+</resources>

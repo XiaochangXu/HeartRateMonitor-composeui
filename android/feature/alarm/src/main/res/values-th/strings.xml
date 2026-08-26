@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="alarm_title">สัญญาณเตือนอัตราการเต้นของหัวใจ</string>
+    <string name="calibrated_samples">ปรับเทียบแล้ว ✓ (%1$s ตัวอย่าง)</string>
+    <string name="not_calibrated">ยังไม่ได้ปรับเทียบ</string>
+    <string name="calibrating_format">กำลังปรับเทียบ %1$s…</string>
+    <string name="remaining_seconds">เหลือ %1$s วินาที</string>
+    <string name="calibrate_sitting">ปรับเทียบท่านั่ง</string>
+    <string name="calibrate_standing">ปรับเทียบท่ายืน</string>
+    <string name="calibration_status_format">นั่ง: %1$s\nยืน: %2$s</string>
+    <string name="clear_calibration">ล้างการปรับเทียบ</string>
+    <string name="enable_alarm">เปิดสัญญาณเตือนอัตราการเต้นของหัวใจ</string>
+    <string name="exclude_posture_detection">ไม่รวมการตรวจจับท่าทาง</string>
+    <string name="above_threshold">มากกว่า</string>
+    <string name="below_threshold">น้อยกว่า</string>
+    <string name="duration_label">ระยะเวลา</string>
+    <string name="seconds_suffix"> วินาที</string>
+    <string name="repeat_alarm">เตือนซ้ำ</string>
+    <string name="alarm_interval">ช่วงเวลาเตือน</string>
+    <string name="minutes_suffix"> นาที</string>
+</resources>

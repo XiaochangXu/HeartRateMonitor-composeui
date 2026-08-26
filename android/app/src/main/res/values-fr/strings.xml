@@ -1,0 +1,96 @@
+<resources>
+
+    <!-- Navigation -->
+    <string name="nav_history">Historique</string>
+    <string name="nav_favorite">Favoris</string>
+    <string name="nav_settings">Paramètres</string>
+
+    <!-- HomeScreen -->
+    <string name="cd_view_history">Voir l\'historique</string>
+
+    <!-- SettingsScreen - General -->
+    <string name="general">Général</string>
+    <string name="sound_settings">Paramètres sonores</string>
+    <string name="sound_preview">Aperçu du son</string>
+    <string name="subtitle_favorite_devices">Gérer les appareils Bluetooth enregistrés</string>
+
+    <!-- SettingsScreen - Bluetooth -->
+    <string name="bluetooth">Bluetooth</string>
+
+    <!-- SettingsScreen - Integration -->
+    <string name="integration">Intégration et accès externe</string>
+
+    <!-- LanTransferScreen -->
+    <string name="lan_stop_scan">Arrêter</string>
+    <string name="lan_pairing">Appairage…</string>
+    <string name="lan_connected_format">Connecté : %1$s</string>
+    <string name="lan_status_idle">En attente</string>
+
+    <!-- SettingsScreen - Status Bar -->
+    <string name="status_bar_resident">Permanent dans la barre d\'état</string>
+
+
+    <!-- SettingsScreen - Floating Window -->
+    <string name="floating_window_style">Style de la fenêtre flottante</string>
+
+    <!-- SettingsScreen - About -->
+    <string name="about">À propos</string>
+
+    <!-- Color Picker Dialog -->
+
+    <!-- HistoryScreen -->
+
+    <!-- ChartScreen -->
+
+    <!-- FavoriteDevicesScreen -->
+
+    <!-- HeartRateAlarmScreen -->
+    <string name="posture_calibration">Calibrage de la posture</string>
+    <string name="alarm_settings">Paramètres d\'alarme</string>
+
+    <!-- ServerScreen -->
+    <string name="http_server_passive">Serveur HTTP (extraction passive)</string>
+    <string name="websocket_server_active">Serveur WebSocket (envoi actif)</string>
+    <string name="server_status">État du serveur</string>
+
+    <!-- WebhookScreen -->
+
+    <!-- FairMemoryScreen -->
+
+    <!-- FairMemory notifications -->
+
+    <!-- BleState messages -->
+
+    <!-- BleService dynamic messages -->
+    <string name="ble_connect_cancelled">Connexion annulée : %1$s</string>
+
+    <!-- MainActivity Toast messages -->
+    <string name="toast_connected">Connecté</string>
+    <string name="toast_auto_reconnecting">Connexion perdue, reconnexion automatique...</string>
+    <string name="toast_reconnect_failed">Échec de la reconnexion</string>
+    <string name="toast_auto_connect_failed">Échec de la connexion à l\'appareil favori</string>
+<string name="toast_bluetooth_disabled">Le Bluetooth n\'est pas activé. Veuillez activer le Bluetooth d\'abord</string>
+    <string name="toast_permissions_denied">Certaines autorisations ont été refusées. Certaines fonctions peuvent être limitées !</string>
+    <string name="toast_permissions_denied_dialog">Veuillez accorder ces autorisations manuellement dans les paramètres.</string>
+    <string name="permission_request_reason">L\'application a besoin de ces autorisations pour trouver les appareils et calculer la vitesse.</string>
+    <string name="permission_forward_title">Accorder les autorisations</string>
+
+    <!-- BleService notification -->
+
+    <!-- UpdateChecker -->
+
+    <!-- Heart Rate Alarm Service notifications -->
+
+    <!-- Status Bar Resident Service notifications -->
+
+    <!-- Floating Window Service notifications -->
+
+    <!-- ThemeSettings -->
+
+    <!-- NavStyle (Navigation Style) -->
+
+    <!-- LiquidGlass (navigation bar) -->
+    <string name="nav_settings_section">Navigation</string>
+    <string name="liquid_glass_distortion_unsupported">L\'effet de distorsion nécessite Android 13+</string>
+
+</resources>

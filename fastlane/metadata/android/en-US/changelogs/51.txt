@@ -1,0 +1,2 @@
+- Fixed interface display errors caused by some languages
+- Fixed bug where some languages were switched and still displayed in English

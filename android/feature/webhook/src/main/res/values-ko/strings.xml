@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="webhook_title">Webhook 설정</string>
+    <string name="cd_add_webhook">Webhook 추가</string>
+    <string name="no_webhooks">Webhook이 없습니다. +를 탭하여 추가</string>
+    <string name="new_webhook">새 Webhook</string>
+    <string name="close">닫기</string>
+    <string name="cd_edit">편집</string>
+    <string name="enable_this_webhook">이 Webhook 사용</string>
+    <string name="trigger_types">트리거 유형 (다중 선택 가능)</string>
+    <string name="name_label">이름</string>
+    <string name="test_send">테스트 전송 (심박수: 88)</string>
+    <string name="save">저장</string>
+    <string name="trigger_heart_rate_updated">심박수 갱신 시</string>
+    <string name="trigger_connected">기기 연결 시</string>
+    <string name="trigger_disconnected">기기 연결 해제 시</string>
+    <string name="webhook_url_label">URL</string>
+    <string name="webhook_body_label">본문 (JSON)</string>
+    <string name="webhook_headers_label">헤더 (JSON)</string>
+</resources>

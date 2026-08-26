@@ -1,0 +1,96 @@
+<resources>
+
+    <!-- Navigation -->
+    <string name="nav_history">历史</string>
+    <string name="nav_favorite">收藏</string>
+    <string name="nav_settings">设置</string>
+
+    <!-- HomeScreen -->
+    <string name="cd_view_history">查看历史记录</string>
+
+    <!-- SettingsScreen - General -->
+    <string name="general">常规</string>
+    <string name="sound_settings">声音设置</string>
+    <string name="sound_preview">声音试听</string>
+    <string name="subtitle_favorite_devices">管理已收藏的蓝牙设备</string>
+
+    <!-- SettingsScreen - Bluetooth -->
+    <string name="bluetooth">蓝牙</string>
+
+    <!-- SettingsScreen - Integration -->
+    <string name="integration">集成 &amp; 外部访问</string>
+
+    <!-- LanTransferScreen -->
+    <string name="lan_stop_scan">停止扫描</string>
+    <string name="lan_pairing">正在配对…</string>
+    <string name="lan_connected_format">已连接：%1$s</string>
+    <string name="lan_status_idle">空闲</string>
+
+    <!-- SettingsScreen - Status Bar -->
+    <string name="status_bar_resident">状态栏常驻</string>
+
+
+    <!-- SettingsScreen - Floating Window -->
+    <string name="floating_window_style">悬浮窗样式</string>
+
+    <!-- SettingsScreen - About -->
+    <string name="about">关于</string>
+
+    <!-- Color Picker Dialog -->
+
+    <!-- HistoryScreen -->
+
+    <!-- ChartScreen -->
+
+    <!-- FavoriteDevicesScreen -->
+
+    <!-- HeartRateAlarmScreen -->
+    <string name="posture_calibration">姿态校准</string>
+    <string name="alarm_settings">预警设置</string>
+
+    <!-- ServerScreen -->
+    <string name="http_server_passive">HTTP 服务器 (被动拉取)</string>
+    <string name="websocket_server_active">WebSocket 服务器 (主动推送)</string>
+    <string name="server_status">服务器状态</string>
+
+    <!-- WebhookScreen -->
+
+    <!-- FairMemoryScreen -->
+
+    <!-- FairMemory notifications -->
+
+    <!-- BleState messages -->
+
+    <!-- BleService dynamic messages -->
+    <string name="ble_connect_cancelled">连接已取消: %1$s</string>
+
+    <!-- MainActivity Toast messages -->
+    <string name="toast_connected">已连接</string>
+    <string name="toast_auto_reconnecting">连接已断开，正在尝试自动重连...</string>
+    <string name="toast_reconnect_failed">重连失败</string>
+    <string name="toast_auto_connect_failed">连接收藏设备失败</string>
+    <string name="toast_bluetooth_disabled">蓝牙未开启，请先打开蓝牙</string>
+    <string name="toast_permissions_denied">部分权限被拒绝，功能可能受限</string>
+    <string name="toast_permissions_denied_dialog">请在设置中手动授予以下权限</string>
+    <string name="permission_request_reason">应用需要这些权限才能查找设备和计算速度</string>
+    <string name="permission_forward_title">授予权限</string>
+
+    <!-- BleService notification -->
+
+    <!-- UpdateChecker -->
+
+    <!-- Heart Rate Alarm Service notifications -->
+
+    <!-- Status Bar Resident Service notifications -->
+
+    <!-- Floating Window Service notifications -->
+
+    <!-- ThemeSettings -->
+
+    <!-- NavStyle (导航样式) -->
+
+    <!-- LiquidGlass (导航栏液态玻璃) -->
+    <string name="nav_settings_section">导航选项</string>
+    <string name="liquid_glass_distortion_unsupported">扭曲效果需 Android 13+</string>
+
+</resources>

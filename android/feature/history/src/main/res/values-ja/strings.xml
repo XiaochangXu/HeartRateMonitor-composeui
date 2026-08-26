@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="history_title">履歴</string>
+    <string name="no_history">履歴はまだありません</string>
+    <string name="confirm_delete">削除の確認</string>
+    <string name="delete_history_confirm">選択した %1$s 件の履歴を削除しますか？この操作は取り消せません。</string>
+    <string name="deleted_records">%1$s 件の履歴を削除しました</string>
+    <string name="delete_failed">削除に失敗しました: %1$s</string>
+    <string name="confirm_text">OK</string>
+    <string name="selected_count">%1$s 件選択中</string>
+    <string name="cd_select_all">すべて選択</string>
+    <string name="in_progress">測定中</string>
+    <string name="stats_format">平均 %1$s · 最低 %2$s · 最高 %3$s · %4$s 件</string>
+    <string name="chart_detail">心拍数詳細</string>
+    <string name="cd_rotate_screen">画面を回転</string>
+    <string name="no_heart_rate_data">表示する心拍数データがありません</string>
+    <string name="marker_heart_rate">心拍数: %1$s bpm\n時間: %2$s</string>
+    <string name="stat_avg">平均</string>
+    <string name="stat_min">最低</string>
+    <string name="stat_max">最高</string>
+    <string name="stat_time">時間</string>
+    <string name="stat_bpm_value">%1$s bpm</string>
+    <string name="stat_time_range">%1$s - %2$s</string>
+    <string name="max_records_hint">最大30件まで保存</string>
+</resources>

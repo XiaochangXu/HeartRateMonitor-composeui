@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="cd_toggle_floating_window">フローティングウィンドウの切り替え</string>
+    <string name="cd_speed_dial">クイック操作</string>
+    <string name="cd_search_bluetooth">Bluetoothデバイスを検索</string>
+    <string name="search_tip_title">注意事項</string>
+    <string name="scan_filter_on">スキャンフィルター: 有効</string>
+    <string name="scan_filter_off">スキャンフィルター: 無効</string>
+    <string name="search_tip_message">デバイスの心拍数ブロードキャストを先にオンにしてから、検索をタップしてください。オンにしないとデバイスが見つかりません。</string>
+    <string name="got_it">わかりました</string>
+    <string name="available_devices">利用可能なデバイス</string>
+    <string name="no_available_devices">利用可能なデバイスがありません。右上の検索をタップしてください</string>
+    <string name="enter_fullscreen">全画面モードに入る</string>
+    <string name="disconnect">切断</string>
+    <string name="please_disconnect_first">先にデバイスを切断してください</string>
+    <string name="speed">速度</string>
+    <string name="cd_favorite">お気に入り</string>
+    <string name="bpm_unit">回/分</string>
+    <string name="heart_rate_data">心拍数データ</string>
+    <string name="heart_rate_statistics">心拍数統計</string>
+    <string name="heart_rate_ring_max">心拍数上限</string>
+    <string name="edit_heart_rate_ring_max">心拍数リングの最大値を変更</string>
+    <string name="cd_edit_heart_rate_max">半円リングの心拍数上限を変更</string>
+    <string name="fullscreen_exit_hint">画面をタップするか、戻るキーで終了</string>
+    <string name="history_not_enabled">履歴が有効になっていません</string>
+    <string name="device_not_connected">デバイス未接続</string>
+    <string name="connected_device">接続中のデバイス</string>
+    <string name="max_heart_rate">最大</string>
+    <string name="min_heart_rate">最低</string>
+    <string name="reset">リセット</string>
+</resources>

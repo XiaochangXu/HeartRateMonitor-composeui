@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="favorite_devices">Thiết bị yêu thích</string>
+    <string name="cd_clear_all_favorites">Xóa tất cả thiết bị yêu thích</string>
+    <string name="no_favorite_devices">Không có thiết bị yêu thích</string>
+    <string name="delete_favorite_title">Xóa thiết bị yêu thích</string>
+    <string name="delete_favorite_confirm">Bạn có muốn xóa bản ghi yêu thích của "%1$s" không?</string>
+    <string name="delete">Xóa</string>
+    <string name="clear_all_favorites_title">Xóa tất cả yêu thích</string>
+    <string name="clear_all_favorites_confirm">Bạn có muốn xóa tất cả thiết bị yêu thích (%1$s) không? Hành động này không thể hoàn tác.</string>
+    <string name="delete_all">Xóa tất cả</string>
+</resources>

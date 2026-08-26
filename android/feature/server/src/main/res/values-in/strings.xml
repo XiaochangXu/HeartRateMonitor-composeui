@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="lan_transfer_title">Transfer LAN</string>
+    <string name="lan_transfer_tip">Sebelum digunakan, buka aplikasi PC dan pastikan berada di Wi-Fi/LAN yang sama dengan ponsel. Ponsel akan mendeteksi PC secara otomatis; ketuk perangkat untuk memasangkan, dan setelah PC mengonfirmasi, detak jantung akan dikirim secara real-time.</string>
+    <string name="lan_scanning">Memindai PC di sekitar…</string>
+    <string name="lan_no_devices">Tidak ada PC ditemukan. Pastikan aplikasi PC berjalan dan PC berada di jaringan yang sama</string>
+    <string name="lan_no_devices_hint">Tidak ada perangkat tersedia. Ketuk cari di kanan atas</string>
+    <string name="lan_connected_device">Perangkat terhubung</string>
+    <string name="lan_available_devices">Perangkat tersedia</string>
+    <string name="lan_scan">Pindai</string>
+    <string name="lan_pair_approved">PC menyetujui koneksi. Pengiriman detak jantung dimulai</string>
+    <string name="lan_pair_rejected">PC menolak koneksi</string>
+    <string name="lan_pair_failed">Pemasangan gagal: %1$s</string>
+    <string name="lan_pair_timeout">Waktu pemasangan habis, PC tidak merespons</string>
+    <string name="lan_disconnect">Putuskan</string>
+    <string name="lan_please_disconnect_first">Putuskan dulu koneksi perangkat</string>
+    <string name="lan_connected_status">Terhubung ke PC</string>
+    <string name="lan_status_pushing">Mengirim</string>
+    <string name="lan_ws_not_enabled">Server WebSocket nonaktif, tidak dapat mengirim. Aktifkan di «Server HTTP dan WebSocket»</string>
+    <string name="lan_open_server_settings">Buka pengaturan</string>
+    <string name="lan_pair_action">Hubungkan</string>
+    <string name="lan_device_unknown">PC tidak dikenal</string>
+    <string name="server_settings">Pengaturan server</string>
+    <string name="not_connected_network">Belum terhubung ke jaringan</string>
+    <string name="http_port_hint">Port HTTP</string>
+    <string name="websocket_port_hint">Port WebSocket</string>
+    <string name="enable_server_format">Aktifkan server %1$s</string>
+    <string name="access_url_format">URL akses: %1$s://%2$s:%3$s</string>
+    <string name="http_enabled_status">Server HTTP: aktif</string>
+    <string name="http_disabled_status">Server HTTP: nonaktif</string>
+    <string name="http_access_url">URL akses: http://%1$s:%2$s/heartrate</string>
+    <string name="server_start_failed">Gagal memulai server (port mungkin digunakan)</string>
+    <string name="ws_enabled_status">Server WebSocket: aktif</string>
+    <string name="ws_disabled_status">Server WebSocket: nonaktif</string>
+    <string name="ws_access_url">URL akses: ws://%1$s:%2$s</string>
+    <string name="obs_tip">Sumber Browser OBS (tambahkan URL ini di OBS):</string>
+    <string name="obs_url">http://%1$s:%2$s/</string>
+</resources>

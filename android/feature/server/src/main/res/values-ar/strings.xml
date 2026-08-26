@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="lan_transfer_title">نقل عبر LAN</string>
+    <string name="lan_transfer_tip">قبل الاستخدام، يرجى تشغيل تطبيق الكمبيوتر والتأكد من أنه على نفس Wi-Fi/LAN مع هاتفك. سيكتشف الهاتف الكمبيوتر تلقائيًا؛ اضغط على الجهاز للاقتران، وبعد تأكيد الكمبيوتر سيتم إرسال معدل ضربات القلب في الوقت الفعلي.</string>
+    <string name="lan_scanning">جارٍ مسح أجهزة الكمبيوتر القريبة…</string>
+    <string name="lan_no_devices">لم يتم العثور على أجهزة كمبيوتر. تأكد من أن تطبيق الكمبيوتر يعمل وأن الكمبيوتر على نفس الشبكة</string>
+    <string name="lan_no_devices_hint">لا توجد أجهزة متاحة. اضغط على البحث في أعلى اليمين</string>
+    <string name="lan_connected_device">الجهاز المتصل</string>
+    <string name="lan_available_devices">الأجهزة المتاحة</string>
+    <string name="lan_scan">مسح</string>
+    <string name="lan_pair_approved">وافق الكمبيوتر على الاتصال. بدأ إرسال معدل ضربات القلب</string>
+    <string name="lan_pair_rejected">رفض الكمبيوتر الاتصال</string>
+    <string name="lan_pair_failed">فشل الاقتران: %1$s</string>
+    <string name="lan_pair_timeout">انتهت مهلة الاقتران، لم يستجب الكمبيوتر</string>
+    <string name="lan_disconnect">قطع الاتصال</string>
+    <string name="lan_please_disconnect_first">يرجى قطع اتصال الجهاز أولاً</string>
+    <string name="lan_connected_status">متصل بالكمبيوتر</string>
+    <string name="lan_status_pushing">جارٍ الإرسال</string>
+    <string name="lan_ws_not_enabled">خادم WebSocket معطل، لا يمكن الإرسال. قم بتمكينه في "خادم HTTP و WebSocket"</string>
+    <string name="lan_open_server_settings">فتح الإعدادات</string>
+    <string name="lan_pair_action">اتصال</string>
+    <string name="lan_device_unknown">كمبيوتر غير معروف</string>
+    <string name="server_settings">إعدادات الخادم</string>
+    <string name="not_connected_network">غير متصل بالشبكة</string>
+    <string name="http_port_hint">منفذ HTTP</string>
+    <string name="websocket_port_hint">منفذ WebSocket</string>
+    <string name="enable_server_format">تمكين خادم %1$s</string>
+    <string name="access_url_format">عنوان الوصول: %1$s://%2$s:%3$s</string>
+    <string name="http_enabled_status">خادم HTTP: مفعل</string>
+    <string name="http_disabled_status">خادم HTTP: معطل</string>
+    <string name="http_access_url">عنوان الوصول: http://%1$s:%2$s/heartrate</string>
+    <string name="server_start_failed">فشل بدء الخادم (قد يكون المنفذ مستخدمًا)</string>
+    <string name="ws_enabled_status">خادم WebSocket: مفعل</string>
+    <string name="ws_disabled_status">خادم WebSocket: معطل</string>
+    <string name="ws_access_url">عنوان الوصول: ws://%1$s:%2$s</string>
+    <string name="obs_tip">مصدر متصفح OBS (أضف هذا الرابط في OBS):</string>
+    <string name="obs_url">http://%1$s:%2$s/</string>
+</resources>

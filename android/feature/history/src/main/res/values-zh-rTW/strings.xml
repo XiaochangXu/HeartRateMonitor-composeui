@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="history_title">歷史記錄</string>
+    <string name="no_history">還沒有任何歷史記錄</string>
+    <string name="confirm_delete">確認刪除</string>
+    <string name="delete_history_confirm">確定要刪除選中的 %1$s 條歷史記錄嗎？此操作無法撤銷。</string>
+    <string name="deleted_records">已刪除 %1$s 條記錄</string>
+    <string name="delete_failed">刪除失敗: %1$s</string>
+    <string name="confirm_text">確定</string>
+    <string name="selected_count">已選擇 %1$s 項</string>
+    <string name="cd_select_all">全選</string>
+    <string name="in_progress">進行中</string>
+    <string name="stats_format">平均 %1$s · 最低 %2$s · 最高 %3$s · %4$s 條記錄</string>
+    <string name="chart_detail">心率詳情</string>
+    <string name="cd_rotate_screen">切換方向</string>
+    <string name="no_heart_rate_data">沒有心率資料可顯示</string>
+    <string name="marker_heart_rate">心率: %1$s bpm\n時間: %2$s</string>
+    <string name="stat_avg">平均</string>
+    <string name="stat_min">最低</string>
+    <string name="stat_max">最高</string>
+    <string name="stat_time">時間</string>
+    <string name="stat_bpm_value">%1$s bpm</string>
+    <string name="stat_time_range">%1$s - %2$s</string>
+    <string name="max_records_hint">記錄最多保存30條</string>
+</resources>

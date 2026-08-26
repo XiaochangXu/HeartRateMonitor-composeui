@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="favorite_devices">Appareils favoris</string>
+    <string name="cd_clear_all_favorites">Effacer tous les appareils favoris</string>
+    <string name="no_favorite_devices">Aucun appareil favori</string>
+    <string name="delete_favorite_title">Supprimer l\'appareil favori</string>
+    <string name="delete_favorite_confirm">Voulez-vous supprimer l\'enregistrement favori de "%1$s" ?</string>
+    <string name="delete">Supprimer</string>
+    <string name="clear_all_favorites_title">Effacer tous les favoris</string>
+    <string name="clear_all_favorites_confirm">Voulez-vous supprimer tous les appareils favoris (%1$s) ? Cette action est irréversible.</string>
+    <string name="delete_all">Tout supprimer</string>
+</resources>

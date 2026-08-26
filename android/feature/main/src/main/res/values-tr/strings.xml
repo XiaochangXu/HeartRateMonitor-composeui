@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="cd_toggle_floating_window">Yüzen pencereyi aç/kapat</string>
+    <string name="cd_speed_dial">Hızlı işlemler</string>
+    <string name="cd_search_bluetooth">Bluetooth cihazlarını ara</string>
+    <string name="search_tip_title">Dikkat</string>
+    <string name="scan_filter_on">Filtre: açık</string>
+    <string name="scan_filter_off">Filtre: kapalı</string>
+    <string name="search_tip_message">Önce cihazın kalp atış hızı yayınını açın, sonra ara düğmesine dokunun. Aksi takdirde cihaz bulunamaz.</string>
+    <string name="got_it">Anlaşıldı</string>
+    <string name="available_devices">Kullanılabilir cihazlar</string>
+    <string name="no_available_devices">Kullanılabilir cihaz yok. Sağ üstte ara düğmesine dokunun</string>
+    <string name="enter_fullscreen">Tam ekran moduna geç</string>
+    <string name="disconnect">Bağlantıyı kes</string>
+    <string name="please_disconnect_first">Önce cihazın bağlantısını kesin</string>
+    <string name="speed">Hız</string>
+    <string name="cd_favorite">Favoriler</string>
+    <string name="bpm_unit">bpm</string>
+    <string name="heart_rate_data">Kalp atış hızı verileri</string>
+    <string name="heart_rate_statistics">Kalp atış hızı istatistikleri</string>
+    <string name="heart_rate_ring_max">Maks. kalp hızı</string>
+    <string name="edit_heart_rate_ring_max">Kalp atış hızı halkasının maksimum değerini düzenle</string>
+    <string name="cd_edit_heart_rate_max">Kalp atış hızı üst sınırını düzenle</string>
+    <string name="fullscreen_exit_hint">Çıkmak için ekrana dokunun veya geri tuşuna basın</string>
+    <string name="history_not_enabled">Geçmiş etkin değil</string>
+    <string name="device_not_connected">Cihaz bağlı değil</string>
+    <string name="connected_device">Bağlı cihaz</string>
+    <string name="max_heart_rate">Maks</string>
+    <string name="min_heart_rate">Min</string>
+    <string name="reset">Sıfırla</string>
+</resources>

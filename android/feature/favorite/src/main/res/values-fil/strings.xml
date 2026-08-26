@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="favorite_devices">Mga paboritong device</string>
+    <string name="cd_clear_all_favorites">I-clear ang lahat ng paboritong device</string>
+    <string name="no_favorite_devices">Walang paboritong device</string>
+    <string name="delete_favorite_title">Tanggalin ang paboritong device</string>
+    <string name="delete_favorite_confirm">Nais mo bang tanggalin ang paboritong record ng "%1$s"?</string>
+    <string name="delete">Tanggalin</string>
+    <string name="clear_all_favorites_title">I-clear ang lahat ng paborito</string>
+    <string name="clear_all_favorites_confirm">Nais mo bang tanggalin ang lahat ng paboritong device (%1$s)? Hindi maaaring i-undo ang aksyon na ito.</string>
+    <string name="delete_all">Tanggalin lahat</string>
+</resources>

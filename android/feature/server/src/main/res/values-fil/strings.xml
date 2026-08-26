@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="lan_transfer_title">LAN transfer</string>
+    <string name="lan_transfer_tip">Bago gamitin, buksan ang app ng PC at tiyaking nasa parehong Wi-Fi/LAN network ito ng telepono. Awtomatikong mahahanap ng telepono ang PC; i-tap ang device para mag-pair, at pagkatapos kumpirmahin ng PC, ipapadala ang rate ng puso sa real-time.</string>
+    <string name="lan_scanning">Nag-scan ng mga kalapit na PC…</string>
+    <string name="lan_no_devices">Walang nakitang PC. Tiyakin na tumatakbo ang app ng PC at ang PC ay nasa parehong network</string>
+    <string name="lan_no_devices_hint">Walang available na device. I-tap ang search sa kanang itaas</string>
+    <string name="lan_connected_device">Naka-connect na device</string>
+    <string name="lan_available_devices">Available na device</string>
+    <string name="lan_scan">Mag-scan</string>
+    <string name="lan_pair_approved">Inaprubahan ng PC ang koneksyon. Nagsimula ang pagpapadala ng rate ng puso</string>
+    <string name="lan_pair_rejected">Tinanggihan ng PC ang koneksyon</string>
+    <string name="lan_pair_failed">Nabigo ang pag-pair: %1$s</string>
+    <string name="lan_pair_timeout">Naubos ang oras ng pag-pair, hindi tumugon ang PC</string>
+    <string name="lan_disconnect">Putulin ang koneksyon</string>
+    <string name="lan_please_disconnect_first">Putulin muna ang koneksyon ng device</string>
+    <string name="lan_connected_status">Nakakonekta sa PC</string>
+    <string name="lan_status_pushing">Nagpapadala</string>
+    <string name="lan_ws_not_enabled">Naka-off ang WebSocket server, hindi makapagpadala. I-enable ito sa «HTTP at WebSocket server»</string>
+    <string name="lan_open_server_settings">Buksan ang mga setting</string>
+    <string name="lan_pair_action">Kumonekta</string>
+    <string name="lan_device_unknown">Hindi kilalang PC</string>
+    <string name="server_settings">Mga setting ng server</string>
+    <string name="not_connected_network">Hindi nakakonekta sa network</string>
+    <string name="http_port_hint">HTTP port</string>
+    <string name="websocket_port_hint">WebSocket port</string>
+    <string name="enable_server_format">I-enable ang %1$s server</string>
+    <string name="access_url_format">Access URL: %1$s://%2$s:%3$s</string>
+    <string name="http_enabled_status">HTTP server: naka-on</string>
+    <string name="http_disabled_status">HTTP server: naka-off</string>
+    <string name="http_access_url">Access URL: http://%1$s:%2$s/heartrate</string>
+    <string name="server_start_failed">Nabigo ang pag-start ng server (maaaring ginagamit ang port)</string>
+    <string name="ws_enabled_status">WebSocket server: naka-on</string>
+    <string name="ws_disabled_status">WebSocket server: naka-off</string>
+    <string name="ws_access_url">Access URL: ws://%1$s:%2$s</string>
+    <string name="obs_tip">OBS Browser Source (idaydag ang URL na ito sa OBS):</string>
+    <string name="obs_url">http://%1$s:%2$s/</string>
+</resources>

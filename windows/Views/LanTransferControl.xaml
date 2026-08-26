@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<UserControl x:Class="HeartRate.Views.LanTransferControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:models="using:HeartRate.Models"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             d:DesignWidth="620"
+             d:DesignHeight="700">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <TextBlock x:Uid="Lan_Header"
+                   Grid.Row="0"
+                   Text="局域网传输"
+                   FontSize="20"
+                   FontWeight="SemiBold"
+                   Margin="20,0,0,12" />
+
+        <ScrollViewer Grid.Row="1" Padding="12,0,12,12">
+            <StackPanel Spacing="16">
+
+                <!-- ── 总开关 + 配对参数 ─────────────────────────────────────── -->
+                <Border Background="{ThemeResource LayerFillColorDefaultBrush}"
+                        BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}"
+                        BorderThickness="1"
+                        CornerRadius="{ThemeResource OverlayCornerRadius}"
+                        Padding="20">
+                    <StackPanel Spacing="12">
+                        <ToggleSwitch x:Uid="Lan_Toggle"
+                                      IsOn="{x:Bind ViewModel.Settings.Enabled, Mode=TwoWay}"
+                                      Toggled="LanToggle_Toggled" />
+
+                        <Grid ColumnSpacing="12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="110" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock x:Uid="Lan_ComputerName" Text="电脑名"
+                                       Grid.Column="0" VerticalAlignment="Center" />
+                            <TextBox Grid.Column="1"
+                                     Text="{x:Bind ViewModel.ComputerNameText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                     PlaceholderText="DESKTOP-ABC" />
+                        </Grid>
+
+                        <Grid ColumnSpacing="12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="110" />
+                                <ColumnDefinition Width="120" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock x:Uid="Lan_PairPort" Text="配对端口"
+                                       Grid.Column="0" VerticalAlignment="Center" />
+                            <TextBox Grid.Column="1"
+                                     Text="{x:Bind ViewModel.PairPortText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                     InputScope="Number"
+                                     MaxLength="5" />
+                        </Grid>
+
+                        <Grid ColumnSpacing="12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="110" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock x:Uid="Lan_LocalIp" Text="本机 IP"
+                                       Grid.Column="0" VerticalAlignment="Center" />
+                            <TextBlock Grid.Column="1"
+                                       Text="{x:Bind ViewModel.LocalIp, Mode=OneWay}"
+                                       IsTextSelectionEnabled="True"
+                                       FontFamily="Consolas"
+                                       VerticalAlignment="Center" />
+                        </Grid>
+
+                        <TextBlock x:Uid="Lan_Status" Text="状态"
+                                   Style="{ThemeResource CaptionTextBlockStyle}"
+                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        <TextBlock Text="{x:Bind ViewModel.StatusText, Mode=OneWay}"
+                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                    </StackPanel>
+                </Border>
+
+                <!-- ── 已配对手机列表 ─────────────────────────────────────────── -->
+                <Border Background="{ThemeResource LayerFillColorDefaultBrush}"
+                        BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}"
+                        BorderThickness="1"
+                        CornerRadius="{ThemeResource OverlayCornerRadius}"
+                        Padding="20">
+                    <StackPanel Spacing="10">
+                        <TextBlock x:Uid="Lan_Devices" Text="已连接设备"
+                                   FontSize="15"
+                                   FontWeight="SemiBold" />
+
+                        <ItemsControl ItemsSource="{x:Bind ViewModel.Phones, Mode=OneWay}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="models:LanPhone">
+                                    <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                            BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}"
+                                            BorderThickness="1"
+                                            CornerRadius="6"
+                                            Padding="12"
+                                            Margin="0,0,0,8">
+                                        <Grid ColumnSpacing="10">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel Grid.Column="0" Spacing="2">
+                                                <TextBlock Text="{x:Bind DeviceName, Mode=OneWay}" FontWeight="SemiBold" />
+                                                <TextBlock Text="{x:Bind StatusText, Mode=OneWay}"
+                                                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                           TextWrapping="Wrap" />
+                                                <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                           Style="{ThemeResource CaptionTextBlockStyle}">
+                                                    <Run Text="ws://" /><Run Text="{x:Bind WsHost, Mode=OneWay}" /><Run Text=":" /><Run Text="{x:Bind WsPort, Mode=OneWay}" />
+                                                </TextBlock>
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="1"
+                                                        Orientation="Horizontal"
+                                                        Spacing="6"
+                                                        VerticalAlignment="Center">
+                                                <TextBlock Text="{x:Bind HeartRate, Mode=OneWay}"
+                                                           FontSize="22"
+                                                           FontWeight="Bold"
+                                                           Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                                                <TextBlock Text="bpm"
+                                                           VerticalAlignment="Bottom"
+                                                           Margin="0,0,0,4"
+                                                           Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+
+                        <TextBlock x:Uid="Lan_NoDevices"
+                                   Text="暂无已配对设备"
+                                   Visibility="{x:Bind ViewModel.NoDevicesHintVisibility, Mode=OneWay}"
+                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                   Style="{ThemeResource CaptionTextBlockStyle}" />
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</UserControl>

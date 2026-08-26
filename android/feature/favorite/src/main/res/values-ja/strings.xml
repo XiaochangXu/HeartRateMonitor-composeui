@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="favorite_devices">お気に入りデバイス</string>
+    <string name="cd_clear_all_favorites">すべてのお気に入りデバイスをクリア</string>
+    <string name="no_favorite_devices">お気に入りデバイスはありません</string>
+    <string name="delete_favorite_title">お気に入りデバイスを削除</string>
+    <string name="delete_favorite_confirm">「%1$s」のお気に入り記録を削除しますか？</string>
+    <string name="delete">削除</string>
+    <string name="clear_all_favorites_title">すべてのお気に入りをクリア</string>
+    <string name="clear_all_favorites_confirm">すべての %1$s 件のお気に入りデバイスを削除しますか？この操作は取り消せません。</string>
+    <string name="delete_all">すべて削除</string>
+</resources>

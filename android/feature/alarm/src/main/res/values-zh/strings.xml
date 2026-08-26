@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="alarm_title">心率预警</string>
+    <string name="calibrated_samples">已校准 ✓（%1$s 个样本）</string>
+    <string name="not_calibrated">未校准</string>
+    <string name="calibrating_format">正在校准%1$s…</string>
+    <string name="remaining_seconds">剩余 %1$s 秒</string>
+    <string name="calibrate_sitting">校准静坐</string>
+    <string name="calibrate_standing">校准站立</string>
+    <string name="calibration_status_format">静坐：%1$s\n站立：%2$s</string>
+    <string name="clear_calibration">清除校准</string>
+    <string name="enable_alarm">启用心率预警</string>
+    <string name="exclude_posture_detection">排除姿态检测</string>
+    <string name="above_threshold">超过</string>
+    <string name="below_threshold">低于</string>
+    <string name="duration_label">持续</string>
+    <string name="seconds_suffix"> 秒</string>
+    <string name="repeat_alarm">重复报警</string>
+    <string name="alarm_interval">报警间隔</string>
+    <string name="minutes_suffix"> 分钟</string>
+</resources>
+

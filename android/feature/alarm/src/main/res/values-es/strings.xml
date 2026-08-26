@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="alarm_title">Alarma de frecuencia cardíaca</string>
+    <string name="calibrated_samples">Calibrado ✓ (%1$s muestras)</string>
+    <string name="not_calibrated">Sin calibrar</string>
+    <string name="calibrating_format">Calibrando %1$s…</string>
+    <string name="remaining_seconds">%1$s segundos restantes</string>
+    <string name="calibrate_sitting">Calibrar sentado</string>
+    <string name="calibrate_standing">Calibrar de pie</string>
+    <string name="calibration_status_format">Sentado: %1$s\nDe pie: %2$s</string>
+    <string name="clear_calibration">Borrar calibración</string>
+    <string name="enable_alarm">Activar la alarma de frecuencia cardíaca</string>
+    <string name="exclude_posture_detection">Excluir la detección de postura</string>
+    <string name="above_threshold">Superior a</string>
+    <string name="below_threshold">Inferior a</string>
+    <string name="duration_label">Duración</string>
+    <string name="seconds_suffix"> s</string>
+    <string name="repeat_alarm">Repetir alarma</string>
+    <string name="alarm_interval">Intervalo de alarma</string>
+    <string name="minutes_suffix"> min</string>
+</resources>

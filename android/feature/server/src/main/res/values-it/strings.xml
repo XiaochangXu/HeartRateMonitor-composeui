@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="lan_transfer_title">Trasferimento LAN</string>
+    <string name="lan_transfer_tip">Prima dell\'uso, apri l\'app del PC e assicurati che sia sulla stessa rete Wi-Fi/LAN del telefono. Il telefono rileverà il PC automaticamente; tocca il dispositivo per associarlo e, dopo la conferma del PC, la frequenza cardiaca verrà inviata in tempo reale.</string>
+    <string name="lan_scanning">Scansione dei PC nelle vicinanze…</string>
+    <string name="lan_no_devices">Nessun PC trovato. Verifica che l\'app del PC sia in esecuzione e che il PC sia sulla stessa rete</string>
+    <string name="lan_no_devices_hint">Nessun dispositivo disponibile. Tocca cerca in alto a destra</string>
+    <string name="lan_connected_device">Dispositivo connesso</string>
+    <string name="lan_available_devices">Dispositivi disponibili</string>
+    <string name="lan_scan">Scansiona</string>
+    <string name="lan_pair_approved">Il PC ha autorizzato la connessione. Invio della frequenza cardiaca avviato</string>
+    <string name="lan_pair_rejected">Il PC ha rifiutato la connessione</string>
+    <string name="lan_pair_failed">Associazione non riuscita: %1$s</string>
+    <string name="lan_pair_timeout">Timeout dell\'associazione, il PC non ha risposto</string>
+    <string name="lan_disconnect">Disconnetti</string>
+    <string name="lan_please_disconnect_first">Disconnetti prima il dispositivo</string>
+    <string name="lan_connected_status">Connesso al PC</string>
+    <string name="lan_status_pushing">Invio</string>
+    <string name="lan_ws_not_enabled">Il server WebSocket è disattivato, impossibile inviare. Attivalo in «Server HTTP e WebSocket»</string>
+    <string name="lan_open_server_settings">Apri le impostazioni</string>
+    <string name="lan_pair_action">Connetti</string>
+    <string name="lan_device_unknown">PC sconosciuto</string>
+    <string name="server_settings">Impostazioni del server</string>
+    <string name="not_connected_network">Non connesso alla rete</string>
+    <string name="http_port_hint">Porta HTTP</string>
+    <string name="websocket_port_hint">Porta WebSocket</string>
+    <string name="enable_server_format">Attiva il server %1$s</string>
+    <string name="access_url_format">URL di accesso: %1$s://%2$s:%3$s</string>
+    <string name="http_enabled_status">Server HTTP: attivo</string>
+    <string name="http_disabled_status">Server HTTP: inattivo</string>
+    <string name="http_access_url">URL di accesso: http://%1$s:%2$s/heartrate</string>
+    <string name="server_start_failed">Avvio del server non riuscito (la porta potrebbe essere in uso)</string>
+    <string name="ws_enabled_status">Server WebSocket: attivo</string>
+    <string name="ws_disabled_status">Server WebSocket: inattivo</string>
+    <string name="ws_access_url">URL di accesso: ws://%1$s:%2$s</string>
+    <string name="obs_tip">Sorgente browser OBS (aggiungi questo URL in OBS):</string>
+    <string name="obs_url">http://%1$s:%2$s/</string>
+</resources>

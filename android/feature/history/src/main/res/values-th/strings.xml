@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="history_title">ประวัติ</string>
+    <string name="no_history">ยังไม่มีบันทึกประวัติ</string>
+    <string name="confirm_delete">ยืนยันการลบ</string>
+    <string name="delete_history_confirm">ต้องการลบบันทึกที่เลือก (%1$s) หรือไม่? การดำเนินการนี้ไม่สามารถย้อนกลับได้</string>
+    <string name="deleted_records">ลบบันทึกแล้ว: %1$s</string>
+    <string name="delete_failed">ลบไม่สำเร็จ: %1$s</string>
+    <string name="confirm_text">ตกลง</string>
+    <string name="selected_count">เลือกแล้ว: %1$s</string>
+    <string name="cd_select_all">เลือกทั้งหมด</string>
+    <string name="in_progress">กำลังดำเนินการ</string>
+    <string name="stats_format">เฉลี่ย %1$s · ต่ำสุด %2$s · สูงสุด %3$s · %4$s รายการ</string>
+    <string name="chart_detail">รายละเอียดอัตราการเต้นของหัวใจ</string>
+    <string name="cd_rotate_screen">หมุนหน้าจอ</string>
+    <string name="no_heart_rate_data">ไม่มีข้อมูลอัตราการเต้นของหัวใจให้แสดง</string>
+    <string name="marker_heart_rate">อัตราการเต้นของหัวใจ: %1$s bpm\nเวลา: %2$s</string>
+    <string name="stat_avg">เฉลี่ย</string>
+    <string name="stat_min">ต่ำสุด</string>
+    <string name="stat_max">สูงสุด</string>
+    <string name="stat_time">เวลา</string>
+    <string name="stat_bpm_value">%1$s bpm</string>
+    <string name="stat_time_range">%1$s - %2$s</string>
+    <string name="max_records_hint">บันทึกได้สูงสุด 30 รายการ</string>
+</resources>

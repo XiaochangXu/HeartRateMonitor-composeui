@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="lan_transfer_title">Transfer LAN</string>
+    <string name="lan_transfer_tip">Przed użyciem uruchom aplikację na PC i upewnij się, że jest w tej samej sieci Wi-Fi/LAN co telefon. Telefon automatycznie wykryje PC; dotknij urządzenia, aby je sparować, a po potwierdzeniu na PC tętno będzie przesyłane w czasie rzeczywistym.</string>
+    <string name="lan_scanning">Skanowanie pobliskich komputerów PC…</string>
+    <string name="lan_no_devices">Nie znaleziono komputerów PC. Upewnij się, że aplikacja na PC działa i PC jest w tej samej sieci</string>
+    <string name="lan_no_devices_hint">Brak dostępnych urządzeń. Stuknij szukaj w prawym górnym rogu</string>
+    <string name="lan_connected_device">Połączone urządzenie</string>
+    <string name="lan_available_devices">Dostępne urządzenia</string>
+    <string name="lan_scan">Skanuj</string>
+    <string name="lan_pair_approved">PC zaakceptował połączenie. Przesyłanie tętna rozpoczęte</string>
+    <string name="lan_pair_rejected">PC odrzucił połączenie</string>
+    <string name="lan_pair_failed">Parowanie nieudane: %1$s</string>
+    <string name="lan_pair_timeout">Przekroczono czas parowania, PC nie odpowiedział</string>
+    <string name="lan_disconnect">Rozłącz</string>
+    <string name="lan_please_disconnect_first">Najpierw rozłącz urządzenie</string>
+    <string name="lan_connected_status">Połączono z PC</string>
+    <string name="lan_status_pushing">Wysyłanie</string>
+    <string name="lan_ws_not_enabled">Serwer WebSocket jest wyłączony, wysyłanie niemożliwe. Włącz go w sekcji „Serwer HTTP &amp; WebSocket"</string>
+    <string name="lan_open_server_settings">Otwórz ustawienia</string>
+    <string name="lan_pair_action">Połącz</string>
+    <string name="lan_device_unknown">Nieznany PC</string>
+    <string name="server_settings">Ustawienia serwera</string>
+    <string name="not_connected_network">Brak połączenia z siecią</string>
+    <string name="http_port_hint">Port HTTP</string>
+    <string name="websocket_port_hint">Port WebSocket</string>
+    <string name="enable_server_format">Włącz serwer %1$s</string>
+    <string name="access_url_format">URL dostępu: %1$s://%2$s:%3$s</string>
+    <string name="http_enabled_status">Serwer HTTP: wł.</string>
+    <string name="http_disabled_status">Serwer HTTP: wył.</string>
+    <string name="http_access_url">URL dostępu: http://%1$s:%2$s/heartrate</string>
+    <string name="server_start_failed">Nie udało się uruchomić serwera (port może być zajęty)</string>
+    <string name="ws_enabled_status">Serwer WebSocket: wł.</string>
+    <string name="ws_disabled_status">Serwer WebSocket: wył.</string>
+    <string name="ws_access_url">URL dostępu: ws://%1$s:%2$s</string>
+    <string name="obs_tip">Źródło przeglądarki OBS (dodaj ten URL do OBS):</string>
+    <string name="obs_url">http://%1$s:%2$s/</string>
+</resources>

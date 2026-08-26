@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="lan_transfer_title">Chuyển qua LAN</string>
+    <string name="lan_transfer_tip">Trước khi sử dụng, hãy mở ứng dụng trên máy tính và đảm bảo nó ở cùng mạng Wi-Fi/LAN với điện thoại. Điện thoại sẽ tự động phát hiện máy tính; nhấn vào thiết bị để ghép nối, sau khi máy tính xác nhận, nhịp tim sẽ được gửi theo thời gian thực.</string>
+    <string name="lan_scanning">Đang quét máy tính gần đó…</string>
+    <string name="lan_no_devices">Không tìm thấy máy tính. Kiểm tra ứng dụng trên máy tính đang chạy và máy tính ở cùng mạng</string>
+    <string name="lan_no_devices_hint">Không có thiết bị khả dụng. Nhấn tìm kiếm ở góc trên bên phải</string>
+    <string name="lan_connected_device">Thiết bị đã kết nối</string>
+    <string name="lan_available_devices">Thiết bị khả dụng</string>
+    <string name="lan_scan">Quét</string>
+    <string name="lan_pair_approved">Máy tính đã chấp thuận kết nối. Đã bắt đầu gửi nhịp tim</string>
+    <string name="lan_pair_rejected">Máy tính từ chối kết nối</string>
+    <string name="lan_pair_failed">Ghép nối thất bại: %1$s</string>
+    <string name="lan_pair_timeout">Hết thời gian ghép nối, máy tính không phản hồi</string>
+    <string name="lan_disconnect">Ngắt kết nối</string>
+    <string name="lan_please_disconnect_first">Vui lòng ngắt kết nối thiết bị trước</string>
+    <string name="lan_connected_status">Đã kết nối với máy tính</string>
+    <string name="lan_status_pushing">Đang gửi</string>
+    <string name="lan_ws_not_enabled">Máy chủ WebSocket đang tắt, không thể gửi. Hãy bật trong «Máy chủ HTTP và WebSocket»</string>
+    <string name="lan_open_server_settings">Mở cài đặt</string>
+    <string name="lan_pair_action">Kết nối</string>
+    <string name="lan_device_unknown">Máy tính không xác định</string>
+    <string name="server_settings">Cài đặt máy chủ</string>
+    <string name="not_connected_network">Chưa kết nối mạng</string>
+    <string name="http_port_hint">Cổng HTTP</string>
+    <string name="websocket_port_hint">Cổng WebSocket</string>
+    <string name="enable_server_format">Bật máy chủ %1$s</string>
+    <string name="access_url_format">URL truy cập: %1$s://%2$s:%3$s</string>
+    <string name="http_enabled_status">Máy chủ HTTP: bật</string>
+    <string name="http_disabled_status">Máy chủ HTTP: tắt</string>
+    <string name="http_access_url">URL truy cập: http://%1$s:%2$s/heartrate</string>
+    <string name="server_start_failed">Khởi động máy chủ thất bại (cổng có thể đang được sử dụng)</string>
+    <string name="ws_enabled_status">Máy chủ WebSocket: bật</string>
+    <string name="ws_disabled_status">Máy chủ WebSocket: tắt</string>
+    <string name="ws_access_url">URL truy cập: ws://%1$s:%2$s</string>
+    <string name="obs_tip">Nguồn trình duyệt OBS (thêm URL này vào OBS):</string>
+    <string name="obs_url">http://%1$s:%2$s/</string>
+</resources>

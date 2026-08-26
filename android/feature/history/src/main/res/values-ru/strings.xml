@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="history_title">История</string>
+    <string name="no_history">Записей в истории пока нет</string>
+    <string name="confirm_delete">Подтвердить удаление</string>
+    <string name="delete_history_confirm">Удалить выбранные записи (%1$s)? Это действие нельзя отменить.</string>
+    <string name="deleted_records">Записей удалено: %1$s</string>
+    <string name="delete_failed">Не удалось удалить: %1$s</string>
+    <string name="confirm_text">ОК</string>
+    <string name="selected_count">Выбрано: %1$s</string>
+    <string name="cd_select_all">Выбрать все</string>
+    <string name="in_progress">В процессе</string>
+    <string name="stats_format">Среднее %1$s · Мин %2$s · Макс %3$s · Записей: %4$s</string>
+    <string name="chart_detail">Детали пульса</string>
+    <string name="cd_rotate_screen">Повернуть экран</string>
+    <string name="no_heart_rate_data">Нет данных пульса для отображения</string>
+    <string name="marker_heart_rate">Пульс: %1$s bpm\nВремя: %2$s</string>
+    <string name="stat_avg">Среднее</string>
+    <string name="stat_min">Мин</string>
+    <string name="stat_max">Макс</string>
+    <string name="stat_time">Время</string>
+    <string name="stat_bpm_value">%1$s bpm</string>
+    <string name="stat_time_range">%1$s - %2$s</string>
+    <string name="max_records_hint">До 30 записей</string>
+</resources>

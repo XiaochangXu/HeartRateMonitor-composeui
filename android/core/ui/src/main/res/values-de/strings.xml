@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="cd_back">Zurück</string>
+    <string name="cancel">Abbrechen</string>
+    <string name="cd_delete">Löschen</string>
+    <string name="ok">OK</string>
+    <string name="confirm">OK</string>
+    <string name="nav_home">Start</string>
+</resources>

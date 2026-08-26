@@ -1,0 +1,498 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <data name="MainWindow_Title" xml:space="preserve">
+    <value>心率监控器</value>
+  </data>
+  <data name="MainWindow_ToggleFloat" xml:space="preserve">
+    <value>显示/隐藏悬浮窗</value>
+  </data>
+  <data name="MainWindow_TitleText.Text" xml:space="preserve">
+    <value>心率监控器</value>
+  </data>
+  <data name="DeviceList_HeaderText.Text" xml:space="preserve">
+    <value>心率设备</value>
+  </data>
+  <data name="DeviceList_StartScan" xml:space="preserve">
+    <value>开始扫描</value>
+  </data>
+  <data name="DeviceList_StopScan" xml:space="preserve">
+    <value>停止扫描</value>
+  </data>
+  <data name="DeviceList_Clear" xml:space="preserve">
+    <value>清除</value>
+  </data>
+  <data name="DeviceList_UnknownDevice" xml:space="preserve">
+    <value>未知设备</value>
+  </data>
+  <data name="DeviceList_EmptyHint" xml:space="preserve">
+    <value>未发现设备，请先开启扫描</value>
+  </data>
+  <data name="DeviceList_FoundDevice" xml:space="preserve">
+    <value>发现 {0}</value>
+  </data>
+  <data name="DeviceList_BluetoothUnavailable" xml:space="preserve">
+    <value>蓝牙不可用，无法扫描</value>
+  </data>
+  <data name="DeviceList_ScanAutoStopped" xml:space="preserve">
+    <value>扫描 1 分钟后自动停止，可点击重新扫描</value>
+  </data>
+  <data name="DeviceList_HrBadge.Text" xml:space="preserve">
+    <value>● 心率</value>
+  </data>
+  <data name="HeartRate_HeaderText.Text" xml:space="preserve">
+    <value>实时心率</value>
+  </data>
+  <data name="HeartRate_Connect" xml:space="preserve">
+    <value>连接</value>
+  </data>
+  <data name="HeartRate_Disconnect" xml:space="preserve">
+    <value>断开</value>
+  </data>
+  <data name="HeartRate_NotConnected" xml:space="preserve">
+    <value>未连接</value>
+  </data>
+  <data name="HeartRate_Connecting" xml:space="preserve">
+    <value>连接中...</value>
+  </data>
+  <data name="HeartRate_Reconnecting" xml:space="preserve">
+    <value>自动重连中，请等待或强制断开连接</value>
+  </data>
+  <data name="HeartRate_ReconnectFailed" xml:space="preserve">
+    <value>重连失败（30 秒内未能重连）</value>
+  </data>
+  <data name="HeartRate_AutoReconnectLabel.Text" xml:space="preserve">
+    <value>自动重连</value>
+  </data>
+  <data name="AppSettings_HeaderText.Text" xml:space="preserve">
+    <value>应用设置</value>
+  </data>
+  <data name="AppSettings_AutoConnectLast.Header" xml:space="preserve">
+    <value>自动连接上一次连接过的设备</value>
+  </data>
+  <data name="AppSettings_AutoConnectLastHint.Text" xml:space="preserve">
+    <value>启动扫描到上次连接的设备时自动连接（30 秒超时）</value>
+  </data>
+  <data name="AppSettings_AutoReconnect.Header" xml:space="preserve">
+    <value>自动重连</value>
+  </data>
+  <data name="AppSettings_AutoReconnectHint.Text" xml:space="preserve">
+    <value>设备意外断开后自动重连（手动断开/强制断开不触发）</value>
+  </data>
+  <data name="AppSettings_FilterHeartRateOnly.Header" xml:space="preserve">
+    <value>开启搜索过滤</value>
+  </data>
+  <data name="AppSettings_FilterHeartRateOnlyHint.Text" xml:space="preserve">
+    <value>开启后仅搜索声明了心率服务（0x180D）的设备，过滤无关广播</value>
+  </data>
+  <data name="DeviceList_AutoConnectTimeout" xml:space="preserve">
+    <value>未找到上次连接的设备（30 秒）</value>
+  </data>
+  <data name="DeviceList_ForceDisconnect.Text" xml:space="preserve">
+    <value>强制断开</value>
+  </data>
+  <data name="HeartRate_ConnectedName" xml:space="preserve">
+    <value>已连接 {0}</value>
+  </data>
+  <data name="HeartRate_ConnectFailed" xml:space="preserve">
+    <value>连接失败（请确认设备已开启且未被其他设备占用）</value>
+  </data>
+  <data name="HeartRate_Disconnected" xml:space="preserve">
+    <value>连接已断开</value>
+  </data>
+  <data name="HeartRate_NoDevice" xml:space="preserve">
+    <value>请先选择设备</value>
+  </data>
+  <data name="HeartRate_DeviceName.Text" xml:space="preserve">
+    <value>设备名称</value>
+  </data>
+  <data name="HeartRate_ConnectionMode.Text" xml:space="preserve">
+    <value>连接方式</value>
+  </data>
+  <data name="HeartRate_ConnModeBluetooth" xml:space="preserve">
+    <value>蓝牙</value>
+  </data>
+  <data name="HeartRate_ConnModeLan" xml:space="preserve">
+    <value>局域网</value>
+  </data>
+  <data name="HeartRate_Address.Text" xml:space="preserve">
+    <value>连接地址</value>
+  </data>
+  <data name="HeartRate_HasHrService.Text" xml:space="preserve">
+    <value>心率服务</value>
+  </data>
+  <data name="HeartRate_Yes" xml:space="preserve">
+    <value>是</value>
+  </data>
+  <data name="HeartRate_No" xml:space="preserve">
+    <value>否</value>
+  </data>
+  <data name="HeartRate_FloatLabel.Text" xml:space="preserve">
+    <value>悬浮窗</value>
+  </data>
+  <data name="HeartRate_Bpm" xml:space="preserve">
+    <value>bpm</value>
+  </data>
+  <data name="HeartRate_BluetoothBlockedTitle" xml:space="preserve">
+    <value>无法连接</value>
+  </data>
+  <data name="HeartRate_BluetoothBlockedBody" xml:space="preserve">
+    <value>请先断开局域网连接。</value>
+  </data>
+  <data name="HeartRate_DeviceNotInRangeTitle" xml:space="preserve">
+    <value>设备不在范围内</value>
+  </data>
+  <data name="HeartRate_DeviceNotInRangeBody" xml:space="preserve">
+    <value>该设备不在当前扫描范围内，请先扫描后再连接。</value>
+  </data>
+  <data name="Dialog_Ok" xml:space="preserve">
+    <value>知道了</value>
+  </data>
+  <data name="MainWindow_NavHome.Content" xml:space="preserve">
+    <value>首页</value>
+  </data>
+  <data name="MainWindow_NavAppSettings.Content" xml:space="preserve">
+    <value>应用设置</value>
+  </data>
+  <data name="MainWindow_NavFloatSettings.Content" xml:space="preserve">
+    <value>悬浮窗设置</value>
+  </data>
+  <data name="FloatSettings_HeaderText.Text" xml:space="preserve">
+    <value>悬浮窗设置</value>
+  </data>
+  <data name="FloatSettings_ShowHeart.Header" xml:space="preserve">
+    <value>显示心形图标</value>
+  </data>
+  <data name="FloatSettings_ShowBpm.Header" xml:space="preserve">
+    <value>显示 bpm 文字</value>
+  </data>
+  <data name="FloatSettings_HeartbeatAnimation.Header" xml:space="preserve">
+    <value>开启心跳动画效果</value>
+  </data>
+  <data name="FloatSettings_ScaleHeader.Text" xml:space="preserve">
+    <value>整体大小</value>
+  </data>
+  <data name="FloatSettings_HeartSizeHeader.Text" xml:space="preserve">
+    <value>图标大小</value>
+  </data>
+  <data name="FloatSettings_BgOpacityHeader.Text" xml:space="preserve">
+    <value>背景不透明度</value>
+  </data>
+  <data name="FloatSettings_BorderOpacityHeader.Text" xml:space="preserve">
+    <value>边框不透明度</value>
+  </data>
+  <data name="FloatSettings_HeartColorHeader.Text" xml:space="preserve">
+    <value>悬浮窗颜色</value>
+  </data>
+  <data name="FloatSettings_ClickThrough.Header" xml:space="preserve">
+    <value>开启触摸穿透</value>
+  </data>
+  <data name="FloatSettings_ClickThrough.OnContent" xml:space="preserve">
+    <value>已锁定</value>
+  </data>
+  <data name="FloatSettings_ClickThrough.OffContent" xml:space="preserve">
+    <value>未锁定</value>
+  </data>
+  <data name="FloatSettings_HotKeyHeader.Text" xml:space="preserve">
+    <value>锁定热键</value>
+  </data>
+  <data name="FloatSettings_HotKeyBox.PlaceholderText" xml:space="preserve">
+    <value>按下组合键…</value>
+  </data>
+  <data name="FloatSettings_HotKeyHint.Text" xml:space="preserve">
+    <value>按下热键切换悬浮窗锁定状态。锁定后悬浮窗不响应鼠标且点击穿透，固定在原位。</value>
+  </data>
+  <data name="FloatSettings_ClearHotKey.Content" xml:space="preserve">
+    <value>清除</value>
+  </data>
+  <data name="FloatSettings_Reset.Content" xml:space="preserve">
+    <value>重置为默认值</value>
+  </data>
+  <data name="MainWindow_NavNetwork.Content" xml:space="preserve">
+    <value>网络与传输</value>
+  </data>
+  <data name="Net_Header.Text" xml:space="preserve">
+    <value>网络传输</value>
+  </data>
+  <data name="Net_HttpToggle.Header" xml:space="preserve">
+    <value>HTTP 服务</value>
+  </data>
+  <data name="Net_HttpPort.Text" xml:space="preserve">
+    <value>端口</value>
+  </data>
+  <data name="Net_HttpUrlLabel.Text" xml:space="preserve">
+    <value>访问地址</value>
+  </data>
+  <data name="Net_WsToggle.Header" xml:space="preserve">
+    <value>WebSocket 服务</value>
+  </data>
+  <data name="Net_WsPort.Text" xml:space="preserve">
+    <value>端口</value>
+  </data>
+  <data name="Net_WsUrlLabel.Text" xml:space="preserve">
+    <value>访问地址</value>
+  </data>
+  <data name="Net_Webhooks.Text" xml:space="preserve">
+    <value>Webhook</value>
+  </data>
+  <data name="Net_AddWebhook.Content" xml:space="preserve">
+    <value>添加</value>
+  </data>
+  <data name="Net_Edit.Content" xml:space="preserve">
+    <value>编辑</value>
+  </data>
+  <data name="Net_Delete.Content" xml:space="preserve">
+    <value>删除</value>
+  </data>
+  <data name="WebhookDialog.Title" xml:space="preserve">
+    <value>Webhook</value>
+  </data>
+  <data name="WebhookDialog.PrimaryButtonText" xml:space="preserve">
+    <value>保存</value>
+  </data>
+  <data name="WebhookDialog.CloseButtonText" xml:space="preserve">
+    <value>取消</value>
+  </data>
+  <data name="WebhookDialog_Name.Text" xml:space="preserve">
+    <value>名称</value>
+  </data>
+  <data name="WebhookDialog_NameBox.PlaceholderText" xml:space="preserve">
+    <value>我的 Webhook</value>
+  </data>
+  <data name="WebhookDialog_Url.Text" xml:space="preserve">
+    <value>URL</value>
+  </data>
+  <data name="WebhookDialog_UrlBox.PlaceholderText" xml:space="preserve">
+    <value>https://example.com/hook</value>
+  </data>
+  <data name="WebhookDialog_Enabled.Header" xml:space="preserve">
+    <value>启用</value>
+  </data>
+  <data name="WebhookDialog_Triggers.Text" xml:space="preserve">
+    <value>触发条件</value>
+  </data>
+  <data name="WebhookDialog_TriggerHr.Content" xml:space="preserve">
+    <value>心率更新</value>
+  </data>
+  <data name="WebhookDialog_TriggerConn.Content" xml:space="preserve">
+    <value>连接成功</value>
+  </data>
+  <data name="WebhookDialog_TriggerDisc.Content" xml:space="preserve">
+    <value>连接断开</value>
+  </data>
+  <data name="WebhookDialog_Body.Text" xml:space="preserve">
+    <value>请求体</value>
+  </data>
+  <data name="WebhookDialog_PlaceholderHint.Text" xml:space="preserve">
+    <value>可用占位符：{bpm} {speed}</value>
+  </data>
+  <data name="WebhookDialog_Headers.Text" xml:space="preserve">
+    <value>请求头</value>
+  </data>
+  <data name="WebhookDialog_Test.Content" xml:space="preserve">
+    <value>发送测试</value>
+  </data>
+  <data name="Network_Disabled" xml:space="preserve">
+    <value>未启用</value>
+  </data>
+  <data name="Network_Stopped" xml:space="preserve">
+    <value>已停止</value>
+  </data>
+  <data name="Network_RunningOn" xml:space="preserve">
+    <value>运行中（端口 {0}）</value>
+  </data>
+  <data name="Network_Error" xml:space="preserve">
+    <value>错误：{0}</value>
+  </data>
+  <data name="PortConflict_Title" xml:space="preserve">
+    <value>端口冲突</value>
+  </data>
+  <data name="PortConflict_Body" xml:space="preserve">
+    <value>端口 {0} 已被其他服务占用，请修改端口后再开启。</value>
+  </data>
+  <data name="Webhook_DeleteConfirmTitle" xml:space="preserve">
+    <value>删除 Webhook</value>
+  </data>
+  <data name="Webhook_DeleteConfirmBody" xml:space="preserve">
+    <value>确定删除 Webhook「{0}」吗？</value>
+  </data>
+  <data name="Webhook_Delete" xml:space="preserve">
+    <value>删除</value>
+  </data>
+  <data name="Webhook_Cancel" xml:space="preserve">
+    <value>取消</value>
+  </data>
+  <data name="MainWindow_NavAppearance.Content" xml:space="preserve">
+    <value>主题和语言</value>
+  </data>
+  <data name="Appearance_Header.Text" xml:space="preserve">
+    <value>主题和语言</value>
+  </data>
+  <data name="Appearance_ThemeCard.Text" xml:space="preserve">
+    <value>主题模式</value>
+  </data>
+  <data name="Appearance_ThemeSystem.Content" xml:space="preserve">
+    <value>跟随系统</value>
+  </data>
+  <data name="Appearance_ThemeLight.Content" xml:space="preserve">
+    <value>亮色主题</value>
+  </data>
+  <data name="Appearance_ThemeDark.Content" xml:space="preserve">
+    <value>暗色主题</value>
+  </data>
+  <data name="Appearance_BackdropCard.Text" xml:space="preserve">
+    <value>背景效果</value>
+  </data>
+  <data name="Appearance_BackdropMica.Content" xml:space="preserve">
+    <value>云母</value>
+  </data>
+  <data name="Appearance_BackdropAcrylic.Content" xml:space="preserve">
+    <value>亚克力</value>
+  </data>
+  <data name="Appearance_BackdropHint.Text" xml:space="preserve">
+    <value>云母仅 Windows 11 支持；Windows 10 下请选择亚克力</value>
+  </data>
+  <data name="Appearance_LanguageCard.Text" xml:space="preserve">
+    <value>语言</value>
+  </data>
+  <data name="Appearance_LangZh.Content" xml:space="preserve">
+    <value>中文</value>
+  </data>
+  <data name="Appearance_LangEn.Content" xml:space="preserve">
+    <value>英文</value>
+  </data>
+  <data name="Appearance_RestartHint.Text" xml:space="preserve">
+    <value>切换语言后需要重启应用才能生效。</value>
+  </data>
+  <data name="MainWindow_NavLanTransfer.Content" xml:space="preserve">
+    <value>局域网传输</value>
+  </data>
+  <data name="Lan_Header.Text" xml:space="preserve">
+    <value>局域网传输</value>
+  </data>
+  <data name="Lan_Toggle.Header" xml:space="preserve">
+    <value>启用局域网传输</value>
+  </data>
+  <data name="Lan_ComputerName.Text" xml:space="preserve">
+    <value>电脑名</value>
+  </data>
+  <data name="Lan_PairPort.Text" xml:space="preserve">
+    <value>配对端口</value>
+  </data>
+  <data name="Lan_LocalIp.Text" xml:space="preserve">
+    <value>本机 IP</value>
+  </data>
+  <data name="Lan_Status.Text" xml:space="preserve">
+    <value>状态</value>
+  </data>
+  <data name="Lan_Devices.Text" xml:space="preserve">
+    <value>已连接设备</value>
+  </data>
+  <data name="Lan_NoDevices.Text" xml:space="preserve">
+    <value>暂无已配对设备</value>
+  </data>
+  <data name="Lan_Disabled" xml:space="preserve">
+    <value>未启用</value>
+  </data>
+  <data name="Lan_Stopped" xml:space="preserve">
+    <value>已停止</value>
+  </data>
+  <data name="Lan_RunningOn" xml:space="preserve">
+    <value>广播中（配对端口 {0}）</value>
+  </data>
+  <data name="Lan_PairTitle" xml:space="preserve">
+    <value>心率配对请求</value>
+  </data>
+  <data name="Lan_PairBody" xml:space="preserve">
+    <value>设备「{0}」（{1}）想要推送心率数据，是否允许？</value>
+  </data>
+  <data name="Lan_PairApprove" xml:space="preserve">
+    <value>允许</value>
+  </data>
+  <data name="Lan_PairReject" xml:space="preserve">
+    <value>拒绝</value>
+  </data>
+  <data name="Lan_PortInUse_Title" xml:space="preserve">
+    <value>端口被占用</value>
+  </data>
+  <data name="Lan_PortInUse_Body" xml:space="preserve">
+    <value>配对端口 {0} 已被其他程序占用。是否自动切换到可用端口 {1}？</value>
+  </data>
+  <data name="Lan_PortInUse_Switch" xml:space="preserve">
+    <value>切换到 {0}</value>
+  </data>
+  <data name="Lan_PortInUse_Keep" xml:space="preserve">
+    <value>保持原端口</value>
+  </data>
+  <data name="Lan_PortUnavailable_Title" xml:space="preserve">
+    <value>无可用端口</value>
+  </data>
+  <data name="Lan_PortUnavailable_Body" xml:space="preserve">
+    <value>未找到可用端口，请手动修改配对端口后重试。</value>
+  </data>
+  <data name="MainWindow_NavVersion.Content" xml:space="preserve">
+    <value>版本与信息</value>
+  </data>
+  <data name="VersionInfo_Header.Text" xml:space="preserve">
+    <value>版本与信息</value>
+  </data>
+  <data name="VersionInfo_CurrentVersionLabel.Text" xml:space="preserve">
+    <value>当前版本</value>
+  </data>
+  <data name="VersionInfo_RepoLabel.Text" xml:space="preserve">
+    <value>查看项目仓库</value>
+  </data>
+  <data name="VersionInfo_AndroidLabel.Text" xml:space="preserve">
+    <value>Android 端链接</value>
+  </data>
+  <data name="VersionInfo_CheckUpdateLabel.Text" xml:space="preserve">
+    <value>检查更新</value>
+  </data>
+  <data name="VersionInfo_CheckUpdateButton.Text" xml:space="preserve">
+    <value>检查更新</value>
+  </data>
+  <data name="VersionInfo_CheckUpdateHint.Text" xml:space="preserve">
+    <value>从 Gitee 获取最新版本信息</value>
+  </data>
+  <data name="VersionInfo_CheckingUpdate" xml:space="preserve">
+    <value>正在检查...</value>
+  </data>
+  <data name="VersionInfo_UpdateCheckTitle" xml:space="preserve">
+    <value>检查更新</value>
+  </data>
+  <data name="VersionInfo_UpToDate" xml:space="preserve">
+    <value>当前已是最新版本（v{0}）</value>
+  </data>
+  <data name="VersionInfo_NewVersionFound" xml:space="preserve">
+    <value>发现新版本 v{0}</value>
+  </data>
+  <data name="VersionInfo_CurrentVersion" xml:space="preserve">
+    <value>当前版本：v{0}</value>
+  </data>
+  <data name="VersionInfo_ReleaseNotesTitle" xml:space="preserve">
+    <value>更新内容：</value>
+  </data>
+  <data name="VersionInfo_NoReleaseNotes" xml:space="preserve">
+    <value>暂无更新日志</value>
+  </data>
+  <data name="VersionInfo_GoUpdate" xml:space="preserve">
+    <value>跳转更新</value>
+  </data>
+  <data name="VersionInfo_Cancel" xml:space="preserve">
+    <value>取消</value>
+  </data>
+  <data name="VersionInfo_NoRelease" xml:space="preserve">
+    <value>未找到任何 Release，请先在 Gitee 上发布一个版本</value>
+  </data>
+  <data name="VersionInfo_ApiRateLimit" xml:space="preserve">
+    <value>Gitee API 限流，请稍后再试</value>
+  </data>
+  <data name="VersionInfo_ApiError" xml:space="preserve">
+    <value>Gitee API 返回错误码：{0}</value>
+  </data>
+  <data name="VersionInfo_NetworkError" xml:space="preserve">
+    <value>网络错误：{0}</value>
+  </data>
+  <data name="VersionInfo_NoValidRelease" xml:space="preserve">
+    <value>未找到有效的正式 Release</value>
+  </data>
+</root>

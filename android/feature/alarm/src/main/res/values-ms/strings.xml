@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="alarm_title">Amaran kadar jantung</string>
+    <string name="calibrated_samples">Ditentukur ✓ (%1$s sampel)</string>
+    <string name="not_calibrated">Belum ditentukur</string>
+    <string name="calibrating_format">Menentukur %1$s…</string>
+    <string name="remaining_seconds">%1$s saat lagi</string>
+    <string name="calibrate_sitting">Tentukur duduk</string>
+    <string name="calibrate_standing">Tentukur berdiri</string>
+    <string name="calibration_status_format">Duduk: %1$s\nBerdiri: %2$s</string>
+    <string name="clear_calibration">Kosongkan penentukuran</string>
+    <string name="enable_alarm">Aktifkan amaran kadar jantung</string>
+    <string name="exclude_posture_detection">Kecualikan pengesanan postur</string>
+    <string name="above_threshold">Melebihi</string>
+    <string name="below_threshold">Di bawah</string>
+    <string name="duration_label">Tempoh</string>
+    <string name="seconds_suffix"> saat</string>
+    <string name="repeat_alarm">Ulang amaran</string>
+    <string name="alarm_interval">Selang amaran</string>
+    <string name="minutes_suffix"> minit</string>
+</resources>

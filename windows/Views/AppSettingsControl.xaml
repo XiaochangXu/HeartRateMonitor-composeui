@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<UserControl x:Class="HeartRate.Views.AppSettingsControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             d:DesignWidth="620"
+             d:DesignHeight="400">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <TextBlock x:Uid="AppSettings_HeaderText"
+                   Grid.Row="0"
+                   Text="应用设置"
+                   FontSize="20"
+                   FontWeight="SemiBold"
+                   Margin="20,0,0,12" />
+
+        <ScrollViewer Grid.Row="1"
+                      Padding="12,0,12,12">
+
+            <StackPanel Spacing="16">
+
+                <!-- ── 连接选项 ──────────────────────────────────────────── -->
+                <Border Background="{ThemeResource LayerFillColorDefaultBrush}"
+                        BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}"
+                        BorderThickness="1"
+                        CornerRadius="{ThemeResource OverlayCornerRadius}"
+                        Padding="20">
+                    <StackPanel Spacing="12">
+                        <ToggleSwitch x:Uid="AppSettings_AutoConnectLast"
+                                      IsOn="{x:Bind ViewModel.Settings.AutoConnectLastDevice, Mode=TwoWay}"
+                                      OnContent=""
+                                      OffContent="" />
+                        <TextBlock x:Uid="AppSettings_AutoConnectLastHint"
+                                   Text="启动扫描到上次连接的设备时自动连接（30 秒超时）。"
+                                   Style="{ThemeResource CaptionTextBlockStyle}"
+                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                   TextWrapping="Wrap" />
+
+                        <ToggleSwitch x:Uid="AppSettings_AutoReconnect"
+                                      IsOn="{x:Bind ViewModel.Settings.AutoReconnectEnabled, Mode=TwoWay}"
+                                      OnContent=""
+                                      OffContent="" />
+                        <TextBlock x:Uid="AppSettings_AutoReconnectHint"
+                                   Text="设备意外断开后自动重连（手动断开/强制断开不触发）。"
+                                   Style="{ThemeResource CaptionTextBlockStyle}"
+                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                   TextWrapping="Wrap" />
+
+                        <ToggleSwitch x:Uid="AppSettings_FilterHeartRateOnly"
+                                      IsOn="{x:Bind ViewModel.Settings.FilterHeartRateOnly, Mode=TwoWay}"
+                                      OnContent=""
+                                      OffContent="" />
+                        <TextBlock x:Uid="AppSettings_FilterHeartRateOnlyHint"
+                                   Text="开启后仅搜索声明了心率服务（0x180D）的设备，过滤无关广播。"
+                                   Style="{ThemeResource CaptionTextBlockStyle}"
+                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                   TextWrapping="Wrap" />
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</UserControl>

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="alarm_title">Alarm detak jantung</string>
+    <string name="calibrated_samples">Dikalibrasi ✓ (%1$s sampel)</string>
+    <string name="not_calibrated">Belum dikalibrasi</string>
+    <string name="calibrating_format">Mengkalibrasi %1$s…</string>
+    <string name="remaining_seconds">%1$s detik tersisa</string>
+    <string name="calibrate_sitting">Kalibrasi duduk</string>
+    <string name="calibrate_standing">Kalibrasi berdiri</string>
+    <string name="calibration_status_format">Duduk: %1$s\nBerdiri: %2$s</string>
+    <string name="clear_calibration">Bersihkan kalibrasi</string>
+    <string name="enable_alarm">Aktifkan alarm detak jantung</string>
+    <string name="exclude_posture_detection">Kecualikan deteksi postur</string>
+    <string name="above_threshold">Di atas</string>
+    <string name="below_threshold">Di bawah</string>
+    <string name="duration_label">Durasi</string>
+    <string name="seconds_suffix"> dtk</string>
+    <string name="repeat_alarm">Ulangi alarm</string>
+    <string name="alarm_interval">Interval alarm</string>
+    <string name="minutes_suffix"> mnt</string>
+</resources>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="webhook_title">Pengaturan Webhook</string>
+    <string name="cd_add_webhook">Tambah Webhook</string>
+    <string name="no_webhooks">Tidak ada Webhook. Ketuk + untuk menambah</string>
+    <string name="new_webhook">Webhook baru</string>
+    <string name="close">Tutup</string>
+    <string name="cd_edit">Edit</string>
+    <string name="enable_this_webhook">Aktifkan Webhook ini</string>
+    <string name="trigger_types">Jenis pemicu (dapat memilih beberapa)</string>
+    <string name="name_label">Nama</string>
+    <string name="test_send">Kirim uji (detak jantung: 88)</string>
+    <string name="save">Simpan</string>
+    <string name="trigger_heart_rate_updated">Saat detak jantung diperbarui</string>
+    <string name="trigger_connected">Saat perangkat terhubung</string>
+    <string name="trigger_disconnected">Saat perangkat terputus</string>
+    <string name="webhook_url_label">URL</string>
+    <string name="webhook_body_label">Isi (JSON)</string>
+    <string name="webhook_headers_label">Header (JSON)</string>
+</resources>

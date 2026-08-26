@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="favorite_devices">收藏裝置</string>
+    <string name="cd_clear_all_favorites">清空所有收藏裝置</string>
+    <string name="no_favorite_devices">暫無收藏裝置</string>
+    <string name="delete_favorite_title">刪除收藏裝置</string>
+    <string name="delete_favorite_confirm">確定要刪除「%1$s」的收藏記錄嗎？</string>
+    <string name="delete">刪除</string>
+    <string name="clear_all_favorites_title">清空所有收藏</string>
+    <string name="clear_all_favorites_confirm">確定要刪除全部 %1$s 個收藏裝置嗎？此操作不可撤銷。</string>
+    <string name="delete_all">全部刪除</string>
+</resources>

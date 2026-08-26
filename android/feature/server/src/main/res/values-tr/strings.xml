@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="lan_transfer_title">LAN aktarımı</string>
+    <string name="lan_transfer_tip">Kullanmadan önce bilgisayar uygulamasını açın ve telefonla aynı Wi-Fi/LAN ağında olduğundan emin olun. Telefon bilgisayarı otomatik bulacaktır; eşleştirmek için cihaza dokunun, bilgisayar onayladıktan sonra kalp atış hızı gerçek zamanlı gönderilecektir.</string>
+    <string name="lan_scanning">Yakındaki bilgisayarlar taranıyor…</string>
+    <string name="lan_no_devices">Bilgisayar bulunamadı. Bilgisayar uygulamasının çalıştığını ve bilgisayarın aynı ağda olduğunu kontrol edin</string>
+    <string name="lan_no_devices_hint">Kullanılabilir cihaz yok. Sağ üstteki ara butonuna dokunun</string>
+    <string name="lan_connected_device">Bağlı cihaz</string>
+    <string name="lan_available_devices">Kullanılabilir cihazlar</string>
+    <string name="lan_scan">Tara</string>
+    <string name="lan_pair_approved">Bilgisayar bağlantıyı onayladı. Kalp atış hızı gönderimi başladı</string>
+    <string name="lan_pair_rejected">Bilgisayar bağlantıyı reddetti</string>
+    <string name="lan_pair_failed">Eşleştirme başarısız: %1$s</string>
+    <string name="lan_pair_timeout">Eşleştirme zaman aşımı, bilgisayar yanıt vermedi</string>
+    <string name="lan_disconnect">Bağlantıyı kes</string>
+    <string name="lan_please_disconnect_first">Önce cihazın bağlantısını kesin</string>
+    <string name="lan_connected_status">Bilgisayara bağlandı</string>
+    <string name="lan_status_pushing">Gönderiliyor</string>
+    <string name="lan_ws_not_enabled">WebSocket sunucusu kapalı, gönderilemiyor. «HTTP ve WebSocket sunucusu» bölümünden etkinleştirin</string>
+    <string name="lan_open_server_settings">Ayarları aç</string>
+    <string name="lan_pair_action">Bağlan</string>
+    <string name="lan_device_unknown">Bilinmeyen bilgisayar</string>
+    <string name="server_settings">Sunucu ayarları</string>
+    <string name="not_connected_network">Ağa bağlı değil</string>
+    <string name="http_port_hint">HTTP portu</string>
+    <string name="websocket_port_hint">WebSocket portu</string>
+    <string name="enable_server_format">%1$s sunucusunu etkinleştir</string>
+    <string name="access_url_format">Erişim URL\'si: %1$s://%2$s:%3$s</string>
+    <string name="http_enabled_status">HTTP sunucusu: açık</string>
+    <string name="http_disabled_status">HTTP sunucusu: kapalı</string>
+    <string name="http_access_url">Erişim URL\'si: http://%1$s:%2$s/heartrate</string>
+    <string name="server_start_failed">Sunucu başlatılamadı (port kullanımda olabilir)</string>
+    <string name="ws_enabled_status">WebSocket sunucusu: açık</string>
+    <string name="ws_disabled_status">WebSocket sunucusu: kapalı</string>
+    <string name="ws_access_url">Erişim URL\'si: ws://%1$s:%2$s</string>
+    <string name="obs_tip">OBS Tarayıcı Kaynağı (bu URL\'yi OBS\'e ekleyin):</string>
+    <string name="obs_url">http://%1$s:%2$s/</string>
+</resources>

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="history_title">History</string>
+    <string name="no_history">No history records yet</string>
+    <string name="confirm_delete">Confirm Delete</string>
+    <string name="delete_history_confirm">Are you sure you want to delete %1$s selected records? This action cannot be undone.</string>
+    <string name="deleted_records">Deleted %1$s records</string>
+    <string name="delete_failed">Delete failed: %1$s</string>
+    <string name="confirm_text">OK</string>
+    <string name="selected_count">%1$s selected</string>
+    <string name="cd_select_all">Select all</string>
+    <string name="in_progress">In Progress</string>
+    <string name="stats_format">Avg %1$s · Min %2$s · Max %3$s · %4$s records</string>
+    <string name="chart_detail">Heart Rate Details</string>
+    <string name="cd_rotate_screen">Rotate screen</string>
+    <string name="no_heart_rate_data">No heart rate data to display</string>
+    <string name="marker_heart_rate">HR: %1$s bpm\nTime: %2$s</string>
+    <string name="stat_avg">Average</string>
+    <string name="stat_min">Min</string>
+    <string name="stat_max">Max</string>
+    <string name="stat_time">Time</string>
+    <string name="stat_bpm_value">%1$s bpm</string>
+    <string name="stat_time_range">%1$s - %2$s</string>
+    <string name="max_records_hint">Up to 30 records</string>
+</resources>
+

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="cd_toggle_floating_window">เปิด/ปิดหน้าต่างลอย</string>
+    <string name="cd_speed_dial">การดำเนินการด่วน</string>
+    <string name="cd_search_bluetooth">ค้นหาอุปกรณ์บลูทูธ</string>
+    <string name="search_tip_title">ข้อควรทราบ</string>
+    <string name="scan_filter_on">ตัวกรอง: เปิด</string>
+    <string name="scan_filter_off">ตัวกรอง: ปิด</string>
+    <string name="search_tip_message">โปรดเปิดการออกอากาศอัตราการเต้นของหัวใจของอุปกรณ์ก่อน แล้วแตะค้นหา มิฉะนั้นจะไม่พบอุปกรณ์</string>
+    <string name="got_it">เข้าใจแล้ว</string>
+    <string name="available_devices">อุปกรณ์ที่ใช้ได้</string>
+    <string name="no_available_devices">ไม่มีอุปกรณ์ที่ใช้ได้ โปรดแตะค้นหาที่มุมขวาบน</string>
+    <string name="enter_fullscreen">เข้าสู่โหมดเต็มหน้าจอ</string>
+    <string name="disconnect">ตัดการเชื่อมต่อ</string>
+    <string name="please_disconnect_first">โปรดตัดการเชื่อมต่ออุปกรณ์ก่อน</string>
+    <string name="speed">ความเร็ว</string>
+    <string name="cd_favorite">รายการโปรด</string>
+    <string name="bpm_unit">bpm</string>
+    <string name="heart_rate_data">ข้อมูลอัตราการเต้นของหัวใจ</string>
+    <string name="heart_rate_statistics">สถิติอัตราการเต้นของหัวใจ</string>
+    <string name="heart_rate_ring_max">ชีพจรสูงสุด</string>
+    <string name="edit_heart_rate_ring_max">แก้ไขค่าสูงสุดของวงแหวนอัตราการเต้นของหัวใจ</string>
+    <string name="cd_edit_heart_rate_max">แก้ไขขีดจำกัดบนของอัตราการเต้นของหัวใจ</string>
+    <string name="fullscreen_exit_hint">แตะหน้าจอหรือกดปุ่มย้อนกลับเพื่อออก</string>
+    <string name="history_not_enabled">ยังไม่ได้เปิดประวัติ</string>
+    <string name="device_not_connected">ยังไม่ได้เชื่อมต่ออุปกรณ์</string>
+    <string name="connected_device">อุปกรณ์ที่เชื่อมต่อ</string>
+    <string name="max_heart_rate">สูงสุด</string>
+    <string name="min_heart_rate">ต่ำสุด</string>
+    <string name="reset">รีเซ็ต</string>
+</resources>

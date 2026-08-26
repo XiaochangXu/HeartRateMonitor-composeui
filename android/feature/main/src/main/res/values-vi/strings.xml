@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="cd_toggle_floating_window">Bật/tắt cửa sổ nổi</string>
+    <string name="cd_speed_dial">Thao tác nhanh</string>
+    <string name="cd_search_bluetooth">Tìm thiết bị Bluetooth</string>
+    <string name="search_tip_title">Lưu ý</string>
+    <string name="scan_filter_on">Bộ lọc: bật</string>
+    <string name="scan_filter_off">Bộ lọc: tắt</string>
+    <string name="search_tip_message">Vui lòng bật tính năng phát nhịp tim của thiết bị trước, sau đó nhấn tìm kiếm. Nếu không sẽ không tìm thấy thiết bị.</string>
+    <string name="got_it">Đã hiểu</string>
+    <string name="available_devices">Thiết bị khả dụng</string>
+    <string name="no_available_devices">Không có thiết bị khả dụng. Nhấn tìm kiếm ở góc trên bên phải</string>
+    <string name="enter_fullscreen">Vào chế độ toàn màn hình</string>
+    <string name="disconnect">Ngắt kết nối</string>
+    <string name="please_disconnect_first">Vui lòng ngắt kết nối thiết bị trước</string>
+    <string name="speed">Tốc độ</string>
+    <string name="cd_favorite">Yêu thích</string>
+    <string name="bpm_unit">bpm</string>
+    <string name="heart_rate_data">Dữ liệu nhịp tim</string>
+    <string name="heart_rate_statistics">Thống kê nhịp tim</string>
+    <string name="heart_rate_ring_max">Nhịp tim tối đa</string>
+    <string name="edit_heart_rate_ring_max">Chỉnh sửa giá trị tối đa của vòng nhịp tim</string>
+    <string name="cd_edit_heart_rate_max">Chỉnh sửa giới hạn trên nhịp tim</string>
+    <string name="fullscreen_exit_hint">Chạm màn hình hoặc nhấn phím quay lại để thoát</string>
+    <string name="history_not_enabled">Lịch sử chưa bật</string>
+    <string name="device_not_connected">Chưa kết nối thiết bị</string>
+    <string name="connected_device">Thiết bị đã kết nối</string>
+    <string name="max_heart_rate">Tối đa</string>
+    <string name="min_heart_rate">Tối thiểu</string>
+    <string name="reset">Đặt lại</string>
+</resources>

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="history_title">Kasaysayan</string>
+    <string name="no_history">Wala pang record ng kasaysayan</string>
+    <string name="confirm_delete">Kumpirmahin ang pagtanggal</string>
+    <string name="delete_history_confirm">Nais mo bang tanggalin ang mga napiling record (%1$s)? Hindi maaaring i-undo ang aksyon na ito.</string>
+    <string name="deleted_records">%1$s na record ang natanggal</string>
+    <string name="delete_failed">Nabigo ang pagtanggal: %1$s</string>
+    <string name="confirm_text">OK</string>
+    <string name="selected_count">%1$s ang napili</string>
+    <string name="cd_select_all">Piliin lahat</string>
+    <string name="in_progress">Isinasagawa</string>
+    <string name="stats_format">Avg %1$s · Min %2$s · Max %3$s · %4$s rec.</string>
+    <string name="chart_detail">Detalye ng rate ng puso</string>
+    <string name="cd_rotate_screen">I-rotate ang screen</string>
+    <string name="no_heart_rate_data">Walang data ng rate ng puso na ipapakita</string>
+    <string name="marker_heart_rate">Rate ng puso: %1$s bpm\nOras: %2$s</string>
+    <string name="stat_avg">Avg</string>
+    <string name="stat_min">Min</string>
+    <string name="stat_max">Max</string>
+    <string name="stat_time">Oras</string>
+    <string name="stat_bpm_value">%1$s bpm</string>
+    <string name="stat_time_range">%1$s - %2$s</string>
+    <string name="max_records_hint">Hanggang 30 record</string>
+</resources>

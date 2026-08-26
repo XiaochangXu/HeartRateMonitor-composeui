@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="alarm_title">मुटुको धड्कन अलार्म</string>
+    <string name="calibrated_samples">क्यालिब्रेट गरियो ✓ (%1$s नमूनाहरू)</string>
+    <string name="not_calibrated">क्यालिब्रेट गरिएको छैन</string>
+    <string name="calibrating_format">%1$s क्यालिब्रेट हुँदै…</string>
+    <string name="remaining_seconds">%1$s सेकेन्ड बाँकी</string>
+    <string name="calibrate_sitting">बस्ने क्यालिब्रेट गर्नुहोस्</string>
+    <string name="calibrate_standing">उभिने क्यालिब्रेट गर्नुहोस्</string>
+    <string name="calibration_status_format">बसिरहेको: %1$s\nउभिरहेको: %2$s</string>
+    <string name="clear_calibration">क्यालिब्रेसन मेट्नुहोस्</string>
+    <string name="enable_alarm">मुटुको धड्कन अलार्म सक्रिय गर्नुहोस्</string>
+    <string name="exclude_posture_detection">मुद्रा पत्ता लगाउने बाहेक</string>
+    <string name="above_threshold">भन्दा माथि</string>
+    <string name="below_threshold">भन्दा तल</string>
+    <string name="duration_label">अवधि</string>
+    <string name="seconds_suffix"> सेकेन्ड</string>
+    <string name="repeat_alarm">दोहोर्‍याउने अलार्म</string>
+    <string name="alarm_interval">अलार्म अन्तराल</string>
+    <string name="minutes_suffix"> मिनेट</string>
+</resources>

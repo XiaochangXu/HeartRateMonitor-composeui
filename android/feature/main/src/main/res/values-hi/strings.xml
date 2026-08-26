@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="cd_toggle_floating_window">फ्लोटिंग विंडो टॉगल करें</string>
+    <string name="cd_speed_dial">त्वरित कार्रवाइयां</string>
+    <string name="cd_search_bluetooth">ब्लूटूथ डिवाइस खोजें</string>
+    <string name="search_tip_title">ध्यान दें</string>
+    <string name="scan_filter_on">फ़िल्टर: चालू</string>
+    <string name="scan_filter_off">फ़िल्टर: बंद</string>
+    <string name="search_tip_message">कृपया पहले डिवाइस की हृदय गति ब्रॉडकास्ट चालू करें, फिर खोज दबाएं। अन्यथा डिवाइस नहीं मिलेगा।</string>
+    <string name="got_it">समझ गया</string>
+    <string name="available_devices">उपलब्ध डिवाइस</string>
+    <string name="no_available_devices">कोई उपलब्ध डिवाइस नहीं। ऊपर दाईं ओर खोज दबाएं</string>
+    <string name="enter_fullscreen">फुलस्क्रीन मोड दर्ज करें</string>
+    <string name="disconnect">डिस्कनेक्ट करें</string>
+    <string name="please_disconnect_first">कृपया पहले डिवाइस डिस्कनेक्ट करें</string>
+    <string name="speed">गति</string>
+    <string name="cd_favorite">पसंदीदा</string>
+    <string name="bpm_unit">bpm</string>
+    <string name="heart_rate_data">हृदय गति डेटा</string>
+    <string name="heart_rate_statistics">हृदय गति सांख्यिकी</string>
+    <string name="heart_rate_ring_max">अधिकतम हृदय गति</string>
+    <string name="edit_heart_rate_ring_max">हृदय गति रिंग अधिकतम मान बदलें</string>
+    <string name="cd_edit_heart_rate_max">अर्ध-रिंग हृदय गति ऊपरी सीमा बदलें</string>
+    <string name="fullscreen_exit_hint">बाहर निकलने के लिए स्क्रीन दबाएं या बैक कुंजी दबाएं</string>
+    <string name="history_not_enabled">इतिहास सक्षम नहीं</string>
+    <string name="device_not_connected">डिवाइस कनेक्टेड नहीं</string>
+    <string name="connected_device">कनेक्टेड डिवाइस</string>
+    <string name="max_heart_rate">अधिकतम</string>
+    <string name="min_heart_rate">न्यूनतम</string>
+    <string name="reset">रीसेट</string>
+</resources>

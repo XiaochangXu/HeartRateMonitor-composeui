@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="history_title">Sejarah</string>
+    <string name="no_history">Belum ada rekod sejarah</string>
+    <string name="confirm_delete">Sahkan pemadaman</string>
+    <string name="delete_history_confirm">Adakah anda mahu memadam rekod yang dipilih (%1$s)? Tindakan ini tidak boleh dibatalkan.</string>
+    <string name="deleted_records">%1$s rekod dipadam</string>
+    <string name="delete_failed">Pemadaman gagal: %1$s</string>
+    <string name="confirm_text">OK</string>
+    <string name="selected_count">%1$s dipilih</string>
+    <string name="cd_select_all">Pilih semua</string>
+    <string name="in_progress">Sedang dijalankan</string>
+    <string name="stats_format">Purata %1$s · Min %2$s · Maks %3$s · %4$s rekod</string>
+    <string name="chart_detail">Butiran kadar jantung</string>
+    <string name="cd_rotate_screen">Putar skrin</string>
+    <string name="no_heart_rate_data">Tiada data kadar jantung untuk dipaparkan</string>
+    <string name="marker_heart_rate">Kadar jantung: %1$s bpm\nMasa: %2$s</string>
+    <string name="stat_avg">Purata</string>
+    <string name="stat_min">Min</string>
+    <string name="stat_max">Maks</string>
+    <string name="stat_time">Masa</string>
+    <string name="stat_bpm_value">%1$s bpm</string>
+    <string name="stat_time_range">%1$s - %2$s</string>
+    <string name="max_records_hint">Maksimum 30 rekod</string>
+</resources>

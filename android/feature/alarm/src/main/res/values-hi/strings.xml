@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="alarm_title">हृदय गति अलार्म</string>
+    <string name="calibrated_samples">कैलिब्रेटेड ✓ (%1$s नमूने)</string>
+    <string name="not_calibrated">कैलिब्रेटेड नहीं</string>
+    <string name="calibrating_format">%1$s कैलिब्रेट हो रहा है…</string>
+    <string name="remaining_seconds">%1$s सेकंड शेष</string>
+    <string name="calibrate_sitting">बैठे कैलिब्रेट करें</string>
+    <string name="calibrate_standing">खड़े कैलिब्रेट करें</string>
+    <string name="calibration_status_format">बैठे: %1$s\nखड़े: %2$s</string>
+    <string name="clear_calibration">कैलिब्रेशन साफ करें</string>
+    <string name="enable_alarm">हृदय गति अलार्म सक्षम करें</string>
+    <string name="exclude_posture_detection">मुद्रा पहचान बाहर रखें</string>
+    <string name="above_threshold">ऊपर</string>
+    <string name="below_threshold">नीचे</string>
+    <string name="duration_label">अवधि</string>
+    <string name="seconds_suffix"> सेकंड</string>
+    <string name="repeat_alarm">अलार्म दोहराएं</string>
+    <string name="alarm_interval">अलार्म अंतराल</string>
+    <string name="minutes_suffix"> मिनट</string>
+</resources>

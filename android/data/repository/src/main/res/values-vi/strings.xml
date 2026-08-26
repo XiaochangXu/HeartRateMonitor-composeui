@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- WebhookManager -->
+    <string name="webhook_test_response">Phản hồi kiểm tra Webhook</string>
+    <string name="webhook_send_failed_headers">Gửi thất bại: Headers không phải JSON hợp lệ: %1$s</string>
+    <string name="webhook_send_error">Lỗi không xác định khi gửi: %1$s</string>
+    <string name="webhook_sent">Đã gửi Webhook</string>
+    <string name="webhook_resp_name">Tên</string>
+    <string name="webhook_resp_trigger">Trình kích hoạt</string>
+    <string name="webhook_resp_status">Mã trạng thái</string>
+    <string name="webhook_resp_body">Nội dung phản hồi</string>
+</resources>

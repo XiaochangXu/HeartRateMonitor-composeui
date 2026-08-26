@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- WebhookManager -->
+    <string name="webhook_test_response">Webhook-testreactie</string>
+    <string name="webhook_send_failed_headers">Verzenden mislukt: headers zijn geen geldige JSON: %1$s</string>
+    <string name="webhook_send_error">Onbekende fout bij het verzenden: %1$s</string>
+    <string name="webhook_sent">Webhook verzonden</string>
+    <string name="webhook_resp_name">Naam</string>
+    <string name="webhook_resp_trigger">Trigger</string>
+    <string name="webhook_resp_status">Statuscode</string>
+    <string name="webhook_resp_body">Reactietekst</string>
+</resources>

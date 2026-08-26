@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="cd_toggle_floating_window">Ipakita/itago ang lumulutang na window</string>
+    <string name="cd_speed_dial">Mabilis na aksyon</string>
+    <string name="cd_search_bluetooth">Maghanap ng mga Bluetooth device</string>
+    <string name="search_tip_title">Paalala</string>
+    <string name="scan_filter_on">Filter: naka-on</string>
+    <string name="scan_filter_off">Filter: naka-off</string>
+    <string name="search_tip_message">Mangyaring i-on muna ang broadcast ng rate ng puso ng device, pagkatapos ay i-tap ang maghanap. Kung hindi, hindi makikita ang device.</string>
+    <string name="got_it">Naunawaan</string>
+    <string name="available_devices">Mga available na device</string>
+    <string name="no_available_devices">Walang available na device. I-tap ang maghanap sa kanang itaas</string>
+    <string name="enter_fullscreen">Pumasok sa fullscreen mode</string>
+    <string name="disconnect">Putulin ang koneksyon</string>
+    <string name="please_disconnect_first">Putulin muna ang koneksyon ng device</string>
+    <string name="speed">Bilis</string>
+    <string name="cd_favorite">Mga Paborito</string>
+    <string name="bpm_unit">bpm</string>
+    <string name="heart_rate_data">Data ng rate ng puso</string>
+    <string name="heart_rate_statistics">Statistika ng rate ng puso</string>
+    <string name="heart_rate_ring_max">Max na rate ng puso</string>
+    <string name="edit_heart_rate_ring_max">I-edit ang maximum na halaga ng ring ng rate ng puso</string>
+    <string name="cd_edit_heart_rate_max">I-edit ang itaas na limitasyon ng rate ng puso</string>
+    <string name="fullscreen_exit_hint">I-tap ang screen o pindutin ang back key para lumabas</string>
+    <string name="history_not_enabled">Hindi naka-enable ang kasaysayan</string>
+    <string name="device_not_connected">Hindi nakakonekta ang device</string>
+    <string name="connected_device">Nakakonektang device</string>
+    <string name="max_heart_rate">Max</string>
+    <string name="min_heart_rate">Min</string>
+    <string name="reset">I-reset</string>
+</resources>

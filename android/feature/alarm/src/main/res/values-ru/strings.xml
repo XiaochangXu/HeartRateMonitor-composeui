@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="alarm_title">Тревога по пульсу</string>
+    <string name="calibrated_samples">Откалибровано ✓ (образцов: %1$s)</string>
+    <string name="not_calibrated">Не откалибровано</string>
+    <string name="calibrating_format">Калибровка: %1$s…</string>
+    <string name="remaining_seconds">Осталось секунд: %1$s</string>
+    <string name="calibrate_sitting">Калибровка (сидя)</string>
+    <string name="calibrate_standing">Калибровка (стоя)</string>
+    <string name="calibration_status_format">Сидя: %1$s\nСтоя: %2$s</string>
+    <string name="clear_calibration">Сбросить калибровку</string>
+    <string name="enable_alarm">Включить тревогу по пульсу</string>
+    <string name="exclude_posture_detection">Исключить определение позы</string>
+    <string name="above_threshold">Выше</string>
+    <string name="below_threshold">Ниже</string>
+    <string name="duration_label">Длительность</string>
+    <string name="seconds_suffix"> сек</string>
+    <string name="repeat_alarm">Повторная тревога</string>
+    <string name="alarm_interval">Интервал тревоги</string>
+    <string name="minutes_suffix"> мин</string>
+</resources>

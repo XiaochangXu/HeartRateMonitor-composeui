@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="lan_transfer_title">LAN転送</string>
+    <string name="lan_transfer_tip">使用前に、PC側の専用アプリを起動し、スマートフォンと同じWi-Fi/LANに接続してください。スマートフォンがPCを自動検出し、デバイスをタップしてペアリングを開始します。PC側で確認されると、心拍数がリアルタイムで送信されます。</string>
+    <string name="lan_scanning">近くのPCをスキャン中…</string>
+    <string name="lan_no_devices">PCが見つかりません。PC側のアプリが起動し、同じネットワークに接続されていることを確認してください</string>
+    <string name="lan_no_devices_hint">利用可能なデバイスがありません。右上の検索をタップしてください</string>
+    <string name="lan_connected_device">接続済みデバイス</string>
+    <string name="lan_available_devices">利用可能なデバイス</string>
+    <string name="lan_scan">スキャン</string>
+    <string name="lan_pair_approved">PCが接続を許可しました。心拍数の送信を開始しました</string>
+    <string name="lan_pair_rejected">PCが接続を拒否しました</string>
+    <string name="lan_pair_failed">ペアリングに失敗しました: %1$s</string>
+    <string name="lan_pair_timeout">ペアリングがタイムアウトしました。PCからの応答がありません</string>
+    <string name="lan_disconnect">切断</string>
+    <string name="lan_please_disconnect_first">先にデバイスを切断してください</string>
+    <string name="lan_connected_status">PCに接続済み</string>
+    <string name="lan_status_pushing">送信中</string>
+    <string name="lan_ws_not_enabled">WebSocketサーバーが有効になっていないため送信できません。「HTTP &amp; WebSocketサーバー」で有効にしてください</string>
+    <string name="lan_open_server_settings">設定を開く</string>
+    <string name="lan_pair_action">接続</string>
+    <string name="lan_device_unknown">不明なPC</string>
+    <string name="server_settings">サーバー設定</string>
+    <string name="not_connected_network">ネットワーク未接続</string>
+    <string name="http_port_hint">HTTPポート</string>
+    <string name="websocket_port_hint">WebSocketポート</string>
+    <string name="enable_server_format">%1$sサーバーを有効にする</string>
+    <string name="access_url_format">アクセスURL: %1$s://%2$s:%3$s</string>
+    <string name="http_enabled_status">HTTPサーバー: 有効</string>
+    <string name="http_disabled_status">HTTPサーバー: 無効</string>
+    <string name="http_access_url">アクセスURL: http://%1$s:%2$s/heartrate</string>
+    <string name="server_start_failed">サーバーの起動に失敗しました（ポートが使用中の可能性があります）</string>
+    <string name="ws_enabled_status">WebSocketサーバー: 有効</string>
+    <string name="ws_disabled_status">WebSocketサーバー: 無効</string>
+    <string name="ws_access_url">アクセスURL: ws://%1$s:%2$s</string>
+    <string name="obs_tip">OBSブラウザソース（このURLをOBSに追加）：</string>
+    <string name="obs_url">http://%1$s:%2$s/</string>
+</resources>

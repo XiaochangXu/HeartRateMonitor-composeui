@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="cd_toggle_floating_window">플로팅 창 켜기/끄기</string>
+    <string name="cd_speed_dial">빠른 작업</string>
+    <string name="cd_search_bluetooth">블루투스 기기 검색</string>
+    <string name="search_tip_title">주의사항</string>
+    <string name="scan_filter_on">스캔 필터: 켜짐</string>
+    <string name="scan_filter_off">스캔 필터: 꺼짐</string>
+    <string name="search_tip_message">먼저 기기의 심박수 브로드캐스트를 켠 후 검색을 탭하세요. 켜지 않으면 기기를 찾을 수 없습니다.</string>
+    <string name="got_it">알겠습니다</string>
+    <string name="available_devices">사용 가능한 기기</string>
+    <string name="no_available_devices">사용 가능한 기기가 없습니다. 오른쪽 위 검색을 탭하세요</string>
+    <string name="enter_fullscreen">전체 화면 모드로 전환</string>
+    <string name="disconnect">연결 끊기</string>
+    <string name="please_disconnect_first">먼저 기기 연결을 해제하세요</string>
+    <string name="speed">속도</string>
+    <string name="cd_favorite">즐겨찾기</string>
+    <string name="bpm_unit">회/분</string>
+    <string name="heart_rate_data">심박수 데이터</string>
+    <string name="heart_rate_statistics">심박수 통계</string>
+    <string name="heart_rate_ring_max">심박수 상한</string>
+    <string name="edit_heart_rate_ring_max">심박수 링 최대값 변경</string>
+    <string name="cd_edit_heart_rate_max">반원 링 심박수 상한 변경</string>
+    <string name="fullscreen_exit_hint">화면을 탭하거나 뒤로 키를 눌러 종료</string>
+    <string name="history_not_enabled">기록이 활성화되지 않음</string>
+    <string name="device_not_connected">기기 미연결</string>
+    <string name="connected_device">연결된 기기</string>
+    <string name="max_heart_rate">최대</string>
+    <string name="min_heart_rate">최저</string>
+    <string name="reset">초기화</string>
+</resources>

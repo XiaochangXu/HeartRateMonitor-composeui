@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="lan_transfer_title">การถ่ายโอน LAN</string>
+    <string name="lan_transfer_tip">ก่อนใช้งาน โปรดเปิดแอปบน PC และตรวจสอบว่าอยู่ใน Wi-Fi/LAN เดียวกับโทรศัพท์ โทรศัพท์จะค้นหา PC โดยอัตโนมัติ แตะอุปกรณ์เพื่อจับคู่ หลัง PC ยืนยัน อัตราการเต้นของหัวใจจะถูกส่งแบบเรียลไทม์</string>
+    <string name="lan_scanning">กำลังสแกน PC ที่อยู่ใกล้เคียง…</string>
+    <string name="lan_no_devices">ไม่พบ PC โปรดตรวจสอบว่าแอปบน PC ทำงานอยู่และ PC อยู่ในเครือข่ายเดียวกัน</string>
+    <string name="lan_no_devices_hint">ไม่มีอุปกรณ์ที่พร้อมใช้งาน แตะค้นหาที่มุมขวาบน</string>
+    <string name="lan_connected_device">อุปกรณ์ที่เชื่อมต่อแล้ว</string>
+    <string name="lan_available_devices">อุปกรณ์ที่พร้อมใช้งาน</string>
+    <string name="lan_scan">สแกน</string>
+    <string name="lan_pair_approved">PC อนุญาตการเชื่อมต่อแล้ว เริ่มส่งอัตราการเต้นของหัวใจ</string>
+    <string name="lan_pair_rejected">PC ปฏิเสธการเชื่อมต่อ</string>
+    <string name="lan_pair_failed">จับคู่ไม่สำเร็จ: %1$s</string>
+    <string name="lan_pair_timeout">การจับคู่หมดเวลา PC ไม่ตอบสนอง</string>
+    <string name="lan_disconnect">ตัดการเชื่อมต่อ</string>
+    <string name="lan_please_disconnect_first">โปรดตัดการเชื่อมต่ออุปกรณ์ก่อน</string>
+    <string name="lan_connected_status">เชื่อมต่อกับ PC แล้ว</string>
+    <string name="lan_status_pushing">กำลังส่ง</string>
+    <string name="lan_ws_not_enabled">ปิดเซิร์ฟเวอร์ WebSocket อยู่ ไม่สามารถส่งได้ โปรดเปิดใน "เซิร์ฟเวอร์ HTTP และ WebSocket"</string>
+    <string name="lan_open_server_settings">เปิดการตั้งค่า</string>
+    <string name="lan_pair_action">เชื่อมต่อ</string>
+    <string name="lan_device_unknown">PC ที่ไม่รู้จัก</string>
+    <string name="server_settings">การตั้งค่าเซิร์ฟเวอร์</string>
+    <string name="not_connected_network">ยังไม่ได้เชื่อมต่อเครือข่าย</string>
+    <string name="http_port_hint">พอร์ต HTTP</string>
+    <string name="websocket_port_hint">พอร์ต WebSocket</string>
+    <string name="enable_server_format">เปิดเซิร์ฟเวอร์ %1$s</string>
+    <string name="access_url_format">URL การเข้าถึง: %1$s://%2$s:%3$s</string>
+    <string name="http_enabled_status">เซิร์ฟเวอร์ HTTP: เปิด</string>
+    <string name="http_disabled_status">เซิร์ฟเวอร์ HTTP: ปิด</string>
+    <string name="http_access_url">URL การเข้าถึง: http://%1$s:%2$s/heartrate</string>
+    <string name="server_start_failed">เริ่มเซิร์ฟเวอร์ไม่สำเร็จ (พอร์ตอาจถูกใช้งาน)</string>
+    <string name="ws_enabled_status">เซิร์ฟเวอร์ WebSocket: เปิด</string>
+    <string name="ws_disabled_status">เซิร์ฟเวอร์ WebSocket: ปิด</string>
+    <string name="ws_access_url">URL การเข้าถึง: ws://%1$s:%2$s</string>
+    <string name="obs_tip">แหล่งที่มาของเบราว์เซอร์ OBS (เพิ่ม URL นี้ใน OBS):</string>
+    <string name="obs_url">http://%1$s:%2$s/</string>
+</resources>

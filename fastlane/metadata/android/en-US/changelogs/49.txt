@@ -1,0 +1,9 @@
+- Optimize interface and performance
+- Removing unwanted dependencies reduces app size
+- New full-screen heart rate mode animation color changes by heart rate zone
+- Added toast prompt when Bluetooth is not turned on during device search
+- Added Close navigation animation switch. When it is turned on, it will disable Horizontal Pager's sideslip animation. It is turned on by default and can be turned off by itself.
+- Fix when the device is connected, directly turn off the phone Bluetooth, the App will appear the following exceptions:
+  1. Home Heart Rate Card: Heart rate data clears with delay, but max/min heart rate remains old data before disconnection
+  2. Available Devices page: still shows "Connected Devices" and users must manually disconnect to search for new devices
+  3. Status stuck: Bluetooth cannot automatically enter the rescanning state after it is turned off
