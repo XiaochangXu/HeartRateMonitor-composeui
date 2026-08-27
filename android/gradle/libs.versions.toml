@@ -38,7 +38,7 @@ uiautomator = "2.4.0"
 orgJson = "20240303"
 roomTesting = "3.0.1"
 androidxSqlite = "2.7.0"
-kotlinxSerialization = "1.9.0"
+kotlinxSerialization = "1.11.0"
 androidxTestServices = "1.6.0"
 profileinstaller = "1.4.1"
 
