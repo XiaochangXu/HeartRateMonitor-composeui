@@ -20,7 +20,7 @@ jobs:
         shell: pwsh
 
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           # 排除android目录，彻底规避超长路径文件
           sparse-checkout: |
