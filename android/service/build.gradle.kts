@@ -77,7 +77,7 @@ dependencies {
     testImplementation(libs.truth)
     testImplementation(libs.androidx.test.core)
     testImplementation(libs.kotlinx.coroutines.test)
-    testImplementation("org.json:json:20240303")
-    testImplementation("androidx.room3:room3-testing:3.0.0")
+    testImplementation(libs.org.json)
+    testImplementation(libs.androidx.room.testing)
     testImplementation(libs.androidx.sqlite.framework)
 }

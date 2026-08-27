@@ -1,0 +1,94 @@
+# Dependabot configuration
+# https://docs.github.com/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
+
+version: 2
+
+updates:
+  # ──────────────────────────────────────────────
+  # Android 端：Gradle 依赖（Version Catalog + 各模块 build.gradle.kts）
+  # ──────────────────────────────────────────────
+  - package-ecosystem: "gradle"
+    directory: "/android"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Asia/Shanghai"
+    open-pull-requests-limit: 10
+    # Android 项目根 build.gradle.kts + settings.gradle.kts + libs.versions.toml
+    # Dependabot 会自动递归扫描各子模块的 build.gradle.kts
+    groups:
+      # 将 Kotlin 相关依赖（kotlin、ksp、compose-compiler 插件）打包在同一条 PR 中，避免版本冲突
+      kotlin:
+        patterns:
+          - "org.jetbrains.kotlin.*"
+      # AndroidX 依赖统一分组，减少 PR 数量
+      androidx:
+        patterns:
+          - "androidx.*"
+      # Compose 相关依赖分组
+      compose:
+        patterns:
+          - "androidx.compose.*"
+          - "com.patrykandpatrick.vico"
+      # Hilt / 依赖注入分组
+      hilt:
+        patterns:
+          - "com.google.dagger.*"
+          - "androidx.hilt.*"
+      # KotlinX 库分组
+      kotlinx:
+        patterns:
+          - "org.jetbrains.kotlinx.*"
+      # 测试相关依赖分组
+      testing:
+        patterns:
+          - "junit"
+          - "org.junit.*"
+          - "org.robolectric"
+          - "com.google.truth"
+          - "androidx.test.*"
+    commit-message:
+      prefix: "deps(android)"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "android"
+      - "gradle"
+
+  # ──────────────────────────────────────────────
+  # Android 端：Gradle Wrapper（gradle-wrapper.properties）
+  # ──────────────────────────────────────────────
+  - package-ecosystem: "gradle"
+    directory: "/android/gradle/wrapper"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Asia/Shanghai"
+    open-pull-requests-limit: 1
+    commit-message:
+      prefix: "deps(gradle-wrapper)"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "android"
+      - "gradle-wrapper"
+
+  # ──────────────────────────────────────────────
+  # GitHub Actions workflows 依赖更新
+  # ──────────────────────────────────────────────
+  - package-ecosystem: "github-actions"
+    directory: "/.github/workflows"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Asia/Shanghai"
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "deps(ci)"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "github-actions"

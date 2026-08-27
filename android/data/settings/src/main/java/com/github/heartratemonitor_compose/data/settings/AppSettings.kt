@@ -119,7 +119,7 @@ data class AppSettings(
 )
             put(SettingsKeys.SCAN_FILTER_ENABLED, true,
 )
-            put(SettingsKeys.NAV_ANIMATION_DISABLED, true,
+            put(SettingsKeys.NAV_ANIMATION_DISABLED, false,
 )
             put(SettingsKeys.FAVORITE_DEVICE_ID, null,
 )

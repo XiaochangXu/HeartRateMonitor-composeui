@@ -44,6 +44,6 @@ dependencies {
     testImplementation(libs.androidx.test.core)
     testImplementation(libs.truth)
     testImplementation(libs.kotlinx.coroutines.test)
-    testImplementation("androidx.room3:room3-testing:3.0.0")
+    testImplementation(libs.androidx.room.testing)
     testImplementation(libs.androidx.sqlite.framework)
 }

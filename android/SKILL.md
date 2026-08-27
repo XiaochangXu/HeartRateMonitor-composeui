@@ -412,7 +412,12 @@
 
 - 资源随代码走：feature/模块独有资源随迁，跨模块共享资源下沉 `:core:ui`；`values`/`values-zh` 成对迁移；字符串 key 全仓库唯一（禁止两处定义）。
 - 模块间依赖默认 `implementation`；类型出现在模块公开 API（方法返回/构造参数）时用 `api`（如 `:data:database` 的 DAO/Entity、`:data:repository` 对三个数据模块）。
-- 版本一律走 `gradle/libs.versions.toml`，禁止模块内硬编码版本。
+- **版本一律走 `gradle/libs.versions.toml`，禁止模块内硬编码版本**。具体要求：
+  - **所有外部依赖**（含测试依赖）必须通过 `libs.versions.toml` 的 `version.ref` 统一管理，禁止在 `build.gradle.kts` 中出现 `"group:name:version"` 硬编码字符串。
+  - **toml 内禁止内联版本号**：`[libraries]` 区所有库声明的版本必须引用 `[versions]` 区的变量（`version.ref = "xxx"`），禁止写 `version = "1.0.0"` 内联字面量。
+  - **新增依赖时**：先在 `[versions]` 区添加版本变量，再在 `[libraries]` 区添加库声明，最后在 `build.gradle.kts` 中用 `libs.xxx` 引用；三步缺一不可。
+  - **共享版本号提取为一个变量**：同组库共享同一版本时（如 `sqlite-bundled` 与 `sqlite-framework` 共用 `androidxSqlite`），提取为单个 `version.ref`，避免多处分散维护。
+  - 仓库根目录 `.github/dependabot.yml` 已配置 Dependabot 自动更新 toml 中的版本，禁止在模块内绕过 toml 手动指定版本以规避 Dependabot 覆盖。
 - `:app` 的 `proguard-rules.pro` 保留全部 keep 规则（R8 最终打包生效）。
 - 敏感机制（契约 6）与映射归口（契约 1）在模块移动后保持原样，禁止借模块化重构业务逻辑。
 
