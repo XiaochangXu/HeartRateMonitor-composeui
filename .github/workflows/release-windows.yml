@@ -67,7 +67,7 @@ jobs:
           Write-Host "打包完成：$zip ($size MB)"
 
       - name: 上传至Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: v${{ github.event.inputs.version }}
           name: v${{ github.event.inputs.version }}
