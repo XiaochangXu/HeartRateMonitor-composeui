@@ -85,8 +85,10 @@ updates:
   # ──────────────────────────────────────────────
   # Android 端：Gradle Wrapper（gradle-wrapper.properties）
   # ──────────────────────────────────────────────
+  # directory 指向 Gradle 项目根目录（包含 gradlew 和 gradle/wrapper/），
+  # 而非 gradle/wrapper 本身——Dependabot 会自动在该目录下寻找 gradle-wrapper.properties
   - package-ecosystem: "gradle"
-    directory: "/android/gradle/wrapper"
+    directory: "/android"
     schedule:
       interval: "weekly"
       day: "monday"
