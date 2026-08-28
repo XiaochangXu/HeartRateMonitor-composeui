@@ -85,23 +85,9 @@ updates:
   # ──────────────────────────────────────────────
   # Android 端：Gradle Wrapper（gradle-wrapper.properties）
   # ──────────────────────────────────────────────
-  # directory 指向 Gradle 项目根目录（包含 gradlew 和 gradle/wrapper/），
-  # 而非 gradle/wrapper 本身——Dependabot 会自动在该目录下寻找 gradle-wrapper.properties
-  - package-ecosystem: "gradle"
-    directory: "/android"
-    schedule:
-      interval: "weekly"
-      day: "monday"
-      time: "09:00"
-      timezone: "Asia/Shanghai"
-    open-pull-requests-limit: 1
-    commit-message:
-      prefix: "deps(gradle-wrapper)"
-      include: "scope"
-    labels:
-      - "dependencies"
-      - "android"
-      - "gradle-wrapper"
+  # 不需要单独条目！Dependabot 的 gradle ecosystem 默认就会扫描
+  # gradle/wrapper/gradle-wrapper.properties，由上面的 gradle 条目统一处理。
+  # commit-message prefix 统一使用 "deps(android)" 即可。
 
   # ──────────────────────────────────────────────
   # GitHub Actions workflows 依赖更新
