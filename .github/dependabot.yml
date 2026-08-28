@@ -14,33 +14,24 @@ updates:
       day: "monday"
       time: "09:00"
       timezone: "Asia/Shanghai"
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 15
     # Android 项目根 build.gradle.kts + settings.gradle.kts + libs.versions.toml
     # Dependabot 会自动递归扫描各子模块的 build.gradle.kts
     groups:
-      # 将 Kotlin 相关依赖（kotlin、ksp、compose-compiler 插件）打包在同一条 PR 中，避免版本冲突
-      kotlin:
-        patterns:
-          - "org.jetbrains.kotlin.*"
-      # AndroidX 依赖统一分组，减少 PR 数量
-      androidx:
-        patterns:
-          - "androidx.*"
-      # Compose 相关依赖分组
+      # ── 以下分组顺序很重要：Dependabot 按定义顺序匹配，先匹配到的分组生效 ──
+      # 具体分组必须放在 androidx（androidx.*）之前，否则会被 androidx 抢先匹配
+
+      # Compose 相关依赖（必须在 androidx 之前，否则 androidx.compose.* 会被 androidx 匹配）
       compose:
         patterns:
           - "androidx.compose.*"
           - "com.patrykandpatrick.vico"
-      # Hilt / 依赖注入分组
+      # Hilt / 依赖注入（必须在 androidx 之前，否则 androidx.hilt.* 会被 androidx 匹配）
       hilt:
         patterns:
           - "com.google.dagger.*"
           - "androidx.hilt.*"
-      # KotlinX 库分组
-      kotlinx:
-        patterns:
-          - "org.jetbrains.kotlinx.*"
-      # 测试相关依赖分组
+      # 测试相关依赖（必须在 androidx 之前，否则 androidx.test.* 会被 androidx 匹配）
       testing:
         patterns:
           - "junit"
@@ -48,6 +39,41 @@ updates:
           - "org.robolectric"
           - "com.google.truth"
           - "androidx.test.*"
+      # AGP（Android Gradle Plugin）相关插件，统一更新避免版本冲突
+      agp:
+        patterns:
+          - "com.android.application"
+          - "com.android.library"
+          - "com.android.test"
+      # KSP（Kotlin Symbol Processing）插件
+      ksp:
+        patterns:
+          - "com.google.devtools.ksp"
+      # Kotlin 相关依赖（kotlin、compose-compiler、serialization 插件）
+      kotlin:
+        patterns:
+          - "org.jetbrains.kotlin.*"
+      # KotlinX 库分组
+      kotlinx:
+        patterns:
+          - "org.jetbrains.kotlinx.*"
+      # AndroidX 依赖统一分组（兜底，放在 compose/hilt/testing 之后确保细分组优先）
+      androidx:
+        patterns:
+          - "androidx.*"
+      # Coil 图片加载库分组
+      coil:
+        patterns:
+          - "io.coil-kt.*"
+      # 第三方 UI 库分组（backdrop、capsule 等）
+      ui-libs:
+        patterns:
+          - "io.github.kyant0.*"
+          - "com.materialkolor"
+          - "com.guolindev.permissionx"
+          - "com.juul.kable.*"
+          - "org.nanohttpd.*"
+          - "org.json"
     commit-message:
       prefix: "deps(android)"
       include: "scope"

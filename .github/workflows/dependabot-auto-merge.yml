@@ -1,0 +1,57 @@
+name: Dependabot Auto-Merge
+
+# 当 Dependabot 打开或更新 PR 时触发
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  auto-merge:
+    name: Auto-merge Dependabot PR
+    runs-on: ubuntu-latest
+    # 仅处理 Dependabot 提交的 PR
+    if: github.actor == 'dependabot[bot]'
+    permissions:
+      contents: write         # 合并 PR 所需
+      pull-requests: write    # 批准 & 合并 PR 所需
+
+    steps:
+      # 1. 检出代码（浅克隆，仅用于构建验证）
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      # 2. 设置 JDK
+      - name: Set up JDK 21
+        uses: actions/setup-java@v6
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: gradle
+
+      # 3. 验证 Kotlin 编译是否通过（跳过资源打包/DEX/APK 签名，节省 CI 时间）
+      - name: Validate Kotlin compilation
+        working-directory: android
+        run: |
+          chmod +x gradlew
+          # 仅编译 Kotlin 源码，不生成 APK，速度快 3-5 倍
+          # 同样能检测出依赖更新导致的 API 变更、类缺失、方法签名不兼容等问题
+          ./gradlew compileDebugKotlin --no-daemon -q
+        continue-on-error: false
+
+      # 4. 自动批准 PR
+      - name: Auto-approve PR
+        if: success()
+        run: gh pr review --approve "$PR_URL"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+
+      # 5. 启用自动合并（Auto-merge），让 GitHub 在所有检查通过后自动 squash 合并
+      - name: Enable auto-merge
+        if: success()
+        run: gh pr merge --auto --squash "$PR_URL"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
