@@ -1,7 +1,0 @@
-- Optimization specific
-- Optimize interface and performance
-- Fixed List/Map/Set type causing Composable to be non-skippable resulting in unnecessary reorganization
-- Fix reproducible build failure of Fdroid
-- Migrating persistent configuration of Webhook from json to Datastore
-- Open Configuration Cache for Build
-- Add OBS browser source heart rate display, application built-in html file, add the source address to OBS, support two transmission methods, http polling and websocket real-time push, choose one, recommend websocket real-time push, better performance

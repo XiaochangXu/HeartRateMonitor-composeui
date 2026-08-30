@@ -3,6 +3,7 @@ package com.github.heartratemonitor_compose.service
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.app.Service
 import android.content.ComponentName
 import android.content.Context
@@ -86,6 +87,7 @@ class HeartRateAlarmService : Service() {
     private val calibrationBuffer = mutableListOf<FloatArray>()
 
     @Inject lateinit var settingsRepository: SettingsRepository
+    @Inject lateinit var reopenAppIntent: @JvmSuppressWildcards () -> Intent
     private lateinit var sensorManager: SensorManager
     private lateinit var postureDetector: PostureDetector
     private var bleService: BleService? = null
@@ -454,6 +456,12 @@ class HeartRateAlarmService : Service() {
             .setContentText(getString(R.string.alarm_resident_notification_text))
             .setSmallIcon(R.drawable.ic_heart)
             .setOngoing(true)
+            .setContentIntent(
+                PendingIntent.getActivity(
+                    this, 0, reopenAppIntent(),
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                )
+            )
             .build()
     }
 

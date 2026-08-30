@@ -193,7 +193,7 @@ class FairMemoryNotifier @Inject constructor(
         private const val HEAP_CHANNEL_ID = "fair_memory_heap"
         private const val PSS_CHANNEL_ID = "fair_memory_pss"
 
-        private const val HEAP_NOTIFICATION_ID = 1001
+        private const val HEAP_NOTIFICATION_ID = 1003
         private const val PSS_NOTIFICATION_ID = 1002
 
         private const val ACTION_CLOSE_APP = "com.github.heartratemonitor_compose.action.CLOSE_APP"

@@ -142,8 +142,8 @@ class HttpServerManager(
 
             // 根路径 / 返回 OBS 用的 HTML 页面（浏览器源直接填此地址即可）
             if (session?.method == Method.GET && (session.uri == "/" || session.uri == "/obs" || session.uri == "/obs_heartrate")) {
-                val hostHeader = session?.headers?.get("host")
-                val host = extractHost(hostHeader) ?: session?.remoteIpAddress ?: ""
+                val hostHeader = session.headers?.get("host")
+                val host = extractHost(hostHeader) ?: session.remoteIpAddress ?: ""
                 val resp = newFixedLengthResponse(Response.Status.OK, "text/html; charset=utf-8", getObsHtml(host))
                 // 禁止 OBS 浏览器源缓存 HTML 页面，确保每次连接都拉取最新内容
                 resp.addHeader("Cache-Control", "no-cache, no-store, must-revalidate")

@@ -24,8 +24,10 @@ import com.github.heartratemonitor_compose.data.model.HeartRateRecordInfo
 import kotlinx.collections.immutable.ImmutableList
 import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
 import com.patrykandpatrick.vico.compose.cartesian.axis.rememberAxisGuidelineComponent
-import com.patrykandpatrick.vico.compose.cartesian.rememberVicoScrollState
+import com.patrykandpatrick.vico.compose.cartesian.Zoom
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLineCartesianLayer
+import com.patrykandpatrick.vico.compose.cartesian.rememberVicoScrollState
+import com.patrykandpatrick.vico.compose.cartesian.rememberVicoZoomState
 import com.patrykandpatrick.vico.compose.cartesian.rememberCartesianChart
 import com.patrykandpatrick.vico.compose.cartesian.marker.rememberDefaultCartesianMarker
 import com.patrykandpatrick.vico.compose.common.component.rememberShapeComponent
@@ -128,7 +130,11 @@ internal fun HeartRateChart(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(8.dp),
-            scrollState = rememberVicoScrollState(scrollEnabled = false)
+            scrollState = rememberVicoScrollState(scrollEnabled = true),
+            zoomState = rememberVicoZoomState(
+                zoomEnabled = true,
+                initialZoom = Zoom.Content
+            )
         )
     }
 }

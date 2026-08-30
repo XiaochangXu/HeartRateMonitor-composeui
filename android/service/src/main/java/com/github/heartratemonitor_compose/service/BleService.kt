@@ -50,6 +50,7 @@ class BleService : Service(), FairMemoryReceiver.MemoryListener, BleConnectionMa
     @Inject lateinit var sessionRepository: SessionRepository
     @Inject lateinit var fairMemoryReceiver: FairMemoryReceiver
     @Inject lateinit var lanTransferSharedState: LanTransferSharedState
+    @Inject lateinit var reopenAppIntent: @JvmSuppressWildcards () -> Intent
 
     private lateinit var bleManager: BleManager
     private lateinit var heartRateRecorder: HeartRateRecorder
@@ -93,7 +94,7 @@ class BleService : Service(), FairMemoryReceiver.MemoryListener, BleConnectionMa
         serverHost = createServerHost()
         broadcastManager = createBroadcastManager()
         settingsListener = createSettingsListener()
-        notificationManager = BleNotificationManager(this, settingsRepository)
+        notificationManager = BleNotificationManager(this, settingsRepository, reopenAppIntent)
 
         // 初始化 Handler 内的本地化兜底设备名
         connectionHandler.initDeviceNameFallback(getString(R.string.unknown_device))

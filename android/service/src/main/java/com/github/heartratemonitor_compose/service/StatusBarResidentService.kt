@@ -4,6 +4,7 @@ import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.KeyguardManager
+import android.app.PendingIntent
 import android.app.Service
 import android.content.BroadcastReceiver
 import android.content.ComponentCallbacks2
@@ -64,6 +65,7 @@ class StatusBarResidentService : Service() {
     @Inject lateinit var settingsRepository: SettingsRepository
     @Inject lateinit var themeState: ThemeState
     @Inject lateinit var customSchemeCache: CustomSchemeCache
+    @Inject lateinit var reopenAppIntent: @JvmSuppressWildcards () -> Intent
 
     private var heartRateText by mutableStateOf("--")
     private var isAnimationEnabled by mutableStateOf(true)
@@ -298,6 +300,12 @@ class StatusBarResidentService : Service() {
             .setContentText(getString(R.string.status_bar_notification_text))
             .setSmallIcon(R.drawable.ic_heart)
             .setOngoing(true)
+            .setContentIntent(
+                PendingIntent.getActivity(
+                    this, 0, reopenAppIntent(),
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                )
+            )
             .build()
     }
 

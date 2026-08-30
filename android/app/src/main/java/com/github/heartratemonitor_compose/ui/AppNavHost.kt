@@ -78,7 +78,18 @@ fun AppNavHost(
             // 文件模式：NavDisplay 独占返回事件流，不用外层 BackHandler 拦截。
             // 栈底 TabRoot 时让系统接管（finish Activity），二级页面 pop。
             if (navBackStack.size > 1) {
-                safePopBack()
+                // 心率详情页横屏时按返回：先切回竖屏，不退出页面（与旋转按钮行为一致）
+                val topKey = navBackStack.last()
+                val activity = context as? android.app.Activity
+                if (topKey is AppNavKey.Chart && activity != null &&
+                    activity.requestedOrientation ==
+                        android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+                ) {
+                    activity.requestedOrientation =
+                        android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+                } else {
+                    safePopBack()
+                }
             } else {
                 (context as? android.app.Activity)?.finish()
             }

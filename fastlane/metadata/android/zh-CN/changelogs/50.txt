@@ -1,7 +1,0 @@
-- 优化细节
-- 优化界面和性能
-- 修复集合类型（List/Map/Set）导致 Composable 不可跳过产生不必要的重组
-- 修复 Fdroid 的可复现构建失败
-- 将 Webhook 的持久化配置从 json 迁移到 Datastore
-- 为构建开启配置缓存（Configuration Cache）
-- 新增 OBS 浏览器源心率显示，应用内置了 html 文件，将源地址添加进 OBS 即可，支持两种传输方式，http 轮询和 websocket 实时推送，任选其一即可，推荐使用 websocket 实时推送，性能更好

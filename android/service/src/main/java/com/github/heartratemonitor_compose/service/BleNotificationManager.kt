@@ -3,6 +3,7 @@ package com.github.heartratemonitor_compose.service
 import android.Manifest
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.app.Service
 import android.content.pm.PackageManager
 import android.content.pm.ServiceInfo
@@ -21,7 +22,8 @@ import com.github.heartratemonitor_compose.data.repository.SettingsRepository
  */
 class BleNotificationManager(
     private val service: Service,
-    private val settingsRepository: SettingsRepository
+    private val settingsRepository: SettingsRepository,
+    private val reopenAppIntent: () -> android.content.Intent
 ) {
 
     companion object {
@@ -40,11 +42,17 @@ class BleNotificationManager(
             manager.createNotificationChannel(chan)
         }
 
+        val reopenPendingIntent = PendingIntent.getActivity(
+            service, 0, reopenAppIntent(),
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
         val notification = NotificationCompat.Builder(service, CHANNEL_ID)
             .setContentTitle(service.getString(R.string.app_name))
             .setContentText(service.getString(R.string.notification_content))
             .setSmallIcon(R.drawable.ic_bluetooth_connected)
             .setOngoing(true)
+            .setContentIntent(reopenPendingIntent)
             .build()
 
         var type = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {

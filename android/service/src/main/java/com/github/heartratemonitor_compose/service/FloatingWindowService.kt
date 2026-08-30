@@ -101,6 +101,7 @@ class FloatingWindowService : Service() {
     @Inject lateinit var settingsRepository: SettingsRepository
     @Inject lateinit var themeState: ThemeState
     @Inject lateinit var customSchemeCache: CustomSchemeCache
+    @Inject lateinit var reopenAppIntent: @JvmSuppressWildcards () -> Intent
 
     private val serviceScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
     private var bleService: BleService? = null
@@ -455,6 +456,12 @@ class FloatingWindowService : Service() {
             .addAction(R.drawable.ic_floating_window_on, getString(R.string.touch_through_disable_action), disablePendingIntent)
             .setOngoing(true)
             .setPriority(NotificationCompat.PRIORITY_LOW)
+            .setContentIntent(
+                PendingIntent.getActivity(
+                    this, 0, reopenAppIntent(),
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                )
+            )
             .build()
 
         val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager

@@ -57,9 +57,11 @@ class StatusBarSettingsViewModel @Inject constructor(
             is StatusBarSettingsIntent.SetResident -> {
                 if (intent.enabled && !overlayPermissionProvider.canDrawOverlays()) {
                     // 无悬浮窗权限：不落盘不启服务，经回调交由 UI 跳转系统权限页
-                    //（Activity 上下文）；跳转前先置外部启动抑制标志（原 UI 层语义上提）
-                    suppressHideForExternalLaunch(true)
+                    //（Activity 上下文）；DEF-02 修复：先回调跳转，UI 侧 startActivity 成功后才
+                    // 置位 suppress——避免 safe-cast 失败或 Intent 不解析时 suppress 泄漏。
+                    // setSuppressHideForExternalLaunch 自带 5 秒超时复位兜底。
                     intent.onRequestPermission?.invoke(overlayPermissionProvider.createManageOverlayIntent())
+                    suppressHideForExternalLaunch(true)
                 } else {
                     settings.set(SettingsKeys.STATUS_BAR_RESIDENT_ENABLED, intent.enabled)
                     if (intent.enabled) serviceLauncher.startStatusBarResidentService()

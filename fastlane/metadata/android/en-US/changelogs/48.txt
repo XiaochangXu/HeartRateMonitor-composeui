@@ -1,7 +1,0 @@
-- Fixed some bugs
-- Continue to refine details
-- Continue to optimize performance and reduce unnecessary restructuring
-- A maximum of 30 historical records can be saved, and the oldest records will be deleted when they are exceeded.
-- Upgrade some dependency libraries
-- Gradle upgraded to 9.7.0
-- compsoebom Upgrade to latest stable version 2026.08.00

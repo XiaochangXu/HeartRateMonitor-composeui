@@ -3,7 +3,6 @@ package com.github.heartratemonitor_compose.ui.main
 import android.app.Activity
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.withInfiniteAnimationFrameNanos
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -29,6 +28,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
@@ -207,7 +207,7 @@ fun FullScreenHeartRate(
     val ecgPhase = remember { Animatable(0f) }
     LaunchedEffect(isAnimationEnabled) {
         if (!isAnimationEnabled) return@LaunchedEffect
-        // 使用 withInfiniteAnimationFrameNanos 挂接到 Choreographer Vsync 信号：
+        // 使用 withFrameNanos 挂接到 Choreographer Vsync 信号：
         // 每帧在屏幕刷新的精确时间点执行，帧间隔稳定且无抖动。
         // 以 frameTimeNanos 计算实际经过时间，保证相位推进精确匹配心率，
         // 同时避免 delay(16) 不与 Vsync 同步导致的帧间隔 16~32ms 波动和丢帧。
@@ -222,7 +222,7 @@ fun FullScreenHeartRate(
                 continue
             }
             // 挂接到 Vsync，在屏幕刷新时推进一帧
-            val frameNanos = withInfiniteAnimationFrameNanos { it }  // nanos since boot
+            val frameNanos = withFrameNanos { it }  // nanos since boot
             if (lastNanos == 0L) {
                 lastNanos = frameNanos
                 continue

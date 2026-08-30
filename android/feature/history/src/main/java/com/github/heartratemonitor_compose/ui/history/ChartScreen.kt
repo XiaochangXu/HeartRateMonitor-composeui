@@ -109,7 +109,17 @@ fun ChartScreen(
                 ),
                 title = { Text(stringResource(R.string.chart_detail), style = MaterialTheme.typography.headlineSmall) },
                 navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
+                    IconButton(onClick = {
+                        val activity = context.findActivity()
+                        if (activity != null &&
+                            activity.requestedOrientation == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+                        ) {
+                            // 横屏时按返回：先切回竖屏，不退出页面
+                            activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+                        } else {
+                            onNavigateBack()
+                        }
+                    }) {
                         Surface(
                             modifier = Modifier.size(40.dp),
                             shape = CircleShape,

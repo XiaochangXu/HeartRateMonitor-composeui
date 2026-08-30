@@ -7,7 +7,10 @@ import android.content.Intent
 import android.content.ServiceConnection
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
 import android.os.IBinder
+import android.os.Looper
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
@@ -33,9 +36,35 @@ import javax.inject.Inject
 class MainActivity : FragmentActivity() {
 
     companion object {
-        
+        private const val TAG = "MainActivity"
+        private const val SUPPRESS_TIMEOUT_MS = 5000L
+
         @JvmStatic
-        var suppressHideForExternalLaunch = false
+        private var suppressHideForExternalLaunch = false
+        private val suppressResetHandler = Handler(Looper.getMainLooper())
+        private val suppressResetRunnable = Runnable {
+            if (suppressHideForExternalLaunch) {
+                Log.w(TAG, "suppressHideForExternalLaunch 超时自动复位（用户可能未从外链返回）")
+                suppressHideForExternalLaunch = false
+            }
+        }
+
+        /**
+         * 置位外部启动抑制标志并启动超时自动复位。
+         * 超时确保即使用户从外链页面直接按 HOME，抑制窗口也不会无限泄漏。
+         */
+        @JvmStatic
+        fun setSuppressHideForExternalLaunch(value: Boolean) {
+            suppressResetHandler.removeCallbacks(suppressResetRunnable)
+            suppressHideForExternalLaunch = value
+            if (value) {
+                suppressResetHandler.postDelayed(suppressResetRunnable, SUPPRESS_TIMEOUT_MS)
+            }
+        }
+
+        /** 仅供 [onStart] / [onStop] 读取，不对外暴露 setter。 */
+        @JvmStatic
+        fun isSuppressHideForExternalLaunch(): Boolean = suppressHideForExternalLaunch
     }
 
     @Inject lateinit var overlayPermissionProvider: OverlayPermissionProvider
@@ -55,8 +84,6 @@ class MainActivity : FragmentActivity() {
     override fun attachBaseContext(newBase: Context) {
         super.attachBaseContext(LocaleHelper.wrap(newBase))
     }
-
-    private var isStarted = false
 
     private var bleService: BleService? = null
     private var isBleServiceBound = false
@@ -139,8 +166,16 @@ class MainActivity : FragmentActivity() {
                     killStateSaver = killStateSaver,
                     onToggleFloatingWindow = { toggleFloatingWindow() },
                     onOpenExternal = { intent ->
-                        suppressHideForExternalLaunch = true
-                        startActivity(intent)
+                        // DEF-02 修复：跳转成功后才置位，失败时 suppress 不会泄漏
+                        try {
+                            startActivity(intent)
+                            setSuppressHideForExternalLaunch(true)
+                        } catch (e: android.content.ActivityNotFoundException) {
+                            Log.e(TAG, "外部链接跳转失败：无 Activity 可处理该 Intent", e)
+                            showToast(getString(R.string.toast_permissions_denied))
+                        } catch (e: Exception) {
+                            Log.e(TAG, "外部链接跳转失败", e)
+                        }
                     }
                 )
             }
@@ -149,15 +184,14 @@ class MainActivity : FragmentActivity() {
 
     override fun onStart() {
         super.onStart()
-        isStarted = true
-        suppressHideForExternalLaunch = false
+        // 复位 suppress：取消超时回调并清除标志
+        setSuppressHideForExternalLaunch(false)
         setExcludeFromRecentsFlag(false)
     }
 
     override fun onStop() {
         super.onStop()
-        isStarted = false
-        if (!suppressHideForExternalLaunch && mainViewModel.uiState.value.hideFromRecentsEnabled) {
+        if (!isSuppressHideForExternalLaunch() && mainViewModel.uiState.value.hideFromRecentsEnabled) {
             setExcludeFromRecentsFlag(true)
         }
     }
@@ -201,8 +235,13 @@ class MainActivity : FragmentActivity() {
     private fun toggleFloatingWindow() {
         // 业务判定与设置写入归 VM；权限跳转依赖 Activity 上下文，留在此处
         if (mainViewModel.toggleFloatingWindow()) {
-            suppressHideForExternalLaunch = true
-            startActivity(overlayPermissionProvider.createManageOverlayIntent())
+            // DEF-02 修复：跳转成功后才置位 suppress
+            try {
+                startActivity(overlayPermissionProvider.createManageOverlayIntent())
+                setSuppressHideForExternalLaunch(true)
+            } catch (e: Exception) {
+                Log.e(TAG, "悬浮窗权限页跳转失败", e)
+            }
             return
         }
         updateFloatingWindowUi(mainViewModel.uiState.value.floatingWindowEnabled)
@@ -261,13 +300,20 @@ class MainActivity : FragmentActivity() {
             val am = getSystemService(Context.ACTIVITY_SERVICE) as android.app.ActivityManager
             // 用 baseIntent 包名匹配代替 taskInfo.taskId，兼容 Android 7+ 全版本
             // (TaskInfo.taskId 字段从 API 29 起才存在，低版本访问会抛 NoSuchFieldError)
+            var matched = false
             for (task in am.appTasks) {
                 if (task.taskInfo?.baseIntent?.component?.packageName == packageName) {
                     task.setExcludeFromRecents(exclude)
+                    matched = true
                     break
                 }
             }
-        } catch (_: Throwable) { }
+            if (!matched) {
+                Log.w(TAG, "setExcludeFromRecents($exclude): 未找到包名匹配的任务")
+            }
+        } catch (e: Throwable) {
+            Log.e(TAG, "setExcludeFromRecents($exclude) 失败", e)
+        }
     }
 
     private fun showToast(message: String) {

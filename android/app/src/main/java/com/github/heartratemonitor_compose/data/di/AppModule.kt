@@ -41,5 +41,5 @@ object AppModule {
 
     @Provides
     fun provideSuppressHideForExternalLaunch(): @JvmSuppressWildcards (Boolean) -> Unit =
-        { value -> MainActivity.suppressHideForExternalLaunch = value }
+        { value -> MainActivity.setSuppressHideForExternalLaunch(value) }
 }

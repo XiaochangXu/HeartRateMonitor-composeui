@@ -323,9 +323,11 @@ internal fun RealtimeChart(
                     zoomEnabled = true,
                     initialZoom = Zoom.Content
                 ),
-                // 禁用 diff 动画与初始生长动画，避免曲线从下往上长
+                // 禁用初始 reveal 动画与数据更新的 diff 动画，避免曲线从下往上长
+                // animationSpec = null 禁用 diff 动画；initialAnimationSpec = null 禁用初始动画
+                // (initialAnimationSpec 替代废弃的 animateIn 参数)
                 animationSpec = null,
-                animateIn = false
+                initialAnimationSpec = null
             )
         }
     }
