@@ -1,6 +1,7 @@
 package com.github.heartratemonitor_compose.ui.main
 
 import android.content.Context
+import com.github.heartratemonitor_compose.data.model.ChartDataSnapshot
 import com.github.heartratemonitor_compose.data.model.ScannedDevice
 import com.github.heartratemonitor_compose.data.repository.SettingsRepository
 import com.github.heartratemonitor_compose.data.settings.AppSettings

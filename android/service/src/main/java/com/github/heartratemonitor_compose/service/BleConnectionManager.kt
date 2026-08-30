@@ -2,6 +2,7 @@ package com.github.heartratemonitor_compose.service
 
 import com.github.heartratemonitor_compose.ble.BleState
 import com.github.heartratemonitor_compose.ble.HeartRateMeasurement
+import com.github.heartratemonitor_compose.data.model.ChartDataSnapshot
 import com.github.heartratemonitor_compose.data.model.ScannedDevice
 import kotlinx.coroutines.flow.StateFlow
 
@@ -32,6 +33,21 @@ interface BleConnectionManager {
     val scanResults: StateFlow<List<ScannedDevice>>
 
     val connectedDevice: StateFlow<ConnectedDevice?>
+
+    /**
+     * 当前会话的图表快照（60秒滑动窗口）。
+     *
+     * 生命周期随 BLE 连接生灭，由服务层 [SessionChartTracker] 维护。
+     * StateFlow 重放实现「重进即恢复」——退出应用再重进后，
+     * UI 订阅本流立即获得当前会话的图表缓存，不再归零。
+     */
+    val chartDataSnapshot: StateFlow<ChartDataSnapshot?>
+
+    /** 当前会话心率最大值（随连接生灭，跨重进连续） */
+    val sessionMaxHr: StateFlow<Int>
+
+    /** 当前会话心率最小值（随连接生灭，跨重进连续） */
+    val sessionMinHr: StateFlow<Int>
 
     fun isDeviceConnected(): Boolean
 

@@ -105,9 +105,9 @@ fun AppRoot(
     // 二级页面完全展示后随场景销毁——不存在"常驻隐藏导航条"。
     val liquidGlassConfig by liquidGlassState.config.collectAsStateWithLifecycle()
 
-    // 关闭导航动画开关：读取 SettingsRepository 的全量快照
-    val appSettings by liquidGlassState.appSettingsFlow.collectAsStateWithLifecycle()
-    val navAnimationDisabled = appSettings.navAnimationDisabled
+    // 关闭导航动画开关：仅订阅单字段流，避免全量 AppSettings 快照（60+ 字段）
+    // 任一变化都触发根节点重组
+    val navAnimationDisabled by liquidGlassState.navAnimationDisabledFlow.collectAsStateWithLifecycle()
 
     // 底部渐变需覆盖：系统导航条 inset + 悬浮应用导航条（FLOATING_NAV_HEIGHT + 边距）。
     // windowInsetsBottomHeight 仅等于系统导航条高度，无法覆盖应用导航条悬浮区域。

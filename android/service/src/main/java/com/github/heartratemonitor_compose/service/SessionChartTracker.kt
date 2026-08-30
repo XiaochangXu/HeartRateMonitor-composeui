@@ -1,45 +1,41 @@
-package com.github.heartratemonitor_compose.ui.main
+package com.github.heartratemonitor_compose.service
 
 import android.util.Log
 import com.github.heartratemonitor_compose.ble.HeartRateMeasurement
+import com.github.heartratemonitor_compose.data.model.ChartDataSnapshot
+import com.github.heartratemonitor_compose.data.model.HeartRatePoint
 import com.github.heartratemonitor_compose.service.FairMemoryReceiver
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.toImmutableList
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-
-data class HeartRatePoint(
-    val timeOffsetSec: Float,
-    val heartRate: Float
-)
+import kotlinx.collections.immutable.toImmutableList
 
 /**
- * 避免 UI 层每次心跳都执行 timeOffsetSec->ms 与 Float->Double 的全量转换。
- * [windowMaxY] / [windowMinY] 为当前 60 秒可视窗口内的极值，
- * 由 ChartDataManager 在发布快照时一并计算，避免 UI 层重复遍历 yValues。
+ * 服务层会话图表状态追踪器：RR-Interval → HeartRatePoint → 滑动窗口管理 → ChartDataSnapshot 发布，
+ * 以及本次连接的心率极值跟踪。
+ *
+ * 与原 [ChartDataManager]（:feature/main）的核心区别：
+ * - 生命周期归属 BLE 连接（由 [BleConnectionHandler] 持有），而非 Activity/ViewModel。
+ * - StateFlow 重放天然实现「重进即恢复」——退出应用再重进后，UI 订阅服务层图表流
+ *   立即获得当前会话的完整图表缓存，不再归零。
+ * - 不再需要 isConnected / isHistoryEnabled 外部标志位：
+ *   连接/断开由 [reset] / [clear] 显式控制；历史开关联动由 [BleSettingsListener] 接管。
+ *
+ * 所有可变状态通过 @Synchronized 保证线程安全——心率包到达在 IO 线程调用，
+ * 历史开关联动在主线程调用，两者不会交错。
+ *
+ * @param scope 连接协程作用域（connectionJob 的子协程），断开连接时随 connectionJob 取消。
  */
-data class ChartDataSnapshot(
-    val xValues: ImmutableList<Double>,
-    val yValues: ImmutableList<Double>,
-    val windowMaxY: Double = 0.0,
-    val windowMinY: Double = 0.0
-)
-
-/**
- * RR-Interval → HeartRatePoint → 滑动窗口管理 → ChartDataSnapshot 发布，
- * 以及本次连接的心率极值跟踪与公平运行内存 TRIM 时的缓存释放。
- * 所有可变状态必须且只能在主线程访问。
- */
-class ChartDataManager(private val scope: CoroutineScope) {
+class SessionChartTracker(private val scope: CoroutineScope) {
 
     private val _chartDataSnapshot = MutableStateFlow<ChartDataSnapshot?>(null)
     val chartDataSnapshot: StateFlow<ChartDataSnapshot?> = _chartDataSnapshot.asStateFlow()
 
-    // 必须在外部首次回调前构造完成：历史记录开关关闭时 collect 会立即触发 clear()
     private val _sessionMaxHr = MutableStateFlow(0)
     val sessionMaxHr: StateFlow<Int> = _sessionMaxHr.asStateFlow()
 
@@ -49,21 +45,14 @@ class ChartDataManager(private val scope: CoroutineScope) {
     // --- 内部管道状态 ---
     private var chartStartTime = 0L
     private val chartDataPoints = ArrayDeque<HeartRatePoint>()
-    // 与 chartDataPoints 同步维护的已格式化 Vico 坐标列表，避免 UI 层每拍全量转换
     private val chartXValues = ArrayDeque<Double>()
     private val chartYValues = ArrayDeque<Double>()
 
     // RR-Interval 累加时间戳:逐拍数据按 RR 秒数累加,得到每个心跳的相对时间 (秒)
     private var lastChartTimeSec = 0f
 
-    /** 历史记录开关状态：关闭时不累积图表数据（由 [MainViewModel] 同步设置） */
-    var isHistoryEnabled = false
-
-    /** 连接状态：仅 CONNECTED 时处理测量数据（由 [MainViewModel] 同步设置） */
-    var isConnected = false
-
     private companion object {
-        const val TAG = "ChartDataManager"
+        const val TAG = "SessionChartTracker"
         const val MAX_CHART_POINTS = 10000
 
         /**
@@ -74,7 +63,6 @@ class ChartDataManager(private val scope: CoroutineScope) {
 
         /**
          * 首页实时图表只保留最近 N 秒的数据，避免长时间连接后内存和渲染开销线性增长。
-         * 超过该窗口的旧点会随新点到达被移除；完整历史数据仍由 Room 持久化（历史记录开启时）。
          */
         const val MAX_CHART_WINDOW_SECONDS = 60f
 
@@ -85,24 +73,17 @@ class ChartDataManager(private val scope: CoroutineScope) {
         const val TRIM_KEEP_POINTS = 500
     }
 
-    /**
-     * 标记自上次快照发布以来是否有新数据追加，配合 [snapshotJob] 做 500ms 节流。
-     */
     private var hasPendingSnapshot = false
+    private var snapshotJob: Job? = null
 
     /**
-     * 节流定时器：500ms 内只发布一次快照，避免每个心率包都触发 UI 全量重组 + Vico 重建 series。
+     * 处理一次完整心率测量：跟踪 MAX/MIN，把 RR/bpm 转为图表点。
+     * 由 [BleConnectionHandler.observeHeartRateData] 在心率包到达时调用。
+     * @Synchronized 保证线程安全。
      */
-    private var snapshotJob: kotlinx.coroutines.Job? = null
-
-    /**
-     * 处理一次完整心率测量：跟踪 MAX/MIN，并在历史记录开启时把 RR/bpm 转为图表点。
-     * 仅在主线程调用。
-     */
+    @Synchronized
     fun onMeasurement(measurement: HeartRateMeasurement) {
-        if (!isConnected) return
-
-        // MAX/MIN 独立于历史记录开关：无论是否开启历史记录，始终跟踪当次连接的心率极值
+        // MAX/MIN 跟踪当次连接的心率极值
         val bpm = measurement.bpm
         if (bpm > 0) {
             if (_sessionMaxHr.value == 0 || bpm > _sessionMaxHr.value) {
@@ -113,10 +94,7 @@ class ChartDataManager(private val scope: CoroutineScope) {
             }
         }
 
-        // 历史记录开关关闭时不累积图表数据。
-        if (!isHistoryEnabled) return
-
-        // 防御竞态：状态流通知与数据流到达之间可能存在窗口，确保 chartStartTime 已初始化
+        // 防御竞态：确保 chartStartTime 已初始化
         if (chartStartTime == 0L) {
             chartStartTime = System.currentTimeMillis()
         }
@@ -141,8 +119,6 @@ class ChartDataManager(private val scope: CoroutineScope) {
         }
 
         if (appended) {
-            // 首次数据到达时立即发布快照，让 UI 从 loading 切到图表显示；
-            // 后续更新走 500ms 节流，避免每个心率包都触发 UI 全量重组 + Vico 重建 series。
             if (_chartDataSnapshot.value == null) {
                 publishSnapshot()
             } else {
@@ -151,15 +127,12 @@ class ChartDataManager(private val scope: CoroutineScope) {
         }
     }
 
-    /**
-     * 500ms 节流发布：同一时间窗口内多个心率包只触发一次 UI 更新。
-     * 心率数据照常追加到 [chartXValues] / [chartYValues]，定时器到期后发布最新快照。
-     */
+    @Synchronized
     private fun scheduleSnapshotPublish() {
         hasPendingSnapshot = true
         if (snapshotJob?.isActive == true) return
         snapshotJob = scope.launch {
-            kotlinx.coroutines.delay(SNAPSHOT_THROTTLE_MS)
+            delay(SNAPSHOT_THROTTLE_MS)
             if (hasPendingSnapshot) {
                 hasPendingSnapshot = false
                 publishSnapshot()
@@ -167,10 +140,7 @@ class ChartDataManager(private val scope: CoroutineScope) {
         }
     }
 
-    /**
-     * 将当前 [chartXValues] / [chartYValues] 发布为 [ChartDataSnapshot]。
-     * 窗口极值在发布时一并计算，避免 UI 层每次重组都重复遍历 yValues。
-     */
+    @Synchronized
     private fun publishSnapshot() {
         if (chartYValues.isEmpty()) {
             _chartDataSnapshot.value = null
@@ -190,10 +160,7 @@ class ChartDataManager(private val scope: CoroutineScope) {
         )
     }
 
-    /**
-     * 取消待发布的节流定时器。reset / clear / releaseOnTrim 等即时清空场景调用，
-     * 防止定时器到期后发布已被清空的陈旧快照。
-     */
+    @Synchronized
     private fun cancelSnapshotJob() {
         snapshotJob?.cancel()
         snapshotJob = null
@@ -202,13 +169,14 @@ class ChartDataManager(private val scope: CoroutineScope) {
 
     /**
      * 新会话开始：重置时间基准与全部缓存，并清零 MAX/MIN。
-     * 在连接建立（状态转为 CONNECTED）或开启历史记录时调用。仅在主线程调用。
+     * 在连接建立（[BleConnectionHandler] State.Connected）处调用，与 startSession 同位置。
+     * @Synchronized 保证线程安全。
      */
+    @Synchronized
     fun reset() {
         cancelSnapshotJob()
         chartStartTime = System.currentTimeMillis()
         chartDataPoints.clear()
-        // 兜底：清空 X/Y 双端队列与 snapshot，防止断开事件丢失时重连残留旧数据
         chartXValues.clear()
         chartYValues.clear()
         _chartDataSnapshot.value = null
@@ -218,9 +186,10 @@ class ChartDataManager(private val scope: CoroutineScope) {
     }
 
     /**
-     * 清零本次连接的心率极值。断开连接时调用，使 UI 立即回落为 "--"；
-     * 新会话开始时的清零由 [reset] 负责。仅在主线程调用。
+     * 清零本次连接的心率极值。断开连接时调用，使 UI 立即回落为 "--"。
+     * @Synchronized 保证线程安全。
      */
+    @Synchronized
     fun resetSessionExtremes() {
         _sessionMaxHr.value = 0
         _sessionMinHr.value = 0
@@ -228,10 +197,11 @@ class ChartDataManager(private val scope: CoroutineScope) {
 
     /**
      * 清空当前会话的图表缓存。
-     * 用于断开连接或关闭历史记录时立即重置首页图表，
+     * 用于断开连接（[BleConnectionHandler.cleanupConnection]）或关闭历史记录时立即重置首页图表。
      * 不重置 MAX/MIN（MAX/MIN 由 [reset] 在新会话开始时独立清零）。
-     * 仅在主线程调用。
+     * @Synchronized 保证线程安全。
      */
+    @Synchronized
     fun clear() {
         cancelSnapshotJob()
         chartDataPoints.clear()
@@ -242,17 +212,48 @@ class ChartDataManager(private val scope: CoroutineScope) {
         _chartDataSnapshot.value = null
     }
 
+    @Synchronized
+    private fun appendPoint(point: HeartRatePoint) {
+        val windowStart = point.timeOffsetSec - MAX_CHART_WINDOW_SECONDS
+        while (chartDataPoints.isNotEmpty() && chartDataPoints.first().timeOffsetSec < windowStart) {
+            chartDataPoints.removeFirst()
+            chartXValues.removeFirst()
+            chartYValues.removeFirst()
+        }
+        if (chartDataPoints.size >= MAX_CHART_POINTS) {
+            chartDataPoints.removeFirst()
+            chartXValues.removeFirst()
+            chartYValues.removeFirst()
+        }
+        chartDataPoints.add(point)
+        chartXValues.add((point.timeOffsetSec * 1000).toLong().toDouble())
+        chartYValues.add(point.heartRate.toDouble())
+    }
+
     /**
-     * TRIM 内存预警时释放图表缓存（由公平运行内存 TRIM 广播触发）。仅在主线程调用。
+     * TRIM 内存预警时释放图表缓存（由 [BleService] 的 FairMemoryReceiver 回调触发）。
      *
      * - [FairMemoryReceiver.NOTIFY_TYPE_PSS]（物理内存异常）：文档指出"先查杀再通知"，
      *   紧急度最高，清空整个图表缓存（数据已 Room 持久化，可恢复）。
      * - [FairMemoryReceiver.NOTIFY_TYPE_HEAP]（Java 堆异常）：降采样到 [TRIM_KEEP_POINTS]
      *   保留最近图表数据以维持当前会话体验；无论缓存是否为空都在后台线程触发 GC
-     *   （与原实现一致，GC 对堆异常直接有效）。
+     *   （GC 对堆异常直接有效）。
+     *
+     * 数据操作部分通过 @Synchronized 保证线程安全；
+     * GC 启动在锁外执行，避免在持锁状态下做协程调度。
      */
     fun releaseOnTrim(notifyType: Int) {
         val isPss = notifyType == FairMemoryReceiver.NOTIFY_TYPE_PSS
+        trimData(isPss)
+        // HEAP 异常时在后台线程触发 GC，避免 System.gc() 暂停主线程。
+        // 在锁外启动：锁只保护数据操作，不护送协程调度。
+        if (!isPss) {
+            scope.launch(Dispatchers.Default) { System.gc() }
+        }
+    }
+
+    @Synchronized
+    private fun trimData(isPss: Boolean) {
         // PSS 异常时取消待发布的节流定时器，防止清空后定时器又发布陈旧快照
         if (isPss) cancelSnapshotJob()
         if (chartDataPoints.isNotEmpty()) {
@@ -290,29 +291,5 @@ class ChartDataManager(private val scope: CoroutineScope) {
                 Log.i(TAG, "TRIM(HEAP): 图表降采样 $originalSize -> 保留最近 $TRIM_KEEP_POINTS 点")
             }
         }
-        // HEAP 异常时在后台线程触发 GC，避免 System.gc() 暂停主线程
-        if (!isPss) {
-            scope.launch(Dispatchers.Default) { System.gc() }
-        }
-    }
-
-    private fun appendPoint(point: HeartRatePoint) {
-        // 维护最近 60 秒可视窗口，避免长时间连接后 chartDataPoints 线性膨胀导致
-        // 主线程扫描/拷贝开销增长（以及 Vico 全量重建 series 的卡顿）。
-        val windowStart = point.timeOffsetSec - MAX_CHART_WINDOW_SECONDS
-        while (chartDataPoints.isNotEmpty() && chartDataPoints.first().timeOffsetSec < windowStart) {
-            chartDataPoints.removeFirst()
-            chartXValues.removeFirst()
-            chartYValues.removeFirst()
-        }
-        // 兜底：异常时间戳/极端频率下仍不突破硬上限
-        if (chartDataPoints.size >= MAX_CHART_POINTS) {
-            chartDataPoints.removeFirst()
-            chartXValues.removeFirst()
-            chartYValues.removeFirst()
-        }
-        chartDataPoints.add(point)
-        chartXValues.add((point.timeOffsetSec * 1000).toLong().toDouble())
-        chartYValues.add(point.heartRate.toDouble())
     }
 }

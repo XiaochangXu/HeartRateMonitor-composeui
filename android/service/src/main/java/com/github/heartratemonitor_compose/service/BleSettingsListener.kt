@@ -18,7 +18,8 @@ class BleSettingsListener(
     private val scope: CoroutineScope,
     private val onServerSettingsChanged: () -> Unit,
     private val onSpeedSettingsChanged: () -> Unit,
-    private val onHistoryRecordingDisabled: () -> Unit
+    private val onHistoryRecordingDisabled: () -> Unit,
+    private val onChartCacheClear: () -> Unit
 ) {
     private var jobs: List<Job> = emptyList()
 
@@ -44,7 +45,10 @@ class BleSettingsListener(
                     .collect { enabled ->
                         // 关闭历史记录开关时，立即结束当前 session，
                         // 避免 endTime 一直为 NULL 导致 UI 显示「进行中」直到下次启动。
-                        if (!enabled) onHistoryRecordingDisabled()
+                        if (!enabled) {
+                            onHistoryRecordingDisabled()
+                            onChartCacheClear()
+                        }
                     }
             }
         )

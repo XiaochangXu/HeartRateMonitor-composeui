@@ -12,6 +12,7 @@ import com.github.heartratemonitor_compose.service.R
 import com.github.heartratemonitor_compose.ble.BleManager
 import com.github.heartratemonitor_compose.ble.BleState
 import com.github.heartratemonitor_compose.ble.HeartRateMeasurement
+import com.github.heartratemonitor_compose.data.model.ChartDataSnapshot
 import com.github.heartratemonitor_compose.data.model.ScannedDevice
 import com.github.heartratemonitor_compose.data.settings.SettingsKeys
 import com.github.heartratemonitor_compose.data.WebhookTrigger
@@ -83,6 +84,12 @@ class BleConnectionHandler(
     private val _connectedDevice = MutableStateFlow<ConnectedDevice?>(null)
     override val connectedDevice: StateFlow<ConnectedDevice?> = _connectedDevice.asStateFlow()
 
+    // 服务层会话图表追踪器：生命周期随 BLE 连接生灭，StateFlow 重放实现「重进即恢复」
+    private val sessionChartTracker = SessionChartTracker(scope)
+    override val chartDataSnapshot: StateFlow<ChartDataSnapshot?> = sessionChartTracker.chartDataSnapshot
+    override val sessionMaxHr: StateFlow<Int> = sessionChartTracker.sessionMaxHr
+    override val sessionMinHr: StateFlow<Int> = sessionChartTracker.sessionMinHr
+
     @Volatile
     private var connectedPeripheral: Peripheral? = null
     private var connectionJob: Job? = null
@@ -126,6 +133,22 @@ class BleConnectionHandler(
 
     fun initDeviceNameFallback(name: String) {
         lastConnectedDeviceName = name
+    }
+
+    /**
+     * 清空图表缓存（历史记录开关关闭时由 BleSettingsListener 调用）。
+     * SessionChartTracker 方法 @Synchronized 线程安全。
+     */
+    fun clearChartCache() {
+        sessionChartTracker.clear()
+    }
+
+    /**
+     * TRIM 内存预警时释放图表缓存（由 [BleService] 的 FairMemoryReceiver 回调触发）。
+     * 逻辑见 [SessionChartTracker.releaseOnTrim]。
+     */
+    fun releaseChartOnTrim(notifyType: Int) {
+        sessionChartTracker.releaseOnTrim(notifyType)
     }
 
     /**
@@ -220,6 +243,9 @@ class BleConnectionHandler(
                 freshnessTracker.reset()
                 _connectedDevice.value = null
                 _scanResults.value = emptyList()
+                // 蓝牙关闭时清空图表缓存与极值
+                sessionChartTracker.resetSessionExtremes()
+                sessionChartTracker.clear()
                 broadcast()
                 connectedPeripheral = null
             }
@@ -506,6 +532,8 @@ class BleConnectionHandler(
 
                 // 先确保 session 写入完成（await），再启动心率监听，避免早期数据因 session 未就绪而丢失
                 heartRateRecorder.startSession(deviceName)
+                // 新会话开始：重置图表缓存与极值，与 startSession 同位置
+                sessionChartTracker.reset()
                 broadcast()
 
                 // 作为 connectionJob 的子协程启动：断开连接时随 connectionJob 取消，避免泄漏
@@ -559,6 +587,9 @@ class BleConnectionHandler(
         }
 
         heartRateRecorder.endSession()
+        // 断开连接：清零极值 + 清空图表缓存，与 endSession 同位置
+        sessionChartTracker.resetSessionExtremes()
+        sessionChartTracker.clear()
 
         val message = if (isManuallyDisconnected) context.getString(R.string.ble_manual_disconnect) else context.getString(R.string.ble_device_disconnected)
         // 设置断开状态（仅在当前连接仍为本连接时），避免设备从 Connected 直接跳到 Disconnected 时状态卡在 Connected
@@ -624,6 +655,9 @@ class BleConnectionHandler(
                     _heartRate.value = effective.bpm
                     _heartRateMeasurement.value = effective
                     webhookRepository.triggerWebhooks(WebhookTrigger.HEART_RATE_UPDATED, effective.bpm, speedProvider.speed.value)
+
+                    // 喂点给服务层图表追踪器（@Synchronized 保证线程安全）
+                    sessionChartTracker.onMeasurement(effective)
 
                     // 历史记录落盘失败不应中断心率采集（如 DB 瞬时异常），单独隔离。
                     // 无效值（bpm <= 0）不落盘，避免污染历史统计均值

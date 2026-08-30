@@ -7,6 +7,7 @@ import com.github.heartratemonitor_compose.service.BleConnectionManager
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.supervisorScope
@@ -16,7 +17,8 @@ import kotlinx.collections.immutable.toImmutableList
  * Phase 5 按域拆分，契约 4。自原 MainViewModel.initializeDataStreams 逐行迁出，
  * 敏感语义原样保留：
  * supervisorScope 隔离各订阅异常；CancellationException 重throw；
- * manualConnectionPending 防竞态；断开时立即清零极值 + 清空图表；
+ * manualConnectionPending 防竞态；图表数据管道已迁至服务层 SessionChartTracker，
+ * 断开时的图表清空由 cleanupConnection 处理，本文件不再操作图表缓存；
  * BLE 状态 → 一次性 Toast 经 bleToastListener 回调（§3.4 方案 1）。
  */
 internal fun MainViewModel.bindBleDataStreams(manager: BleConnectionManager): Job {
@@ -28,9 +30,6 @@ internal fun MainViewModel.bindBleDataStreams(manager: BleConnectionManager): Jo
                 try {
                     manager.heartRateMeasurement.collect { measurement ->
                         reduceState { it.copy(heartRate = measurement.bpm) }
-                        if (measurement.bpm > 0 && stateSnapshot.appStatus == AppStatus.CONNECTED) {
-                            chartDataManager.onMeasurement(measurement)
-                        }
                     }
                 } catch (e: CancellationException) {
                     throw e
@@ -69,6 +68,26 @@ internal fun MainViewModel.bindBleDataStreams(manager: BleConnectionManager): Jo
                 }
             }
 
+            // 订阅服务层图表流（SessionChartTracker）：StateFlow 重放实现「重进即恢复」
+            launch {
+                try {
+                    combine(
+                        manager.chartDataSnapshot,
+                        manager.sessionMaxHr,
+                        manager.sessionMinHr
+                    ) { snapshot, maxHr, minHr -> Triple(snapshot, maxHr, minHr) }
+                        .collect { (snapshot, maxHr, minHr) ->
+                            reduceState {
+                                it.copy(chartDataSnapshot = snapshot, sessionMaxHr = maxHr, sessionMinHr = minHr)
+                            }
+                        }
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (e: Exception) {
+                    Log.e("MainViewModel", "图表数据订阅异常终止", e)
+                }
+            }
+
             launch {
                 try {
                     // drop(1) 跳过 StateFlow 首次重放：应用重进时 bleState 的当前值
@@ -86,9 +105,8 @@ internal fun MainViewModel.bindBleDataStreams(manager: BleConnectionManager): Jo
     }
 }
 
-/** BLE 状态机归约：文案/状态映射、图表联动、连接中设备防竞态、Toast 联动。 */
+/** BLE 状态机归约：文案/状态映射、连接中设备防竞态、Toast 联动。 */
 private fun MainViewModel.handleBleState(state: BleState) {
-    val oldStatus = stateSnapshot.appStatus
     Log.d(
         "MainViewModel",
         "bleState: ${state.javaClass.simpleName}, manualPending=$manualConnectionPending, " +
@@ -103,17 +121,7 @@ private fun MainViewModel.handleBleState(state: BleState) {
         else -> AppStatus.DISCONNECTED
     }
 
-    if (oldStatus != AppStatus.CONNECTED && newStatus == AppStatus.CONNECTED) {
-        chartDataManager.isConnected = true
-        chartDataManager.reset()
-    }
-
-    if (oldStatus == AppStatus.CONNECTED && newStatus != AppStatus.CONNECTED) {
-        chartDataManager.isConnected = false
-        // 断开时立即清零极值 + 清空图表数据/snapshot，避免重连时残留旧曲线
-        chartDataManager.resetSessionExtremes()
-        chartDataManager.clear()
-    }
+    // 图表 reset/clear/极值清零已由服务层 SessionChartTracker 在连接成功处和 cleanupConnection 处理
 
     // 手动连接中途可能收到自动重连扫描的 ScanFailed（DISCONNECTED），
     // 此时 manualConnectionPending=true，不能清空 connectingDeviceId，

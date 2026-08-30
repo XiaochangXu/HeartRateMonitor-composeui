@@ -10,10 +10,11 @@ import com.github.heartratemonitor_compose.ble.BleManager
 import com.github.heartratemonitor_compose.ble.BleState
 import com.github.heartratemonitor_compose.ble.HeartRateMeasurement
 import com.github.heartratemonitor_compose.data.db.HeartRateDao
+import com.github.heartratemonitor_compose.data.model.ChartDataSnapshot
+import com.github.heartratemonitor_compose.data.model.ScannedDevice
 import com.github.heartratemonitor_compose.data.repository.SessionRepository
 import com.github.heartratemonitor_compose.data.repository.SettingsRepository
 import com.github.heartratemonitor_compose.data.webhook.WebhookRepository
-import com.github.heartratemonitor_compose.data.model.ScannedDevice
 import com.github.heartratemonitor_compose.service.server.ServerHost
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
@@ -70,6 +71,9 @@ class BleService : Service(), FairMemoryReceiver.MemoryListener, BleConnectionMa
     override val speed: StateFlow<Float> get() = speedProvider.speed
     override val scanResults: StateFlow<List<ScannedDevice>> get() = connectionHandler.scanResults
     override val connectedDevice: StateFlow<ConnectedDevice?> get() = connectionHandler.connectedDevice
+    override val chartDataSnapshot: StateFlow<ChartDataSnapshot?> get() = connectionHandler.chartDataSnapshot
+    override val sessionMaxHr: StateFlow<Int> get() = connectionHandler.sessionMaxHr
+    override val sessionMinHr: StateFlow<Int> get() = connectionHandler.sessionMinHr
 
     override fun isDeviceConnected(): Boolean = connectionHandler.isDeviceConnected()
     override fun startScan(durationMillis: Long) = connectionHandler.startScan(durationMillis)
@@ -184,7 +188,12 @@ class BleService : Service(), FairMemoryReceiver.MemoryListener, BleConnectionMa
             notificationManager.startForeground()
             broadcastManager.broadcast()
         },
-        onHistoryRecordingDisabled = { serviceScope.launch { heartRateRecorder.endSession() } }
+        onHistoryRecordingDisabled = { serviceScope.launch { heartRateRecorder.endSession() } },
+        onChartCacheClear = {
+            // 关闭历史记录开关时清空图表缓存（原 UI 层 ChartDataManager.clear 联动下移至服务层）
+            // SessionChartTracker 方法 @Synchronized 线程安全，无需切线程
+            connectionHandler.clearChartCache()
+        }
     )
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -228,9 +237,10 @@ class BleService : Service(), FairMemoryReceiver.MemoryListener, BleConnectionMa
         settingsScope.cancel()
     }
 
-    /** 公平运行内存 TRIM：清空蓝牙扫描缓存，释放 Advertisement 对象占用的内存。 */
+    /** 公平运行内存 TRIM：清空蓝牙扫描缓存 + 释放图表缓存。 */
     override fun onTrimMemory(notifyType: Int) {
         connectionHandler.trimScanCacheIfIdle()
+        connectionHandler.releaseChartOnTrim(notifyType)
     }
 
     /** 公平运行内存 KILL：将未写入心率记录排入 WorkManager 异步落盘。 */

@@ -38,6 +38,7 @@ class BleSettingsListenerTest {
     private var serverChangedCount = 0
     private var speedChangedCount = 0
     private var historyDisabledCount = 0
+    private var chartCacheClearCount = 0
 
     private lateinit var listener: BleSettingsListener
 
@@ -53,6 +54,7 @@ class BleSettingsListenerTest {
         serverChangedCount = 0
         speedChangedCount = 0
         historyDisabledCount = 0
+        chartCacheClearCount = 0
 
         // Unconfined 作用域：写入乐观更新 StateFlow 时收集协程在写入线程同步恢复，
         // 保持原 SharedPreferences listener 的同步回调语义，断言无需等待调度。
@@ -62,7 +64,8 @@ class BleSettingsListenerTest {
             scope = CoroutineScope(Dispatchers.Unconfined),
             onServerSettingsChanged = { serverChangedCount++ },
             onSpeedSettingsChanged = { speedChangedCount++ },
-            onHistoryRecordingDisabled = { historyDisabledCount++ }
+            onHistoryRecordingDisabled = { historyDisabledCount++ },
+            onChartCacheClear = { chartCacheClearCount++ }
         )
         listener.register()
     }
@@ -147,6 +150,7 @@ class BleSettingsListenerTest {
         repo.set(SettingsKeys.HISTORY_RECORDING_ENABLED, true)
         repo.set(SettingsKeys.HISTORY_RECORDING_ENABLED, false)
         assertThat(historyDisabledCount).isEqualTo(2)
+        assertThat(chartCacheClearCount).isEqualTo(2)
     }
 
     // ── 无关键变更 ──
@@ -157,6 +161,7 @@ class BleSettingsListenerTest {
         assertThat(serverChangedCount).isEqualTo(0)
         assertThat(speedChangedCount).isEqualTo(0)
         assertThat(historyDisabledCount).isEqualTo(0)
+        assertThat(chartCacheClearCount).isEqualTo(0)
     }
 
     @Test
@@ -167,6 +172,7 @@ class BleSettingsListenerTest {
         assertThat(serverChangedCount).isEqualTo(0)
         assertThat(speedChangedCount).isEqualTo(0)
         assertThat(historyDisabledCount).isEqualTo(0)
+        assertThat(chartCacheClearCount).isEqualTo(0)
     }
 
     // ── unregister / register ──

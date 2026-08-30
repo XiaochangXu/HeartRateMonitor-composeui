@@ -31,8 +31,12 @@ class LiquidGlassState @Inject constructor(private val settings: SettingsReposit
     )
     val config: StateFlow<LiquidGlassConfig> = _config.asStateFlow()
 
-    /** 暴露 SettingsRepository 的全量设置快照，供 AppRoot 读取非液态玻璃相关的设置项。 */
-    val appSettingsFlow: StateFlow<AppSettings> = settings.settings
+    /**
+     * 导航动画关闭开关的独立流：AppRoot 仅需此单字段，避免订阅全量 AppSettings
+     * 快照（60+ 字段任一变化都触发根节点重组）。
+     */
+    val navAnimationDisabledFlow: StateFlow<Boolean> =
+        settings.observe(SettingsKeys.NAV_ANIMATION_DISABLED)
 
     fun setEnabled(enabled: Boolean) {
         settings.set(SettingsKeys.LIQUID_GLASS_ENABLED, enabled)

@@ -1,8 +1,6 @@
 package com.github.heartratemonitor_compose.ui.main
 
 import android.content.Context
-import android.os.Handler
-import android.os.Looper
 import android.util.Log
 import androidx.lifecycle.viewModelScope
 import com.github.heartratemonitor_compose.data.settings.AppSettings
@@ -17,6 +15,7 @@ import com.github.heartratemonitor_compose.service.KillStateSaver
 import com.github.heartratemonitor_compose.service.ServiceLauncher
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -33,7 +32,8 @@ import kotlinx.collections.immutable.persistentListOf
 
 /**
  * MVI 架构，Phase 5。仅 BLE 状态订阅 + 组件编排 + 对外单一 [uiState]；
- * 图表数据管道归 [ChartDataManager]，BLE 数据管道订阅与状态机归约见 MainBleStreams.kt。
+ * 图表数据管道归服务层 [SessionChartTracker]（经 [BleConnectionManager] 暴露 StateFlow），
+ * BLE 数据管道订阅与状态机归约见 MainBleStreams.kt。
  *
  * 契约 6 红线原样保留：manualConnectionPending 防竞态、
  * bleToastListener 回调（§3.4 方案 1）、toggleFloatingWindow(): Boolean 返回值语义。
@@ -52,8 +52,6 @@ class MainViewModel @Inject constructor(
 ) : MviViewModel<MainUiState, MainIntent>(initialMainUiState(settings, appContext)),
     FairMemoryReceiver.MemoryListener {
 
-    private val mainHandler = Handler(Looper.getMainLooper())
-
     private var bleServiceRef: WeakReference<BleConnectionManager>? = null
 
     private var serviceDataJob: Job? = null
@@ -64,12 +62,6 @@ class MainViewModel @Inject constructor(
 
     /** 上一次 BLE 状态：ScanFailed 紧跟 AutoReconnecting 才提示重连失败 */
     internal var previousBleState: BleState? = null
-
-    internal val chartDataManager = ChartDataManager(viewModelScope).apply {
-        // 构造期同步历史记录开关，确保首个心率包到达时 onMeasurement 不会被
-        // isHistoryEnabled=false 拦截（collect 的首次重放被 drop(1) 跳过，不再同步此字段）
-        isHistoryEnabled = settings.get(SettingsKeys.HISTORY_RECORDING_ENABLED)
-    }
 
     /**
      * 设备页专用精简状态流：从 [uiState] map 出设备页需要的字段 + distinctUntilChanged 去重。
@@ -99,21 +91,10 @@ class MainViewModel @Inject constructor(
     private val resolveSoundModeFallback: String = currentState.fullscreenSoundMode
 
     init {
-        // 历史记录开关：投影 + 图表管道联动（开关热更新语义原样保留）
-        // drop(1) 跳过 StateFlow 首次重放：VM 重建时 settings.observe 会立即重放当前值，
-        // 但这是状态恢复而非用户切换——reset()/clear() 不应在此时执行，否则与心率包到达
-        // 存在竞态，概率性清空刚产出的图表数据导致转圈圈。isHistoryEnabled 的初始同步
-        // 已在 chartDataManager 构造期完成，首次重放跳过后不影响后续心率包的图表累积。
-        // 与项目中 bleState / BleSettingsListener / StatusBarResidentService 等的 drop(1) 模式一致。
+        // 历史记录开关：仅投影到 UI 状态，图表 reset/clear 联动已由服务层 BleSettingsListener 接管
         viewModelScope.launch {
             settings.observe(SettingsKeys.HISTORY_RECORDING_ENABLED).drop(1).collect { enabled ->
                 setState { it.copy(isHistoryEnabled = enabled) }
-                chartDataManager.isHistoryEnabled = enabled
-                if (enabled) {
-                    mainHandler.post { chartDataManager.reset() }
-                } else {
-                    chartDataManager.clear()
-                }
             }
         }
 
@@ -156,18 +137,6 @@ class MainViewModel @Inject constructor(
                         fullscreenHeartTextColor = snap.fullscreenHeartTextColor,
                         fullscreenSoundMode = snap.fullscreenSoundMode
                     )
-                }
-            }
-        }
-
-        viewModelScope.launch {
-            combine(
-                chartDataManager.chartDataSnapshot,
-                chartDataManager.sessionMaxHr,
-                chartDataManager.sessionMinHr
-            ) { snapshot, maxHr, minHr -> Triple(snapshot, maxHr, minHr) }.collect { (snapshot, maxHr, minHr) ->
-                setState {
-                    it.copy(chartDataSnapshot = snapshot, sessionMaxHr = maxHr, sessionMinHr = minHr)
                 }
             }
         }
@@ -264,9 +233,7 @@ class MainViewModel @Inject constructor(
             is BleState.Connected -> AppStatus.CONNECTED
             else -> AppStatus.DISCONNECTED
         }
-        if (restoredStatus == AppStatus.CONNECTED) {
-            chartDataManager.isConnected = true
-        }
+        // 图表状态由服务层 SessionChartTracker 维护，重进时 StateFlow 重放自动恢复
         reduceState {
             it.copy(
                 appStatus = restoredStatus,
@@ -307,13 +274,10 @@ class MainViewModel @Inject constructor(
     // TRIM/KILL 回调顺序不得调整（契约 6）
 
     /**
-     * 图表缓存释放委派给 ChartDataManager.releaseOnTrim，
-     * 本方法额外负责清空扫描结果缓存。
+     * 图表缓存释放已由服务层 SessionChartTracker 管理，本方法仅负责清空扫描结果缓存。
      */
     fun releaseNonCriticalMemory(notifyType: Int) {
         val isPss = notifyType == FairMemoryReceiver.NOTIFY_TYPE_PSS
-
-        chartDataManager.releaseOnTrim(notifyType)
 
         if (currentState.appStatus != AppStatus.SCANNING) {
             setState { it.copy(scanResults = persistentListOf()) }
@@ -322,7 +286,12 @@ class MainViewModel @Inject constructor(
     }
 
     override fun onTrimMemory(notifyType: Int) {
-        mainHandler.post { releaseNonCriticalMemory(notifyType) }
+        // FairMemoryReceiver 的回调运行在其 HandlerThread 上，需切到主线程释放 UI 缓存。
+        // 图表缓存释放已由服务层 SessionChartTracker 管理，此处仅清空扫描结果缓存。
+        // 使用 viewModelScope.launch 随 VM 销毁自动取消，避免 Handler Runnable 泄漏。
+        viewModelScope.launch(Dispatchers.Main.immediate) {
+            releaseNonCriticalMemory(notifyType)
+        }
     }
 
     override fun onKillMemory() {

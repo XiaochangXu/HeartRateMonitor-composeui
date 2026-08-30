@@ -28,6 +28,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.github.heartratemonitor_compose.data.model.ChartDataSnapshot
 import com.github.heartratemonitor_compose.feature.main.R
 import com.github.heartratemonitor_compose.ui.theme.HeartRateLineColor
 import com.github.heartratemonitor_compose.ui.widgets.IconContainer
@@ -157,7 +158,7 @@ internal fun ChartLoadingIndicator(
  * 实时心率图表（Vico CartesianChartHost）。
  *
  * 数据源:
- * - [MainViewModel.chartDataSnapshot] (ChartDataSnapshot?) 由 ViewModel 维护的已格式化坐标快照
+ * - [MainViewModel.uiState] 中的 chartDataSnapshot (ChartDataSnapshot?)，由服务层 SessionChartTracker 维护
  *
  * 渲染特点（向心电图风格靠拢）:
  * - 逐拍数据:RR-Interval 累加时间戳 + 瞬时心率,分辨率高于 1Hz 平均 bpm
@@ -198,7 +199,7 @@ internal fun RealtimeChart(
     // 心率红主色,ECG 风格
     val lineColor = HeartRateLineColor
 
-    // 直接使用 ChartDataManager 在发布快照时已计算的窗口极值，
+    // 直接使用 SessionChartTracker 在发布快照时已计算的窗口极值，
     // 避免 UI 层每次重组都遍历 yValues 列表（60-180 个点）。
     val maxY = chartDataSnapshot?.windowMaxY ?: 0.0
     val minY = chartDataSnapshot?.windowMinY ?: 0.0

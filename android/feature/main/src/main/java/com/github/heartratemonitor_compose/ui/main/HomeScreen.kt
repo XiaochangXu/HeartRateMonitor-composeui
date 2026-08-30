@@ -48,6 +48,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.github.heartratemonitor_compose.data.model.ChartDataSnapshot
 import com.github.heartratemonitor_compose.feature.main.R
 import com.github.heartratemonitor_compose.ui.animation.entranceGraphics
 import com.github.heartratemonitor_compose.ui.animation.rememberEntrance

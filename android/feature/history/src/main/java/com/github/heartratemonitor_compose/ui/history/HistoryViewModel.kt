@@ -66,19 +66,43 @@ class HistoryViewModel @Inject constructor(
         }
     }
 
+    /**
+     * 增量加载会话预览数据：只查询缓存中不存在的 session，复用已有数据。
+     *
+     * Room 的 allSessions Flow 在表内容变化时（如删除一条会话）会重新发射整个列表，
+     * 若无条件全量重查，删除 1 条时剩余 29 条未变化的采样数据会被全部重新查询。
+     * 此方法通过 diff 缓存，仅对新出现的 session 发起采样查询，已缓存的直接复用。
+     */
     private suspend fun loadStatsForSessions(currentSessions: List<HeartRateSessionInfo>) {
         if (currentSessions.isEmpty()) {
             setState { it.copy(previewDataMap = persistentMapOf()) }
             return
         }
+
+        val currentSessionIds = currentSessions.map { it.id }.toSet()
+        val existingMap = currentState.previewDataMap
+
+        // 只查询：当前列表中有、但缓存中没有的 session
+        val newSessions = currentSessions.filter { it.id !in existingMap }
+
+        if (newSessions.isEmpty()) {
+            // 无新增 session：仅移除已删除 session 的预览数据，复用其余缓存
+            val retainedMap = existingMap.filterKeys { it in currentSessionIds }.toImmutableMap()
+            if (retainedMap.size != existingMap.size) {
+                setState { it.copy(previewDataMap = retainedMap) }
+            }
+            return
+        }
+
+        // 只对新增 session 查询统计与采样数据，已有 session 的预览数据全部复用
         val statsList = repository.getSessionStats()
         val statsMap = statsList.associateBy { it.sessionId }
 
-        // 并发查询每个 session 的采样数据，替代串行 for 循环中的逐个 suspend 调用。
+        // 并发查询新增 session 的采样数据，替代串行 for 循环中的逐个 suspend 调用。
         // coroutineScope 保证结构化并发：任一查询异常不会泄漏，且随调用方取消而取消。
         // Room 内部连接池（默认 4 并发）限制实际并发度，超出部分自动排队。
-        val previews = coroutineScope {
-            currentSessions.map { session ->
+        val newPreviews = coroutineScope {
+            newSessions.map { session ->
                 val stats = statsMap[session.id]
                 if (stats == null || stats.recordCount <= 0) {
                     return@map null
@@ -97,8 +121,17 @@ class HistoryViewModel @Inject constructor(
             }.filterNotNull().awaitAll()
         }
 
-        val previewMap = previews.associate { it.first to it.second }.toImmutableMap()
-        setState { it.copy(previewDataMap = previewMap) }
+        // 合并：保留缓存中仍然存在的 session 的预览数据 + 新查询的数据
+        val mergedMap = buildMap {
+            // 先放入缓存中仍然存在的预览数据（同时移除已删除 session 的条目）
+            existingMap.forEach { (id, data) ->
+                if (id in currentSessionIds) put(id, data)
+            }
+            // 再放入新查询的预览数据
+            newPreviews.forEach { (id, data) -> put(id, data) }
+        }.toImmutableMap()
+
+        setState { it.copy(previewDataMap = mergedMap) }
     }
 
     /** 公平运行内存 TRIM：清空历史预览采样数据，释放内存。 */

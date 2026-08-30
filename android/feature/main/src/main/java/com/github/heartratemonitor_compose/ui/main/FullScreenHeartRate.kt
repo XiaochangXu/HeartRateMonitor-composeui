@@ -3,10 +3,7 @@ package com.github.heartratemonitor_compose.ui.main
 import android.app.Activity
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.withInfiniteAnimationFrameNanos
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -41,7 +38,6 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
@@ -54,8 +50,6 @@ import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.github.heartratemonitor_compose.feature.main.R
 import com.github.heartratemonitor_compose.util.SoundManager
-import kotlin.math.abs
-import kotlin.math.min
 import kotlin.math.sin
 import kotlin.math.PI
 import kotlinx.coroutines.delay
@@ -80,13 +74,15 @@ private val FullscreenHealthLowColor = ComposeColor(0xFF00E676)   // 亮绿
 private val FullscreenHealthMidColor = ComposeColor(0xFFFFD600)   // 亮黄
 private val FullscreenHealthHighColor = ComposeColor(0xFFFF1744)  // 亮红
 
+/** 纳秒到毫秒的转换常量。 */
+private const val NANOS_PER_MS = 1_000_000L
+
 /**
  * 全屏心率模式覆盖层。
  *
  * - 纯黑背景，横屏全屏显示
  * - 静态爱心 + 心率数值，按屏幕高度自适应放到最大
  * - ECG 滚动波形：屏幕底部持续左滚的心电波形，QRS 与实际心率同步
- * - 爱心在 QRS 波峰时产生微妙光晕脉冲（非缩放动画）
  * - 颜色按心率区间变化：< 90 绿色，90~120 黄色，> 120 红色（阈值与首页 HeartRateCard 一致）
  * - 全屏专用高亮配色：黑色背景下对比度更高，仅影响全屏模式
  * - 点击屏幕或按返回键退出
@@ -201,25 +197,48 @@ fun FullScreenHeartRate(
     }
 
     // ECG 滚动动画：ecgPhase 在 0..1 之间循环，每个周期 = 一个心动周期（60_000/bpm ms）
+    // 与 beep 循环保持一致的最佳实践：LaunchedEffect key 为动画开关而非心率值，
+    // 循环内动态读取 currentEffectiveBpm 计算帧步长，心率变化只改变下一帧步长，
+    // 不取消重启协程，不 snapTo(0f)，无视觉跳变。
+    // 不用 animateTo + infiniteRepeatable：该组合被取消后 initialValue 变为当前值，
+    // Restart 只在 [当前值..1f] 间循环，永远到不了 0→当前值 段的 P-QRS-T 波形。
     val effectiveBpm = if (isAnimationEnabled && heartRate > 30) heartRate else 0
+    val currentEffectiveBpm by rememberUpdatedState(effectiveBpm)
     val ecgPhase = remember { Animatable(0f) }
-    LaunchedEffect(effectiveBpm) {
-        if (effectiveBpm > 0) {
-            val cycleMs = (60_000f / effectiveBpm).toInt().coerceAtLeast(200)
-            ecgPhase.snapTo(0f)
-            ecgPhase.animateTo(
-                targetValue = 1f,
-                animationSpec = infiniteRepeatable(
-                    animation = tween(durationMillis = cycleMs, easing = LinearEasing),
-                    repeatMode = RepeatMode.Restart
-                )
-            )
+    LaunchedEffect(isAnimationEnabled) {
+        if (!isAnimationEnabled) return@LaunchedEffect
+        // 使用 withInfiniteAnimationFrameNanos 挂接到 Choreographer Vsync 信号：
+        // 每帧在屏幕刷新的精确时间点执行，帧间隔稳定且无抖动。
+        // 以 frameTimeNanos 计算实际经过时间，保证相位推进精确匹配心率，
+        // 同时避免 delay(16) 不与 Vsync 同步导致的帧间隔 16~32ms 波动和丢帧。
+        // 心率无效时回退到 delay(100) 轮询等待有效值（此时不绘制波形，无性能影响）。
+        var lastNanos = 0L
+        while (isActive) {
+            val bpm = currentEffectiveBpm
+            if (bpm <= 0) {
+                // 心率暂时无效（≤30 或未连接）：暂停推进，重置时间基准等待有效值
+                lastNanos = 0L
+                delay(100)
+                continue
+            }
+            // 挂接到 Vsync，在屏幕刷新时推进一帧
+            val frameNanos = withInfiniteAnimationFrameNanos { it }  // nanos since boot
+            if (lastNanos == 0L) {
+                lastNanos = frameNanos
+                continue
+            }
+            // 浮点除法避免整型截断：高刷新率（120/144Hz）下帧间隔不足 1ms，整除会损失精度，
+            // 导致相位推进慢于真实心率（60Hz 约慢 4%，144Hz 约慢 13%）。
+            val elapsedMs = (frameNanos - lastNanos) / NANOS_PER_MS.toFloat()
+            lastNanos = frameNanos
+            if (elapsedMs > 0) {
+                val cycleMs = (60_000f / bpm).toLong().coerceAtLeast(200L)
+                val delta = elapsedMs / cycleMs.toFloat()
+                val next = ecgPhase.value + delta
+                ecgPhase.snapTo(if (next >= 1f) next - 1f else next)
+            }
         }
     }
-
-    // 爱心光晕：QRS 波峰时最亮；alpha 计算移到 graphicsLayer 绘制阶段，避免每帧重组
-    // rPeakPhase = 0.21f 对应 ecgWaveformValue 中 R 波的实际峰值位置
-    val rPeakPhase = 0.21f
 
     // 全屏沉浸模式：隐藏状态栏/导航栏 + 保持屏幕常亮，退出时恢复
     val fullscreenView = LocalView.current
@@ -331,15 +350,7 @@ fun FullScreenHeartRate(
                     imageVector = Icons.Filled.Favorite,
                     contentDescription = null,
                     tint = heartColor,
-                    modifier = Modifier
-                        .size(heartSize)
-                        .graphicsLayer {
-                            val phaseFraction = ecgPhase.value % 1f
-                            val rawDist = abs(phaseFraction - rPeakPhase)
-                            val distToPeak = min(rawDist, 1f - rawDist)
-                            val heartGlow = if (effectiveBpm > 0) (1f - distToPeak / 0.06f).coerceIn(0f, 1f) else 0f
-                            alpha = 0.75f + 0.25f * heartGlow
-                        }
+                    modifier = Modifier.size(heartSize)
                 )
             }
 
@@ -347,14 +358,7 @@ fun FullScreenHeartRate(
                 text = ":",
                 color = heartColor,
                 fontSize = bpmFontSize,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.graphicsLayer {
-                    val phaseFraction = ecgPhase.value % 1f
-                    val rawDist = abs(phaseFraction - rPeakPhase)
-                    val distToPeak = min(rawDist, 1f - rawDist)
-                    val heartGlow = if (effectiveBpm > 0) (1f - distToPeak / 0.06f).coerceIn(0f, 1f) else 0f
-                    alpha = 0.75f + 0.25f * heartGlow
-                }
+                fontWeight = FontWeight.Bold
             )
 
             Box(
