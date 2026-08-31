@@ -85,7 +85,10 @@ class BleConnectionHandler(
     override val connectedDevice: StateFlow<ConnectedDevice?> = _connectedDevice.asStateFlow()
 
     // 服务层会话图表追踪器：生命周期随 BLE 连接生灭，StateFlow 重放实现「重进即恢复」
-    private val sessionChartTracker = SessionChartTracker(scope)
+    // 历史记录开关关闭期间仅跟踪极值、不统计图表点，开启后从零开始绘制
+    private val sessionChartTracker = SessionChartTracker(scope) {
+        settingsRepository.get(SettingsKeys.HISTORY_RECORDING_ENABLED)
+    }
     override val chartDataSnapshot: StateFlow<ChartDataSnapshot?> = sessionChartTracker.chartDataSnapshot
     override val sessionMaxHr: StateFlow<Int> = sessionChartTracker.sessionMaxHr
     override val sessionMinHr: StateFlow<Int> = sessionChartTracker.sessionMinHr

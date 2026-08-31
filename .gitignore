@@ -32,10 +32,11 @@ android/**/build/
 android/.kotlin/
 android/.tubiao/
 android/.trae/
+android/.meituan-catpaw/
 android/.qoder/
-android/.opencode
-android/.codebuddy
-android/.zcode
+android/.opencode/
+android/.codebuddy/
+android/.zcode/
 android/.logs/
 android/.icon/
 *.apk

@@ -15,6 +15,14 @@ updates:
       time: "09:00"
       timezone: "Asia/Shanghai"
     open-pull-requests-limit: 15
+    # 忽略 material3 1.5.0-alpha24+ 的升级（保留 stable 1.5.0 及以后）：
+    # alpha27 的 ModalBottomSheet 行为变更（SheetState 构造不再预置动画规格、
+    # 新增 isModalBottomSheetStateRestorationFixEnabled 前置条件）导致底部抽屉
+    # 弹出动画失效（直接完整展开），且该问题编译可通过、仅运行时可感知，
+    # 会被 auto-merge 工作流自动合入。等官方在 stable 版本修复后再解除忽略。
+    ignore:
+      - dependency-name: "androidx.compose.material3:material3"
+        versions: [">=1.5.0-alpha.24", "<1.5.0"]
     # Android 项目根 build.gradle.kts + settings.gradle.kts + libs.versions.toml
     # Dependabot 会自动递归扫描各子模块的 build.gradle.kts
     groups:

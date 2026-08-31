@@ -23,15 +23,21 @@ import kotlinx.collections.immutable.toImmutableList
  * - 生命周期归属 BLE 连接（由 [BleConnectionHandler] 持有），而非 Activity/ViewModel。
  * - StateFlow 重放天然实现「重进即恢复」——退出应用再重进后，UI 订阅服务层图表流
  *   立即获得当前会话的完整图表缓存，不再归零。
- * - 不再需要 isConnected / isHistoryEnabled 外部标志位：
+ * - 历史记录开关关闭期间不统计图表点、不发布快照（时间基准保持零），开启后从零
+ *   开始绘制；但 MAX/MIN 极值不受开关影响，始终跟踪当次连接全程。
  *   连接/断开由 [reset] / [clear] 显式控制；历史开关联动由 [BleSettingsListener] 接管。
  *
  * 所有可变状态通过 @Synchronized 保证线程安全——心率包到达在 IO 线程调用，
  * 历史开关联动在主线程调用，两者不会交错。
  *
  * @param scope 连接协程作用域（connectionJob 的子协程），断开连接时随 connectionJob 取消。
+ * @param historyEnabled 历史记录开关读取器（SettingsRepository.get 走内存快照，零 IO，
+ * 每个心率包调用一次成本可忽略）。返回 false 时仅跟踪极值，跳过图表统计与发布。
  */
-class SessionChartTracker(private val scope: CoroutineScope) {
+class SessionChartTracker(
+    private val scope: CoroutineScope,
+    private val historyEnabled: () -> Boolean
+) {
 
     private val _chartDataSnapshot = MutableStateFlow<ChartDataSnapshot?>(null)
     val chartDataSnapshot: StateFlow<ChartDataSnapshot?> = _chartDataSnapshot.asStateFlow()
@@ -83,7 +89,8 @@ class SessionChartTracker(private val scope: CoroutineScope) {
      */
     @Synchronized
     fun onMeasurement(measurement: HeartRateMeasurement) {
-        // MAX/MIN 跟踪当次连接的心率极值
+        // MAX/MIN 跟踪当次连接的心率极值——与历史记录开关无关，
+        // 关闭期间仍持续跟踪，中途开启后无需重新积累。
         val bpm = measurement.bpm
         if (bpm > 0) {
             if (_sessionMaxHr.value == 0 || bpm > _sessionMaxHr.value) {
@@ -94,9 +101,14 @@ class SessionChartTracker(private val scope: CoroutineScope) {
             }
         }
 
-        // 防御竞态：确保 chartStartTime 已初始化
-        if (chartStartTime == 0L) {
-            chartStartTime = System.currentTimeMillis()
+        // 未开启历史记录：不统计图表点、不发布快照。
+        // 同时清零 chartStartTime——连接时 reset() 会把它定格为连接时刻的墙钟，
+        // 若不清零，无 RR 设备的中途开启回退路径会用「现在 - 连接时刻」作首个 x 值，
+        // 导致图表从等待时长处（如 02:00）开始而非从零开始。
+        // 置零后首个开启的数据包会走到下方惰性初始化，时间基准归零重新起算。
+        if (!historyEnabled()) {
+            chartStartTime = 0L
+            return
         }
 
         var appended = false
@@ -110,8 +122,14 @@ class SessionChartTracker(private val scope: CoroutineScope) {
                 appendPoint(HeartRatePoint(lastChartTimeSec, instantHr))
                 appended = true
             }
-        } else {
-            // 设备不支持 RR:回退到 bpm + 墙钟时间戳,同步 lastChartTimeSec
+        } else if (measurement.bpm > 0) {
+            // 设备不支持 RR:回退到 bpm + 墙钟时间戳,同步 lastChartTimeSec。
+            // 无效值（传感器接触丢失时 bpm 被置零、RR 已清空）不绘制，
+            // 避免曲线出现下探到 0 的尖刺。
+            // chartStartTime 在首个有效点处惰性初始化，保证时间基准锚定首个绘制点。
+            if (chartStartTime == 0L) {
+                chartStartTime = System.currentTimeMillis()
+            }
             val timeDiffSeconds = (System.currentTimeMillis() - chartStartTime) / 1000f
             appendPoint(HeartRatePoint(timeDiffSeconds, measurement.bpm.toFloat()))
             lastChartTimeSec = timeDiffSeconds
