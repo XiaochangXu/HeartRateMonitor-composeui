@@ -45,7 +45,7 @@ jobs:
         if: success()
         run: gh pr review --approve "$PR_URL"
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.PR_APPROVE_TOKEN }}
           PR_URL: ${{ github.event.pull_request.html_url }}
 
       # 5. 启用自动合并（Auto-merge），让 GitHub 在所有检查通过后自动 squash 合并
@@ -53,5 +53,5 @@ jobs:
         if: success()
         run: gh pr merge --auto --squash "$PR_URL"
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.PR_APPROVE_TOKEN }}
           PR_URL: ${{ github.event.pull_request.html_url }}
