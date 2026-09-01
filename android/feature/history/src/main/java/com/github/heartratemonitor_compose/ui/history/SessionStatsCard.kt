@@ -82,9 +82,8 @@ internal fun SessionStatsCard(
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 StatCell(
-                    label = stringResource(R.string.stat_avg),
-                    // 数值以 String 传入（%1$s），规避小语种 locale 整数格式化输出本地数字
-                    value = stringResource(R.string.stat_bpm_value, stats.avg.toString()),
+                    label = stringResource(R.string.stat_max),
+                    value = stringResource(R.string.stat_bpm_value, stats.max.toString()),
                     modifier = Modifier.weight(1f)
                 )
                 StatCell(
@@ -99,8 +98,9 @@ internal fun SessionStatsCard(
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 StatCell(
-                    label = stringResource(R.string.stat_max),
-                    value = stringResource(R.string.stat_bpm_value, stats.max.toString()),
+                    label = stringResource(R.string.stat_avg),
+                    // 数值以 String 传入（%1$s），规避小语种 locale 整数格式化输出本地数字
+                    value = stringResource(R.string.stat_bpm_value, stats.avg.toString()),
                     modifier = Modifier.weight(1f)
                 )
                 StatCell(
