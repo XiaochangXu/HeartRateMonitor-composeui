@@ -69,6 +69,15 @@ class HeartRateRecorder(
                     heartRate = bpm
                 )
             )
+            // 超出宽松上限时丢弃最旧记录（缓冲头部）：DB 持续故障时 flush 反复失败、
+            // 记录被放回缓冲，只有此增长点设上限才能保证缓冲有界（约 1 小时心率量），
+            // 同时让 onDestroy 分片入队的总量可控。put-back 路径的瞬时超限会在下次
+            // record() 调用时收敛回上限（有界，无需在放回处重复截断）。
+            if (pendingRecords.size > MAX_PENDING_RECORDS) {
+                val dropped = pendingRecords.size - MAX_PENDING_RECORDS
+                pendingRecords.subList(0, dropped).clear()
+                Log.w(TAG, "待落盘缓冲超过上限（$MAX_PENDING_RECORDS），丢弃最旧的 $dropped 条记录")
+            }
         }
     }
 
@@ -181,5 +190,11 @@ class HeartRateRecorder(
         private const val BATCH_FLUSH_INTERVAL_MS = 5000L
         /** 历史会话最大保留数量，超出时自动删除最旧的。 */
         private const val MAX_SESSIONS = 30
+        /**
+         * 待落盘缓冲的宽松上限（约 1 小时心率量）：DB 持续故障时 flush 失败的记录被放回
+         * 缓冲重试，无上限会无限增长，并最终撑爆 FlushRecordsWorker 单请求的 Data 10KB
+         * 限制。超限时丢弃最旧记录（保留最近约 1 小时），属故障场景下的降级取舍。
+         */
+        private const val MAX_PENDING_RECORDS = 3600
     }
 }

@@ -95,8 +95,12 @@ class BleConnectionHandler(
 
     @Volatile
     private var connectedPeripheral: Peripheral? = null
-    private var connectionJob: Job? = null
-    private var scanJob: Job? = null
+    // connectionJob/scanJob 存在跨线程读写：checkAutoReconnect（IO 线程）会调用
+    // startAutoConnectScan 写入 scanJob，自动扫描收尾（IO 线程）会调用 connectToDevice
+    // 写入 connectionJob，而 stopScan/stopAllBleActivities/onBluetoothDisabled 在主线程读取，
+    // 缺少 @Volatile 时无 happens-before 保证，可能读到过期引用导致取消遗漏。
+    @Volatile private var connectionJob: Job? = null
+    @Volatile private var scanJob: Job? = null
     @Volatile private var isManuallyDisconnected = false
     @Volatile private var isBluetoothTurningOff = false
 
@@ -113,15 +117,18 @@ class BleConnectionHandler(
     /** 是否已注册蓝牙状态广播接收器，防止重复注册/注销。 */
     private var bluetoothReceiverRegistered = false
     private val isScanning = AtomicBoolean(false)
-    /** 上次成功连接的设备 id：仅在连接成功（State.Connected）时写入，失败/超时的首连不触发自动重连 */
-    private var lastConnectedDeviceId: String? = null
+    /** 上次成功连接的设备 id：仅在连接成功（State.Connected）时写入，失败/超时的首连不触发自动重连。
+     *  IO 线程 stateMonitor 写入、checkAutoReconnect（IO 线程）读取，补 @Volatile 保证可见性。 */
+    @Volatile private var lastConnectedDeviceId: String? = null
     @Volatile private var lastConnectedDeviceName: String = "Unknown Device"
     // 连接/扫描纪元：用户每次发起新的 BLE 活动（扫描/连接）时自增。
     // 被取消的旧连接任务的 finally 用其启动时捕获的纪元做校验，
     // 避免退避中的旧自动重连误取消用户刚发起的新连接。
     private val connectEpoch = AtomicLong(0L)
 
-    private var autoReconnectAttempt = 0
+    // 手动连接（可能来自主线程或 IO 线程的自动扫描收尾）复位、连接成功与重试（IO 线程）递增。
+    // 补 @Volatile 保证可见性；非原子递增的偶发计数偏差由重试上限语义容忍。
+    @Volatile private var autoReconnectAttempt = 0
 
     companion object {
         private const val TAG = "BleConnectionHandler"
@@ -290,9 +297,12 @@ class BleConnectionHandler(
 
     override fun startScan(durationMillis: Long) {
         if (!isScanning.compareAndSet(false, true)) return
+        // 先自增纪元再取消旧任务（与 onBluetoothDisabled 的顺序一致）：旧任务的 finally
+        // 收尾与取消是并发执行的，若旧收尾在自增前读到纪元则守卫误判通过，其
+        // isScanning.set(false) 会把此处刚设置的 true 覆盖掉，导致后续扫描被 CAS 拒绝。
+        val myEpoch = connectEpoch.incrementAndGet()
         stopAllBleActivities()
         isBluetoothTurningOff = false
-        val myEpoch = connectEpoch.incrementAndGet()
 
         val useFilter = settingsRepository.get(SettingsKeys.SCAN_FILTER_ENABLED)
 
@@ -354,9 +364,11 @@ class BleConnectionHandler(
 
     override fun startAutoConnectScan(favoriteDeviceId: String, durationMillis: Long) {
         if (!isScanning.compareAndSet(false, true)) return
+        // 先自增纪元再取消旧任务，理由同 startScan：旧任务 finally 收尾的纪元守卫
+        // 必须在任何时刻都读到失配值，避免旧收尾复位 isScanning 覆盖此处的新扫描。
+        val myEpoch = connectEpoch.incrementAndGet()
         stopAllBleActivities()
         isBluetoothTurningOff = false
-        val myEpoch = connectEpoch.incrementAndGet()
 
         val useFilter = settingsRepository.get(SettingsKeys.SCAN_FILTER_ENABLED)
 
@@ -429,6 +441,10 @@ class BleConnectionHandler(
     }
 
     override fun connectToDevice(identifier: String) {
+        // 新连接意图：先自增纪元再取消旧任务（与 onBluetoothDisabled 的顺序一致），
+        // 使退避中的旧自动重连检查失效；并确保旧连接/旧扫描的 finally 收尾（可能与本调用
+        // 并发执行）在任何时刻读到纪元均已失配，不会覆盖新连接接管的状态。
+        val myEpoch = connectEpoch.incrementAndGet()
         stopAllBleActivities()
         isManuallyDisconnected = false
         isBluetoothTurningOff = false
@@ -436,8 +452,6 @@ class BleConnectionHandler(
         // 避免「扫描中被连接打断」后 isScanning 卡死导致后续扫描静默拒绝
         isScanning.set(false)
         autoReconnectAttempt = 0  // 手动连接时重置重试计数
-        // 新连接意图：使退避中的旧自动重连检查失效（旧任务捕获的纪元与本值不再相等）
-        val myEpoch = connectEpoch.incrementAndGet()
 
         connectionJob = scope.launch {
             var peripheral: Peripheral? = null

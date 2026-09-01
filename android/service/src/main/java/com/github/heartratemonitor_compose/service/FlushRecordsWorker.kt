@@ -35,20 +35,32 @@ class FlushRecordsWorker @AssistedInject constructor(
         private const val KEY_TIMESTAMPS = "timestamps"
         private const val KEY_HEART_RATES = "heartRates"
 
+        /**
+         * WorkManager 的 Data 序列化上限为 10KB（Data.MAX_DATA_BYTES = 10240），每条记录
+         * 序列化后占 20 字节（long sessionId + long timestamp + int heartRate）。DB 持续故障时
+         * 缓冲可能累积大量记录（上限见 HeartRateRecorder.MAX_PENDING_RECORDS），一次性打包
+         * 会超限抛 IllegalStateException——且调用点在主线程 onDestroy/onKillMemory 中，
+         * 将直接导致进程崩溃。故按固定条数分片入队，250 条约 5KB，为键名与类型头留足余量。
+         */
+        private const val MAX_RECORDS_PER_REQUEST = 250
+
         /** 调用不阻塞——仅做内存拷贝与入队操作（微秒级）。 */
         fun enqueue(context: Context, records: List<HeartRateRecord>) {
             if (records.isEmpty()) return
-            val data = workDataOf(
-                KEY_SESSION_IDS to records.map { it.sessionId }.toLongArray(),
-                KEY_TIMESTAMPS to records.map { it.timestamp }.toLongArray(),
-                KEY_HEART_RATES to records.map { it.heartRate }.toIntArray()
-            )
-            val request = OneTimeWorkRequestBuilder<FlushRecordsWorker>()
-                .setInputData(data)
-                .setBackoffCriteria(androidx.work.BackoffPolicy.LINEAR, 1, TimeUnit.SECONDS)
-                .build()
-            WorkManager.getInstance(context).enqueue(request)
-            Log.i(TAG, "已入队 ${records.size} 条心率记录待落盘")
+            val chunks = records.chunked(MAX_RECORDS_PER_REQUEST)
+            for (chunk in chunks) {
+                val data = workDataOf(
+                    KEY_SESSION_IDS to chunk.map { it.sessionId }.toLongArray(),
+                    KEY_TIMESTAMPS to chunk.map { it.timestamp }.toLongArray(),
+                    KEY_HEART_RATES to chunk.map { it.heartRate }.toIntArray()
+                )
+                val request = OneTimeWorkRequestBuilder<FlushRecordsWorker>()
+                    .setInputData(data)
+                    .setBackoffCriteria(androidx.work.BackoffPolicy.LINEAR, 1, TimeUnit.SECONDS)
+                    .build()
+                WorkManager.getInstance(context).enqueue(request)
+            }
+            Log.i(TAG, "已入队 ${records.size} 条心率记录待落盘（${chunks.size} 个分片）")
         }
     }
 
