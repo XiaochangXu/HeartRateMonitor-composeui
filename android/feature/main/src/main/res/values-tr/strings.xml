@@ -8,6 +8,7 @@
     <string name="scan_filter_off">Filtre: kapalı</string>
     <string name="search_tip_message">Önce cihazın kalp atış hızı yayınını açın, sonra ara düğmesine dokunun. Aksi takdirde cihaz bulunamaz.</string>
     <string name="got_it">Anlaşıldı</string>
+    <string name="search_devices">Cihazları ara</string>
     <string name="available_devices">Kullanılabilir cihazlar</string>
     <string name="no_available_devices">Kullanılabilir cihaz yok. Sağ üstte ara düğmesine dokunun</string>
     <string name="enter_fullscreen">Tam ekran moduna geç</string>
@@ -28,4 +29,6 @@
     <string name="max_heart_rate">Maks</string>
     <string name="min_heart_rate">Min</string>
     <string name="reset">Sıfırla</string>
+    <string name="warm_tip_title">İpucu</string>
+    <string name="warm_tip_message">Aramaya dokunmadan önce cihazınızda nabız yayını özelliğini etkinleştirin.</string>
 </resources>

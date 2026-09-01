@@ -8,6 +8,7 @@
     <string name="scan_filter_off">फिल्टर: निष्क्रिय</string>
     <string name="search_tip_message">कृपया पहिले यन्त्रको मुटुको धड्कन प्रसारण सक्रिय गर्नुहोस्, त्यसपछि खोज्नुहोस् थिच्नुहोस्। अन्यथा यन्त्र भेटिनेछैन।</string>
     <string name="got_it">बुझेँ</string>
+    <string name="search_devices">यन्त्र खोज्नुहोस्</string>
     <string name="available_devices">उपलब्ध यन्त्रहरू</string>
     <string name="no_available_devices">कुनै उपलब्ध यन्त्र छैन। माथि दायाँ खोज्नुहोस् थिच्नुहोस्</string>
     <string name="enter_fullscreen">फुलस्क्रिन मोडमा प्रवेश गर्नुहोस्</string>
@@ -28,4 +29,6 @@
     <string name="max_heart_rate">अधिकतम</string>
     <string name="min_heart_rate">न्यूनतम</string>
     <string name="reset">रिसेट</string>
+    <string name="warm_tip_title">सुझाव</string>
+    <string name="warm_tip_message">खोजी थिच्नु अघि आफ्नो यन्त्रमा हृदय गति प्रसारण सुविधा सक्रिय गर्नुहोस्।</string>
 </resources>

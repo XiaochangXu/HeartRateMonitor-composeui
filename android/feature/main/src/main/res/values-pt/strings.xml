@@ -8,6 +8,7 @@
     <string name="scan_filter_off">Filtro: inativo</string>
     <string name="search_tip_message">Ative primeiro a transmissão de frequência cardíaca do dispositivo e depois toque em buscar. Caso contrário, o dispositivo não será encontrado.</string>
     <string name="got_it">Entendi</string>
+    <string name="search_devices">Pesquisar dispositivos</string>
     <string name="available_devices">Dispositivos disponíveis</string>
     <string name="no_available_devices">Nenhum dispositivo disponível. Toque em buscar no canto superior direito</string>
     <string name="enter_fullscreen">Entrar em tela cheia</string>
@@ -28,4 +29,6 @@
     <string name="max_heart_rate">Máx</string>
     <string name="min_heart_rate">Mín</string>
     <string name="reset">Redefinir</string>
+    <string name="warm_tip_title">Aviso</string>
+    <string name="warm_tip_message">Ative a função de transmissão de frequência cardíaca no dispositivo antes de tocar em Pesquisar.</string>
 </resources>

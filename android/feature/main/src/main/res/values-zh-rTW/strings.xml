@@ -8,6 +8,7 @@
     <string name="scan_filter_off">未開啟搜尋過濾</string>
     <string name="search_tip_message">請先開啟裝置的心率廣播，再點擊搜尋，否則找不到裝置。</string>
     <string name="got_it">我知道了</string>
+    <string name="search_devices">搜尋裝置</string>
     <string name="available_devices">可用裝置</string>
     <string name="no_available_devices">暫無可用裝置，請點擊右上角搜尋</string>
     <string name="enter_fullscreen">進入全螢幕模式</string>
@@ -28,4 +29,6 @@
     <string name="max_heart_rate">最大心率</string>
     <string name="min_heart_rate">最低心率</string>
     <string name="reset">重設</string>
+    <string name="warm_tip_title">溫馨提示</string>
+    <string name="warm_tip_message">請先開啟裝置上的心率廣播功能後再點擊搜尋</string>
 </resources>

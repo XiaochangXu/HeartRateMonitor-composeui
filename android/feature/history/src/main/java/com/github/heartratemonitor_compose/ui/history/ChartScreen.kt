@@ -257,10 +257,13 @@ fun ChartScreen(
                             .windowInsetsPadding(WindowInsets.navigationBars)
                     ) {
                         Spacer(Modifier.height(padding.calculateTopPadding()))
+                        // 图表卡片：高 300dp，四周留白（左右 16、顶部 16），
+                        // 与下方统计卡片的间距由 SessionStatsCard 的 top 内边距（16dp）提供
                         Box(
                             modifier = Modifier
-                                .weight(1f)
-                                .padding(16.dp)
+                                .fillMaxWidth()
+                                .padding(start = 16.dp, top = 16.dp, end = 16.dp)
+                                .height(300.dp)
                         ) {
                             Crossfade(
                                 targetState = chartReady,
@@ -284,6 +287,7 @@ fun ChartScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(horizontal = 16.dp)
+                                .padding(top = 24.dp)
                                 .padding(bottom = 16.dp)
                         )
                     }

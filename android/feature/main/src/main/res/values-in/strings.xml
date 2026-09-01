@@ -8,6 +8,7 @@
     <string name="scan_filter_off">Filter: nonaktif</string>
     <string name="search_tip_message">Aktifkan dulu siaran detak jantung perangkat, lalu ketuk cari. Jika tidak, perangkat tidak akan ditemukan.</string>
     <string name="got_it">Mengerti</string>
+    <string name="search_devices">Cari perangkat</string>
     <string name="available_devices">Perangkat tersedia</string>
     <string name="no_available_devices">Tidak ada perangkat tersedia. Ketuk cari di kanan atas</string>
     <string name="enter_fullscreen">Masuk ke mode layar penuh</string>
@@ -28,4 +29,6 @@
     <string name="max_heart_rate">Maks</string>
     <string name="min_heart_rate">Min</string>
     <string name="reset">Atur ulang</string>
+    <string name="warm_tip_title">Tips</string>
+    <string name="warm_tip_message">Aktifkan fungsi siaran detak jantung di perangkat sebelum mengetuk Cari.</string>
 </resources>

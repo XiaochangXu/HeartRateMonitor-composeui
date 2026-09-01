@@ -8,6 +8,7 @@
     <string name="scan_filter_off">ตัวกรอง: ปิด</string>
     <string name="search_tip_message">โปรดเปิดการออกอากาศอัตราการเต้นของหัวใจของอุปกรณ์ก่อน แล้วแตะค้นหา มิฉะนั้นจะไม่พบอุปกรณ์</string>
     <string name="got_it">เข้าใจแล้ว</string>
+    <string name="search_devices">ค้นหาอุปกรณ์</string>
     <string name="available_devices">อุปกรณ์ที่ใช้ได้</string>
     <string name="no_available_devices">ไม่มีอุปกรณ์ที่ใช้ได้ โปรดแตะค้นหาที่มุมขวาบน</string>
     <string name="enter_fullscreen">เข้าสู่โหมดเต็มหน้าจอ</string>
@@ -28,4 +29,6 @@
     <string name="max_heart_rate">สูงสุด</string>
     <string name="min_heart_rate">ต่ำสุด</string>
     <string name="reset">รีเซ็ต</string>
+    <string name="warm_tip_title">ข้อแนะนำ</string>
+    <string name="warm_tip_message">โปรดเปิดฟังก์ชันกระจายอัตราการเต้นหัวใจบนอุปกรณ์ก่อนแตะค้นหา</string>
 </resources>

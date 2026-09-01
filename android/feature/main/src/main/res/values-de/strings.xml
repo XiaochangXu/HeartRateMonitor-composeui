@@ -8,6 +8,7 @@
     <string name="scan_filter_off">Scanfilter aus</string>
     <string name="search_tip_message">Bitte aktivieren Sie zuerst die Herzfrequenz-Übertragung Ihres Geräts und tippen Sie dann auf „Suchen". Andernfalls wird das Gerät nicht gefunden.</string>
     <string name="got_it">Verstanden</string>
+    <string name="search_devices">Geräte suchen</string>
     <string name="available_devices">Verfügbare Geräte</string>
     <string name="no_available_devices">Keine Geräte gefunden. Tippen Sie oben rechts auf „Suchen"</string>
     <string name="enter_fullscreen">Vollbildmodus starten</string>
@@ -28,4 +29,6 @@
     <string name="max_heart_rate">MAX</string>
     <string name="min_heart_rate">MIN</string>
     <string name="reset">Zurücksetzen</string>
+    <string name="warm_tip_title">Hinweis</string>
+    <string name="warm_tip_message">Bitte aktivieren Sie vor dem Tippen auf Suchen die Herzfrequenz-Broadcast-Funktion auf Ihrem Gerät.</string>
 </resources>

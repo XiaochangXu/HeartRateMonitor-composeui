@@ -8,6 +8,7 @@
     <string name="scan_filter_off">Filter: naka-off</string>
     <string name="search_tip_message">Mangyaring i-on muna ang broadcast ng rate ng puso ng device, pagkatapos ay i-tap ang maghanap. Kung hindi, hindi makikita ang device.</string>
     <string name="got_it">Naunawaan</string>
+    <string name="search_devices">Maghanap ng device</string>
     <string name="available_devices">Mga available na device</string>
     <string name="no_available_devices">Walang available na device. I-tap ang maghanap sa kanang itaas</string>
     <string name="enter_fullscreen">Pumasok sa fullscreen mode</string>
@@ -28,4 +29,6 @@
     <string name="max_heart_rate">Max</string>
     <string name="min_heart_rate">Min</string>
     <string name="reset">I-reset</string>
+    <string name="warm_tip_title">Paalala</string>
+    <string name="warm_tip_message">I-enable muna ang heart rate broadcast function sa iyong device bago i-tap ang Search.</string>
 </resources>

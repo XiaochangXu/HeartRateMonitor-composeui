@@ -8,6 +8,7 @@
     <string name="scan_filter_off">Filter: uit</string>
     <string name="search_tip_message">Schakel eerst de hartslaguitzending van het apparaat in en tik daarna op zoeken. Anders wordt het apparaat niet gevonden.</string>
     <string name="got_it">Begrepen</string>
+    <string name="search_devices">Apparaten zoeken</string>
     <string name="available_devices">Beschikbare apparaten</string>
     <string name="no_available_devices">Geen beschikbare apparaten. Tik rechtsboven op zoeken</string>
     <string name="enter_fullscreen">Volledig scherm openen</string>
@@ -28,4 +29,6 @@
     <string name="max_heart_rate">Max</string>
     <string name="min_heart_rate">Min</string>
     <string name="reset">Resetten</string>
+    <string name="warm_tip_title">Tip</string>
+    <string name="warm_tip_message">Schakel vóór het tikken op Zoeken de hartslaguitzendfunctie op uw apparaat in.</string>
 </resources>

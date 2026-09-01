@@ -8,6 +8,7 @@
     <string name="scan_filter_off">Filtre : inactif</string>
     <string name="search_tip_message">Veuillez d\'abord activer la diffusion de la fréquence cardiaque de l\'appareil, puis appuyez sur rechercher. Sinon, l\'appareil ne sera pas trouvé.</string>
     <string name="got_it">Compris</string>
+    <string name="search_devices">Rechercher des appareils</string>
     <string name="available_devices">Appareils disponibles</string>
     <string name="no_available_devices">Aucun appareil disponible. Appuyez sur rechercher en haut à droite</string>
     <string name="enter_fullscreen">Passer en plein écran</string>
@@ -28,4 +29,6 @@
     <string name="max_heart_rate">Max</string>
     <string name="min_heart_rate">Min</string>
     <string name="reset">Réinitialiser</string>
+    <string name="warm_tip_title">Avertissement</string>
+    <string name="warm_tip_message">Veuillez activer la diffusion de la fréquence cardiaque sur votre appareil avant d\'appuyer sur Rechercher.</string>
 </resources>

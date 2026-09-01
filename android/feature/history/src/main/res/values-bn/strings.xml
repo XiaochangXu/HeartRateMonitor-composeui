@@ -21,5 +21,7 @@
     <string name="stat_time">সময়</string>
     <string name="stat_bpm_value">%1$s bpm</string>
     <string name="stat_time_range">%1$s - %2$s</string>
+    <string name="heart_rate_chart_title">হৃদস্পন্দন চার্ট</string>
+    <string name="avg_stats_title">গড় পরিসংখ্যান</string>
     <string name="max_records_hint">সর্বোচ্চ ৩০টি রেকর্ড সংরক্ষিত</string>
 </resources>

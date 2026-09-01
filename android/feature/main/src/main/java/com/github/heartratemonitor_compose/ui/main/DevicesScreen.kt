@@ -214,6 +214,38 @@ fun DevicesScreen(
                 ),
                 verticalArrangement = Arrangement.spacedBy(2.dp)
             ) {
+            // 温馨提示卡片：提示先开启设备端心率广播再搜索
+            item(key = "warm_tip", contentType = "warm_tip_card") {
+                Surface(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = MaterialTheme.shapes.extraLarge,
+                    color = MaterialTheme.colorScheme.surfaceBright,
+                    contentColor = MaterialTheme.colorScheme.onSurface
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 14.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        IconContainer(
+                            icon = painterResource(com.github.heartratemonitor_compose.ui.widgets.R.drawable.ic_warm_tip),
+                            containerSize = 36.dp,
+                            iconSize = 20.dp,
+                            containerColor = MaterialTheme.colorScheme.primaryContainer,
+                            iconTint = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
+                        Spacer(Modifier.width(12.dp))
+                        Text(
+                            text = stringResource(R.string.warm_tip_message),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
+            item(key = "gap_tip_connected", contentType = "spacer") { Spacer(Modifier.height(14.dp)) }
+
                 connectedDevice?.let { device ->
                 item(key = "connected", contentType = "connected_card") {
                     val onDisconnect = remember(viewModel) { { viewModel.dispatch(MainIntent.DisconnectDevice) } }
@@ -247,7 +279,7 @@ fun DevicesScreen(
                         )
                         Spacer(Modifier.width(12.dp))
                         Text(
-                            text = stringResource(R.string.available_devices),
+                            text = stringResource(R.string.search_devices),
                             style = MaterialTheme.typography.titleMedium,
                             color = MaterialTheme.colorScheme.onSurface
                         )

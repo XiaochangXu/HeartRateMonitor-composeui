@@ -8,6 +8,7 @@
     <string name="scan_filter_off">Filtr: wył.</string>
     <string name="search_tip_message">Najpierw włącz transmisję tętna na urządzeniu, a następnie naciśnij „Szukaj". W przeciwnym razie urządzenie nie zostanie znalezione.</string>
     <string name="got_it">Rozumiem</string>
+    <string name="search_devices">Szukaj urządzeń</string>
     <string name="available_devices">Dostępne urządzenia</string>
     <string name="no_available_devices">Brak dostępnych urządzeń. Naciśnij ikonę wyszukiwania w prawym górnym rogu</string>
     <string name="enter_fullscreen">Wejdź w tryb pełnoekranowy</string>
@@ -28,4 +29,6 @@
     <string name="max_heart_rate">MAKS</string>
     <string name="min_heart_rate">MIN</string>
     <string name="reset">Resetuj</string>
+    <string name="warm_tip_title">Wskazówka</string>
+    <string name="warm_tip_message">Przed dotknięciem „Szukaj” włącz na urządzeniu funkcję nadawania tętna.</string>
 </resources>

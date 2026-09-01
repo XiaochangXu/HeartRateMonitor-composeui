@@ -8,6 +8,7 @@
     <string name="scan_filter_off">スキャンフィルター: 無効</string>
     <string name="search_tip_message">デバイスの心拍数ブロードキャストを先にオンにしてから、検索をタップしてください。オンにしないとデバイスが見つかりません。</string>
     <string name="got_it">わかりました</string>
+    <string name="search_devices">デバイスを検索</string>
     <string name="available_devices">利用可能なデバイス</string>
     <string name="no_available_devices">利用可能なデバイスがありません。右上の検索をタップしてください</string>
     <string name="enter_fullscreen">全画面モードに入る</string>
@@ -28,4 +29,6 @@
     <string name="max_heart_rate">最大</string>
     <string name="min_heart_rate">最低</string>
     <string name="reset">リセット</string>
+    <string name="warm_tip_title">ご案内</string>
+    <string name="warm_tip_message">検索をタップする前に、デバイスの心拍数ブロードキャスト機能を有効にしてください。</string>
 </resources>

@@ -8,6 +8,7 @@
     <string name="scan_filter_off">Scan filter off</string>
     <string name="search_tip_message">Please turn on your device\'s heart rate broadcast first, then tap search. Otherwise the device cannot be found.</string>
     <string name="got_it">Got it</string>
+    <string name="search_devices">Search Devices</string>
     <string name="available_devices">Available Devices</string>
     <string name="no_available_devices">No devices found. Tap search in the top right corner</string>
     <string name="enter_fullscreen">Enter Fullscreen Mode</string>
@@ -28,4 +29,6 @@
     <string name="max_heart_rate">MAX</string>
     <string name="min_heart_rate">MIN</string>
     <string name="reset">Reset</string>
+    <string name="warm_tip_title">Friendly Reminder</string>
+    <string name="warm_tip_message">Please enable the heart rate broadcast function on your device before tapping search.</string>
 </resources>

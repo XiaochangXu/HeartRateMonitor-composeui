@@ -8,6 +8,7 @@
     <string name="scan_filter_off">Penapis: tidak aktif</string>
     <string name="search_tip_message">Sila aktifkan dahulu penyiaran kadar jantung peranti, kemudian tekan cari. Jika tidak, peranti tidak akan ditemui.</string>
     <string name="got_it">Faham</string>
+    <string name="search_devices">Cari peranti</string>
     <string name="available_devices">Peranti tersedia</string>
     <string name="no_available_devices">Tiada peranti tersedia. Tekan cari di kanan atas</string>
     <string name="enter_fullscreen">Masuk ke mod skrin penuh</string>
@@ -28,4 +29,6 @@
     <string name="max_heart_rate">Maks</string>
     <string name="min_heart_rate">Min</string>
     <string name="reset">Set semula</string>
+    <string name="warm_tip_title">Peringatan</string>
+    <string name="warm_tip_message">Aktifkan fungsi siaran kadar jantung pada peranti sebelum mengetik Cari.</string>
 </resources>

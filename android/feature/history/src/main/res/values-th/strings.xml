@@ -21,5 +21,7 @@
     <string name="stat_time">เวลา</string>
     <string name="stat_bpm_value">%1$s bpm</string>
     <string name="stat_time_range">%1$s - %2$s</string>
+    <string name="heart_rate_chart_title">กราฟอัตราการเต้นหัวใจ</string>
+    <string name="avg_stats_title">สถิติค่าเฉลี่ย</string>
     <string name="max_records_hint">บันทึกได้สูงสุด 30 รายการ</string>
 </resources>

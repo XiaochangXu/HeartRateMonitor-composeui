@@ -8,6 +8,7 @@
     <string name="scan_filter_off">Фильтр: выкл.</string>
     <string name="search_tip_message">Сначала включите трансляцию пульса на устройстве, затем нажмите «Поиск». Иначе устройство не будет найдено.</string>
     <string name="got_it">Понятно</string>
+    <string name="search_devices">Поиск устройств</string>
     <string name="available_devices">Доступные устройства</string>
     <string name="no_available_devices">Нет доступных устройств. Нажмите значок поиска в правом верхнем углу</string>
     <string name="enter_fullscreen">Войти в полноэкранный режим</string>
@@ -28,4 +29,6 @@
     <string name="max_heart_rate">МАКС</string>
     <string name="min_heart_rate">МИН</string>
     <string name="reset">Сбросить</string>
+    <string name="warm_tip_title">Подсказка</string>
+    <string name="warm_tip_message">Перед нажатием «Поиск» включите функцию трансляции пульса на устройстве.</string>
 </resources>

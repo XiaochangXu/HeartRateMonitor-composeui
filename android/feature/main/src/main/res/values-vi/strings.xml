@@ -8,6 +8,7 @@
     <string name="scan_filter_off">Bộ lọc: tắt</string>
     <string name="search_tip_message">Vui lòng bật tính năng phát nhịp tim của thiết bị trước, sau đó nhấn tìm kiếm. Nếu không sẽ không tìm thấy thiết bị.</string>
     <string name="got_it">Đã hiểu</string>
+    <string name="search_devices">Tìm kiếm thiết bị</string>
     <string name="available_devices">Thiết bị khả dụng</string>
     <string name="no_available_devices">Không có thiết bị khả dụng. Nhấn tìm kiếm ở góc trên bên phải</string>
     <string name="enter_fullscreen">Vào chế độ toàn màn hình</string>
@@ -28,4 +29,6 @@
     <string name="max_heart_rate">Tối đa</string>
     <string name="min_heart_rate">Tối thiểu</string>
     <string name="reset">Đặt lại</string>
+    <string name="warm_tip_title">Lưu ý</string>
+    <string name="warm_tip_message">Hãy bật chức năng phát nhịp tim trên thiết bị trước khi nhấn Tìm kiếm.</string>
 </resources>

@@ -21,5 +21,7 @@
     <string name="stat_time">Hora</string>
     <string name="stat_bpm_value">%1$s bpm</string>
     <string name="stat_time_range">%1$s - %2$s</string>
+    <string name="heart_rate_chart_title">Gráfico FC</string>
+    <string name="avg_stats_title">Estatísticas médias</string>
     <string name="max_records_hint">Máximo de 30 registros</string>
 </resources>

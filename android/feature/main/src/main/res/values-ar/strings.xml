@@ -8,6 +8,7 @@
     <string name="scan_filter_off">المرشح: معطل</string>
     <string name="search_tip_message">يرجى تشغيل بث معدل ضربات القلب للجهاز أولاً، ثم اضغط بحث. وإلا فلن يتم العثور على الجهاز.</string>
     <string name="got_it">فهمت</string>
+    <string name="search_devices">البحث عن الأجهزة</string>
     <string name="available_devices">الأجهزة المتاحة</string>
     <string name="no_available_devices">لا توجد أجهزة متاحة. اضغط على بحث في الأعلى يمينًا</string>
     <string name="enter_fullscreen">الدخول إلى وضع ملء الشاشة</string>
@@ -28,4 +29,6 @@
     <string name="max_heart_rate">الأقصى</string>
     <string name="min_heart_rate">الأدنى</string>
     <string name="reset">إعادة تعيين</string>
+    <string name="warm_tip_title">تنبيه</string>
+    <string name="warm_tip_message">يرجى تمكين ميزة بث معدل النبض على جهازك قبل النقر على بحث.</string>
 </resources>

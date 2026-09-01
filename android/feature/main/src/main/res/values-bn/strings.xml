@@ -8,6 +8,7 @@
     <string name="scan_filter_off">ফিল্টার: বন্ধ</string>
     <string name="search_tip_message">অনুগ্রহ করে আগে ডিভাইসের হৃদস্পন্দন ব্রডকাস্ট চালু করুন, তারপর খুঁজুন ট্যাপ করুন। অন্যথায় ডিভাইস পাওয়া যাবে না।</string>
     <string name="got_it">বুঝেছি</string>
+    <string name="search_devices">ডিভাইস খুঁজুন</string>
     <string name="available_devices">উপলব্ধ ডিভাইস</string>
     <string name="no_available_devices">কোনো উপলব্ধ ডিভাইস নেই। উপরে ডানদিকে খুঁজুন ট্যাপ করুন</string>
     <string name="enter_fullscreen">ফুলস্ক্রিন মোডে প্রবেশ করুন</string>
@@ -28,4 +29,6 @@
     <string name="max_heart_rate">সর্বোচ্চ</string>
     <string name="min_heart_rate">সর্বনিম্ন</string>
     <string name="reset">রিসেট</string>
+    <string name="warm_tip_title">অনুরোধ</string>
+    <string name="warm_tip_message">অনুসন্ধানে ট্যাপ করার আগে আপনার ডিভাইসে হৃদস্পন্দন সম্প্রচার বৈশিষ্ট্য চালু করুন।</string>
 </resources>
