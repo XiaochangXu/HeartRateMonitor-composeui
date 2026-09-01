@@ -165,8 +165,9 @@ internal fun HeartRateChart(
         else maxOf(records.maxOf { it.heartRate }.toDouble() + 20.0, rangeMinY + 40.0)
     }
 
-    // 圆角卡片容器包裹图表：G2 连续曲率（extraLarge 28dp）+ surfaceBright，
-    // 与 SessionStatsCard 及首页 RealtimeChart 卡片风格完全一致
+    // 圆角卡片容器包裹图表：普通圆角（主题 extraLarge = RoundedCornerShape 28dp）+ surfaceBright，
+    // 与 SessionStatsCard 及首页 RealtimeChart 卡片风格完全一致；
+    // G2 连续曲率目前仅用于底部导航栏（ContinuousCapsule），卡片不使用
     Surface(
         modifier = modifier,
         shape = MaterialTheme.shapes.extraLarge,
