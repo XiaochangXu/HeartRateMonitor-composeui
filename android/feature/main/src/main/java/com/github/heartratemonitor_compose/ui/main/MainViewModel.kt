@@ -10,6 +10,7 @@ import com.github.heartratemonitor_compose.data.repository.FavoriteDeviceReposit
 import com.github.heartratemonitor_compose.data.repository.SettingsRepository
 import com.github.heartratemonitor_compose.data.system.OverlayPermissionProvider
 import com.github.heartratemonitor_compose.service.BleConnectionManager
+import com.github.heartratemonitor_compose.service.HeartRateRepository
 import com.github.heartratemonitor_compose.service.FairMemoryReceiver
 import com.github.heartratemonitor_compose.service.KillStateSaver
 import com.github.heartratemonitor_compose.service.ServiceLauncher
@@ -32,8 +33,9 @@ import kotlinx.collections.immutable.persistentListOf
 
 /**
  * MVI 架构，Phase 5。仅 BLE 状态订阅 + 组件编排 + 对外单一 [uiState]；
- * 图表数据管道归服务层 [SessionChartTracker]（经 [BleConnectionManager] 暴露 StateFlow），
- * BLE 数据管道订阅与状态机归约见 MainBleStreams.kt。
+ * 图表数据管道归服务层 [SessionChartTracker]（内聚于 HeartRateRepository，
+ * Phase 2 后数据面由构造注入的 Repository 直出，控制命令经 Binder 注入的
+ * BleConnectionManager 弱引用下发），BLE 数据管道订阅与状态机归约见 MainBleStreams.kt。
  *
  * 契约 6 红线原样保留：manualConnectionPending 防竞态、
  * bleToastListener 回调（§3.4 方案 1）、toggleFloatingWindow(): Boolean 返回值语义。
@@ -44,6 +46,7 @@ import kotlinx.collections.immutable.persistentListOf
 class MainViewModel @Inject constructor(
     private val settings: SettingsRepository,
     private val favoriteDeviceRepository: FavoriteDeviceRepository,
+    private val heartRateRepository: HeartRateRepository,
     private val fairMemoryReceiver: FairMemoryReceiver,
     private val killStateSaver: KillStateSaver,
     private val serviceLauncher: ServiceLauncher,
@@ -52,6 +55,7 @@ class MainViewModel @Inject constructor(
 ) : MviViewModel<MainUiState, MainIntent>(initialMainUiState(settings, appContext)),
     FairMemoryReceiver.MemoryListener {
 
+    /** 仅控制命令通道（扫描/连接/断开）的弱引用；数据面已由构造注入的 Repository 直出。 */
     private var bleServiceRef: WeakReference<BleConnectionManager>? = null
 
     private var serviceDataJob: Job? = null
@@ -144,6 +148,11 @@ class MainViewModel @Inject constructor(
         fairMemoryReceiver.addMemoryListener(this)
 
         viewModelScope.launch { favoriteDeviceRepository.migrateLegacyFavoritesIfNeeded() }
+
+        // Phase 2（HeartRateRepository 迁移）：数据面订阅在构造期启动，
+        // 不再依赖 Activity 绑定服务的时序；Repository 为进程级 SSOT，
+        // Activity 重建时 StateFlow 重放自动恢复当前状态，无需旧重绑补丁。
+        serviceDataJob = bindRepositoryStreams(heartRateRepository)
     }
 
     override suspend fun handleIntent(intent: MainIntent) {
@@ -212,34 +221,16 @@ class MainViewModel @Inject constructor(
     }
 
     /**
-     * 绑定机制不变：仍由 MainActivity 通过 Binder 绑定 BleService 后注入实例，
-     * WeakReference 持有避免 ViewModel 泄潏 Service。
+     * 控制面注入：仍由 MainActivity 通过 Binder 绑定 BleService 后注入实例，
+     * WeakReference 持有避免 ViewModel 泄漏 Service。
+     *
+     * Phase 2（HeartRateRepository 迁移）：原 setConnectionManager 的数据面订阅与
+     * 状态恢复补丁已删除——数据订阅在 init 构造期从 Repository 直出，
+     * Activity 重建时 StateFlow 重放自动恢复（appStatus/图表/Toast 语义由
+     * bindRepositoryStreams 的 drop(1) 与既有归约逻辑保证），本方法仅注入控制命令通道。
      */
-    fun setConnectionManager(manager: BleConnectionManager) {
-        if (bleServiceRef?.get() === manager && serviceDataJob?.isActive == true) return
-
+    fun setControlPlane(manager: BleConnectionManager) {
         this.bleServiceRef = WeakReference(manager)
-        serviceDataJob?.cancel()
-        serviceDataJob = bindBleDataStreams(manager)
-
-        // 状态恢复：bleState 订阅的 drop(1) 会跳过当前值的首次重放（避免图表 reset / Toast），
-        // 但 appStatus 必须同步——否则 Activity 重建后重新绑定时，首页会显示未连接，
-        // 而设备实际仍连接着（BleService 前台服务未被回收）。此处仅同步状态与图表连接标志位，
-        // 不调用 handleBleState，不触发图表 reset，不触发 Toast。
-        val currentBleState = manager.bleState.value
-        val restoredStatus = when (currentBleState) {
-            is BleState.Scanning -> AppStatus.SCANNING
-            is BleState.AutoConnecting, is BleState.Connecting, is BleState.AutoReconnecting -> AppStatus.CONNECTING
-            is BleState.Connected -> AppStatus.CONNECTED
-            else -> AppStatus.DISCONNECTED
-        }
-        // 图表状态由服务层 SessionChartTracker 维护，重进时 StateFlow 重放自动恢复
-        reduceState {
-            it.copy(
-                appStatus = restoredStatus,
-                statusMessage = currentBleState.getMessage(appContext)
-            )
-        }
     }
 
     internal fun reduceState(reducer: (MainUiState) -> MainUiState) {

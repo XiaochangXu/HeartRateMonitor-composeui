@@ -33,9 +33,7 @@ import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
@@ -47,8 +45,12 @@ import kotlin.math.abs
 import kotlin.time.Duration.Companion.seconds
 
 /**
- * 持有并驱动 [BleConnectionManager] 的全部状态流，[BleService] 仅做只读暴露。
+ * 驱动 [BleConnectionManager] 的连接状态机，[BleService] 仅做只读暴露。
  * 纪元机制（connectEpoch）防止退避中的旧自动重连误取消用户刚发起的新连接。
+ *
+ * Phase 1（HeartRateRepository 迁移）：状态流宿主已移至进程级 [HeartRateRepository]
+ * （SSOT），本类通过 set 系列方法写入、override 属性只读转发；
+ * speed 流宿主同在 Repository（[SpeedProvider] 经 updateSpeed 写入）。
  */
 class BleConnectionHandler(
     private val context: Context,
@@ -60,38 +62,30 @@ class BleConnectionHandler(
     private val broadcast: () -> Unit,
     private val freshnessTracker: HeartRateFreshnessTracker,
     private val scope: CoroutineScope,
+    /** 进程级状态流 SSOT（Phase 1 迁移，见类注释）。 */
+    private val repository: HeartRateRepository,
     /** 注入 fake 便于单元测试驱动连接状态机。 */
     private val peripheralFactory: (String, PeripheralBuilder.() -> Unit) -> Peripheral =
         { identifier, builder -> Peripheral(identifier, builder) }
 ) : BleConnectionManager {
 
-    private val _bleState = MutableStateFlow<BleState>(BleState.Idle)
-    override val bleState: StateFlow<BleState> = _bleState.asStateFlow()
+    override val bleState: StateFlow<BleState> get() = repository.bleState
 
-    private val _heartRate = MutableStateFlow(0)
-    override val heartRate: StateFlow<Int> = _heartRate.asStateFlow()
+    override val heartRate: StateFlow<Int> get() = repository.heartRate
 
-    // 完整心率测量 (含 RR-Interval / 传感器接触 / 累计能耗),供图表做逐拍渲染
-    private val _heartRateMeasurement = MutableStateFlow(HeartRateMeasurement.EMPTY)
-    override val heartRateMeasurement: StateFlow<HeartRateMeasurement> = _heartRateMeasurement.asStateFlow()
+    override val heartRateMeasurement: StateFlow<HeartRateMeasurement> get() = repository.heartRateMeasurement
 
-    private val _scanResults = MutableStateFlow<List<ScannedDevice>>(emptyList())
-    override val scanResults: StateFlow<List<ScannedDevice>> = _scanResults.asStateFlow()
+    override val scanResults: StateFlow<List<ScannedDevice>> get() = repository.scanResults
 
-    override val speed: StateFlow<Float> get() = speedProvider.speed
+    override val speed: StateFlow<Float> get() = repository.speed
 
-    // 修复：连接后 scanResults 被清空导致列表为空，单独维护已连接设备信息
-    private val _connectedDevice = MutableStateFlow<ConnectedDevice?>(null)
-    override val connectedDevice: StateFlow<ConnectedDevice?> = _connectedDevice.asStateFlow()
+    override val connectedDevice: StateFlow<ConnectedDevice?> get() = repository.connectedDevice
 
-    // 服务层会话图表追踪器：生命周期随 BLE 连接生灭，StateFlow 重放实现「重进即恢复」
+    // 服务层会话图表追踪器：进程级 HeartRateRepository 内聚，StateFlow 重放实现「重进即恢复」
     // 历史记录开关关闭期间仅跟踪极值、不统计图表点，开启后从零开始绘制
-    private val sessionChartTracker = SessionChartTracker(scope) {
-        settingsRepository.get(SettingsKeys.HISTORY_RECORDING_ENABLED)
-    }
-    override val chartDataSnapshot: StateFlow<ChartDataSnapshot?> = sessionChartTracker.chartDataSnapshot
-    override val sessionMaxHr: StateFlow<Int> = sessionChartTracker.sessionMaxHr
-    override val sessionMinHr: StateFlow<Int> = sessionChartTracker.sessionMinHr
+    override val chartDataSnapshot: StateFlow<ChartDataSnapshot?> get() = repository.chartDataSnapshot
+    override val sessionMaxHr: StateFlow<Int> get() = repository.sessionMaxHr
+    override val sessionMinHr: StateFlow<Int> get() = repository.sessionMinHr
 
     @Volatile
     private var connectedPeripheral: Peripheral? = null
@@ -150,7 +144,7 @@ class BleConnectionHandler(
      * SessionChartTracker 方法 @Synchronized 线程安全。
      */
     fun clearChartCache() {
-        sessionChartTracker.clear()
+        repository.clearChart()
     }
 
     /**
@@ -158,7 +152,7 @@ class BleConnectionHandler(
      * 逻辑见 [SessionChartTracker.releaseOnTrim]。
      */
     fun releaseChartOnTrim(notifyType: Int) {
-        sessionChartTracker.releaseOnTrim(notifyType)
+        repository.releaseChartOnTrim(notifyType)
     }
 
     /**
@@ -206,8 +200,8 @@ class BleConnectionHandler(
         // 重入保护：STATE_TURNING_OFF → STATE_OFF 连续两次广播，第二次直接跳过
         if (isBluetoothTurningOff) {
             // 确保最终状态为 BluetoothDisabled（第二次广播时异步清理可能还没设值）
-            if (_bleState.value !is BleState.BluetoothDisabled) {
-                _bleState.value = BleState.BluetoothDisabled
+            if (repository.bleState.value !is BleState.BluetoothDisabled) {
+                repository.setBleState(BleState.BluetoothDisabled)
             }
             return
         }
@@ -216,8 +210,8 @@ class BleConnectionHandler(
         if (connectedPeripheral == null && !isScanning.get() && connectionJob == null && scanJob == null) {
             // 无活动 BLE 任务时仍设置 BluetoothDisabled（如 Idle → 蓝牙关闭），
             // 让 UI 正确反映蓝牙状态而非保持 Idle
-            if (_bleState.value !is BleState.BluetoothDisabled) {
-                _bleState.value = BleState.BluetoothDisabled
+            if (repository.bleState.value !is BleState.BluetoothDisabled) {
+                repository.setBleState(BleState.BluetoothDisabled)
             }
             return
         }
@@ -242,20 +236,20 @@ class BleConnectionHandler(
                     return@withContext
                 }
                 heartRateRecorder.endSession()
-                _bleState.value = BleState.BluetoothDisabled
+                repository.setBleState(BleState.BluetoothDisabled)
                 webhookRepository.triggerWebhooks(
                     WebhookTrigger.DISCONNECTED,
-                    _heartRate.value,
-                    speedProvider.speed.value
+                    repository.heartRate.value,
+                    repository.speed.value
                 )
-                _heartRate.value = 0
-                _heartRateMeasurement.value = HeartRateMeasurement.EMPTY
+                repository.setHeartRate(0)
+                repository.setHeartRateMeasurement(HeartRateMeasurement.EMPTY)
                 freshnessTracker.reset()
-                _connectedDevice.value = null
-                _scanResults.value = emptyList()
+                repository.setConnectedDevice(null)
+                repository.setScanResults(emptyList())
                 // 蓝牙关闭时清空图表缓存与极值
-                sessionChartTracker.resetSessionExtremes()
-                sessionChartTracker.clear()
+                repository.resetChartExtremes()
+                repository.clearChart()
                 broadcast()
                 connectedPeripheral = null
             }
@@ -279,10 +273,10 @@ class BleConnectionHandler(
      * 下游 UI（rate <= 0 显示 --）、预警服务（rate <= 0 过滤）、局域网广播自动降级。
      */
     fun clearHeartRateOnStale() {
-        if (_heartRate.value > 0) {
+        if (repository.heartRate.value > 0) {
             Log.w(TAG, "心率数据长时间未更新，判定测量失败并清零")
-            _heartRate.value = 0
-            _heartRateMeasurement.value = HeartRateMeasurement.EMPTY
+            repository.setHeartRate(0)
+            repository.setHeartRateMeasurement(HeartRateMeasurement.EMPTY)
             broadcast()
         }
     }
@@ -290,7 +284,7 @@ class BleConnectionHandler(
     /** 非扫描中清空扫描缓存，释放 Advertisement 对象占用的内存。 */
     fun trimScanCacheIfIdle() {
         if (!isScanning.get()) {
-            _scanResults.value = emptyList()
+            repository.setScanResults(emptyList())
             Log.i("BleService", "TRIM: 已清空蓝牙扫描缓存")
         }
     }
@@ -314,20 +308,20 @@ class BleConnectionHandler(
                 withContext(NonCancellable) {
                     if (connectEpoch.get() != myEpoch) return@withContext
                     isScanning.set(false)
-                    _bleState.value = BleState.BluetoothDisabled
+                    repository.setBleState(BleState.BluetoothDisabled)
                 }
                 return@launch
             }
 
             val foundDevicesMap = mutableMapOf<String, ScannedDevice>()
             try {
-                _bleState.value = BleState.Scanning
+                repository.setBleState(BleState.Scanning)
                 withTimeout(durationMillis) {
                     bleManager.scan(useServiceFilter = useFilter).collect { advertisement ->
                         val existing = foundDevicesMap[advertisement.identifier]
                         if (shouldUpdateScanResult(existing?.rssi, advertisement.rssi)) {
                             foundDevicesMap[advertisement.identifier] = advertisement.toScannedDevice()
-                            _scanResults.value = foundDevicesMap.values.toList()
+                            repository.setScanResults(foundDevicesMap.values.toList())
                         }
                     }
                 }
@@ -339,7 +333,7 @@ class BleConnectionHandler(
                 withContext(NonCancellable) {
                     if (connectEpoch.get() != myEpoch) return@withContext
                     isScanning.set(false)
-                    _bleState.value = BleState.BluetoothDisabled
+                    repository.setBleState(BleState.BluetoothDisabled)
                 }
             } finally {
                 withContext(NonCancellable) {
@@ -348,9 +342,9 @@ class BleConnectionHandler(
                     if (connectEpoch.get() != myEpoch) return@withContext
                     isScanning.set(false)
                     // 仅当仍在扫描状态时才发出 ScanFailed，避免覆盖正在进行的连接状态
-                    if (_bleState.value is BleState.Scanning) {
+                    if (repository.bleState.value is BleState.Scanning) {
                         val statusMessage = if (foundDevicesMap.isNotEmpty()) context.getString(R.string.ble_scan_finished) else context.getString(R.string.ble_no_devices_found)
-                        _bleState.value = BleState.ScanFailed(statusMessage)
+                        repository.setBleState(BleState.ScanFailed(statusMessage))
                     }
                 }
             }
@@ -380,15 +374,15 @@ class BleConnectionHandler(
                 withContext(NonCancellable) {
                     if (connectEpoch.get() != myEpoch) return@withContext
                     isScanning.set(false)
-                    _bleState.value = BleState.BluetoothDisabled
+                    repository.setBleState(BleState.BluetoothDisabled)
                 }
                 return@launch
             }
 
             val foundDevicesMap = mutableMapOf<String, ScannedDevice>()
             var favoriteFound = false
-            if (_bleState.value !is BleState.AutoReconnecting) {
-                _bleState.value = BleState.AutoConnecting
+            if (repository.bleState.value !is BleState.AutoReconnecting) {
+                repository.setBleState(BleState.AutoConnecting)
             }
 
             try {
@@ -397,7 +391,7 @@ class BleConnectionHandler(
                         val existing = foundDevicesMap[advertisement.identifier]
                         if (shouldUpdateScanResult(existing?.rssi, advertisement.rssi)) {
                             foundDevicesMap[advertisement.identifier] = advertisement.toScannedDevice()
-                            _scanResults.value = foundDevicesMap.values.toList()
+                            repository.setScanResults(foundDevicesMap.values.toList())
                         }
 
                         if (advertisement.identifier == favoriteDeviceId) {
@@ -414,7 +408,7 @@ class BleConnectionHandler(
                 withContext(NonCancellable) {
                     if (connectEpoch.get() != myEpoch) return@withContext
                     isScanning.set(false)
-                    _bleState.value = BleState.BluetoothDisabled
+                    repository.setBleState(BleState.BluetoothDisabled)
                 }
             } catch (e: Exception) {
                 Log.w(TAG, "Auto scan error", e)
@@ -428,11 +422,11 @@ class BleConnectionHandler(
                         Log.d(TAG, "autoScan finally: favoriteFound=true, calling connectToDevice($favoriteDeviceId)")
                         connectToDevice(favoriteDeviceId)
                     } else {
-                        if (_bleState.value is BleState.AutoConnecting || _bleState.value is BleState.AutoReconnecting) {
-                            Log.d(TAG, "autoScan finally: favoriteFound=false, emitting ScanFailed (currentBleState=${_bleState.value.javaClass.simpleName})")
-                            _bleState.value = BleState.ScanFailed(context.getString(R.string.ble_auto_connect_failed))
+                        if (repository.bleState.value is BleState.AutoConnecting || repository.bleState.value is BleState.AutoReconnecting) {
+                            Log.d(TAG, "autoScan finally: favoriteFound=false, emitting ScanFailed (currentBleState=${repository.bleState.value.javaClass.simpleName})")
+                            repository.setBleState(BleState.ScanFailed(context.getString(R.string.ble_auto_connect_failed)))
                         } else {
-                            Log.d(TAG, "autoScan finally: favoriteFound=false, NOT emitting ScanFailed (currentBleState=${_bleState.value.javaClass.simpleName})")
+                            Log.d(TAG, "autoScan finally: favoriteFound=false, NOT emitting ScanFailed (currentBleState=${repository.bleState.value.javaClass.simpleName})")
                         }
                     }
                 }
@@ -475,9 +469,9 @@ class BleConnectionHandler(
                 }
                 connectedPeripheral = peripheral
 
-                if (_bleState.value !is BleState.AutoReconnecting) {
+                if (repository.bleState.value !is BleState.AutoReconnecting) {
                     Log.d(TAG, "connectToDevice: setting BleState.Connecting for $identifier")
-                    _bleState.value = BleState.Connecting
+                    repository.setBleState(BleState.Connecting)
                 } else {
                     Log.d(TAG, "connectToDevice: keeping AutoReconnecting, will use existing BleState")
                 }
@@ -497,8 +491,8 @@ class BleConnectionHandler(
 
             } catch (e: TimeoutCancellationException) {
                 Log.e(TAG, "Connection to $identifier timed out", e)
-                if (_bleState.value !is BleState.AutoReconnecting) {
-                    _bleState.value = BleState.Disconnected(context.getString(R.string.ble_connect_timeout))
+                if (repository.bleState.value !is BleState.AutoReconnecting) {
+                    repository.setBleState(BleState.Disconnected(context.getString(R.string.ble_connect_timeout)))
                 }
             } catch (e: CancellationException) {
                 // 结构化并发：真正的取消（外部 cancel / 设备断开）必须向上传播，
@@ -506,8 +500,8 @@ class BleConnectionHandler(
                 throw e
             } catch (e: Exception) {
                 Log.e(TAG, "Connection to $identifier failed", e)
-                if (_bleState.value !is BleState.AutoReconnecting) {
-                    _bleState.value = BleState.Disconnected(context.getString(R.string.ble_connect_failed, e.message))
+                if (repository.bleState.value !is BleState.AutoReconnecting) {
+                    repository.setBleState(BleState.Disconnected(context.getString(R.string.ble_connect_failed, e.message)))
                 }
             } finally {
                 withContext(NonCancellable) {
@@ -524,8 +518,8 @@ class BleConnectionHandler(
     private suspend fun handlePeripheralState(peripheral: Peripheral, state: State) {
         when (state) {
             is State.Connecting -> {
-                if (_bleState.value !is BleState.AutoReconnecting) {
-                    _bleState.value = BleState.Connecting
+                if (repository.bleState.value !is BleState.AutoReconnecting) {
+                    repository.setBleState(BleState.Connecting)
                 }
             }
             is State.Connected -> {
@@ -541,22 +535,22 @@ class BleConnectionHandler(
                 // 仅连接成功后登记设备 id：失败/超时的首连不得触发自动重连
                 lastConnectedDeviceId = peripheral.identifier
                 // 同步当前已连接设备信息（id + name）供 UI 显示
-                _connectedDevice.value = ConnectedDevice(lastConnectedDeviceId ?: "", deviceName)
-                _scanResults.value = emptyList()
-                _bleState.value = BleState.Connected(context.getString(R.string.ble_connected_to, deviceName))
+                repository.setConnectedDevice(ConnectedDevice(lastConnectedDeviceId ?: "", deviceName))
+                repository.setScanResults(emptyList())
+                repository.setBleState(BleState.Connected(context.getString(R.string.ble_connected_to, deviceName)))
                 autoReconnectAttempt = 0  // 连接成功，重置重试计数
-                webhookRepository.triggerWebhooks(WebhookTrigger.CONNECTED, speed = speedProvider.speed.value)
+                webhookRepository.triggerWebhooks(WebhookTrigger.CONNECTED, speed = repository.speed.value)
 
                 // 先确保 session 写入完成（await），再启动心率监听，避免早期数据因 session 未就绪而丢失
                 heartRateRecorder.startSession(deviceName)
                 // 新会话开始：重置图表缓存与极值，与 startSession 同位置
-                sessionChartTracker.reset()
+                repository.resetChartSession()
                 broadcast()
 
                 // 作为 connectionJob 的子协程启动：断开连接时随 connectionJob 取消，避免泄漏
                 CoroutineScope(currentCoroutineContext()).launch { observeHeartRateData(peripheral) }
             }
-            is State.Disconnecting -> _bleState.value = BleState.Disconnected(context.getString(R.string.ble_disconnecting))
+            is State.Disconnecting -> repository.setBleState(BleState.Disconnected(context.getString(R.string.ble_disconnecting)))
             is State.Disconnected -> {
                 throw CancellationException("Device disconnected: ${state.status}")
             }
@@ -605,22 +599,22 @@ class BleConnectionHandler(
 
         heartRateRecorder.endSession()
         // 断开连接：清零极值 + 清空图表缓存，与 endSession 同位置
-        sessionChartTracker.resetSessionExtremes()
-        sessionChartTracker.clear()
+        repository.resetChartExtremes()
+        repository.clearChart()
 
         val message = if (isManuallyDisconnected) context.getString(R.string.ble_manual_disconnect) else context.getString(R.string.ble_device_disconnected)
         // 设置断开状态（仅在当前连接仍为本连接时），避免设备从 Connected 直接跳到 Disconnected 时状态卡在 Connected
-        _bleState.value = BleState.Disconnected(message)
+        repository.setBleState(BleState.Disconnected(message))
 
-        webhookRepository.triggerWebhooks(WebhookTrigger.DISCONNECTED, _heartRate.value, speedProvider.speed.value)
-        _heartRate.value = 0
+        webhookRepository.triggerWebhooks(WebhookTrigger.DISCONNECTED, repository.heartRate.value, repository.speed.value)
+        repository.setHeartRate(0)
         // 同步清空测量源，避免重连后首页沿用上次会话的旧心率值
-        _heartRateMeasurement.value = HeartRateMeasurement.EMPTY
+        repository.setHeartRateMeasurement(HeartRateMeasurement.EMPTY)
         // 新鲜度看门狗复位，避免旧连接的超时任务污染新连接
         freshnessTracker.reset()
         // 清除已连接设备信息（断开后 DevicesScreen 不再显示已连接卡片）
-        _connectedDevice.value = null
-        _scanResults.value = emptyList()
+        repository.setConnectedDevice(null)
+        repository.setScanResults(emptyList())
         broadcast()
         connectedPeripheral = null
     }
@@ -635,7 +629,7 @@ class BleConnectionHandler(
         autoReconnectAttempt++
         if (autoReconnectAttempt > MAX_AUTO_RECONNECT_ATTEMPTS) {
             // 次数以 String 传入（%1$s），规避小语种（ne/bn/ar）locale 整数格式化输出本地数字（如 Devanagari ५）
-            _bleState.value = BleState.ScanFailed(context.getString(R.string.ble_max_reconnect, MAX_AUTO_RECONNECT_ATTEMPTS.toString()))
+            repository.setBleState(BleState.ScanFailed(context.getString(R.string.ble_max_reconnect, MAX_AUTO_RECONNECT_ATTEMPTS.toString())))
             autoReconnectAttempt = 0
             return
         }
@@ -646,7 +640,7 @@ class BleConnectionHandler(
         delay(delayMs)
         // 退避结束后再次校验，覆盖延迟期间用户发起的任何新连接/扫描
         if (connectEpoch.get() != epoch) return
-        _bleState.value = BleState.AutoReconnecting
+        repository.setBleState(BleState.AutoReconnecting)
         startAutoConnectScan(lastConnectedDeviceId!!)
     }
 
@@ -669,12 +663,12 @@ class BleConnectionHandler(
                     } else {
                         measurement
                     }
-                    _heartRate.value = effective.bpm
-                    _heartRateMeasurement.value = effective
-                    webhookRepository.triggerWebhooks(WebhookTrigger.HEART_RATE_UPDATED, effective.bpm, speedProvider.speed.value)
+                    repository.setHeartRate(effective.bpm)
+                    repository.setHeartRateMeasurement(effective)
+                    webhookRepository.triggerWebhooks(WebhookTrigger.HEART_RATE_UPDATED, effective.bpm, repository.speed.value)
 
                     // 喂点给服务层图表追踪器（@Synchronized 保证线程安全）
-                    sessionChartTracker.onMeasurement(effective)
+                    repository.onChartMeasurement(effective)
 
                     // 历史记录落盘失败不应中断心率采集（如 DB 瞬时异常），单独隔离。
                     // 无效值（bpm <= 0）不落盘，避免污染历史统计均值

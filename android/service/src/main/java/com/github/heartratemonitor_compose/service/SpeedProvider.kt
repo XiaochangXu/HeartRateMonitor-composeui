@@ -11,30 +11,30 @@ import android.util.Log
 import androidx.core.app.ActivityCompat
 import com.github.heartratemonitor_compose.data.settings.SettingsKeys
 import com.github.heartratemonitor_compose.data.repository.SettingsRepository
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 
 /**
  * 将位置监听器的注册/注销、速度单位转换从 [BleService] 中剥离。
+ *
+ * Phase 2（HeartRateRepository 迁移）：速度值写入进程级 [HeartRateRepository]（SSOT），
+ * 本类仅保留 GPS 监听与单位转换逻辑，不再自持状态流。
  */
 class SpeedProvider(
     private val context: Context,
-    private val settingsRepository: SettingsRepository
+    private val settingsRepository: SettingsRepository,
+    private val heartRateRepository: HeartRateRepository
 ) {
 
     private val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as? LocationManager
 
-    private val _speed = MutableStateFlow(0f)
-    val speed: StateFlow<Float> = _speed.asStateFlow()
-
     private val locationListener = object : LocationListener {
         override fun onLocationChanged(location: Location) {
-            _speed.value = if (location.hasSpeed()) {
-                location.speed * 3.6f // m/s to km/h
-            } else {
-                0f
-            }
+            heartRateRepository.updateSpeed(
+                if (location.hasSpeed()) {
+                    location.speed * 3.6f // m/s to km/h
+                } else {
+                    0f
+                }
+            )
         }
 
         @Suppress("OVERRIDE_DEPRECATION")
@@ -57,7 +57,7 @@ class SpeedProvider(
             startLocationUpdates()
         } else {
             stopLocationUpdates()
-            _speed.value = 0f
+            heartRateRepository.updateSpeed(0f)
         }
     }
 

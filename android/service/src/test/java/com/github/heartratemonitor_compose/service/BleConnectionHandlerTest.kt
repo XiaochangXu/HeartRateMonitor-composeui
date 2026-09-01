@@ -85,18 +85,23 @@ class BleConnectionHandlerTest {
     private fun createHandler(
         scope: CoroutineScope,
         peripheral: FakePeripheral
-    ): BleConnectionHandler = BleConnectionHandler(
-        context = context,
-        bleManager = BleManager(),
-        settingsRepository = settingsRepository,
-        webhookRepository = webhookRepository,
-        heartRateRecorder = HeartRateRecorder(settingsRepository, dao, scope),
-        speedProvider = SpeedProvider(context, settingsRepository),
-        broadcast = {},
-        freshnessTracker = HeartRateFreshnessTracker(scope),
-        scope = scope,
-        peripheralFactory = { _, _ -> peripheral }
-    )
+    ): BleConnectionHandler {
+        // 生产环境 Hilt 注入同一 @Singleton；测试同样共享单实例，保证写入面互通
+        val repository = HeartRateRepository(settingsRepository)
+        return BleConnectionHandler(
+            context = context,
+            bleManager = BleManager(),
+            settingsRepository = settingsRepository,
+            webhookRepository = webhookRepository,
+            heartRateRecorder = HeartRateRecorder(settingsRepository, dao, scope),
+            speedProvider = SpeedProvider(context, settingsRepository, repository),
+            broadcast = {},
+            freshnessTracker = HeartRateFreshnessTracker(scope),
+            repository = repository,
+            scope = scope,
+            peripheralFactory = { _, _ -> peripheral }
+        )
+    }
 
     /** 轮询等待 bleState 满足条件（真实时间），超时抛 AssertionError。 */
     private suspend fun awaitBleState(

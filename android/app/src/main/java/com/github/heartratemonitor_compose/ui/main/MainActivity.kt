@@ -93,8 +93,9 @@ class MainActivity : FragmentActivity() {
             val binder = service as BleService.LocalBinder
             bleService = binder.getService()
             isBleServiceBound = true
-            // 绑定机制保留（契约 3 例外）；BLE 状态订阅/自动连接判定已归 MainViewModel
-            mainViewModel.setConnectionManager(bleService!!)
+            // Binder 仅注入控制命令通道（Phase 2 后数据面由 VM 构造期从 HeartRateRepository 订阅）；
+            // 自动连接判定仍在此处触发（服务就绪后）
+            mainViewModel.setControlPlane(bleService!!)
             mainViewModel.checkAndStartAutoConnectScan()
         }
 

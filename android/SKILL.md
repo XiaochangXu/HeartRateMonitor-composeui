@@ -293,14 +293,15 @@ description: 项目架构契约、编码规范、验证基线与踩坑指南
 
 ## 3. Service 抽象边界
 
-- ViewModel/UI 依赖 `BleConnectionManager`（BLE 扫描/连接/状态流）与 `ServiceLauncher`（服务启停）接口，禁止依赖具体 `BleService` / `ServiceController` 类。
-- 例外：Activity/Service 通过 Binder 绑定具体 Service 属绑定机制，允许保留具体类型。
+- **数据面**（实时心率/测量/速度/扫描/连接状态/图表流）：ViewModel/UI 一律依赖 `HeartRateRepository`（:service 进程级 @Singleton SSOT，2026-09 迁移，见契约 13），构造注入直出 StateFlow，禁止经 Binder/Service 实例获取数据流。
+- **控制面**（扫描/连接/断开命令与服务启停）：依赖 `BleConnectionManager` 与 `ServiceLauncher` 接口，禁止依赖具体 `BleService` / `ServiceController` 类。
+- 例外：Activity/Service 通过 Binder 绑定具体 Service 属绑定机制，允许保留具体类型（`MainViewModel.setControlPlane` 注入控制命令通道；StatusBarResidentService 绑定仅为确保前台服务存在，数据已从 Repository 读取）。
 - `BleService` 仅承担生命周期编排，连接状态机逻辑归 `BleConnectionHandler`，前台通知归 `BleNotificationManager`；新增同类逻辑应放入对应组件而非 BleService。
 - 服务启停统一经注入的 `ServiceLauncher`（Hilt 绑定 ServiceController），禁止在 UI 层直接 `startService(Intent(...))`。
 
 ## 4. 组件职责与体量上限
 
-- `MainViewModel`：仅 BLE 状态订阅 + 组件编排（含自 MainActivity 迁入的启动编排：自动连接判定/服务恢复/悬浮窗切换/会话清理/BLE Toast 联动）+ 对外 StateFlow；图表数据管道（RR→Point→Snapshot→窗口）归服务层 `SessionChartTracker`（挂在 `BleConnectionHandler` 连接协程内，经 `BleConnectionManager` 接口暴露 StateFlow，UI 直接订阅）；历史记录开关的图表 reset/clear 联动由 `BleSettingsListener` 在服务端接管；"删除收藏并恢复最近"逻辑归 `FavoriteDeviceRepository.deleteAndRestoreLatest()`。
+- `MainViewModel`：仅 BLE 状态订阅 + 组件编排（含自 MainActivity 迁入的启动编排：自动连接判定/服务恢复/悬浮窗切换/会话清理/BLE Toast 联动）+ 对外 StateFlow；数据面订阅在构造期从 `HeartRateRepository` 直出（2026-09 迁移，原 setConnectionManager 重绑补丁已删除）；图表数据管道（RR→Point→Snapshot→窗口）归服务层 `SessionChartTracker`（内聚于 `HeartRateRepository`，UI 直接订阅 Repository）；历史记录开关的图表 reset/clear 联动由 `BleSettingsListener` 在服务端接管；“删除收藏并恢复最近”逻辑归 `FavoriteDeviceRepository.deleteAndRestoreLatest()`。
 - 单个 Composable 文件建议 ≤ 350 行，单个子组件建议 ≤ 150 行；超限时按职责拆为同包新文件（`internal` 可见性），状态通过参数/回调提升传递。
 - 页面结构模式：Screen 主文件只做状态收集与编排，子区域提取为独立 Composable 文件（参考 ui/alarm、ui/settings 现有拆分）。
 
@@ -319,7 +320,7 @@ description: 项目架构契约、编码规范、验证基线与踩坑指南
 - StateFlow 收集模拟原 listener 语义时先 `.drop(1)` 跳过初始发射。
 - KillStateSaver.save 的 runBlocking 同步落盘是 KILL 场景的硬约束（进程随时被杀，异步 launch 会丢数据），不得改为 `set()` 即发即忘。
 - FairMemoryReceiver TRIM/KILL 回调的落盘与缓存释放顺序不得调整。
-- HeartRateRecorder.flushPendingRecords 的取消语义：`CancellationException` 必须「记录回放缓冲区 + 重抛」，禁止并入普通 `Exception` 分支吞掉——否则与 onDestroy「先 drainPendingRecords 入队 Worker、后 serviceScope.cancel()」的顺序叠加，落盘中的批次会被静默丢弃；flush 循环同样不得吞取消。
+- HeartRateRecorder.flushPendingRecords 的取消语义（2026-09 迁移后组件位于 :data:repository，包名保持不变，语义红线不变）：`CancellationException` 必须「记录回放缓冲区 + 重抛」，禁止并入普通 `Exception` 分支吞掉——否则与 onDestroy「先 drainPendingRecords 入队 Worker、后 serviceScope.cancel()」的顺序叠加，落盘中的批次会被静默丢弃；flush 循环同样不得吞取消。
 - BleBroadcastManager 的 200ms 节流只允许作用于高频心率包：连接/断开迁移、状态文案变化、心率清零等终态事件必须直发（否则断开广播落在节流窗口内被丢弃后，WS 客户端永久停留在 connected=true 的陈旧状态）。
 - SettingsRepository.set/remove 落盘协程的异常防护（IO 失败记录日志、不炸进程）不得移除；内存乐观快照与磁盘值的瞬态分叉属已声明限制，磁盘写失败不得让进程崩溃。
 
@@ -333,7 +334,7 @@ description: 项目架构契约、编码规范、验证基线与踩坑指南
   ```
 
   （新增模块或新增含单测的模块后，验证命令须含各模块自身的 `:X:testDebugUnitTest`。）
-- 当前单测基线：**全部通过（221 用例，0 失败）**；其中 29 个为纯 UDF 迁移（2026-08）新增的设置页 ViewModel 往返一致性/配对状态机用例；MVI 迁移（2026-08）完成后新增 MviViewModel 基类测试 ×2 与阈值 clamp 纯归约测试 ×2，验收存档见 `baseline/mvi-baseline.md`。历史基线问题（AppDatabaseTest / HeartRateRecorderTest 的 Room 3→4 迁移缺失导致的 28 个预存失败）已于 2026-08 修复——测试改用 Room 默认驱动（RoomOpenHelper 自行建表与版本管理），不再手工提供 SupportSQLiteOpenHelper + 空 onCreate Callback；出现新失败必须修复。2026-08 i18n 数字系统整改（159 文件，规范见第 12 章）验证时补录 `:core:model` 的 WebhookTest ×8（213→221，基线命令此前遗漏该模块）。
+- 当前单测基线：**全部通过（221 用例，0 失败）**；其中 29 个为纯 UDF 迁移（2026-08）新增的设置页 ViewModel 往返一致性/配对状态机用例；MVI 迁移（2026-08）完成后新增 MviViewModel 基类测试 ×2 与阈值 clamp 纯归约测试 ×2，验收存档见 `baseline/mvi-baseline.md`。历史基线问题（AppDatabaseTest / HeartRateRecorderTest 的 Room 3→4 迁移缺失导致的 28 个预存失败）已于 2026-08 修复——测试改用 Room 默认驱动（RoomOpenHelper 自行建表与版本管理），不再手工提供 SupportSQLiteOpenHelper + 空 onCreate Callback；出现新失败必须修复。2026-08 i18n 数字系统整改（159 文件，规范见第 12 章）验证时补录 `:core:model` 的 WebhookTest ×8（213→221，基线命令此前遗漏该模块）。2026-09 HeartRateRepository 迁移（spec 见 `docs/spec-heart-rate-repository-migration.md`）基线复核：修复预存失败 `FunctionSettingsViewModelTest`（cb2629e 改 NAV_ANIMATION_DISABLED 默认值时漏同步测试，以 DEFAULTS 为准修正）；新增已知 flaky：`BleConnectionHandlerTest` 的 `successful connect then link loss triggers auto reconnect`（真实时间轮询 + Robolectric 蓝牙 shadow 状态，重跑即过，非回归）；`HeartRateRecorderTest` 已随组件迁至 `:data:repository` 验证通过。
 - **已知 flaky（非回归，勿按新失败处理）**：SettingsRepositoryTest 的 `int negative values` 与 `observe int emits current value and updates` 在全量并行跑时偶发「Int 写入后立读返回默认值 0」——属 SettingsRepository KDoc 已声明的「瞬态回退窗口」（DataStore 落盘发射与 Unconfined 乐观缓存的对账时序竞态，测试内 `awaitDiskReconciled` 无法完全消除）。处置：单独 `--rerun-tasks` 重跑该模块，通过即视为环境性失败，无需改代码。
 - 涉及 BLE 连接/断开/重连、设置热更新的改动需提示用户真机回归。
 
@@ -364,9 +365,10 @@ description: 项目架构契约、编码规范、验证基线与踩坑指南
                    通用字符串与图标）
 :data:settings     DataStore 存储 + SettingsRepository + settingsDataStore 单例（契约 2 例外）
 :data:database     Room（Entity/DAO/AppDatabase/schemas），KSP 在此模块
-:data:repository   仓储层 + webhook/network/sensor/system 封装 + ModelMappers（契约 1 映射归口）
+:data:repository   仓储层 + webhook/network/sensor/system 封装 + ModelMappers（契约 1 映射归口）+
+                   HeartRateRecorder 落盘缓冲（2026-09 迁入，包名不变）
 :service           BLE/常驻/悬浮窗/预警/局域网服务 + ble + init + LanTransferSharedState +
-                   ServiceModule（ServiceLauncher @Binds）
+                   HeartRateRepository（实时数据流 SSOT，契约 3/13）+ ServiceModule（ServiceLauncher @Binds）
 :feature:*         main/settings/history/alarm/server/webhook/favorite 页面
 :baselineprofile   现有模块，不动
 ```
@@ -409,7 +411,8 @@ description: 项目架构契约、编码规范、验证基线与踩坑指南
 | 通用 Composable/动画/UI 工具/路由常量/通用字符串图标 | `:core:ui` |
 | 设置读写/DataStore | `:data:settings` |
 | Entity/DAO/数据库 | `:data:database` |
-| Repository/网络/传感器/系统封装 | `:data:repository` |
+| Repository/网络/传感器/系统封装/落盘缓冲（HeartRateRecorder） | `:data:repository` |
+| BLE 实时数据流 SSOT（HeartRateRepository，契约 13） | `:service` |
 | BLE/服务/通知/局域网服务 | `:service` |
 | 某功能页面及其 ViewModel | 对应 `:feature:*` |
 | 跨 feature 共享的页面组件 | 下沉 `:core:ui`（禁止 feature 互依） |
@@ -483,7 +486,8 @@ description: 项目架构契约、编码规范、验证基线与踩坑指南
 ### 10.3 既有例外（不得扩大）
 
 - `MainViewModel` 的 Activity 生命周期编排方法（cleanupOpenSessions / recoverServices /
-  checkAndStartAutoConnectScan / setConnectionManager 绑定注入）保持公开方法形态（非 UI 用户意图）；
+  checkAndStartAutoConnectScan / setControlPlane 控制面注入）保持公开方法形态（非 UI 用户意图）；
+  数据面订阅已改在构造期从 `HeartRateRepository` 直出（2026-09 迁移），不再经 Binder 注入；
   `toggleFloatingWindow(): Boolean` 返回值与 `bleToastListener` 回调属 §3.4 方案 1 豁免；
   `ThemeSettingsViewModel.themePreviewCache` 为色卡预览一次性展示依赖（只读缓存，非业务状态）。
 - 更新日志检测归 `ChangelogNotifier` Hilt 单例（`:app`，替代旧 rememberChangelogState）；
@@ -608,3 +612,24 @@ Android 的 locale 敏感格式化在这些语言下使用本地数字系统（�
 ### 补充：RTL 语言下纯 URL 文本 bidi 重排问题
 
 阿拉伯语（ar）等 RTL 语言下，纯 URL 文本（如 `http://192.168.1.1:8000/`）末尾的 `/` 会被 bidi 算法移到开头，显示为 `/http://192.168.1.1:8000`。修复方式：对纯 URL 的 `Text` 组件添加 `textDirection = TextDirection.Ltr`。注意：仅对纯 URL 文本适用，含本地化前缀的混合文本（如 `عنوان الوصول: http://...`）不需要，bidi 算法能正确处理混合文本中的 LTR 段。
+
+---
+
+# 13. 心率数据流 SSOT（2026-09 Repository 化迁移，禁止回退）
+
+违反即视为破坏架构：
+
+- **单一事实来源**：实时心率/测量/速度/扫描/连接状态/图表快照流一律经
+  `HeartRateRepository`（`:service`，`@Singleton`）暴露；落盘缓冲经
+  `HeartRateRecorder`（`:data:repository`，包名保持不变）。禁止新建第二条
+  实时数据通道，禁止从 `BleService`/`BleConnectionHandler` 实例直接收集数据流。
+- **写入面收敛**：只有采集引擎（`BleConnectionHandler`）与 `SpeedProvider`
+  可调用 Repository 的 set*/update*/图表代理方法；消费者一律只读。
+- **分层落点**：Repository 在 `:service`（因 `BleState` 持有 service 资源与
+  Context，下沉 data 层需先迁移领域模型，见 spec 修订记录）；落盘在
+  `:data:repository`；控制命令仍走 `BleConnectionManager`/Binder（契约 3）。
+- **敏感语义原样保留**：图表 500ms 快照节流、落盘 5s 批量 + 异常分级重试、
+  缓冲上限、Tracker 随连接生灭的 reset/clear 调用点——调参或调整调用顺序前
+  必须先读 `SessionChartTracker` / `HeartRateRecorder` 内注释。
+- **性能基线不变**：数值即时（StateFlow 直连）、图表 ≤500ms、落盘 ≤5s；
+  不得在 Repository 层新增轮询或全量拷贝转发。

@@ -91,7 +91,9 @@ class FunctionSettingsViewModelTest {
                 autoConnectEnabled = false,
                 autoReconnectEnabled = true,
                 scanFilterEnabled = true,
-                navAnimationDisabled = true
+                // 与 AppSettings.DEFAULTS 同步（cb2629e 将 NAV_ANIMATION_DISABLED 默认值
+                // 由 true 改为 false 时漏改本测试，属预存失败修复，非迁移引入）
+                navAnimationDisabled = false
             )
         )
     }

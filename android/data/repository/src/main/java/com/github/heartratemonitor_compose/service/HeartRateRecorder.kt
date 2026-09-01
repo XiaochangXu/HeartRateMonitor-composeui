@@ -16,8 +16,9 @@ import kotlinx.coroutines.launch
 
 
 /**
- * 将原本散落在 [BleService] 中的「会话创建 → 缓冲 → 批量 flush → 会话结束」逻辑收敛到一处，
- * 让 [BleService] 只关心连接/断开/心率接收，而不必直接操作数据库与缓冲队列。
+ * 将原本散落在 BleService（:service 采集引擎，Phase 3 迁入 :data:repository）
+ * 中的「会话创建 → 缓冲 → 批量 flush → 会话结束」逻辑收敛到一处，
+ * 让采集引擎只关心连接/断开/心率接收，而不必直接操作数据库与缓冲队列。
  */
 class HeartRateRecorder(
     private val settingsRepository: SettingsRepository,

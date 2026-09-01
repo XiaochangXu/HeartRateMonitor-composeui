@@ -3,7 +3,7 @@ package com.github.heartratemonitor_compose.ui.main
 import android.util.Log
 import androidx.lifecycle.viewModelScope
 import com.github.heartratemonitor_compose.ble.BleState
-import com.github.heartratemonitor_compose.service.BleConnectionManager
+import com.github.heartratemonitor_compose.service.HeartRateRepository
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collectLatest
@@ -20,15 +20,19 @@ import kotlinx.collections.immutable.toImmutableList
  * manualConnectionPending 防竞态；图表数据管道已迁至服务层 SessionChartTracker，
  * 断开时的图表清空由 cleanupConnection 处理，本文件不再操作图表缓存；
  * BLE 状态 → 一次性 Toast 经 bleToastListener 回调（§3.4 方案 1）。
+ *
+ * Phase 2（HeartRateRepository 迁移）：数据源由 Binder 注入的 BleConnectionManager
+ * 改为构造注入的进程级 HeartRateRepository（SSOT），VM 构造期即订阅，
+ * 不再依赖 Activity 绑定时序；drop(1) 语义保留（防 StateFlow 首次重放）。
  */
-internal fun MainViewModel.bindBleDataStreams(manager: BleConnectionManager): Job {
+internal fun MainViewModel.bindRepositoryStreams(repository: HeartRateRepository): Job {
     return viewModelScope.launch {
         // supervisorScope：任一订阅异常只终止自身，不级联取消其余数据管道，
         // 避免单个 collector 抛异常导致心率/状态/扫描结果全部永久停更。
         supervisorScope {
             launch {
                 try {
-                    manager.heartRateMeasurement.collect { measurement ->
+                    repository.heartRateMeasurement.collect { measurement ->
                         reduceState { it.copy(heartRate = measurement.bpm) }
                     }
                 } catch (e: CancellationException) {
@@ -40,7 +44,7 @@ internal fun MainViewModel.bindBleDataStreams(manager: BleConnectionManager): Jo
 
             launch {
                 try {
-                    manager.speed.collect { reduceState { s -> s.copy(speed = it) } }
+                    repository.speed.collect { reduceState { s -> s.copy(speed = it) } }
                 } catch (e: CancellationException) {
                     throw e
                 } catch (e: Exception) {
@@ -50,7 +54,7 @@ internal fun MainViewModel.bindBleDataStreams(manager: BleConnectionManager): Jo
 
             launch {
                 try {
-                    manager.scanResults.collect { reduceState { s -> s.copy(scanResults = it.toImmutableList()) } }
+                    repository.scanResults.collect { reduceState { s -> s.copy(scanResults = it.toImmutableList()) } }
                 } catch (e: CancellationException) {
                     throw e
                 } catch (e: Exception) {
@@ -60,7 +64,7 @@ internal fun MainViewModel.bindBleDataStreams(manager: BleConnectionManager): Jo
 
             launch {
                 try {
-                    manager.connectedDevice.collect { reduceState { s -> s.copy(connectedDevice = it) } }
+                    repository.connectedDevice.collect { reduceState { s -> s.copy(connectedDevice = it) } }
                 } catch (e: CancellationException) {
                     throw e
                 } catch (e: Exception) {
@@ -72,9 +76,9 @@ internal fun MainViewModel.bindBleDataStreams(manager: BleConnectionManager): Jo
             launch {
                 try {
                     combine(
-                        manager.chartDataSnapshot,
-                        manager.sessionMaxHr,
-                        manager.sessionMinHr
+                        repository.chartDataSnapshot,
+                        repository.sessionMaxHr,
+                        repository.sessionMinHr
                     ) { snapshot, maxHr, minHr -> Triple(snapshot, maxHr, minHr) }
                         .collect { (snapshot, maxHr, minHr) ->
                             reduceState {
@@ -94,7 +98,7 @@ internal fun MainViewModel.bindBleDataStreams(manager: BleConnectionManager): Jo
                     // （如 Connected）会被新订阅者立即收到，但这是状态恢复而非新事件，
                     // 不应触发图表 reset 或「已连接」Toast。与项目中 BleSettingsListener /
                     // StatusBarResidentService 等的 drop(1) 模式一致。
-                    manager.bleState.drop(1).collectLatest { state -> handleBleState(state) }
+                    repository.bleState.drop(1).collectLatest { state -> handleBleState(state) }
                 } catch (e: CancellationException) {
                     throw e
                 } catch (e: Exception) {

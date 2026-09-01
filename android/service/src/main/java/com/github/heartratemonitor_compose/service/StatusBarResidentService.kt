@@ -36,6 +36,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.ComposeView
 import androidx.lifecycle.Lifecycle
 import com.github.heartratemonitor_compose.service.R
+import com.github.heartratemonitor_compose.ble.BleState
 import com.github.heartratemonitor_compose.data.settings.SettingsKeys
 import com.github.heartratemonitor_compose.data.repository.SettingsRepository
 import com.github.heartratemonitor_compose.ui.theme.CustomSchemeCache
@@ -63,6 +64,7 @@ class StatusBarResidentService : Service() {
     private lateinit var layoutParams: WindowManager.LayoutParams
 
     @Inject lateinit var settingsRepository: SettingsRepository
+    @Inject lateinit var heartRateRepository: HeartRateRepository
     @Inject lateinit var themeState: ThemeState
     @Inject lateinit var customSchemeCache: CustomSchemeCache
     @Inject lateinit var reopenAppIntent: @JvmSuppressWildcards () -> Intent
@@ -74,9 +76,10 @@ class StatusBarResidentService : Service() {
     private val heartbeatAnimator = HeartbeatAnimator()
 
     private val serviceScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
-    private var bleService: BleService? = null
+    // Phase 4：心率数据已改由 HeartRateRepository 读取；保留绑定仅为确保 BleService
+    // 前台服务存在（BIND_AUTO_CREATE 拉起副作用），并兼容其重建时重新触发订阅
     private var isServiceBound = false
-    /** 当前生效的 BleService 心率订阅，重新订阅前先取消，避免叠加重复收集 */
+    /** 当前生效的心率订阅（Repository 直出），重新订阅前先取消，避免 onServiceConnected 重入叠加 */
     private var bleDataJob: Job? = null
 
     private var settingsJobs: List<Job> = emptyList()
@@ -85,14 +88,13 @@ class StatusBarResidentService : Service() {
 
     private val serviceConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
-            val binder = service as BleService.LocalBinder
-            bleService = binder.getService()
+            // Phase 4 后数据面走 HeartRateRepository，无需持有 Service 实例；
+            // 绑定本身保留（前台服务锚点），回调仅触发/重置订阅
             isServiceBound = true
             observeBleData()
         }
 
         override fun onServiceDisconnected(name: ComponentName?) {
-            bleService = null
             isServiceBound = false
             updateHeartRateText(0)
             heartbeatAnimator.stop()
@@ -164,7 +166,7 @@ class StatusBarResidentService : Service() {
                     .drop(1)
                     .collect {
                         isAnimationEnabled = it
-                        val rate = bleService?.heartRate?.value ?: 0
+                        val rate = heartRateRepository.heartRate.value
                         heartbeatAnimator.update(rate, isAnimationEnabled, isConnected)
                     }
             },
@@ -221,7 +223,8 @@ class StatusBarResidentService : Service() {
         // 初值同步：observeSettingsChanges 用 drop(1) 跳过首次发射，
         // 此处补读当前值，确保首次显示时心跳动画开关与设置一致
         isAnimationEnabled = settingsRepository.get(SettingsKeys.HEARTBEAT_ANIMATION_ENABLED)
-        // 绑定 BleService 获取心率数据（仅 bind，不 start，避免冷重启后台启动限制）
+        // 绑定 BleService 仅为确保前台服务存在（Phase 4 后心率数据从 HeartRateRepository 读取；
+        // 仅 bind 不 start，避免冷重启后台启动限制）
         Intent(this, BleService::class.java).also { intent ->
             bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE)
         }
@@ -365,8 +368,11 @@ class StatusBarResidentService : Service() {
         // 取消旧订阅：BleService 重建后重新 onServiceConnected 会再次调用本方法，
         // 旧协程会持有已销毁服务实例的 StateFlow，必须避免叠加重复收集。
         bleDataJob?.cancel()
+        // Phase 4（HeartRateRepository 迁移）：数据源由 Binder 拿到的 BleService 实例
+        // 改为进程级 HeartRateRepository（SSOT），不再随 BleService 重建而换流；
+        // 上方 cancel 保留，防止 onServiceConnected 多次回调叠加订阅。
         bleDataJob = serviceScope.launch {
-            bleService?.heartRate?.collectLatest { rate ->
+            heartRateRepository.heartRate.collectLatest { rate ->
                 updateHeartRateText(rate)
             }
         }
@@ -374,8 +380,9 @@ class StatusBarResidentService : Service() {
 
     private fun updateHeartRateText(rate: Int) {
         heartRateText = if (rate > 0) "$rate" else "--"
-        // isConnected 随心率更新同步：断开后心率会归零，确保动画立即停止
-        isConnected = bleService?.isDeviceConnected() ?: false
+        // isConnected 随心率更新同步：断开后心率会归零，确保动画立即停止。
+        // Phase 4 后连接标志由 Repository 的 bleState 推导（与流同源，不依赖 Binder）
+        isConnected = heartRateRepository.bleState.value is BleState.Connected
         heartbeatAnimator.update(rate, isAnimationEnabled, isConnected)
     }
 

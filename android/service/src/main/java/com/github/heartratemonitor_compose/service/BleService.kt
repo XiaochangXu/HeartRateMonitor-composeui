@@ -47,6 +47,7 @@ class BleService : Service(), FairMemoryReceiver.MemoryListener, BleConnectionMa
     @Inject lateinit var webhookRepository: WebhookRepository
     @Inject lateinit var settingsRepository: SettingsRepository
     @Inject lateinit var heartRateDao: HeartRateDao
+    @Inject lateinit var heartRateRepository: HeartRateRepository
     @Inject lateinit var sessionRepository: SessionRepository
     @Inject lateinit var fairMemoryReceiver: FairMemoryReceiver
     @Inject lateinit var lanTransferSharedState: LanTransferSharedState
@@ -69,7 +70,7 @@ class BleService : Service(), FairMemoryReceiver.MemoryListener, BleConnectionMa
     override val bleState: StateFlow<BleState> get() = connectionHandler.bleState
     override val heartRate: StateFlow<Int> get() = connectionHandler.heartRate
     override val heartRateMeasurement: StateFlow<HeartRateMeasurement> get() = connectionHandler.heartRateMeasurement
-    override val speed: StateFlow<Float> get() = speedProvider.speed
+    override val speed: StateFlow<Float> get() = heartRateRepository.speed
     override val scanResults: StateFlow<List<ScannedDevice>> get() = connectionHandler.scanResults
     override val connectedDevice: StateFlow<ConnectedDevice?> get() = connectionHandler.connectedDevice
     override val chartDataSnapshot: StateFlow<ChartDataSnapshot?> get() = connectionHandler.chartDataSnapshot
@@ -144,7 +145,7 @@ class BleService : Service(), FairMemoryReceiver.MemoryListener, BleConnectionMa
     )
 
     private fun createSpeedProvider(): SpeedProvider =
-        SpeedProvider(applicationContext, settingsRepository)
+        SpeedProvider(applicationContext, settingsRepository, heartRateRepository)
 
     private fun createConnectionHandler(): BleConnectionHandler = BleConnectionHandler(
         context = this,
@@ -156,6 +157,7 @@ class BleService : Service(), FairMemoryReceiver.MemoryListener, BleConnectionMa
         // 延迟解析：broadcastManager 构造晚于 connectionHandler（依赖其状态流），运行时求值
         broadcast = { broadcastManager.broadcast() },
         freshnessTracker = heartRateFreshnessTracker,
+        repository = heartRateRepository,
         scope = serviceScope
     )
 
@@ -163,7 +165,7 @@ class BleService : Service(), FairMemoryReceiver.MemoryListener, BleConnectionMa
         context = applicationContext,
         settingsRepository = settingsRepository,
         heartRate = connectionHandler.heartRate,
-        speed = speedProvider.speed,
+        speed = heartRateRepository.speed,
         isDeviceConnected = connectionHandler::isDeviceConnected,
         getStatusMessage = { connectionHandler.bleState.value.getMessage(applicationContext) },
         webSocketClientCount = lanTransferSharedState.webSocketClientCount,
@@ -174,7 +176,7 @@ class BleService : Service(), FairMemoryReceiver.MemoryListener, BleConnectionMa
     private fun createBroadcastManager(): BleBroadcastManager = BleBroadcastManager(
         emitState = serverHost::emitState,
         heartRate = connectionHandler.heartRate,
-        speed = speedProvider.speed,
+        speed = heartRateRepository.speed,
         bleState = connectionHandler.bleState,
         isDeviceConnected = connectionHandler::isDeviceConnected,
         context = applicationContext
