@@ -296,8 +296,13 @@ internal fun RealtimeChart(
                         }
                     ),
                     bottomAxis = HorizontalAxis.rememberBottom(
-                        // 采样频率低，降低标签密度：每 ~20 个数据点显示一个时间标签（约 3~4 个）
-                        itemPlacer = HorizontalAxis.ItemPlacer.aligned(spacing = { 20 }),
+                        // 降低标签密度：每 ~24 个数据点显示一个时间标签。
+                        // spacing 必须保证相邻刻度的像素间距留有余量：Vico 会把中间标签的可用宽度
+                        // 压到与相邻刻度的间距一致，间距一旦小于“文本宽度+标签内边距”（约 131~137px）
+                        // 就会用省略号截断标签；2Hz 采样下 20 点间距 ≈ 131~140px，恰好横跨临界值，
+                        // 采样节奏与缩放的微小抖动会让标签时而完整时而截断（呈周期性变化），
+                        // 24 点把间距抬到 ~160px 以上，留出约 20% 安全余量
+                        itemPlacer = HorizontalAxis.ItemPlacer.aligned(spacing = { 24 }),
                         valueFormatter = CartesianValueFormatter { _, value, _ ->
                             // value 是整数毫秒（x 值已量化），转回分:秒显示
                             val totalSec = (value / 1000.0).toLong()

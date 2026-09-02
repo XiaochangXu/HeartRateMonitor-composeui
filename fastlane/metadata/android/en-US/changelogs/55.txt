@@ -1,0 +1,5 @@
+- Fixed bug where auto-connect favorites disconnected and reconnected perfectly connected devices
+- Fixed an issue where the heart rate chart probability appears incomplete
+- Fix some bugs that may cause crashes
+- Optimize chart display on heart rate detail page, reduce card height, smooth Bezier curve
+- Optimization specific

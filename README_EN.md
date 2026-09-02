@@ -9,8 +9,6 @@
 
   <h1>Heart Rate Monitor</h1>
 
-  <p><strong>Make heart-rate monitoring elegant.</strong></p>
-
   <p>An Android heart rate monitoring app based on BLE (Bluetooth Low Energy) technology, plus a Windows desktop heart rate monitor — two platforms that work together.</p>
 
   <p>
@@ -28,7 +26,22 @@
 
 -----
 
-## 📦 Project Overview
+### What's this
+ A dual-platform app that reads your bracelet/watch heart rate in real time via **BLE Heart Rate Broadcast **(Standard Heart Rate Service UUID `0x180D`).
+ After the bracelet/watch end turns on the heart rate broadcast, this application scans the connection and displays real-time BPM, supports floating window, status bar resident,
+ History charts, OBS browser feed overlays, and HTTP / WebSocket / Webhook data outputs.
+
+### Compatible devices
+ Any device that supports standard BLE heart rate service (0x180D), including but not limited to:
+ - Xiaomi bracelet/Xiaomi watch (turn on heart rate broadcast)
+ - Huawei bracelet/Huawei watch (Settings → Heart rate broadcast)
+ - Glory Bracelet/Glory Watch
+ - Amazfit / Zepp OS Watch (Heart Rate Push enabled)
+ - Garmin Watch (Broadcast Heart Rate enabled)
+ - Apple Watch (requires third-party broadcast apps)
+ - Polar / Wahoo / Coospo and other standard BLE heart rate bands
+
+## Project Overview
 
 This repository contains two platform-specific applications with no shared code; they can be used together:
 
@@ -39,27 +52,27 @@ This repository contains two platform-specific applications with no shared code;
 
 -----
 
-## ✨ Features
+## Features
 
 ### Android
 
-- 🖥️ **Full-Screen Mode**: Immersive heart rate display, turning your phone into a cardiac monitor
-- 🔵 **Bluetooth Connection**: Scan and connect to BLE devices that support heart rate services
-- ⭐ **Device Management**: Favorite frequently used devices, with auto-connect and disconnect-reconnect support
-- ❤️ **Heartbeat Animation**: Dynamically changes based on heart rate
-- 📊 **Heart Rate History & Charts**: Auto-recording, history list, batch management, chart analysis, landscape view
-- 🎨 **Personalization**: Feature toggles, floating window style customization
-- 📡 **Data Interfaces**: HTTP server, WebSocket server, Webhook push
-- 🖥️ **OBS Browser Source Display**: Built-in HTML page — add a browser source in OBS with the server address to display real-time heart rate, with customizable color, size, font, and more via URL parameters
-- 🖼️ **Floating Heart Rate Display**: Shows your heart rate over any app on your phone screen
-- 📌 **Status Bar Heart Rate**: Display real-time heart rate in the status bar
-- 🔔 **Heart Rate Alert**: Posture detection combined with threshold-based notifications and vibration
-- 🧠 **Fair Memory Management**: Adapted to domestic vendor memory management mechanisms
-- 🎨 **Color Picker**: Self-drawn HSV color wheel
-- ✨ **Smooth Transition Animations**: Real-time blur scaling
-- 🧊 **Liquid Glass Effect**: Liquid glass effect for the bottom navigation bar
-- 🔗 **Local Network Transmission**: WebSocket server for PC and phone communication
-- 🎯 **Material 3 Dynamic Color**
+- **Full-Screen Mode**: Immersive heart rate display, turning your phone into a cardiac monitor
+- **Bluetooth Connection**: Scan and connect to BLE devices that support heart rate services
+- **Device Management**: Favorite frequently used devices, with auto-connect and disconnect-reconnect support
+- **Heartbeat Animation**: Dynamically changes based on heart rate
+- **Heart Rate History & Charts**: Auto-recording, history list, batch management, chart analysis, landscape view
+- **Personalization**: Feature toggles, floating window style customization
+- **Data Interfaces**: HTTP server, WebSocket server, Webhook push
+- **OBS Browser Source Display**: Built-in HTML page — add a browser source in OBS with the server address to display real-time heart rate, with customizable color, size, font, and more via URL parameters
+- **Floating Heart Rate Display**: Shows your heart rate over any app on your phone screen
+- **Status Bar Heart Rate**: Display real-time heart rate in the status bar
+- **Heart Rate Alert**: Posture detection combined with threshold-based notifications and vibration
+- **Fair Memory Management**: Adapted to domestic vendor memory management mechanisms
+- **Color Picker**: Self-drawn HSV color wheel
+- **Smooth Transition Animations**: Real-time blur scaling
+- **Liquid Glass Effect**: Liquid glass effect for the bottom navigation bar
+- **Local Network Transmission**: WebSocket server for PC and phone communication
+- **Material 3 Dynamic Color**
 
 ### Windows
 
@@ -76,7 +89,7 @@ This repository contains two platform-specific applications with no shared code;
 
 -----
 
-## 🖼️ Screenshots
+## Screenshots
 
 ### Android
 
@@ -98,7 +111,7 @@ This repository contains two platform-specific applications with no shared code;
 
 -----
 
-## 🚀 Installation & Running
+## Installation & Running
 
 Clone the repository:
 
@@ -110,7 +123,7 @@ git clone https://github.com/XiaochangXu/HeartRateMonitor-composeui.git
 
 1. **Open the project**: Open the `android` directory with **Android Studio**
 2. Wait for **Gradle** to automatically sync dependencies
-3. **Build and run**: Connect a real device or emulator (API ≥ 24), then click the ▶️ Run button in the toolbar
+3. **Build and run**: Connect a real device or emulator (API ≥ 24), then click the ▶ Run button in the toolbar
 
 ### Windows
 
@@ -133,7 +146,7 @@ bin\Debug\net10.0-windows10.0.19041.0\win-x64\HeartRate.exe
 
 -----
 
-## 🧭 Usage Guide
+## Usage Guide
 
 ### Android
 
@@ -169,7 +182,7 @@ bin\Debug\net10.0-windows10.0.19041.0\win-x64\HeartRate.exe
 
 -----
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 ├── android/                     # Android (Kotlin + Compose)
@@ -181,7 +194,7 @@ bin\Debug\net10.0-windows10.0.19041.0\win-x64\HeartRate.exe
 
 -----
 
-## 🙏 Acknowledgements
+## cknowledgements
 
 **Core Dependencies (Android)**
 
@@ -197,9 +210,9 @@ bin\Debug\net10.0-windows10.0.19041.0\win-x64\HeartRate.exe
 
 -----
 
-## 🗺️ Roadmap
+## Roadmap
 
-### ✅ Core Features
+### Core Features
 
 - [x] BLE heart-rate device scanning & connection
 - [x] Heart-rate history & chart analysis
@@ -213,6 +226,6 @@ bin\Debug\net10.0-windows10.0.19041.0\win-x64\HeartRate.exe
 
 -----
 
-## 📄 License
+## License
 
 [MIT](./LICENSE) © 2026 XiaochangXu
