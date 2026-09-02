@@ -31,7 +31,10 @@ import com.github.heartratemonitor_compose.data.model.HeartRateRecordInfo
 import com.github.heartratemonitor_compose.ui.widgets.IconContainer
 import kotlinx.collections.immutable.ImmutableList
 import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
+import com.patrykandpatrick.vico.compose.cartesian.CartesianDrawingContext
+import com.patrykandpatrick.vico.compose.cartesian.CartesianMeasuringContext
 import com.patrykandpatrick.vico.compose.cartesian.axis.rememberAxisGuidelineComponent
+import com.patrykandpatrick.vico.compose.cartesian.layer.CartesianLayerDimensions
 import com.patrykandpatrick.vico.compose.cartesian.Zoom
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLineCartesianLayer
 import com.patrykandpatrick.vico.compose.cartesian.rememberVicoScrollState
@@ -61,6 +64,9 @@ import com.patrykandpatrick.vico.compose.common.component.TextComponent
 import com.patrykandpatrick.vico.compose.common.data.ExtraStore
 import java.text.SimpleDateFormat
 import java.util.Date
+import kotlin.math.ceil
+import kotlin.math.floor
+import kotlin.math.roundToInt
 
 /** 降采样后图表最多显示的数据点数 */
 private const val MAX_POINTS = 300
@@ -156,13 +162,19 @@ internal fun HeartRateChart(
     // Y 轴范围：最低值为心率最小值 - 20，最高值为心率最大值 + 20，
     // 曲线上下都留出空间，不顶着图表顶/底部；
     // 整体跨度不足 40 bpm 时（心率变化很小）以最低值为基准向上补足，
-    // 避免微小波动被放大成剧烈起伏
+    // 避免微小波动被放大成剧烈起伏；
+    // 上界向上对齐到 20bpm 刻度网格：Vico 的 step 刻度从 rangeMinY 起每 20 一格，
+    // 仅当 (maxY - minY) 是 20 的整数倍时顶边才恰好落在网格线上，
+    // 否则顶部会留出无网格线、无刻度的空带，观感如“绘制不完整”
     val rangeMinY = remember(records) {
         if (records.isEmpty()) 0.0 else records.minOf { it.heartRate }.toDouble() - 20.0
     }
     val rangeMaxY = remember(records) {
         if (records.isEmpty()) 40.0
-        else maxOf(records.maxOf { it.heartRate }.toDouble() + 20.0, rangeMinY + 40.0)
+        else {
+            val target = maxOf(records.maxOf { it.heartRate }.toDouble() + 20.0, rangeMinY + 40.0)
+            rangeMinY + ceil((target - rangeMinY) / 20.0) * 20.0
+        }
     }
 
     // 圆角卡片容器包裹图表：普通圆角（主题 extraLarge = RoundedCornerShape 28dp）+ surfaceBright，
@@ -227,7 +239,12 @@ internal fun HeartRateChart(
                         valueFormatter = CartesianValueFormatter { _, value, _ -> value.toInt().toString() }
                     ),
                     bottomAxis = HorizontalAxis.rememberBottom(
-                        valueFormatter = bottomAxisFormatter
+                        valueFormatter = bottomAxisFormatter,
+                        // 首尾端点必出刻度：会话开始/结束时间总有竖网格线和时间标签，
+                        // 中间刻度按“相邻标签不重叠”的最大密度等分。
+                        // 默认 aligned 的刻度只落在等差网格上且跳过端点，
+                        // 数据点数非间距整数倍时最后一段数据无竖线无时间，观感如“绘制不完整”
+                        itemPlacer = remember { EndpointsAlignedItemPlacer() }
                     ),
                     marker = marker
                 ),
@@ -244,6 +261,86 @@ internal fun HeartRateChart(
             )
         }
     }
+}
+
+/**
+ * 底部时间轴刻度选择器：首尾（数据起点/终点）必出刻度，中间按“相邻时间标签不重叠”的
+ * 最大密度在首尾间等分。
+ *
+ * 默认的 aligned 刻度只落在 minX + k×spacing 的等差网格上，且刻意跳过范围两端
+ * （AlignedHorizontalAxisItemPlacer.getLabelValues 中 value == fullXRange.start/end 会被跳过）：
+ * 间距按标签宽度自动抽稀（spacing × ceil(maxLabelWidth / (xSpacing × spacing))），
+ * 数据点数凑巧是间距整数倍时末刻度恰好落在数据终点（看起来完整），
+ * 否则最后一段数据（长会话可达数分钟）无竖网格线与时间标签，跨会话看呈概率性。
+ */
+private class EndpointsAlignedItemPlacer : HorizontalAxis.ItemPlacer {
+    override fun getShiftExtremeLines(context: CartesianDrawingContext) = true
+
+    // 与 aligned(addExtremeLabelPadding = true) 一致：返回数据两端作为端点标签位置，
+    // 绘图区两侧各留半个标签宽内边距，保证首尾时间标签完整可见不被裁剪
+    override fun getFirstLabelValue(context: CartesianMeasuringContext, maxLabelWidth: Float) =
+        context.ranges.minX
+
+    override fun getLastLabelValue(context: CartesianMeasuringContext, maxLabelWidth: Float) =
+        context.ranges.maxX
+
+    override fun getLabelValues(
+        context: CartesianDrawingContext,
+        visibleXRange: ClosedFloatingPointRange<Double>,
+        fullXRange: ClosedFloatingPointRange<Double>,
+        maxLabelWidth: Float,
+    ): List<Double> {
+        val minX = context.ranges.minX
+        val maxX = context.ranges.maxX
+        val xStep = context.ranges.xStep
+        val stepsInRange = ((maxX - minX) / xStep).takeIf { it > 0.0 } ?: return listOf(minX)
+        // 无重叠前提下最密的刻度间距（单位：xStep）：相邻刻度像素距离 ≥ 最大标签宽度
+        val step = if (maxLabelWidth != 0f) {
+            ceil(maxLabelWidth / context.layerDimensions.xSpacing).toInt().coerceAtLeast(1)
+        } else {
+            1
+        }
+        // 在 [minX, maxX] 间等分 count 段：首、尾必为刻度，中间取整到整数索引
+        val count = floor(stepsInRange / step).toInt().coerceIn(1, 60)
+        return buildList {
+            add(minX)
+            for (k in 1 until count) {
+                val value = minX + (maxX - minX) * k / count
+                add(minX + ((value - minX) / xStep).roundToInt() * xStep)
+            }
+            add(maxX)
+        }
+            .distinct()
+            .filter { it in visibleXRange }
+    }
+
+    override fun getWidthMeasurementLabelValues(
+        context: CartesianMeasuringContext,
+        layerDimensions: CartesianLayerDimensions,
+        fullXRange: ClosedFloatingPointRange<Double>,
+    ): List<Double> = listOf(context.ranges.minX, context.ranges.maxX)
+
+    override fun getHeightMeasurementLabelValues(
+        context: CartesianMeasuringContext,
+        layerDimensions: CartesianLayerDimensions,
+        fullXRange: ClosedFloatingPointRange<Double>,
+        maxLabelWidth: Float,
+    ): List<Double> =
+        listOf(context.ranges.minX, (context.ranges.minX + context.ranges.maxX) / 2.0, context.ranges.maxX)
+
+    override fun getStartLayerMargin(
+        context: CartesianMeasuringContext,
+        layerDimensions: CartesianLayerDimensions,
+        tickThickness: Float,
+        maxLabelWidth: Float,
+    ): Float = (tickThickness / 2f - layerDimensions.unscalableStartPadding).coerceAtLeast(0f)
+
+    override fun getEndLayerMargin(
+        context: CartesianMeasuringContext,
+        layerDimensions: CartesianLayerDimensions,
+        tickThickness: Float,
+        maxLabelWidth: Float,
+    ): Float = (tickThickness / 2f - layerDimensions.unscalableEndPadding).coerceAtLeast(0f)
 }
 
 @Composable
