@@ -295,13 +295,13 @@ description: 项目架构契约、编码规范、验证基线与踩坑指南
 
 - **数据面**（实时心率/测量/速度/扫描/连接状态/图表流）：ViewModel/UI 一律依赖 `HeartRateRepository`（:service 进程级 @Singleton SSOT，2026-09 迁移，见契约 13），构造注入直出 StateFlow，禁止经 Binder/Service 实例获取数据流。
 - **控制面**（扫描/连接/断开命令与服务启停）：依赖 `BleConnectionManager` 与 `ServiceLauncher` 接口，禁止依赖具体 `BleService` / `ServiceController` 类。
-- 例外：Activity/Service 通过 Binder 绑定具体 Service 属绑定机制，允许保留具体类型（`MainViewModel.setControlPlane` 注入控制命令通道；StatusBarResidentService 绑定仅为确保前台服务存在，数据已从 Repository 读取）。
+- 例外：Activity/Service 通过 Binder 绑定具体 Service 属绑定机制，允许保留具体类型（`MainViewModel.setControlPlane` 注入控制命令通道；StatusBarResidentService / FloatingWindowService 绑定仅为确保前台服务存在，数据已从 Repository 直订）。
 - `BleService` 仅承担生命周期编排，连接状态机逻辑归 `BleConnectionHandler`，前台通知归 `BleNotificationManager`；新增同类逻辑应放入对应组件而非 BleService。
 - 服务启停统一经注入的 `ServiceLauncher`（Hilt 绑定 ServiceController），禁止在 UI 层直接 `startService(Intent(...))`。
 
 ## 4. 组件职责与体量上限
 
-- `MainViewModel`：仅 BLE 状态订阅 + 组件编排（含自 MainActivity 迁入的启动编排：自动连接判定/服务恢复/悬浮窗切换/会话清理/BLE Toast 联动）+ 对外 StateFlow；数据面订阅在构造期从 `HeartRateRepository` 直出（2026-09 迁移，原 setConnectionManager 重绑补丁已删除）；图表数据管道（RR→Point→Snapshot→窗口）归服务层 `SessionChartTracker`（内聚于 `HeartRateRepository`，UI 直接订阅 Repository）；历史记录开关的图表 reset/clear 联动由 `BleSettingsListener` 在服务端接管；“删除收藏并恢复最近”逻辑归 `FavoriteDeviceRepository.deleteAndRestoreLatest()`。
+- `MainViewModel`：仅 BLE 状态订阅 + 组件编排（含自 MainActivity 迁入的启动编排：自动连接判定/服务恢复/悬浮窗切换/会话清理/BLE Toast 联动）+ 对外 StateFlow；数据面订阅在构造期从 `HeartRateRepository` 直出，并按 `Repository.bleState.value` 同步恢复 appStatus（原 setConnectionManager 状态恢复补丁的等价物：bleState 订阅 drop(1) 跳过首帧重放，值流重放恢复不了 appStatus，见契约 13）；图表数据管道（RR→Point→Snapshot→窗口）归服务层 `SessionChartTracker`（内聚于 `HeartRateRepository`，UI 直接订阅 Repository）；历史记录开关的图表 reset/clear 联动由 `BleSettingsListener` 在服务端接管；“删除收藏并恢复最近”逻辑归 `FavoriteDeviceRepository.deleteAndRestoreLatest()`。
 - 单个 Composable 文件建议 ≤ 350 行，单个子组件建议 ≤ 150 行；超限时按职责拆为同包新文件（`internal` 可见性），状态通过参数/回调提升传递。
 - 页面结构模式：Screen 主文件只做状态收集与编排，子区域提取为独立 Composable 文件（参考 ui/alarm、ui/settings 现有拆分）。
 
@@ -623,8 +623,9 @@ Android 的 locale 敏感格式化在这些语言下使用本地数字系统（�
   `HeartRateRepository`（`:service`，`@Singleton`）暴露；落盘缓冲经
   `HeartRateRecorder`（`:data:repository`，包名保持不变）。禁止新建第二条
   实时数据通道，禁止从 `BleService`/`BleConnectionHandler` 实例直接收集数据流。
-- **写入面收敛**：只有采集引擎（`BleConnectionHandler`）与 `SpeedProvider`
-  可调用 Repository 的 set*/update*/图表代理方法；消费者一律只读。
+- **写入面收敛**：只有采集引擎（`BleConnectionHandler`）、`SpeedProvider` 与
+  `BleService.onCreate` 的对账调用（`resetForNewServiceInstance`，见下）
+  可写 Repository；消费者一律只读。
 - **分层落点**：Repository 在 `:service`（因 `BleState` 持有 service 资源与
   Context，下沉 data 层需先迁移领域模型，见 spec 修订记录）；落盘在
   `:data:repository`；控制命令仍走 `BleConnectionManager`/Binder（契约 3）。
@@ -633,3 +634,10 @@ Android 的 locale 敏感格式化在这些语言下使用本地数字系统（�
   必须先读 `SessionChartTracker` / `HeartRateRecorder` 内注释。
 - **性能基线不变**：数值即时（StateFlow 直连）、图表 ≤500ms、落盘 ≤5s；
   不得在 Repository 层新增轮询或全量拷贝转发。
+- **服务重建对账（不得移除）**：状态宿主进程级化后，Service 重建不再自然自愈，
+  必须显式对账——`BleService.onCreate` 必须调用
+  `heartRateRepository.resetForNewServiceInstance()` 清零上一实例残留的连接态
+  （服务被杀重启后若不清零，UI 将展示幽灵连接：首页图表显示未连接、设备页
+  显示已连接、断开命令因新 Handler 无活动任务而静默落空）；
+  `MainViewModel` 构造期必须按 `Repository.bleState.value` 恢复 appStatus
+  （bleState 订阅 drop(1) 跳过首帧重放，值流重放无法恢复它）。

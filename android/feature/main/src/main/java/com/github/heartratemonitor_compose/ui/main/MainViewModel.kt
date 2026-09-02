@@ -151,8 +151,28 @@ class MainViewModel @Inject constructor(
 
         // Phase 2（HeartRateRepository 迁移）：数据面订阅在构造期启动，
         // 不再依赖 Activity 绑定服务的时序；Repository 为进程级 SSOT，
-        // Activity 重建时 StateFlow 重放自动恢复当前状态，无需旧重绑补丁。
+        // 心率/速度/已连接设备/图表等值流经 StateFlow 重放自动恢复。
         serviceDataJob = bindRepositoryStreams(heartRateRepository)
+
+        // 状态恢复（原 setConnectionManager 补丁，Phase 2 迁移时误删后回归）：
+        // bleState 订阅的 drop(1) 会跳过当前值的首帧重放（避免图表 reset / Toast），
+        // 因此 appStatus 无法随值流重放恢复——「退出应用隐藏后台」后重进等 VM
+        // 重建场景中，首页会显示未连接而设备实际仍连接着。此处按 Repository
+        // 当前值仅同步 appStatus 与状态文案，不调用 handleBleState
+        // （不触发图表 reset、不触发 Toast）。
+        val restoredBleState = heartRateRepository.bleState.value
+        val restoredStatus = when (restoredBleState) {
+            is BleState.Scanning -> AppStatus.SCANNING
+            is BleState.AutoConnecting, is BleState.Connecting, is BleState.AutoReconnecting -> AppStatus.CONNECTING
+            is BleState.Connected -> AppStatus.CONNECTED
+            else -> AppStatus.DISCONNECTED
+        }
+        reduceState {
+            it.copy(
+                appStatus = restoredStatus,
+                statusMessage = restoredBleState.getMessage(appContext)
+            )
+        }
     }
 
     override suspend fun handleIntent(intent: MainIntent) {

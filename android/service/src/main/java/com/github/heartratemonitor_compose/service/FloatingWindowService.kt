@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.sp
 import androidx.core.app.NotificationCompat
 import androidx.lifecycle.Lifecycle
 import com.github.heartratemonitor_compose.service.R
+import com.github.heartratemonitor_compose.ble.BleState
 import com.github.heartratemonitor_compose.data.settings.SettingsKeys
 import com.github.heartratemonitor_compose.data.repository.SettingsRepository
 import com.github.heartratemonitor_compose.ui.theme.CustomSchemeCache
@@ -102,19 +103,18 @@ class FloatingWindowService : Service() {
     @Inject lateinit var themeState: ThemeState
     @Inject lateinit var customSchemeCache: CustomSchemeCache
     @Inject lateinit var reopenAppIntent: @JvmSuppressWildcards () -> Intent
+    // 数据面 SSOT（审查修订）：悬浮窗心率/速度/连接标志改由进程级 Repository 直订，
+    // 不再经 Binder 持有的 BleService 实例读取
+    @Inject lateinit var heartRateRepository: HeartRateRepository
 
     private val serviceScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
-    private var bleService: BleService? = null
     private var isServiceBound = false
-    /** 当前生效的 BleService 数据订阅，重新订阅前先取消，避免叠加重复收集 */
+    /** 当前生效的数据订阅（Repository 直出），重新订阅前先取消，避免叠加重复收集 */
     private var bleDataJobs: List<Job> = emptyList()
 
     private var isWindowShown = false
     /** 拖拽中暂停心率/速度刷新，避免重组与 updateViewLayout 争抢主线程造成卡顿 */
     private var isDragging = false
-    /** 拖拽期间缓存的最新心率，松手后一次性应用 */
-    private var pendingHeartRate: Int = 0
-    private var pendingSpeed: Float = 0f
 
     private var heartRateText by mutableStateOf("--")
     private var speedText by mutableStateOf("0.0")
@@ -134,19 +134,18 @@ class FloatingWindowService : Service() {
 
     private val serviceConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
-            val binder = service as BleService.LocalBinder
-            bleService = binder.getService()
+            // 数据面已改由 HeartRateRepository 直订，无需持有 Service 实例；
+            // 绑定保留为前台服务拉起锚点（BIND_AUTO_CREATE 副作用）
             isServiceBound = true
-            isConnected = bleService?.isDeviceConnected() ?: false
+            isConnected = heartRateRepository.bleState.value is BleState.Connected
             observeBleData()
         }
 
         override fun onServiceDisconnected(name: ComponentName?) {
-            // 取消旧订阅并复位显示：继续 collect 已销毁 BleService 的 StateFlow
-            // 会显示陈旧心率并滞留已销毁服务实例（对齐 StatusBarResidentService 的处理）
+            // 取消旧订阅并复位显示，防止 onServiceConnected 重入时叠加重复收集
+            // （对齐 StatusBarResidentService 的处理）
             bleDataJobs.forEach { it.cancel() }
             bleDataJobs = emptyList()
-            bleService = null
             isServiceBound = false
             isDragging = false
             isConnected = false
@@ -225,31 +224,26 @@ class FloatingWindowService : Service() {
 
     private fun observeBleData() {
         // 取消旧订阅：BleService 重建后重新 onServiceConnected 会再次调用本方法，
-        // 旧协程会持有已销毁服务实例的 StateFlow，必须避免叠加重复收集。
+        // 必须先取消旧协程，避免叠加重复收集。
         bleDataJobs.forEach { it.cancel() }
         bleDataJobs = listOf(
             serviceScope.launch {
                 // 使用 collect 而非 collectLatest：lambda 体内无挂起操作，不需要取消上一个收集。
-                // collectLatest 在新值到来时会取消旧协程，但 StateFlow 去重特性导致拖拽结束后
-                // 若当前值等于最后缓存的值则不会重新发射，heartRateText 永远停在 applyPendingBleData
-                // 写入的值——直到下一次心率真正变化，表现为拖拽后显示上一次或上上一次的心率。
-                bleService?.heartRate?.collect { rate ->
-                    if (isDragging) {
-                        // 拖拽中只缓存不写入状态，避免触发重组与 updateViewLayout 争抢主线程
-                        pendingHeartRate = rate
-                    } else {
+                // 拖拽期间跳过 UI 刷新；恢复刷新由 applyPendingBleData 直读 StateFlow.value，
+                // 无需拖拽期间缓存（.value 始终是采集引擎写入的最新值）。
+                heartRateRepository.heartRate.collect { rate ->
+                    if (!isDragging) {
                         heartRateText = if (rate > 0) "$rate" else "--"
-                        // 心率变更时同步连接状态，确保断开后心跳动画立即停止
-                        isConnected = bleService?.isDeviceConnected() ?: false
+                        // 心率变更时同步连接状态，确保断开后心跳动画立即停止。
+                        // 连接标志由 Repository 的 bleState 推导（与流同源，不依赖 Binder）
+                        isConnected = heartRateRepository.bleState.value is BleState.Connected
                         heartbeatAnimator.update(rate, isAnimationEnabled, isConnected)
                     }
                 }
             },
             serviceScope.launch {
-                bleService?.speed?.collect { speed ->
-                    if (isDragging) {
-                        pendingSpeed = speed
-                    } else {
+                heartRateRepository.speed.collect { speed ->
+                    if (!isDragging) {
                         speedText = String.format(Locale.US, "%.1f", speed)
                     }
                 }
@@ -258,26 +252,23 @@ class FloatingWindowService : Service() {
     }
 
     /**
-     * 一次性应用拖拽期间缓存的最新心率/速度，恢复正常刷新。
+     * 一次性应用拖拽期间的最新心率/速度，恢复正常刷新。
      * 调用时机：ACTION_UP / ACTION_CANCEL / enableTouchThrough()。
      *
-     * 优先从 StateFlow 同步读取当前值（.value），而非依赖 pendingHeartRate 缓存：
-     * StateFlow 具有去重特性，拖拽期间如果多个连续的心率值相同则只发射一次，
-     * pendingHeartRate 可能停在较旧的值上；而 .value 始终是 BleConnectionHandler
-     * 写入的最新心率，不会因收集协程的调度延迟而显示过时数据。
-     * 若 StateFlow 不可用（服务已解绑），回退到 pendingHeartRate 缓存值。
+     * 直接从 StateFlow 同步读取当前值（.value）：.value 始终是采集引擎写入的
+     * 最新心率，不依赖收集协程的调度时序，拖拽期间的跳帧不会造成陈旧显示；
+     * Repository 进程级存活，不存在旧实现“服务已解绑”的回退场景。
      */
     private fun applyPendingBleData() {
-        // 从 StateFlow 同步读取最新值，确保不会因 collect 调度延迟而应用过时的缓存
-        val rate = bleService?.heartRate?.value ?: pendingHeartRate
+        val rate = heartRateRepository.heartRate.value
         if (rate > 0) {
             heartRateText = "$rate"
         } else {
             heartRateText = "--"
         }
-        isConnected = bleService?.isDeviceConnected() ?: false
+        isConnected = heartRateRepository.bleState.value is BleState.Connected
         heartbeatAnimator.update(rate, isAnimationEnabled, isConnected)
-        val currentSpeed = bleService?.speed?.value ?: pendingSpeed
+        val currentSpeed = heartRateRepository.speed.value
         speedText = String.format(Locale.US, "%.1f", currentSpeed)
     }
 
@@ -391,8 +382,8 @@ class FloatingWindowService : Service() {
     private fun enableTouchThrough() {
         if (isTouchThroughEnabled || !isWindowShown) return
         isTouchThroughEnabled = true
-        // 穿透后窗口不再收到 ACTION_UP，必须在此复位 isDragging 并应用缓存值，
-        // 否则心率更新会永远卡在 pendingHeartRate
+        // 穿透后窗口不再收到 ACTION_UP，必须在此复位 isDragging 并直读 StateFlow
+        // 当前值刷新显示，否则心率更新会永远卡在拖拽暂停状态
         isDragging = false
         applyPendingBleData()
         layoutParams.flags = layoutParams.flags or WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
@@ -491,7 +482,7 @@ class FloatingWindowService : Service() {
         val isSpeedEnabled = settingsRepository.get(SettingsKeys.SPEED_DISPLAY_ENABLED)
         isAnimationEnabled = settingsRepository.get(SettingsKeys.HEARTBEAT_ANIMATION_ENABLED)
         // 同步更新心跳动画驱动器
-        val rate = bleService?.heartRate?.value ?: 0
+        val rate = heartRateRepository.heartRate.value
         heartbeatAnimator.update(rate, isAnimationEnabled, isConnected)
 
         val finalBgColor = Color.argb((255 * bgAlpha).roundToInt(), Color.red(bgColor), Color.green(bgColor), Color.blue(bgColor))

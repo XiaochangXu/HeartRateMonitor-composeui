@@ -25,9 +25,10 @@ import javax.inject.Singleton
  * - 图表三流（chartDataSnapshot / sessionMaxHr / sessionMinHr）由内聚的
  *   [SessionChartTracker] 维护，快照发布 500ms 节流语义不变（SNAPSHOT_THROTTLE_MS）。
  *
- * 生命周期：@Singleton 进程级。Tracker 实例不再随 Service 重建而重置，
- * 但数据清理点（连接成功 reset / 断开与蓝牙关闭 clear）全部保留在 Handler 中，
- * 「重进即恢复」语义不变且在 Service 重启（START_STICKY）场景下更稳定。
+ * 生命周期：@Singleton 进程级。Service 存活期间状态跨 Activity 重建持续存在
+ * （「重进即恢复」）；Service 被杀重建（START_STICKY）时由 [BleService.onCreate]
+ * 调用 [resetForNewServiceInstance] 对账清零，回归迁移前「状态随采集引擎生灭」
+ * 的自愈语义（否则 UI 将展示幽灵连接）。
  *
  * 线程安全：各 set* 直接对 StateFlow 赋值（原子）；Tracker 内部 @Synchronized。
  */
@@ -112,4 +113,26 @@ class HeartRateRepository @Inject constructor(
 
     /** TRIM 内存预警时释放图表缓存（FairMemoryReceiver 回调链）。 */
     fun releaseChartOnTrim(notifyType: Int) = sessionChartTracker.releaseOnTrim(notifyType)
+
+    // ── 服务重建对账（仅 BleService.onCreate 调用）──
+
+    /**
+     * 清零上一个 Service 实例残留的瞬态状态。
+     *
+     * 状态流宿主进程级化后，BleService 被系统杀死重建（START_STICKY）时本类会
+     * 保留已死实例的连接态，而新 Handler 无任何活动连接——UI 将展示幽灵连接
+     * （首页图表显示未连接、设备页显示已连接、断开命令静默落空）。
+     * 迁移前状态随 Handler 生灭自然自愈，本方法显式回归该语义。
+     * 仅可在 onCreate 调用：此刻新 Handler 尚无活动连接，本类中的连接态必然为残留值。
+     */
+    fun resetForNewServiceInstance() {
+        _bleState.value = BleState.Idle
+        _heartRate.value = 0
+        _heartRateMeasurement.value = HeartRateMeasurement.EMPTY
+        _scanResults.value = emptyList()
+        _connectedDevice.value = null
+        _speed.value = 0f
+        sessionChartTracker.resetSessionExtremes()
+        sessionChartTracker.clear()
+    }
 }

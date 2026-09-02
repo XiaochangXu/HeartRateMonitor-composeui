@@ -88,6 +88,13 @@ class BleService : Service(), FairMemoryReceiver.MemoryListener, BleConnectionMa
     override fun onCreate() {
         super.onCreate()
 
+        // 服务重建对账（契约 13）：状态流宿主已进程级化（HeartRateRepository），
+        // 本服务被系统杀死后 START_STICKY 重建时，Repository 保留着上一实例的
+        // 连接态——UI 会展示幽灵连接（首页图表显示未连接、设备页显示已连接、
+        // 断开命令因新 Handler 无活动任务而静默落空）。迁移前该状态随 Handler
+        // 生灭自然自愈，此处显式回归该语义；必须先于任何组件消费 Repository 状态。
+        heartRateRepository.resetForNewServiceInstance()
+
         bleManager = BleManager()
         heartRateRecorder = createHeartRateRecorder()
         speedProvider = createSpeedProvider()

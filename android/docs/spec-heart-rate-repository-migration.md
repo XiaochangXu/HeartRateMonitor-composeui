@@ -43,6 +43,27 @@
   Repository 实例（与生产 @Singleton 不符），统一为共享实例；
   ④ `MainViewModel` 类 KDoc 前 4 行丢失前导空格，恢复缩进。
   验证：全模块单测 + `:app:assembleDebug` BUILD SUCCESSFUL。
+- **线上缺陷修复（2026-09-02）：服务重建后幽灵连接（「退出应用隐藏后台」场景）**：
+  现象——正在记录心率时开启该设置并退出，等待一段时间后重进，首页图表显示
+  未连接、设备页显示已连接、断开命令无效，只能退出重进。
+  根因有二：① Phase 2 删除 `setConnectionManager` 时连同状态恢复补丁一并删除，
+  而 `bleState` 订阅的 `drop(1)` 跳过首帧重放，VM 重建后 `appStatus` 无法随
+  值流重放恢复（首页显示未连接）；② 状态流宿主进程级化后，BleService 被系统
+  杀死重建（START_STICKY）时 Repository 保留已死实例的连接态，新 Handler 无
+  活动任务，`disconnectDevice` 静默无操作且陈旧的已连接设备卡片无法消除
+  （迁移前状态随 Handler 生灭，天然自愈）。
+  修复：`BleService.onCreate` 首行调用
+  `HeartRateRepository.resetForNewServiceInstance()` 对账清零；
+  `MainViewModel` 构造期按 `Repository.bleState.value` 恢复 appStatus
+  （原补丁等价回归）。语义对齐迁移前行为，已同步 SKILL.md 契约 4/13，
+  新增 `HeartRateRepositoryTest` 回归测试。
+- **审查补充（2026-09-02）：FloatingWindowService 数据面收敛（Phase 4 遗漏勘误）**：
+  Phase 4 曾判定 FloatingWindowService 为「纯控制面，无数据流」；幽灵连接修复后
+  的回归审查发现该判定有误——其 observeBleData/applyPendingBleData 经 Binder
+  持有的 BleService 实例收集心率/速度/连接标志（违反契约 13 数据面约束，
+  仅因委托链底层同源而未表现异常）。已注入 Repository 并转换全部读取点，
+  删除 bleService 字段与拖拽 pending 缓存（.value 直读后无回退场景），
+  绑定保留为前台服务锚点；同步修正本 Phase 4 勘误与 SKILL.md 契约 3/13。
 
 ---
 
@@ -230,7 +251,7 @@ DB 故障注入（临时改错库名）验证缓冲重试不丢数据。
 
 ### Phase 4 ——（可选）消费者与控制面收敛（1 天，可延后）
 
-状态：已完成 2026-09-02 ｜ 验证记录：StatusBarResidentService 心率流改由 Repository 直订、isConnected 由 bleState 派生；bindService 保留为前台服务拉起锚点（避免“常驻悬浮层存活而 BLE 服务死亡时永不恢复”退化）；控制命令收敛评估：MainViewModel 控制面已收窄为 setControlPlane（M2）， FloatingWindowService 纯控制面维持现状
+状态：已完成 2026-09-02 ｜ 验证记录：StatusBarResidentService 心率流改由 Repository 直订、isConnected 由 bleState 派生；bindService 保留为前台服务拉起锚点（避免“常驻悬浮层存活而 BLE 服务死亡时永不恢复”退化）；控制命令收敛评估：MainViewModel 控制面已收窄为 setControlPlane（M2），FloatingWindowService 纯控制面维持现状（2026-09-02 审查勘误：该判定有误，其 observeBleData 实际经 Binder 收集心率/速度数据流，已补充转换为 Repository 直订，见修订记录）
 
 动机：消除残余的双路径，非阻塞项。
 
@@ -239,7 +260,7 @@ DB 故障注入（临时改错库名）验证缓冲重试不丢数据。
   观察实时流；Binder 仅保留启动控制。注意其"仅 bind 不 start"的启动限制注释(:224)仍然成立。
 - 控制命令（connect/disconnect/scan）评估收敛到 `ServiceLauncher/ServiceController`
   抽象（Hilt 已绑定，ServiceModule.kt:17-18），MainActivity 不再需要 `bleService` 字段。
-- FloatingWindowService 绑定维持现状（纯控制面，无数据流）。
+- FloatingWindowService 绑定维持现状（2026-09-02 勘误：原判定“纯控制面，无数据流”有误，其 observeBleData 经 Binder 收集心率/速度；已补充转换为 Repository 直订，见修订记录）。
 - 文档：更新 `ChartScreen.kt` / `RealtimeChart.kt` 中"服务层 SessionChartTracker 维护"
   的注释指向新链路。
 
