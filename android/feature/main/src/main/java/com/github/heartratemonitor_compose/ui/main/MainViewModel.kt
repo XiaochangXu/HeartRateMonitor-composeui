@@ -213,8 +213,28 @@ class MainViewModel @Inject constructor(
         }
     }
 
-    /** 自动连接判定与触发（原 MainActivity.checkAndStartAutoConnectScan）。 */
+    /**
+     * 自动连接判定与触发（原 MainActivity.checkAndStartAutoConnectScan）。
+     *
+     * 触发点为 MainActivity 绑定服务成功（onServiceConnected），每次 Activity 重建重绑定
+     * 都会再执行——「退出应用隐藏后台」后重进即命中此路径，而 BleService 作为前台服务
+     * 仍在后台运行，GATT 连接往往完好。必须先检查连接态再发起：否则
+     * startAutoConnectScan 的 stopAllBleActivities 会取消现有 connectionJob，
+     * cleanupConnection 无条件 disconnect()/close() 旧 peripheral，把完好连接物理断开
+     * 再重连（历史会话断裂、图表清零重画、UI 闪现「正在尝试连接收藏的设备...」）。
+     *
+     * 已连接/连接进行中一律跳过；未连接时照常触发，保留「离开期间真断开后的兜底重连」语义。
+     */
     fun checkAndStartAutoConnectScan() {
+        val manager = bleServiceRef?.get()
+        if (manager != null) {
+            val current = manager.bleState.value
+            val busy = manager.isDeviceConnected() ||
+                current is BleState.Connecting ||
+                current is BleState.AutoConnecting ||
+                current is BleState.AutoReconnecting
+            if (busy) return
+        }
         val isAutoConnectEnabled = settings.get(SettingsKeys.AUTO_CONNECT_ENABLED)
         val favorite = settings.getNullable(SettingsKeys.FAVORITE_DEVICE_ID)
         if (isAutoConnectEnabled && favorite != null) {
