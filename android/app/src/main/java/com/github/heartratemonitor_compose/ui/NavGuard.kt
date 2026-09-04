@@ -1,13 +1,14 @@
 package com.github.heartratemonitor_compose.ui
 
+import android.os.SystemClock
 import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 
-/** 同路由双击保护窗口：短窗口内对相同键重复压栈直接忽略。 */
-const val SAME_ROUTE_DEBOUNCE_MS = 100L
+/** 同路由双击保护窗口：短窗口内对相同键重复压栈直接忽略；300ms 对齐 ViewConfiguration.getDoubleTapTimeout()。 */
+const val SAME_ROUTE_DEBOUNCE_MS = 300L
 
 class NavGuard {
     var lastNavTimeMs = 0L
@@ -21,7 +22,8 @@ fun rememberNavGuard(): NavGuard = remember { NavGuard() }
 fun rememberSafeNavigate(navBackStack: NavBackStack<NavKey>, navGuard: NavGuard): (AppNavKey) -> Unit =
     remember(navBackStack, navGuard) {
         nav@{ key: AppNavKey ->
-            val now = System.currentTimeMillis()
+            // ⚠️ 反直觉设计：单调时钟，避免改时间/NTP 校时让防抖窗口失效
+            val now = SystemClock.elapsedRealtime()
             // 同路由短窗口：防双击重复压栈
             if (key == navGuard.lastKey && now - navGuard.lastNavTimeMs < SAME_ROUTE_DEBOUNCE_MS) {
                 Log.w("AppRoot", "navigate blocked by same-route guard: $key")
