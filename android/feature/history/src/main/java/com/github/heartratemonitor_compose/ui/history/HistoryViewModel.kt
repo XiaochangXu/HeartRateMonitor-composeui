@@ -5,6 +5,7 @@ import com.github.heartratemonitor_compose.data.model.HeartRateSessionInfo
 import com.github.heartratemonitor_compose.data.repository.HistoryRepository
 import com.github.heartratemonitor_compose.ui.mvi.MviViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
@@ -33,6 +34,17 @@ class HistoryViewModel @Inject constructor(
 ) : MviViewModel<HistoryUiState, HistoryIntent>(HistoryUiState()),
     FairMemoryReceiver.MemoryListener {
 
+    /**
+     * 删除结果一次性回调：Composable 注册/注销（一次性事件不进 UiState，避免重组重放），
+     * 语义参考 MainViewModel.bleToastListener（MVI 迁移方案 §3.4 方案 1）。
+     *
+     * 删除异常必须在 VM 内捕获：dispatch 为即发即忘（viewModelScope.launch），DAO 抛出的
+     * 异常回传不到 Composable 的 try/catch，未捕获会经 UncaughtExceptionHandler 崩进程。
+     * 同理「已删除 N 条」的 Toast 只能由本回调在删除真正完成后触发，不能紧跟 dispatch 弹出。
+     */
+    @Volatile
+    var deleteResultListener: ((HistoryDeleteResult) -> Unit)? = null
+
     init {
         viewModelScope.launch {
             repository.allSessions.collect { list ->
@@ -46,7 +58,7 @@ class HistoryViewModel @Inject constructor(
 
     override suspend fun handleIntent(intent: HistoryIntent) {
         when (intent) {
-            is HistoryIntent.DeleteSessions -> repository.deleteSessionsByIds(intent.ids)
+            is HistoryIntent.DeleteSessions -> deleteSessions(intent.ids)
             is HistoryIntent.EnterMultiSelect ->
                 setState { it.copy(isMultiSelectMode = true, selectedIds = persistentSetOf(intent.initialId)) }
             HistoryIntent.ExitMultiSelect ->
@@ -64,6 +76,23 @@ class HistoryViewModel @Inject constructor(
             HistoryIntent.SelectAll ->
                 setState { it.copy(selectedIds = currentState.sessions.map { s -> s.id }.toImmutableSet()) }
         }
+    }
+
+    private suspend fun deleteSessions(ids: List<Long>) {
+        val count = ids.size
+        val result = try {
+            repository.deleteSessionsByIds(ids)
+            HistoryDeleteResult.Deleted(count)
+        } catch (e: CancellationException) {
+            throw e // 取消必须重抛，禁止并入普通 Exception 分支吞掉（契约 6）
+        } catch (e: Exception) {
+            HistoryDeleteResult.Failed(e.message ?: e.javaClass.simpleName)
+        }
+        // 仅删除成功后退出多选：失败时保留选中项，用户可直接重试
+        if (result is HistoryDeleteResult.Deleted) {
+            setState { it.copy(isMultiSelectMode = false, selectedIds = persistentSetOf()) }
+        }
+        deleteResultListener?.invoke(result)
     }
 
     /**
@@ -147,6 +176,15 @@ class HistoryViewModel @Inject constructor(
         super.onCleared()
         fairMemoryReceiver.removeMemoryListener(this)
     }
+}
+
+/**
+ * 删除结果一次性事件（VM 无 Context，文案由 UI 侧映射，不进 UiState）。
+ */
+sealed interface HistoryDeleteResult {
+    data class Deleted(val count: Int) : HistoryDeleteResult
+
+    data class Failed(val reason: String) : HistoryDeleteResult
 }
 
 /** 历史记录页用户意图。 */

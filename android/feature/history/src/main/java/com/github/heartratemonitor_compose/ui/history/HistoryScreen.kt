@@ -73,6 +73,25 @@ fun HistoryScreen(
     val isMultiSelectMode = uiState.isMultiSelectMode
     val selectedIds = uiState.selectedIds
 
+    // 删除结果一次性回调：Toast 文案需在 UI 侧映射（VM 无 Context）
+    DisposableEffect(viewModel) {
+        viewModel.deleteResultListener = { result ->
+            when (result) {
+                is HistoryDeleteResult.Deleted -> Toast.makeText(
+                    context,
+                    context.getString(R.string.deleted_records, result.count.toString()),
+                    Toast.LENGTH_SHORT
+                ).show()
+                is HistoryDeleteResult.Failed -> Toast.makeText(
+                    context,
+                    context.getString(R.string.delete_failed, result.reason),
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+        }
+        onDispose { viewModel.deleteResultListener = null }
+    }
+
     var showDeleteDialog by remember { mutableStateOf(false) }
 
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
@@ -201,18 +220,10 @@ fun HistoryScreen(
                     ExpressiveButton(
                         label = stringResource(R.string.confirm_text),
                         onClick = {
-                            val deleteCount = selectedIds.size
-                            val deleteIds = selectedIds.toList()
-                            // dispatch 为即发即忘（与原 deleteSessions 内部 launch 语义一致），
-                            // 删除结果由 sessions Flow 回流刷新；Toast 沿用原成功文案
-                            try {
-                                viewModel.dispatch(HistoryIntent.DeleteSessions(deleteIds))
-                                viewModel.dispatch(HistoryIntent.ExitMultiSelect)
-                                Toast.makeText(context, context.getString(R.string.deleted_records, deleteCount.toString()), Toast.LENGTH_SHORT).show()
-                                dismiss()
-                            } catch (e: Exception) {
-                                Toast.makeText(context, context.getString(R.string.delete_failed, e.message), Toast.LENGTH_LONG).show()
-                            }
+                            // dispatch 为即发即忘：Toast 由 deleteResultListener 在删除完成后触发，
+                            // 列表刷新由 sessions Flow 回流，此处只提交意图并关闭弹窗
+                            viewModel.dispatch(HistoryIntent.DeleteSessions(selectedIds.toList()))
+                            dismiss()
                         },
                         style = ExpressiveButtonStyle.Danger
                     )
