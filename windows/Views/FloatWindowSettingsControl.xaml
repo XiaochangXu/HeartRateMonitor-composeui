@@ -105,10 +105,10 @@
                                        Grid.Column="0"
                                        VerticalAlignment="Center" />
                             <Slider Grid.Column="1"
-                                    Minimum="0.5"
-                                    Maximum="2"
-                                    StepFrequency="0.05"
-                                    Value="{x:Bind ViewModel.Settings.WindowScale, Mode=TwoWay}" />
+                                    Minimum="50"
+                                    Maximum="200"
+                                    StepFrequency="1"
+                                    Value="{x:Bind ViewModel.Settings.FloatingSize, Mode=TwoWay}" />
                             <TextBlock Grid.Column="2"
                                        Text="{x:Bind ViewModel.ScaleText, Mode=OneWay}"
                                        TextAlignment="Right"
@@ -127,12 +127,12 @@
                                        Grid.Column="0"
                                        VerticalAlignment="Center" />
                             <Slider Grid.Column="1"
-                                    Minimum="12"
-                                    Maximum="64"
+                                    Minimum="50"
+                                    Maximum="200"
                                     StepFrequency="1"
-                                    Value="{x:Bind ViewModel.Settings.HeartSize, Mode=TwoWay}" />
+                                    Value="{x:Bind ViewModel.Settings.FloatingIconSize, Mode=TwoWay}" />
                             <TextBlock Grid.Column="2"
-                                       Text="{x:Bind ViewModel.HeartSizeText, Mode=OneWay}"
+                                       Text="{x:Bind ViewModel.IconSizeText, Mode=OneWay}"
                                        TextAlignment="Right"
                                        VerticalAlignment="Center"
                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}" />

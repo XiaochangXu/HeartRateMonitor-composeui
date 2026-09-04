@@ -15,9 +15,9 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <LangVersion>latest</LangVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <Version>4.9.3</Version>
-    <AssemblyVersion>4.9.3.0</AssemblyVersion>
-    <FileVersion>4.9.3.0</FileVersion>
+    <Version>4.9.4</Version>
+    <AssemblyVersion>4.9.4.0</AssemblyVersion>
+    <FileVersion>4.9.4.0</FileVersion>
     <ApplicationIcon>winico\favicon.ico</ApplicationIcon>
     <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
     <DefaultLanguage>en-US</DefaultLanguage>

@@ -28,8 +28,8 @@ namespace HeartRate.ViewModels
             SettingsService.Save();
         }
 
-        public string ScaleText => $"{(int)Math.Round(Settings.WindowScale * 100)}%";
-        public string HeartSizeText => $"{Settings.HeartSize:0}px";
+        public string ScaleText => $"{Settings.FloatingSize}%";
+        public string IconSizeText => $"{Settings.FloatingIconSize}%";
         public string HotKeyDisplay => Settings.ClickThroughHotKey;
 
         /// <summary>录制热键：由设置页 TextBox.KeyDown 调用。</summary>
@@ -57,14 +57,14 @@ namespace HeartRate.ViewModels
             Settings.ResetAppearanceToDefaults();
             SettingsService.Save();
             OnPropertyChanged(nameof(ScaleText));
-            OnPropertyChanged(nameof(HeartSizeText));
+            OnPropertyChanged(nameof(IconSizeText));
             HeartColor = ColorUtil.Parse(Settings.HeartColor);
         }
 
         private void OnSettingsPropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
             OnPropertyChanged(nameof(ScaleText));
-            OnPropertyChanged(nameof(HeartSizeText));
+            OnPropertyChanged(nameof(IconSizeText));
             if (e.PropertyName == nameof(FloatWindowSettings.HeartColor))
                 HeartColor = ColorUtil.Parse(Settings.HeartColor);
             if (e.PropertyName == nameof(FloatWindowSettings.ClickThroughHotKey))

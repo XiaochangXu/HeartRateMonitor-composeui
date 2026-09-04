@@ -17,7 +17,31 @@ public partial class App : Application
     public App()
     {
         InitializeComponent();
+
+        // ── 诊断：FirstChanceException 捕获所有托管异常（含被 XAML stow 前的）──
+        // stowed exception(0xC000027B) 会 fail-fast 无日志，这里先落盘真实堆栈。
+        AppDomain.CurrentDomain.FirstChanceException += (_, e) =>
+        {
+            if (_inLogging || e.Exception is null) return;
+            _inLogging = true;
+            try
+            {
+                var dir = Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                    "HeartRate");
+                Directory.CreateDirectory(dir);
+                var sb = new StringBuilder();
+                sb.AppendLine($"[{DateTime.Now:HH:mm:ss.fff}] FirstChance {e.Exception.GetType().FullName} hr=0x{e.Exception.HResult:X8} tid={Environment.CurrentManagedThreadId}");
+                AppendException(sb, e.Exception, depth: 1);
+                sb.AppendLine();
+                File.AppendAllText(Path.Combine(dir, "crash.log"), sb.ToString());
+            }
+            catch { }
+            finally { _inLogging = false; }
+        };
     }
+
+    private static bool _inLogging;
 
     protected override void OnLaunched(LaunchActivatedEventArgs args)
     {

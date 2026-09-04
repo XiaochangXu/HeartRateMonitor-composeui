@@ -66,10 +66,13 @@ public partial class FloatWindowSettings : ObservableObject
 
     // ── 外观 ──────────────────────────────────────────────────────────────
     // 默认外观值：用于字段初始化与「重置为默认值」。
+    // 尺寸语义与安卓端对齐（FloatingWindowService.updateWindowAppearance）：
+    // 整体大小/图标大小均为百分比 Int（50..200，默认 100），
+    // 爱心实际尺寸 = 基础 22 × 整体比例 × 图标比例。
     public const bool DefaultShowBpmText = true;
     public const bool DefaultShowHeart = true;
-    public const double DefaultWindowScale = 1.6;
-    public const double DefaultHeartSize = 50;
+    public const int DefaultFloatingSize = 100;
+    public const int DefaultFloatingIconSize = 100;
     public const string DefaultHeartColor = "#EB3C50";
 
     [ObservableProperty]
@@ -79,10 +82,10 @@ public partial class FloatWindowSettings : ObservableObject
     private bool _showHeart = DefaultShowHeart;
 
     [ObservableProperty]
-    private double _windowScale = DefaultWindowScale;
+    private int _floatingSize = DefaultFloatingSize;
 
     [ObservableProperty]
-    private double _heartSize = DefaultHeartSize;
+    private int _floatingIconSize = DefaultFloatingIconSize;
 
     [ObservableProperty]
     private string _heartColor = DefaultHeartColor;
@@ -100,8 +103,8 @@ public partial class FloatWindowSettings : ObservableObject
     /// </summary>
     public void ResetAppearanceToDefaults()
     {
-        WindowScale = DefaultWindowScale;
-        HeartSize = DefaultHeartSize;
+        FloatingSize = DefaultFloatingSize;
+        FloatingIconSize = DefaultFloatingIconSize;
         HeartColor = DefaultHeartColor;
         ShowHeart = DefaultShowHeart;
         ShowBpmText = DefaultShowBpmText;
@@ -128,6 +131,13 @@ public partial class FloatWindowSettings : ObservableObject
     /// <summary>启动扫描到上次连接的设备时自动连接（30 秒超时）。</summary>
     [ObservableProperty]
     private bool _autoConnectLastDevice = DefaultAutoConnectLast;
+
+    // ── 应用设置：窗口行为 ────────────────────────────────────────────────
+    public const bool DefaultHideToTray = true;
+
+    /// <summary>开启后点关闭不退出应用，而是隐藏到系统托盘；托盘右键菜单可恢复/退出。</summary>
+    [ObservableProperty]
+    private bool _hideToTray = DefaultHideToTray;
 
     /// <summary>上一次成功连接的设备 MAC 地址（供启动自动连接）。</summary>
     [ObservableProperty]
@@ -169,20 +179,21 @@ public partial class FloatWindowSettings : ObservableObject
     partial void OnClickThroughEnabledChanged(bool value) => SettingsService.Save();
     partial void OnClickThroughHotKeyChanged(string value) => SettingsService.Save();
     partial void OnAutoReconnectEnabledChanged(bool value) => SettingsService.Save();
+    partial void OnHideToTrayChanged(bool value) => SettingsService.Save();
     partial void OnAutoConnectLastDeviceChanged(bool value) => SettingsService.Save();
     partial void OnFilterHeartRateOnlyChanged(bool value) => SettingsService.Save();
     partial void OnLastConnectedAddressChanged(ulong? value) => SettingsService.Save();
     partial void OnLastConnectedNameChanged(string value) => SettingsService.Save();
 
-    partial void OnWindowScaleChanged(double value)
+    partial void OnFloatingSizeChanged(int value)
     {
-        WindowScale = Math.Clamp(value, 0.5, 2.0);
+        FloatingSize = Math.Clamp(value, 50, 200);
         SettingsService.Save();
     }
 
-    partial void OnHeartSizeChanged(double value)
+    partial void OnFloatingIconSizeChanged(int value)
     {
-        HeartSize = Math.Clamp(value, 12, 64);
+        FloatingIconSize = Math.Clamp(value, 50, 200);
         SettingsService.Save();
     }
 

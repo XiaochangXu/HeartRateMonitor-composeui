@@ -28,14 +28,10 @@
                 <StackPanel Orientation="Vertical"
                             Spacing="24">
 
-                    <!-- 大号心率数字：爱心 + 数值 -->
+                    <!-- 大号心率数字 -->
                     <StackPanel Orientation="Horizontal"
                                 HorizontalAlignment="Center"
                                 Spacing="14">
-                        <Viewbox Width="46" Height="46" VerticalAlignment="Center">
-                            <Path Fill="{StaticResource HeartBrush}"
-                                  Data="M 451.5 808 C 441.8 804.7 433.3 799.3 426 792 L 357 729 C 286.3 664.3 222.5 600.2 165.5 536.5 C 108.5 472.8 80 402.7 80 326 C 80 263.3 101 211 143 169 C 185 127 237.3 106 300 106 C 335.3 106 368.7 113.5 400 128.5 C 431.3 143.5 458 164 480 190 C 502 164 528.7 143.5 560 128.5 C 591.3 113.5 624.7 106 660 106 C 722.7 106 775 127 817 169 C 859 211 880 263.3 880 326 C 880 402.7 851.7 473 795 537 C 738.3 601 674 665.3 602 730 L 534 792 C 526.7 799.3 518.2 804.7 508.5 808 C 498.8 811.3 489.3 813 480 813 C 470.7 813 461.2 811.3 451.5 808 Z" />
-                        </Viewbox>
                         <TextBlock Text="{x:Bind ViewModel.HeartRateText, Mode=OneWay}"
                                    FontSize="64"
                                    FontWeight="Bold"

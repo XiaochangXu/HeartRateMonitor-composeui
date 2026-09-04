@@ -62,17 +62,25 @@ public sealed class FloatWindow
     private string _bpmText = "--";
     private bool _showBpmText = true;
     private bool _showHeart = true;
+    // 尺寸公式与安卓端 FloatingWindowService.updateWindowAppearance 对齐：
+    // 整体比例 = FloatingSize/100；图标比例 = FloatingIconSize/100；
+    // 爱心 = 基础 22 × 整体 × 图标；bpm 数字 = 16 × 整体；"bpm" = 12 × 整体；
+    // 内边距 = 8 × 整体；爱心-数字间距 = 4 × 整体；"bpm" 前间距 = 2 × 整体。
     private float _scale = 1f;
-    private float _heartFontSize = 26f;
+    private float _iconScale = 1f;
     private int _heartColorR = 235, _heartColorG = 60, _heartColorB = 80;
     private bool _clickThrough;
     private bool _showHeartbeatAnimation;
 
     // ── 心跳动画 ──────────────────────────────────────────────────────────
-    // 动画缩放系数（1=不缩放），由 DispatcherQueueTimer 在 UI 线程上 ~60fps 更新。
+    // 相位积分器设计：_phase 为连续累计的周期数（波形只取其小数部分）。
+    // bpm 变化仅改变积分速率、从不重置相位，因此心率快速刷新/波动时
+    // 节拍连续、无"跳拍"，观感平滑。动画 bpm 经低通渐变到目标值。
     private float _animScale = 1f;
     private int _animBpm;
-    private DateTimeOffset _animStart;
+    private double _phase;
+    private double _animBpmSmooth;
+    private DateTimeOffset? _lastTick;
     private readonly DispatcherQueue? _uiDispatcher;
     private DispatcherQueueTimer? _animTimer;
 
@@ -105,8 +113,8 @@ public sealed class FloatWindow
         _showBpmText = s.ShowBpmText;
         _showHeart = s.ShowHeart;
         _showHeartbeatAnimation = s.ShowHeartbeatAnimation;
-        _scale = (float)s.WindowScale;
-        _heartFontSize = (float)s.HeartSize;
+        _scale = s.FloatingSize / 100f;
+        _iconScale = s.FloatingIconSize / 100f;
         var hc = ColorUtil.Parse(s.HeartColor);
         _heartColorR = hc.R; _heartColorG = hc.G; _heartColorB = hc.B;
         _clickThrough = s.ClickThroughEnabled;
@@ -231,26 +239,70 @@ public sealed class FloatWindow
 
     private float GetDpiScale() => _hwnd == 0 ? 1f : PInvoke.GetDpiForWindow(new HWND(_hwnd)) / 96f;
 
-    /// <summary>按当前 DPI 校正窗口物理尺寸（与 DComp surface 尺寸保持一致）。</summary>
-    private void ApplySizeFromDpi()
+    /// <summary>
+    /// 按内容计算窗口物理尺寸（对齐安卓端 Compose 自适应布局）：
+    /// 宽 = 内边距×2 + [爱心 + 间距] + bpm 数字宽 + ["bpm" + 间距]，高 = 内边距×2 + max(行高, 爱心)。
+    /// DWrite 未就绪时回退旧的固定 BaseWidth×scale（仅窗口创建首帧）。
+    /// </summary>
+    private (float wPx, float hPx) ComputeContentSize(float dpi)
     {
-        var dpi = GetDpiScale();
-        var w = Math.Max(1, (int)(BaseWidth * _scale * dpi));
-        var h = Math.Max(1, (int)(BaseHeight * _scale * dpi));
-        PInvoke.SetWindowPos(new HWND(_hwnd), new HWND(-1), 0, 0, w, h,
-            SET_WINDOW_POS_FLAGS.SWP_NOMOVE | SET_WINDOW_POS_FLAGS.SWP_NOACTIVATE | SET_WINDOW_POS_FLAGS.SWP_FRAMECHANGED);
+        var pad = 8f * _scale * dpi;
+        var heartSize = 22f * _scale * _iconScale * dpi;
+        var numLineHeight = 16f * _scale * _iconScale * dpi * 1.4f;
+
+        if (_bpmFormat is null || _bpmLabelFormat is null)
+            return (Math.Max(1f, BaseWidth * _scale * dpi), Math.Max(1f, BaseHeight * _scale * dpi));
+
+        float w = pad * 2;
+        if (_showHeart)
+        {
+            w += heartSize + 4f * _scale * dpi; // bpmNumberMarginStart（仅爱心显示时）
+        }
+        w += MeasureTextWidth(_bpmText, _bpmFormat) + 2f; // +2px 缓冲：字形 advance 舍入
+        if (_showBpmText)
+        {
+            w += 2f * _scale * dpi + MeasureTextWidth("bpm", _bpmLabelFormat);
+        }
+
+        float contentH = Math.Max(numLineHeight, _showHeart ? heartSize : 0f);
+        float h = pad * 2 + contentH;
+        return (Math.Max(1f, w), Math.Max(1f, h));
     }
+
+    /// <summary>窗口物理尺寸与内容不符时更新（设置/DPI/数字变化时调用）。</summary>
+    private void UpdateWindowSize()
+    {
+        if (_hwnd == 0) return;
+        var dpi = GetDpiScale();
+        var (wPx, hPx) = ComputeContentSize(dpi);
+        int w = Math.Max(1, (int)Math.Ceiling(wPx));
+        int h = Math.Max(1, (int)Math.Ceiling(hPx));
+        unsafe
+        {
+            RECT r;
+            PInvoke.GetWindowRect(new HWND(_hwnd), &r);
+            if (r.right - r.left != w || r.bottom - r.top != h)
+            {
+                PInvoke.SetWindowPos(new HWND(_hwnd), new HWND(-1), 0, 0, w, h,
+                    SET_WINDOW_POS_FLAGS.SWP_NOMOVE | SET_WINDOW_POS_FLAGS.SWP_NOACTIVATE | SET_WINDOW_POS_FLAGS.SWP_FRAMECHANGED);
+            }
+        }
+    }
+
+    /// <summary>按当前 DPI 与内容校正窗口物理尺寸（与 DComp surface 尺寸保持一致）。</summary>
+    private void ApplySizeFromDpi() => UpdateWindowSize();
 
     private void CreateFormats(float dpi)
     {
         ReleaseFormats();
         if (_dwrite is null) return;
         _heartFormat = CreateTextFormat("Segoe MDL2 Assets",
-            DWRITE_FONT_WEIGHT.DWRITE_FONT_WEIGHT_NORMAL, _heartFontSize * _scale * dpi);
+            DWRITE_FONT_WEIGHT.DWRITE_FONT_WEIGHT_NORMAL, 22f * _scale * _iconScale * dpi);
+        // 文字与爱心同比例：图标大小滑块同时缩放爱心与文字（用户偏好，区别于安卓端）
         _bpmFormat = CreateTextFormat("Segoe UI",
-            DWRITE_FONT_WEIGHT.DWRITE_FONT_WEIGHT_BOLD, 30f * _scale * dpi);
+            DWRITE_FONT_WEIGHT.DWRITE_FONT_WEIGHT_BOLD, 16f * _scale * _iconScale * dpi);
         _bpmLabelFormat = CreateTextFormat("Segoe UI",
-            DWRITE_FONT_WEIGHT.DWRITE_FONT_WEIGHT_NORMAL, 14f * _scale * dpi);
+            DWRITE_FONT_WEIGHT.DWRITE_FONT_WEIGHT_NORMAL, 12f * _scale * _iconScale * dpi);
     }
 
     private unsafe IDWriteTextFormat? CreateTextFormat(string family, DWRITE_FONT_WEIGHT weight, float size)
@@ -264,6 +316,9 @@ public sealed class FloatWindow
                 DWRITE_FONT_STRETCH.DWRITE_FONT_STRETCH_NORMAL,
                 size, new PCWSTR(pLocale), out var textFormat);
             textFormat.SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT.DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
+            // 悬浮窗文本恒为单行：禁用自动换行。否则矩形宽度与文本测量宽度
+            // 相等时，像素舍入会让末字符折到下一行（表现为数字"74"竖排）。
+            textFormat.SetWordWrapping(DWRITE_WORD_WRAPPING.DWRITE_WORD_WRAPPING_NO_WRAP);
             return textFormat;
         }
     }
@@ -304,8 +359,7 @@ public sealed class FloatWindow
         if (_hwnd == 0 || _device is null) return;
 
         var dpi = GetDpiScale();
-        var wPx = Math.Max(1f, BaseWidth * _scale * dpi);
-        var hPx = Math.Max(1f, BaseHeight * _scale * dpi);
+        var (wPx, hPx) = ComputeContentSize(dpi);
         EnsureSurface((uint)Math.Ceiling(wPx), (uint)Math.Ceiling(hPx));
         if (_surface is null) return;
 
@@ -343,9 +397,9 @@ public sealed class FloatWindow
                     ctx.DrawRoundedRectangle(&rr, brush, 2.5f, null);
                 }
 
-                // 文字
-                var padX = 12f * _scale * dpi;
-                var padY = 6f * _scale * dpi;
+                // 文字（内边距 = 8 × 整体比例，对齐安卓 basePaddingDp）
+                var padX = 8f * _scale * dpi;
+                var padY = 8f * _scale * dpi;
                 float cx = padX;
 
                 if (_showHeart)
@@ -354,7 +408,8 @@ public sealed class FloatWindow
                     { r = _heartColorR / 255f, g = _heartColorG / 255f, b = _heartColorB / 255f, a = 1f };
                     ctx.CreateSolidColorBrush(&hc, null, out var brush);
 
-                    var heartSize = _heartFontSize * _scale * dpi;
+                    // 爱心 = 基础 22 × 整体比例 × 图标比例（对齐安卓 iconSize 公式）
+                    var heartSize = 22f * _scale * _iconScale * dpi;
                     var hx = cx;
 
                     // 爱心路径几何缓存：仅大小变化时重建（960 空间坐标 × size/960）
@@ -367,27 +422,29 @@ public sealed class FloatWindow
                         sink.SetFillMode(D2D1_FILL_MODE.D2D1_FILL_MODE_ALTERNATE);
                         float s = heartSize / 960f;
 
-                        // --- outer path ---
-                        sink.BeginFigure(new D2D_POINT_2F { x = 451.5f * s, y = 808.0f * s }, D2D1_FIGURE_BEGIN.D2D1_FIGURE_BEGIN_FILLED);
+                        // 爱心轮廓：Material Design "favorite" 图标，与 obs_heartrate.html
+                        // 页面同款（24 空间 SVG ×40 → 960 空间）。
+                        // 实际填充范围 x 80..880、y 120..854。
+                        // 直线用三点重合的退化贝塞尔段表示（与本项目既有做法一致）。
+                        sink.BeginFigure(new D2D_POINT_2F { x = 480.0f * s, y = 854.0f * s }, D2D1_FIGURE_BEGIN.D2D1_FIGURE_BEGIN_FILLED);
                         sink.AddBeziers(stackalloc D2D1_BEZIER_SEGMENT[]
                         {
-                            new() { point1 = new D2D_POINT_2F { x = 441.8f * s, y = 804.7f * s }, point2 = new D2D_POINT_2F { x = 433.3f * s, y = 799.3f * s }, point3 = new D2D_POINT_2F { x = 426.0f * s, y = 792.0f * s } },
-                            new() { point1 = new D2D_POINT_2F { x = 357.0f * s, y = 729.0f * s }, point2 = new D2D_POINT_2F { x = 286.3f * s, y = 664.3f * s }, point3 = new D2D_POINT_2F { x = 165.5f * s, y = 536.5f * s } },
-                            new() { point1 = new D2D_POINT_2F { x = 108.5f * s, y = 472.8f * s }, point2 = new D2D_POINT_2F { x = 80.0f * s, y = 402.7f * s }, point3 = new D2D_POINT_2F { x = 80.0f * s, y = 326.0f * s } },
-                            new() { point1 = new D2D_POINT_2F { x = 80.0f * s, y = 263.3f * s }, point2 = new D2D_POINT_2F { x = 101.0f * s, y = 211.0f * s }, point3 = new D2D_POINT_2F { x = 143.0f * s, y = 169.0f * s } },
-                            new() { point1 = new D2D_POINT_2F { x = 185.0f * s, y = 127.0f * s }, point2 = new D2D_POINT_2F { x = 237.3f * s, y = 106.0f * s }, point3 = new D2D_POINT_2F { x = 300.0f * s, y = 106.0f * s } },
-                            new() { point1 = new D2D_POINT_2F { x = 335.3f * s, y = 106.0f * s }, point2 = new D2D_POINT_2F { x = 368.7f * s, y = 113.5f * s }, point3 = new D2D_POINT_2F { x = 400.0f * s, y = 128.5f * s } },
-                            new() { point1 = new D2D_POINT_2F { x = 431.3f * s, y = 143.5f * s }, point2 = new D2D_POINT_2F { x = 458.0f * s, y = 164.0f * s }, point3 = new D2D_POINT_2F { x = 480.0f * s, y = 190.0f * s } },
-                            new() { point1 = new D2D_POINT_2F { x = 502.0f * s, y = 164.0f * s }, point2 = new D2D_POINT_2F { x = 528.7f * s, y = 143.5f * s }, point3 = new D2D_POINT_2F { x = 560.0f * s, y = 128.5f * s } },
-                            new() { point1 = new D2D_POINT_2F { x = 591.3f * s, y = 113.5f * s }, point2 = new D2D_POINT_2F { x = 624.7f * s, y = 106.0f * s }, point3 = new D2D_POINT_2F { x = 660.0f * s, y = 106.0f * s } },
-                            new() { point1 = new D2D_POINT_2F { x = 722.7f * s, y = 106.0f * s }, point2 = new D2D_POINT_2F { x = 775.0f * s, y = 127.0f * s }, point3 = new D2D_POINT_2F { x = 817.0f * s, y = 169.0f * s } },
-                            new() { point1 = new D2D_POINT_2F { x = 859.0f * s, y = 211.0f * s }, point2 = new D2D_POINT_2F { x = 880.0f * s, y = 263.3f * s }, point3 = new D2D_POINT_2F { x = 880.0f * s, y = 326.0f * s } },
-                            new() { point1 = new D2D_POINT_2F { x = 880.0f * s, y = 402.7f * s }, point2 = new D2D_POINT_2F { x = 851.7f * s, y = 473.0f * s }, point3 = new D2D_POINT_2F { x = 795.0f * s, y = 537.0f * s } },
-                            new() { point1 = new D2D_POINT_2F { x = 738.3f * s, y = 601.0f * s }, point2 = new D2D_POINT_2F { x = 674.0f * s, y = 665.3f * s }, point3 = new D2D_POINT_2F { x = 602.0f * s, y = 730.0f * s } },
-                            new() { point1 = new D2D_POINT_2F { x = 534.0f * s, y = 792.0f * s }, point2 = new D2D_POINT_2F { x = 534.0f * s, y = 792.0f * s }, point3 = new D2D_POINT_2F { x = 534.0f * s, y = 792.0f * s } },
-                            new() { point1 = new D2D_POINT_2F { x = 526.7f * s, y = 799.3f * s }, point2 = new D2D_POINT_2F { x = 518.2f * s, y = 804.7f * s }, point3 = new D2D_POINT_2F { x = 508.5f * s, y = 808.0f * s } },
-                            new() { point1 = new D2D_POINT_2F { x = 498.8f * s, y = 811.3f * s }, point2 = new D2D_POINT_2F { x = 489.3f * s, y = 813.0f * s }, point3 = new D2D_POINT_2F { x = 480.0f * s, y = 813.0f * s } },
-                            new() { point1 = new D2D_POINT_2F { x = 470.7f * s, y = 813.0f * s }, point2 = new D2D_POINT_2F { x = 461.2f * s, y = 811.3f * s }, point3 = new D2D_POINT_2F { x = 451.5f * s, y = 808.0f * s } },
+                            // 底尖左侧（直线）
+                            new() { point1 = new D2D_POINT_2F { x = 422.0f * s, y = 801.2f * s }, point2 = new D2D_POINT_2F { x = 422.0f * s, y = 801.2f * s }, point3 = new D2D_POINT_2F { x = 422.0f * s, y = 801.2f * s } },
+                            // 左下大弧 → 左侧
+                            new() { point1 = new D2D_POINT_2F { x = 216.0f * s, y = 614.4f * s }, point2 = new D2D_POINT_2F { x = 80.0f * s, y = 491.2f * s }, point3 = new D2D_POINT_2F { x = 80.0f * s, y = 340.0f * s } },
+                            // 左瓣顶
+                            new() { point1 = new D2D_POINT_2F { x = 80.0f * s, y = 216.8f * s }, point2 = new D2D_POINT_2F { x = 176.8f * s, y = 120.0f * s }, point3 = new D2D_POINT_2F { x = 300.0f * s, y = 120.0f * s } },
+                            // 左瓣 → 中心凹口
+                            new() { point1 = new D2D_POINT_2F { x = 369.6f * s, y = 120.0f * s }, point2 = new D2D_POINT_2F { x = 436.4f * s, y = 152.4f * s }, point3 = new D2D_POINT_2F { x = 480.0f * s, y = 203.6f * s } },
+                            // 凹口 → 右瓣顶
+                            new() { point1 = new D2D_POINT_2F { x = 523.6f * s, y = 152.4f * s }, point2 = new D2D_POINT_2F { x = 590.4f * s, y = 120.0f * s }, point3 = new D2D_POINT_2F { x = 660.0f * s, y = 120.0f * s } },
+                            // 右瓣顶 → 右侧
+                            new() { point1 = new D2D_POINT_2F { x = 783.2f * s, y = 120.0f * s }, point2 = new D2D_POINT_2F { x = 880.0f * s, y = 216.8f * s }, point3 = new D2D_POINT_2F { x = 880.0f * s, y = 340.0f * s } },
+                            // 右侧 → 右下大弧 → 底尖右侧
+                            new() { point1 = new D2D_POINT_2F { x = 880.0f * s, y = 491.2f * s }, point2 = new D2D_POINT_2F { x = 744.0f * s, y = 614.4f * s }, point3 = new D2D_POINT_2F { x = 538.0f * s, y = 801.6f * s } },
+                            // 底尖闭合（直线）
+                            new() { point1 = new D2D_POINT_2F { x = 480.0f * s, y = 854.0f * s }, point2 = new D2D_POINT_2F { x = 480.0f * s, y = 854.0f * s }, point3 = new D2D_POINT_2F { x = 480.0f * s, y = 854.0f * s } },
                         });
                         sink.EndFigure(D2D1_FIGURE_END.D2D1_FIGURE_END_CLOSED);
                         sink.Close();
@@ -397,8 +454,8 @@ public sealed class FloatWindow
 
                     if (_heartGeometry is not null)
                     {
-                        // 垂直居中：SVG 实际可见范围 106..813，视觉中心 ~459.5
-                        float visualCenter = (106f + 813f) / 2f;
+                        // 垂直居中：实际填充范围 y 120..854，视觉中心 ~487
+                        float visualCenter = 487f;
                         float sy = heartSize / 960f;
                         var hy = padY + (heartSize / 2f - visualCenter * sy);
 
@@ -421,7 +478,8 @@ public sealed class FloatWindow
                         ctx.FillGeometry(_heartGeometry, brush);
                         ctx.SetTransform(saved);
                     }
-                    cx += heartSize + 8f * _scale * dpi;
+                    // 爱心-数字间距 = bpmNumberMarginStart（4 × 整体比例，仅爱心显示时）
+                    cx += heartSize + 4f * _scale * dpi;
                 }
 
                 // 心率数值：始终绘制；_showBpmText 仅控制其后的「bpm」单位标签
@@ -432,7 +490,8 @@ public sealed class FloatWindow
                     ctx.CreateSolidColorBrush(&wt, null, out var brush);
 
                     var numW = MeasureTextWidth(_bpmText, _bpmFormat);
-                    var numRect = new D2D_RECT_F { left = cx, top = padY, right = cx + numW, bottom = hPx - padY };
+                    // right 留 2px 余量：矩形恰好等于测量宽度时，舍入可能截断末字符
+                    var numRect = new D2D_RECT_F { left = cx, top = padY, right = cx + numW + 2f, bottom = hPx - padY };
                     fixed (char* p = _bpmText)
                     {
                         ctx.DrawText(new PCWSTR(p), (uint)_bpmText.Length, _bpmFormat, &numRect, brush,
@@ -440,10 +499,10 @@ public sealed class FloatWindow
                             DWRITE_MEASURING_MODE.DWRITE_MEASURING_MODE_NATURAL);
                     }
 
-                    // 「bpm」单位标签：仅当开启显示 bpm 文字时绘制
+                    // 「bpm」单位标签：仅当开启显示 bpm 文字时绘制（前置间距 2 × 整体比例）
                     if (_showBpmText && _bpmLabelFormat is not null)
                     {
-                        var labelLeft = cx + numW + 4f * _scale * dpi;
+                        var labelLeft = cx + numW + 2f * _scale * dpi;
                         var labelRect = new D2D_RECT_F { left = labelLeft, top = padY, right = wPx - padX, bottom = hPx - padY };
                         string label = "bpm";
                         fixed (char* p = label)
@@ -547,13 +606,15 @@ public sealed class FloatWindow
                     self._mouseDown = false;
                     break;
                 case WM_DPICHANGED:
-                    // 跨 DPI 显示器移动：按系统建议矩形调整窗口并重建字体/surface
+                    // 跨 DPI 显示器移动：按系统建议位置 + 内容计算尺寸重建字体/surface
                     self.CreateFormats(self.GetDpiScale());
                     self._heartGeometry = null;
                     self._heartGeometrySize = -1f;
                     var rect = *(RECT*)lParam.Value;
+                    var suggested = self.ComputeContentSize(self.GetDpiScale());
                     PInvoke.SetWindowPos(hwnd, new HWND(-1), rect.left, rect.top,
-                        rect.right - rect.left, rect.bottom - rect.top,
+                        Math.Max(1, (int)Math.Ceiling(suggested.wPx)),
+                        Math.Max(1, (int)Math.Ceiling(suggested.hPx)),
                         SET_WINDOW_POS_FLAGS.SWP_NOACTIVATE | SET_WINDOW_POS_FLAGS.SWP_FRAMECHANGED);
                     self.Render();
                     break;
@@ -641,8 +702,10 @@ public sealed class FloatWindow
     {
         _bpmText = bpm.ToString();
         _animBpm = bpm;
-        RestartBeatTiming();
+        // 不重置动画相位：相位由 OnAnimTick 积分推进，bpm 只改变速率，
+        // 心率快速刷新时节拍保持连续（此前每次刷新重置起点导致跳拍混乱）。
         StartAnimIfNeeded();
+        UpdateWindowSize(); // 数字位数变化 → 宽度自适应（对齐安卓 Compose 自测内容）
         Render();
     }
 
@@ -651,8 +714,8 @@ public sealed class FloatWindow
     {
         _bpmText = "--";
         _animBpm = 0;
-        RestartBeatTiming();
-        StartAnimIfNeeded(); // _animBpm==0 → 内部 StopAnim
+        StartAnimIfNeeded(); // _animBpm==0 → 内部 StopAnim（缩放归 1）
+        UpdateWindowSize();
         Render();
     }
 
@@ -671,44 +734,27 @@ public sealed class FloatWindow
     private void OnSettingsChanged()
     {
         var oldScale = _scale;
-        var oldFontSize = _heartFontSize;
+        var oldIconScale = _iconScale;
         LoadSettings();
 
         var dpi = GetDpiScale();
-        var w = Math.Max(1, (int)(BaseWidth * _scale * dpi));
-        var h = Math.Max(1, (int)(BaseHeight * _scale * dpi));
 
         // 尺寸相关设置变化才重建字体格式与几何缓存
-        if (Math.Abs(_scale - oldScale) > 0.0001f || Math.Abs(_heartFontSize - oldFontSize) > 0.0001f)
+        if (Math.Abs(_scale - oldScale) > 0.0001f || Math.Abs(_iconScale - oldIconScale) > 0.0001f)
         {
             CreateFormats(dpi);
             _heartGeometry = null;
             _heartGeometrySize = -1f;
         }
 
-        // 仅窗口尺寸变化时才 SetWindowPos
-        unsafe
-        {
-            RECT r;
-            PInvoke.GetWindowRect(new HWND(_hwnd), &r);
-            if (r.right - r.left != w || r.bottom - r.top != h)
-            {
-                PInvoke.SetWindowPos(new HWND(_hwnd), new HWND(-1), 0, 0, w, h,
-                    SET_WINDOW_POS_FLAGS.SWP_NOMOVE | SET_WINDOW_POS_FLAGS.SWP_NOACTIVATE | SET_WINDOW_POS_FLAGS.SWP_FRAMECHANGED);
-            }
-        }
+        // 窗口尺寸随内容自适应（仅尺寸变化时才 SetWindowPos）
+        UpdateWindowSize();
 
         if (!_closed) Render();
         StartAnimIfNeeded();
     }
 
     // ── 心跳动画 ──────────────────────────────────────────────────────────
-
-    /// <summary>重置心跳周期起点，使缩放节奏与新 bpm 同步。</summary>
-    private void RestartBeatTiming()
-    {
-        _animStart = DateTimeOffset.UtcNow;
-    }
 
     /// <summary>按需启动/停止动画定时器：仅在开启且 bpm>0 时运行。</summary>
     private void StartAnimIfNeeded()
@@ -722,6 +768,8 @@ public sealed class FloatWindow
         EnsureAnimTimer();
         if (_animTimer is not null && !_animTimer.IsRunning)
         {
+            _lastTick = null;         // 首帧 dt=0，避免停顿期间累积出巨幅相位跳变
+            _animBpmSmooth = _animBpm; // 重新起跳时直接用当前 bpm，不从 0 爬升
             _animTimer.Interval = TimeSpan.FromMilliseconds(16);
             _animTimer.Start();
         }
@@ -740,25 +788,40 @@ public sealed class FloatWindow
     {
         if (_animTimer is not null && _animTimer.IsRunning)
             _animTimer.Stop();
+        _lastTick = null;
         _animScale = 1f;
     }
 
-    /// <summary>定时器回调（UI 线程）：按 bpm 计算收缩系数并重绘。</summary>
+    /// <summary>
+    /// 定时器回调（UI 线程）：相位积分推进 → 呼吸式正弦波形 → 缩放并重绘。
+    /// 整个周期连续地收缩↔舒张（纯正弦，如呼吸般平滑），频率跟随心率；
+    /// bpm 经低通渐变，心率波动时节拍平滑过渡、无跳拍。
+    /// </summary>
     private void OnAnimTick(DispatcherQueueTimer sender, object args)
     {
         if (!_showHeartbeatAnimation || _animBpm <= 0)
         {
-            _animScale = 1f;
             StopAnim();
             Render();
             return;
         }
-        double T = 60.0 / _animBpm;             // 一个心跳周期（秒）
-        double elapsed = (DateTimeOffset.UtcNow - _animStart).TotalSeconds;
-        double phase = (elapsed % T) / T;       // 0..1
-        double scale = phase < 0.2
-            ? 1.0 + 0.18 * Math.Sin(phase / 0.2 * Math.PI)
-            : 1.0;
+
+        var now = DateTimeOffset.UtcNow;
+        double dt = _lastTick is { } t ? (now - t).TotalSeconds : 0;
+        _lastTick = now;
+        if (dt < 0) dt = 0;
+        else if (dt > 0.25) dt = 0.25; // 系统休眠/恢复等异常间隔，钳制防跳变
+
+        // 动画 bpm 低通（τ≈0.5s）：显示数值保持原始 bpm，节拍速率渐变不顿挫
+        _animBpmSmooth += (_animBpm - _animBpmSmooth) * (1 - Math.Exp(-dt / 0.5));
+
+        // 相位积分：单位为周期数；bpm 变化只改速率，相位永远连续
+        _phase = (_phase + dt * _animBpmSmooth / 60.0) % 1.0;
+
+        // 呼吸式平滑正弦：整周期连续收缩/舒张（±10%），无脉冲、无突变
+        const double Amp = 0.10;
+        double scale = 1.0 + Amp * Math.Sin(2.0 * Math.PI * _phase);
+
         _animScale = (float)scale;
         Render();
     }

@@ -84,6 +84,18 @@
   <data name="AppSettings_FilterHeartRateOnlyHint.Text" xml:space="preserve">
     <value>When enabled, only devices advertising the Heart Rate service (0x180D) are discovered.</value>
   </data>
+  <data name="AppSettings_HideToTray.Header" xml:space="preserve">
+    <value>Hide to tray</value>
+  </data>
+  <data name="AppSettings_HideToTrayHint.Text" xml:space="preserve">
+    <value>Closing the window hides the app to the system tray instead of exiting. Click the tray icon to restore, right-click it to show or exit.</value>
+  </data>
+  <data name="Tray_ShowMainWindow" xml:space="preserve">
+    <value>Show main window</value>
+  </data>
+  <data name="Tray_Exit" xml:space="preserve">
+    <value>Exit</value>
+  </data>
   <data name="DeviceList_AutoConnectTimeout" xml:space="preserve">
     <value>Last connected device not found (30 s)</value>
   </data>

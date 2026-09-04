@@ -84,6 +84,18 @@
   <data name="AppSettings_FilterHeartRateOnlyHint.Text" xml:space="preserve">
     <value>开启后仅搜索声明了心率服务（0x180D）的设备，过滤无关广播</value>
   </data>
+  <data name="AppSettings_HideToTray.Header" xml:space="preserve">
+    <value>隐藏到托盘</value>
+  </data>
+  <data name="AppSettings_HideToTrayHint.Text" xml:space="preserve">
+    <value>关闭窗口时不退出应用，而是隐藏到系统右下角托盘；左键单击托盘图标恢复窗口，右键菜单可显示或退出</value>
+  </data>
+  <data name="Tray_ShowMainWindow" xml:space="preserve">
+    <value>显示主窗口</value>
+  </data>
+  <data name="Tray_Exit" xml:space="preserve">
+    <value>退出</value>
+  </data>
   <data name="DeviceList_AutoConnectTimeout" xml:space="preserve">
     <value>未找到上次连接的设备（30 秒）</value>
   </data>

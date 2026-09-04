@@ -65,6 +65,25 @@
                                    TextWrapping="Wrap" />
                     </StackPanel>
                 </Border>
+
+                <!-- ── 窗口行为 ──────────────────────────────────────────── -->
+                <Border Background="{ThemeResource LayerFillColorDefaultBrush}"
+                        BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}"
+                        BorderThickness="1"
+                        CornerRadius="{ThemeResource OverlayCornerRadius}"
+                        Padding="20">
+                    <StackPanel Spacing="12">
+                        <ToggleSwitch x:Uid="AppSettings_HideToTray"
+                                      IsOn="{x:Bind ViewModel.Settings.HideToTray, Mode=TwoWay}"
+                                      OnContent=""
+                                      OffContent="" />
+                        <TextBlock x:Uid="AppSettings_HideToTrayHint"
+                                   Text="关闭窗口时不退出应用，而是隐藏到系统右下角托盘；左键单击托盘图标恢复窗口，右键菜单可显示或退出。"
+                                   Style="{ThemeResource CaptionTextBlockStyle}"
+                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                   TextWrapping="Wrap" />
+                    </StackPanel>
+                </Border>
             </StackPanel>
         </ScrollViewer>
     </Grid>

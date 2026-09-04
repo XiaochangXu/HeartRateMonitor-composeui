@@ -28,6 +28,10 @@ public sealed partial class MainWindow : Window
     private static readonly SUBCLASSPROC _subclassProc = SubclassProc;
     private string? _registeredHotKey;
 
+    // ── 隐藏到托盘 ───────────────────────────────────────────────────────
+    private const uint WM_APP_TRAY = 0x8000 + 1; // 与 TrayIconService.WM_APP_TRAY 保持一致
+    private bool _exitRequested; // 托盘菜单"退出"置位：Close() 时走真正退出而非隐藏
+
     private delegate IntPtr SUBCLASSPROC(IntPtr hwnd, uint msg, IntPtr wParam, IntPtr lParam,
                                          UIntPtr uIdSubclass, IntPtr dwRefData);
 
@@ -93,8 +97,14 @@ public sealed partial class MainWindow : Window
         NavView.SelectedItem = NavView.MenuItems[0];
 
         Closed += OnClosed;
+        // 拦截用户关闭（×/Alt+F4）："隐藏到托盘"开启时取消关闭并隐藏窗口。
+        // 仅用户触发的关闭会走 Closing；托盘"退出"走 Window.Close() 不触发，可正常退出。
+        AppWindow.Closing += OnAppWindowClosing;
 
         SetupHotKey();
+        // 隐藏到托盘：按当前设置创建托盘图标，并随设置变更同步
+        SyncTrayIcon();
+        SettingsService.Changed += OnSettingsChangedForTray;
 
         // 启动后自动开始持续扫描：发现设备→显示提示→点击连接后停止
         ViewModel.DeviceList.AutoStartScan();
@@ -362,6 +372,11 @@ public sealed partial class MainWindow : Window
 
     private void OnClosed(object sender, WindowEventArgs args)
     {
+        // 真正退出：清理托盘与设置订阅
+        TrayIconService.Destroy();
+        SettingsService.Changed -= OnSettingsChangedForTray;
+        AppWindow.Closing -= OnAppWindowClosing;
+
         // 先注销热键与子类化，避免主窗口销毁后仍接收 WM_HOTKEY
         SettingsService.Changed -= OnSettingsChangedForHotKey;
         var hwndCleanup = WindowNative.GetWindowHandle(this);
@@ -456,6 +471,60 @@ public sealed partial class MainWindow : Window
             var s = SettingsService.Current;
             s.ClickThroughEnabled = !s.ClickThroughEnabled;
         }
+        else if (msg == WM_APP_TRAY)
+        {
+            // 托盘图标回调：左键恢复窗口，右键弹菜单
+            TrayIconService.HandleMessage(wParam, lParam);
+        }
         return DefSubclassProc(hwnd, msg, wParam, lParam);
+    }
+
+    // ── 隐藏到托盘 ───────────────────────────────────────────────────────
+
+    /// <summary>按当前设置创建/移除托盘图标（启动与设置变更时调用）。</summary>
+    private void SyncTrayIcon()
+    {
+        if (SettingsService.Current.HideToTray)
+        {
+            var iconPath = Path.Combine(AppContext.BaseDirectory, "winico", "favicon.ico");
+            TrayIconService.EnsureCreated(
+                WindowNative.GetWindowHandle(this),
+                iconPath,
+                Title,
+                RestoreFromTray,
+                ExitFromTray);
+        }
+        else
+        {
+            TrayIconService.Remove();
+        }
+    }
+
+    private void OnSettingsChangedForTray() => SyncTrayIcon();
+
+    /// <summary>
+    /// 用户关闭窗口（×/Alt+F4）时："隐藏到托盘"开启则取消关闭并隐藏到托盘。
+    /// 注意：程序调用 Window.Close()（托盘"退出"）不触发 Closing，会正常退出。
+    /// </summary>
+    private void OnAppWindowClosing(AppWindow sender, AppWindowClosingEventArgs args)
+    {
+        if (_exitRequested || !SettingsService.Current.HideToTray) return;
+        args.Cancel = true;
+        SyncTrayIcon(); // 兜底：确保图标存在
+        AppWindow.Hide();
+    }
+
+    /// <summary>托盘"显示主窗口"：恢复显示并激活。</summary>
+    private void RestoreFromTray()
+    {
+        AppWindow.Show();
+        Activate();
+    }
+
+    /// <summary>托盘"退出"：置位后走真正退出清理路径。</summary>
+    private void ExitFromTray()
+    {
+        _exitRequested = true;
+        Close();
     }
 }
