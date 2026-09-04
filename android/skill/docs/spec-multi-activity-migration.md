@@ -229,10 +229,10 @@ internal sealed interface Destination {
 
 **不写任何动画资源**。`startActivity(intent)` 不带 `ActivityOptions`，`finish()` 不覆写、不调 `overridePendingTransition`，打开/关闭均使用平台默认窗口转场。
 
-- 观感跟随系统与 ROM（Android 12+ 为平台统一转场，14+ 预测式返回自动生效）
+- 观感跟随系统与 ROM（Android 12+ 为平台统一转场）
 - 与原 Compose 转场（350ms 滑动 + 1:4 视差）观感**不同**，属已确认取舍：还原视差需要自定义 anim，与"交给系统"的决策冲突
 - 不受 `navAnimationDisabled` 控制（决策 D2，该开关仍只管 Tab 切换）
-- 预测式返回由 `enableOnBackInvokedCallback="true"`（已在 manifest）自动提供
+- 预测式返回已在 manifest 通过 `enableOnBackInvokedCallback="false"` 全局禁用（返回走传统按键分发，无预测式动画）
 
 ### 6.4 `BleControlPlaneRegistry`（必须做）
 
