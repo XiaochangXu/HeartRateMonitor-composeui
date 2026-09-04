@@ -1,7 +1,7 @@
 <div align="right">
   <strong>English</strong> | <a href="./README.md">简体中文</a>
   <br>
-  <a href="./android/SKILL.md">Project Rules</a>
+  <a href="./android/skill/SKILL.md">Project Rules</a>
 </div>
 
 <div align="center">
@@ -185,7 +185,21 @@ bin\Debug\net10.0-windows10.0.19041.0\win-x64\HeartRate.exe
 ## Project Structure
 
 ```
-├── android/                     # Android (Kotlin + Compose)
+├── android/                     # Android (Kotlin + Compose, multi-module)
+│   ├── app/                     # App shell: entry point, navigation, composition root (HeartRateApp @HiltAndroidApp + AppModule), Manifest
+│   ├── core/
+│   │   ├── model/               # Domain models (zero module dependencies)
+│   │   ├── designsystem/        # Theme visuals & theme state (depends on :data:settings)
+│   │   └── ui/                  # Shared Compose components / animations / UI utils / routing / shared resources
+│   ├── data/
+│   │   ├── settings/            # DataStore settings storage + SettingsRepository
+│   │   ├── database/            # Room (Entity/DAO/AppDatabase)
+│   │   └── repository/          # Repository layer + webhook/network/sensor/system
+│   ├── service/                 # BLE / foreground / floating window / alert / LAN services
+│   ├── feature/                 # Feature modules: main / settings / history / alarm / server / webhook / favorite
+│   ├── baselineprofile/         # Baseline profile (com.android.test)
+│   ├── skill/                   # Project rules: SKILL.md index + docs/contracts (13 contracts) + docs/baseline
+│   └── baseline/                # Multi-modularization baseline archive
 ├── windows/                     # Windows (C# + WinUI 3)
 ├── .github/workflows/           # Release pipelines: release-android.yml / release-windows.yml
 ├── LICENSE
@@ -194,7 +208,7 @@ bin\Debug\net10.0-windows10.0.19041.0\win-x64\HeartRate.exe
 
 -----
 
-## cknowledgements
+## Acknowledgements
 
 **Core Dependencies (Android)**
 

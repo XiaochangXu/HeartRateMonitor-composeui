@@ -1,7 +1,7 @@
 <div align="right">
   <a href="./README_EN.md">English</a> | <strong>简体中文</strong>
   <br>
-  <a href="./android/SKILL.md">项目规范</a>
+  <a href="./android/skill/SKILL.md">项目规范</a>
 </div>
 
 <div align="center">
@@ -198,7 +198,7 @@ bin\Debug\net10.0-windows10.0.19041.0\win-x64\HeartRate.exe
 │   ├── service/                 # BLE/常驻/悬浮窗/预警/局域网服务
 │   ├── feature/                 # 功能模块：main / settings / history / alarm / server / webhook / favorite
 │   ├── baselineprofile/         # 基线配置（com.android.test）
-│   ├── SKILL.md                 # 项目规范（含模块边界契约）
+│   ├── skill/                   # 项目规范：SKILL.md 索引 + docs/contracts（13 条契约）+ docs/baseline
 │   └── baseline/                # 多模块化基线存档
 ├── windows/                     # Windows 端（C# + WinUI 3）
 ├── .github/workflows/           # 发布流水线：release-android.yml / release-windows.yml
