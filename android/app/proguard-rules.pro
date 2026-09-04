@@ -18,7 +18,7 @@
 # 2. Kotlin 元数据保留（Kotlin 反射 / 协程内部依赖）
 #    - kotlin.Metadata：R8 默认保留（mapping.txt 已验证未改名）
 #    - **$$serializer：kotlinx.serialization 需要，库自带 consumer-rules 已覆盖，
-#      项目特定类名保留见下方第 18 节
+#      项目特定类名保留见第 9 节（Webhook / Posture）
 # ----------------------------------------------------------------------------
 -keepclassmembers class kotlin.** { *; }
 -dontwarn kotlin.**
@@ -114,6 +114,8 @@
 # ----------------------------------------------------------------------------
 -keep class com.github.heartratemonitor_compose.HeartRateApp { *; }
 -keep class com.github.heartratemonitor_compose.ui.main.MainActivity { *; }
+# 18 个二级页 Activity（2026-09 多 Activity 迁移，manifest 引用 + 生命周期方法不被混淆）
+-keep class com.github.heartratemonitor_compose.ui.page.** { *; }
 -keep class com.github.heartratemonitor_compose.service.BleService { *; }
 -keep class com.github.heartratemonitor_compose.service.FloatingWindowService { *; }
 -keep class com.github.heartratemonitor_compose.service.StatusBarResidentService { *; }
