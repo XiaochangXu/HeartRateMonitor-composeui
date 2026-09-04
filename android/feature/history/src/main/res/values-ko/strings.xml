@@ -13,6 +13,9 @@
     <string name="stats_format">평균 %1$s · 최저 %2$s · 최고 %3$s · %4$s개 기록</string>
     <string name="chart_detail">심박수 상세</string>
     <string name="cd_rotate_screen">방향 전환</string>
+    <string name="cd_export">CSV 내보내기</string>
+    <string name="export_success">기록 %1$s개를 내보냈습니다</string>
+    <string name="export_failed">내보내기 실패: %1$s</string>
     <string name="no_heart_rate_data">표시할 심박수 데이터가 없습니다</string>
     <string name="marker_heart_rate">심박수: %1$s bpm\n시간: %2$s</string>
     <string name="stat_avg">평균</string>

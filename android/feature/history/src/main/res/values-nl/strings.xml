@@ -13,6 +13,9 @@
     <string name="stats_format">Gem. %1$s · Min %2$s · Max %3$s · %4$s rec.</string>
     <string name="chart_detail">Hartslagdetail</string>
     <string name="cd_rotate_screen">Scherm draaien</string>
+    <string name="cd_export">CSV exporteren</string>
+    <string name="export_success">%1$s registraties geëxporteerd</string>
+    <string name="export_failed">Exporteren mislukt: %1$s</string>
     <string name="no_heart_rate_data">Geen hartslaggegevens om weer te geven</string>
     <string name="marker_heart_rate">Hartslag: %1$s bpm\nTijd: %2$s</string>
     <string name="stat_avg">Gem.</string>

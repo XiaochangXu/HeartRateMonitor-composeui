@@ -13,6 +13,9 @@
     <string name="stats_format">औसत %1$s · न्यून %2$s · अधिकतम %3$s · %4$s रिकॉर्ड</string>
     <string name="chart_detail">हृदय गति विवरण</string>
     <string name="cd_rotate_screen">स्क्रीन घुमाएं</string>
+    <string name="cd_export">CSV निर्यात करें</string>
+    <string name="export_success">%1$s रिकॉर्ड निर्यात किए गए</string>
+    <string name="export_failed">निर्यात विफल: %1$s</string>
     <string name="no_heart_rate_data">प्रदर्शित करने के लिए कोई हृदय गति डेटा नहीं</string>
     <string name="marker_heart_rate">हृदय गति: %1$s bpm\nसमय: %2$s</string>
     <string name="stat_avg">औसत</string>

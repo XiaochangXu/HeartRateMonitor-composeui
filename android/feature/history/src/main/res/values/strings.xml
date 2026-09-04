@@ -13,6 +13,9 @@
     <string name="stats_format">Avg %1$s · Min %2$s · Max %3$s · %4$s records</string>
     <string name="chart_detail">Heart Rate Details</string>
     <string name="cd_rotate_screen">Rotate screen</string>
+    <string name="cd_export">Export CSV</string>
+    <string name="export_success">Exported %1$s records</string>
+    <string name="export_failed">Export failed: %1$s</string>
     <string name="no_heart_rate_data">No heart rate data to display</string>
     <string name="marker_heart_rate">HR: %1$s bpm\nTime: %2$s</string>
     <string name="stat_avg">Average</string>

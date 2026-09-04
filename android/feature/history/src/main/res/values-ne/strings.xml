@@ -13,6 +13,9 @@
     <string name="stats_format">औसत %1$s · न्यूनतम %2$s · अधिकतम %3$s · %4$s रेकर्ड</string>
     <string name="chart_detail">मुटुको धड्कन विवरण</string>
     <string name="cd_rotate_screen">स्क्रिन घुमाउनुहोस्</string>
+    <string name="cd_export">CSV निर्यात गर्नुहोस्</string>
+    <string name="export_success">%1$s रेकर्ड निर्यात भयो</string>
+    <string name="export_failed">निर्यात असफल भयो: %1$s</string>
     <string name="no_heart_rate_data">देखाउन कुनै मुटुको धड्कन डेटा छैन</string>
     <string name="marker_heart_rate">मुटुको धड्कन: %1$s bpm\nसमय: %2$s</string>
     <string name="stat_avg">औसत</string>

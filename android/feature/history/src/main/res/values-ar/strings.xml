@@ -13,6 +13,9 @@
     <string name="stats_format">المتوسط %1$s · الأدنى %2$s · الأعلى %3$s · %4$s سجلاً</string>
     <string name="chart_detail">تفاصيل معدل ضربات القلب</string>
     <string name="cd_rotate_screen">تدوير الشاشة</string>
+    <string name="cd_export">تصدير CSV</string>
+    <string name="export_success">تم تصدير %1$s من السجلات</string>
+    <string name="export_failed">فشل التصدير: %1$s</string>
     <string name="no_heart_rate_data">لا توجد بيانات معدل ضربات القلب للعرض</string>
     <string name="marker_heart_rate">معدل ضربات القلب: %1$s bpm\nالوقت: %2$s</string>
     <string name="stat_avg">المتوسط</string>

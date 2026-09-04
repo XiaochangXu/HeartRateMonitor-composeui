@@ -13,6 +13,9 @@
     <string name="stats_format">Среднее %1$s · Мин %2$s · Макс %3$s · Записей: %4$s</string>
     <string name="chart_detail">Детали пульса</string>
     <string name="cd_rotate_screen">Повернуть экран</string>
+    <string name="cd_export">Экспорт CSV</string>
+    <string name="export_success">Экспортировано записей: %1$s</string>
+    <string name="export_failed">Ошибка экспорта: %1$s</string>
     <string name="no_heart_rate_data">Нет данных пульса для отображения</string>
     <string name="marker_heart_rate">Пульс: %1$s bpm\nВремя: %2$s</string>
     <string name="stat_avg">Среднее</string>

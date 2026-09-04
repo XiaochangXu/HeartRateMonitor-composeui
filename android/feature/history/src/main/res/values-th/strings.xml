@@ -13,6 +13,9 @@
     <string name="stats_format">เฉลี่ย %1$s · ต่ำสุด %2$s · สูงสุด %3$s · %4$s รายการ</string>
     <string name="chart_detail">รายละเอียดอัตราการเต้นของหัวใจ</string>
     <string name="cd_rotate_screen">หมุนหน้าจอ</string>
+    <string name="cd_export">ส่งออก CSV</string>
+    <string name="export_success">ส่งออกแล้ว %1$s รายการ</string>
+    <string name="export_failed">ส่งออกไม่สำเร็จ: %1$s</string>
     <string name="no_heart_rate_data">ไม่มีข้อมูลอัตราการเต้นของหัวใจให้แสดง</string>
     <string name="marker_heart_rate">อัตราการเต้นของหัวใจ: %1$s bpm\nเวลา: %2$s</string>
     <string name="stat_avg">เฉลี่ย</string>

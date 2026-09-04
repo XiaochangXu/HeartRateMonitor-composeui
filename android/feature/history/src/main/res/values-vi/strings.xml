@@ -13,6 +13,9 @@
     <string name="stats_format">TB %1$s · Min %2$s · Max %3$s · %4$s bản ghi</string>
     <string name="chart_detail">Chi tiết nhịp tim</string>
     <string name="cd_rotate_screen">Xoay màn hình</string>
+    <string name="cd_export">Xuất CSV</string>
+    <string name="export_success">Đã xuất %1$s bản ghi</string>
+    <string name="export_failed">Xuất thất bại: %1$s</string>
     <string name="no_heart_rate_data">Không có dữ liệu nhịp tim để hiển thị</string>
     <string name="marker_heart_rate">Nhịp tim: %1$s bpm\nThời gian: %2$s</string>
     <string name="stat_avg">TB</string>

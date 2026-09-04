@@ -13,6 +13,9 @@
     <string name="stats_format">Ort. %1$s · Min %2$s · Mak %3$s · %4$s kayıt</string>
     <string name="chart_detail">Kalp atış hızı detayı</string>
     <string name="cd_rotate_screen">Ekranı döndür</string>
+    <string name="cd_export">CSV\'yi dışa aktar</string>
+    <string name="export_success">%1$s kayıt dışa aktarıldı</string>
+    <string name="export_failed">Dışa aktarma başarısız: %1$s</string>
     <string name="no_heart_rate_data">Gösterilecek kalp atış hızı verisi yok</string>
     <string name="marker_heart_rate">Kalp atış hızı: %1$s bpm\nSaat: %2$s</string>
     <string name="stat_avg">Ort.</string>

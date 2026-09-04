@@ -13,6 +13,9 @@
     <string name="stats_format">Rata %1$s · Min %2$s · Maks %3$s · %4$s data</string>
     <string name="chart_detail">Detail detak jantung</string>
     <string name="cd_rotate_screen">Putar layar</string>
+    <string name="cd_export">Ekspor CSV</string>
+    <string name="export_success">%1$s catatan diekspor</string>
+    <string name="export_failed">Ekspor gagal: %1$s</string>
     <string name="no_heart_rate_data">Tidak ada data detak jantung untuk ditampilkan</string>
     <string name="marker_heart_rate">Detak jantung: %1$s bpm\nWaktu: %2$s</string>
     <string name="stat_avg">Rata</string>

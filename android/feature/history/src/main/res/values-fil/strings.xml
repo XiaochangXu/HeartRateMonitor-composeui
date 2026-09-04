@@ -13,6 +13,9 @@
     <string name="stats_format">Avg %1$s · Min %2$s · Max %3$s · %4$s rec.</string>
     <string name="chart_detail">Detalye ng rate ng puso</string>
     <string name="cd_rotate_screen">I-rotate ang screen</string>
+    <string name="cd_export">I-export ang CSV</string>
+    <string name="export_success">Na-export ang %1$s na tala</string>
+    <string name="export_failed">Nabigo ang pag-export: %1$s</string>
     <string name="no_heart_rate_data">Walang data ng rate ng puso na ipapakita</string>
     <string name="marker_heart_rate">Rate ng puso: %1$s bpm\nOras: %2$s</string>
     <string name="stat_avg">Avg</string>

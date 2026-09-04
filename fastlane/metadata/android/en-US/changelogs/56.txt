@@ -1,0 +1,5 @@
+- Optimal performance
+- Optimize pop-up animation of update log pop-up window
+- Fixed bugs that could cause crashes
+- Support statistical heart rate history data export
+- Migrate from single Acitvity architecture to multi-activity hybrid architecture, remove Navgation 3 navigation library and custom animation effects, transition animation implementation changed to more reliable, more stable system-native Activity transitions

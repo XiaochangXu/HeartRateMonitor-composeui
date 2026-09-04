@@ -13,6 +13,9 @@
     <string name="stats_format">平均 %1$s · 最低 %2$s · 最高 %3$s · %4$s 條記錄</string>
     <string name="chart_detail">心率詳情</string>
     <string name="cd_rotate_screen">切換方向</string>
+    <string name="cd_export">匯出 CSV</string>
+    <string name="export_success">已匯出 %1$s 筆記錄</string>
+    <string name="export_failed">匯出失敗: %1$s</string>
     <string name="no_heart_rate_data">沒有心率資料可顯示</string>
     <string name="marker_heart_rate">心率: %1$s bpm\n時間: %2$s</string>
     <string name="stat_avg">平均</string>

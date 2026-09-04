@@ -13,6 +13,9 @@
     <string name="stats_format">Moy. %1$s · Min %2$s · Max %3$s · %4$s enr.</string>
     <string name="chart_detail">Détails de la fréquence cardiaque</string>
     <string name="cd_rotate_screen">Faire pivoter l\'écran</string>
+    <string name="cd_export">Exporter en CSV</string>
+    <string name="export_success">%1$s enregistrements exportés</string>
+    <string name="export_failed">Échec de l\'exportation : %1$s</string>
     <string name="no_heart_rate_data">Aucune donnée de fréquence cardiaque à afficher</string>
     <string name="marker_heart_rate">Fréquence cardiaque : %1$s bpm\nHeure : %2$s</string>
     <string name="stat_avg">Moy.</string>

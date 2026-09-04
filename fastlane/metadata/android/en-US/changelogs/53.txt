@@ -1,5 +1,0 @@
-- Fixed bug caused by opening the hidden background function of exiting the application
-- Fixed ECG animation in full screen mode jumping and blinking after updating heart rate
-- Fixed some bugs and optimized performance
-- Optimize ECG animation in full screen mode
-- Update dependency libraries to the latest version

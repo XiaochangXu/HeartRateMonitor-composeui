@@ -13,6 +13,9 @@
     <string name="stats_format">Med. %1$s · Min %2$s · Max %3$s · %4$s rec.</string>
     <string name="chart_detail">Dettaglio frequenza cardiaca</string>
     <string name="cd_rotate_screen">Ruota schermo</string>
+    <string name="cd_export">Esporta CSV</string>
+    <string name="export_success">Esportate %1$s registrazioni</string>
+    <string name="export_failed">Esportazione non riuscita: %1$s</string>
     <string name="no_heart_rate_data">Nessun dato di frequenza cardiaca da mostrare</string>
     <string name="marker_heart_rate">Frequenza cardiaca: %1$s bpm\nOra: %2$s</string>
     <string name="stat_avg">Med.</string>

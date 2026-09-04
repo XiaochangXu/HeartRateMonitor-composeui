@@ -13,6 +13,9 @@
     <string name="stats_format">গড় %1$s · সর্বনিম্ন %2$s · সর্বোচ্চ %3$s · %4$sটি রেকর্ড</string>
     <string name="chart_detail">হৃদস্পন্দনের বিস্তারিত</string>
     <string name="cd_rotate_screen">স্ক্রিন ঘোরান</string>
+    <string name="cd_export">CSV রপ্তানি করুন</string>
+    <string name="export_success">%1$sটি রেকর্ড রপ্তানি হয়েছে</string>
+    <string name="export_failed">রপ্তানি ব্যর্থ হয়েছে: %1$s</string>
     <string name="no_heart_rate_data">প্রদর্শনের জন্য কোনো হৃদস্পন্দন ডেটা নেই</string>
     <string name="marker_heart_rate">হৃদস্পন্দন: %1$s bpm\nসময়: %2$s</string>
     <string name="stat_avg">গড়</string>

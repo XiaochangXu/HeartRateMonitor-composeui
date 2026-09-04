@@ -13,6 +13,9 @@
     <string name="stats_format">Purata %1$s · Min %2$s · Maks %3$s · %4$s rekod</string>
     <string name="chart_detail">Butiran kadar jantung</string>
     <string name="cd_rotate_screen">Putar skrin</string>
+    <string name="cd_export">Eksport CSV</string>
+    <string name="export_success">%1$s rekod dieksport</string>
+    <string name="export_failed">Eksport gagal: %1$s</string>
     <string name="no_heart_rate_data">Tiada data kadar jantung untuk dipaparkan</string>
     <string name="marker_heart_rate">Kadar jantung: %1$s bpm\nMasa: %2$s</string>
     <string name="stat_avg">Purata</string>

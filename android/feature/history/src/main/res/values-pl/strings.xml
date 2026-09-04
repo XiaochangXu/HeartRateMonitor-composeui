@@ -13,6 +13,9 @@
     <string name="stats_format">Średnie %1$s · Min %2$s · Maks %3$s · Wpisów: %4$s</string>
     <string name="chart_detail">Szczegóły tętna</string>
     <string name="cd_rotate_screen">Obróć ekran</string>
+    <string name="cd_export">Eksportuj CSV</string>
+    <string name="export_success">Wyeksportowano zapisy: %1$s</string>
+    <string name="export_failed">Eksport nie powiódł się: %1$s</string>
     <string name="no_heart_rate_data">Brak danych tętna do wyświetlenia</string>
     <string name="marker_heart_rate">Tętno: %1$s bpm\nCzas: %2$s</string>
     <string name="stat_avg">Średnie</string>

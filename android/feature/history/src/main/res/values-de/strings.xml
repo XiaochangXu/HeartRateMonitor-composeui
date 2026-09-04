@@ -13,6 +13,9 @@
     <string name="stats_format">Durchschnitt %1$s · Min %2$s · Max %3$s · %4$s Einträge</string>
     <string name="chart_detail">Herzfrequenz-Details</string>
     <string name="cd_rotate_screen">Bildschirm drehen</string>
+    <string name="cd_export">CSV exportieren</string>
+    <string name="export_success">%1$s Einträge exportiert</string>
+    <string name="export_failed">Export fehlgeschlagen: %1$s</string>
     <string name="no_heart_rate_data">Keine Herzfrequenzdaten zum Anzeigen</string>
     <string name="marker_heart_rate">HF: %1$s bpm\nZeit: %2$s</string>
     <string name="stat_avg">Durchschnitt</string>

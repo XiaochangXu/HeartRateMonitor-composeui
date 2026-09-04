@@ -1,6 +1,9 @@
 package com.github.heartratemonitor_compose.ui.history
 
 import android.content.pm.ActivityInfo
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -86,6 +89,43 @@ fun ChartScreen(
         startTime = records.firstOrNull()?.timestamp ?: 0L
     }
 
+    // SAF 导出：用户选定目标文件后交由 VM 写入（业务流程归 VM，契约 10.2）
+    val exportLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.CreateDocument("text/csv")
+    ) { uri ->
+        if (uri != null) {
+            viewModel.dispatch(ChartIntent.ExportCsv(sessionId, uri))
+        }
+    }
+    // 导出文件名取会话首条记录的时间；无记录时退化为当前时间
+    val exportFileName = remember(records) {
+        val format = SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.US)
+        val base = records.firstOrNull()?.timestamp ?: System.currentTimeMillis()
+        "heart_rate_${format.format(Date(base))}.csv"
+    }
+
+    LaunchedEffect(uiState.exportEvent) {
+        when (val event = uiState.exportEvent) {
+            is ChartExportEvent.Success -> {
+                Toast.makeText(
+                    context,
+                    context.getString(R.string.export_success, event.count.toString()),
+                    Toast.LENGTH_SHORT
+                ).show()
+                viewModel.dispatch(ChartIntent.ConsumeExportEvent)
+            }
+            is ChartExportEvent.Failure -> {
+                Toast.makeText(
+                    context,
+                    context.getString(R.string.export_failed, event.message),
+                    Toast.LENGTH_SHORT
+                ).show()
+                viewModel.dispatch(ChartIntent.ConsumeExportEvent)
+            }
+            null -> Unit
+        }
+    }
+
     DisposableEffect(Unit) {
         onDispose {
             val activity = context.findActivity() ?: return@onDispose
@@ -134,6 +174,20 @@ fun ChartScreen(
                     }
                 },
                 actions = {
+                    IconButton(onClick = { exportLauncher.launch(exportFileName) }) {
+                        Surface(
+                            modifier = Modifier.size(40.dp),
+                            shape = CircleShape,
+                            color = MaterialTheme.colorScheme.surfaceBright
+                        ) {
+                            Box(contentAlignment = Alignment.Center) {
+                                Icon(
+                                    painter = painterResource(R.drawable.ic_export),
+                                    contentDescription = stringResource(R.string.cd_export)
+                                )
+                            }
+                        }
+                    }
                     IconButton(onClick = {
                         val activity = context.findActivity() ?: return@IconButton
                         activity.requestedOrientation =
