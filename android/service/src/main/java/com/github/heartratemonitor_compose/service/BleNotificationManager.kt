@@ -17,13 +17,13 @@ import com.github.heartratemonitor_compose.data.settings.SettingsKeys
 import com.github.heartratemonitor_compose.data.repository.SettingsRepository
 
 /**
- * 速度显示开启且持有定位权限时附加 FOREGROUND_SERVICE_TYPE_LOCATION，
+ * 速度显示开启且持有定位权限时附加 FOREGROUND_SERVICE_TYPE_LOCATION；
  * 启动失败时降级为 CONNECTED_DEVICE 类型重试。
  */
 class BleNotificationManager(
     private val service: Service,
     private val settingsRepository: SettingsRepository,
-    private val reopenAppIntent: () -> android.content.Intent
+    private val reopenAppIntent: @JvmSuppressWildcards () -> android.content.Intent
 ) {
 
     companion object {
@@ -32,7 +32,7 @@ class BleNotificationManager(
         private const val NOTIFICATION_ID = 1
     }
 
-    /** 将宿主 Service 提升为前台服务（幂等：可在 onCreate / onStartCommand 重复调用）。 */
+    /** 将宿主 Service 提升为前台服务（幂等）。 */
     fun startForeground() {
         val channelName = service.getString(R.string.notification_channel_name)
 

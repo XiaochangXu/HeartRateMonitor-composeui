@@ -100,7 +100,6 @@ fun AppNavHost(
         ),
         // 显式传入 sceneStrategies 命名参数，匹配泛型重载 NavDisplay<T>
         sceneStrategies = listOf(SinglePaneSceneStrategy()),
-        // ── 转场动画 ──
         transitionSpec = {
             (slideIntoContainer(
                 towards = AnimatedContentTransitionScope.SlideDirection.Start,
@@ -142,7 +141,6 @@ fun AppNavHost(
                 targetOffset = { fullWidth -> fullWidth }
             ) + fadeOut(animationSpec = tween()))
         },
-        // ──────────────────────────────────────────────────────────────────────────────
         entryProvider = entryProvider {
             // 栈底 = Tab 页宿主：Pager + 底部导航条由 NavDisplay 渲染（随场景生灭）
             entry<AppNavKey.TabRoot> {

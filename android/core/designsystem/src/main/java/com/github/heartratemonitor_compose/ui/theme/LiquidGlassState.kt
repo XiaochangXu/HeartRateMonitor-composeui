@@ -9,14 +9,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
 import javax.inject.Singleton
 
-/**
- * **必须保持 [Singleton] 作用域**：AppRoot（MainActivity 注入）与 NavStyleScreen
- * （EntryPoint 获取）必须共享同一实例，开关才能即时生效。若去掉 @Singleton，
- * 设置页修改的是自己的副本，AppRoot 侧收不到更新——即「液态玻璃开关失效」。
- *
- * 构造时经 SettingsRepository 预热快照同步加载持久化配置，
- * 由 [com.github.heartratemonitor_compose.HeartRateApp.onCreate] 显式触发注入字段。
- */
+// ⚠️ 反直觉设计：必须 Singleton 作用域——AppRoot 与 NavStyleScreen 共享同一实例，否则「液态玻璃开关失效」。
 @Singleton
 class LiquidGlassState @Inject constructor(private val settings: SettingsRepository) {
 
@@ -31,10 +24,7 @@ class LiquidGlassState @Inject constructor(private val settings: SettingsReposit
     )
     val config: StateFlow<LiquidGlassConfig> = _config.asStateFlow()
 
-    /**
-     * 导航动画关闭开关的独立流：AppRoot 仅需此单字段，避免订阅全量 AppSettings
-     * 快照（60+ 字段任一变化都触发根节点重组）。
-     */
+    // 独立流避免订阅全量 AppSettings（60+ 字段变化触发根节点重组）。
     val navAnimationDisabledFlow: StateFlow<Boolean> =
         settings.observe(SettingsKeys.NAV_ANIMATION_DISABLED)
 

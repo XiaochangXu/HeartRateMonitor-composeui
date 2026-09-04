@@ -93,9 +93,7 @@ fun DevicesScreen(
         )
     }
 
-    // appStatus 是枚举（stable），直接赋值即可。
-    // DevicesScreen 已通过 devicesUiState 精简订阅过滤了高频字段，
-    // appStatus 变化频率低，无需 derivedStateOf 额外优化。
+    // appStatus 已经 devicesUiState 精简过滤高频字段，变化频率低，直接赋值无需 derivedStateOf。
     val isScanning = appStatus == AppStatus.SCANNING
     val isConnectingOrConnected = appStatus == AppStatus.CONNECTED || appStatus == AppStatus.CONNECTING
 

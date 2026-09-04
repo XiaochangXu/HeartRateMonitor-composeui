@@ -11,13 +11,6 @@ import org.json.JSONArray
 import javax.inject.Inject
 import javax.inject.Singleton
 
-/**
- * 将 SharedPreferences 读写与 Room 访问从 [MainViewModel] 下沉到 repository 层，
- * 同时完成旧版 JSON 收藏历史的一次性迁移。
- *
- * SettingsRepository 与 DAO 由 Hilt 构造注入（Phase 2 起，替代 AppContainer 手工装配）。
- * 对外返回 Domain Model（见 `data.model`），避免 Room Entity 泄漏到 UI/ViewModel 层。
- */
 @Singleton
 class FavoriteDeviceRepository @Inject constructor(
     private val settingsRepository: SettingsRepository,
@@ -45,8 +38,7 @@ class FavoriteDeviceRepository @Inject constructor(
                 }
             }
         } catch (e: Exception) {
-            // JSON 整体解析失败：不置位完成标志，下次启动重试，
-            // 避免"迁移失败却标记已完成"导致旧数据永久丢失
+            // ⚠️ 反直觉设计：不置位完成标志，避免"迁移失败却标记已完成"导致旧数据永久丢失。
             Log.w("FavoriteDeviceRepository", "收藏历史 JSON 解析失败，下次启动重试迁移", e)
             return
         }
@@ -83,13 +75,7 @@ class FavoriteDeviceRepository @Inject constructor(
         dao.deleteById(id)
     }
 
-    /**
-     * 删除指定收藏设备，并从剩余收藏中恢复最近的一个为当前收藏设备；
-     * 删除后无剩余收藏时清空当前收藏 ID。
-     *
-     * 收敛原 [MainViewModel][com.github.heartratemonitor_compose.ui.main.MainViewModel]
-     * 与 FavoriteDevicesViewModel 中重复的「删除后恢复最近收藏」逻辑。
-     */
+    // 删除并恢复最近收藏（无剩余时清空当前收藏 ID）。
     suspend fun deleteAndRestoreLatest(id: String) {
         dao.deleteById(id)
         val latest = dao.getLatest()

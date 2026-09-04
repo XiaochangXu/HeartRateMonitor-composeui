@@ -23,9 +23,9 @@ import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.collections.immutable.toImmutableSet
 
 /**
- * MVI 架构，Phase 2。历史会话列表、统计/迷你图采样、多选态归约进单一 UiState
- * （多选态为业务状态：影响删除行为，D3 自 Composable 上提）。
- * 依赖由 Hilt 构造注入（Phase 3 起）。
+ * MVI 架构。历史会话列表、统计/迷你图采样、多选态归约进单一 UiState
+ * （多选态为业务状态：影响删除行为，自 Composable 上提）。
+ * 依赖由 Hilt 构造注入。
  */
 @HiltViewModel
 class HistoryViewModel @Inject constructor(
@@ -35,12 +35,9 @@ class HistoryViewModel @Inject constructor(
     FairMemoryReceiver.MemoryListener {
 
     /**
-     * 删除结果一次性回调：Composable 注册/注销（一次性事件不进 UiState，避免重组重放），
-     * 语义参考 MainViewModel.bleToastListener（MVI 迁移方案 §3.4 方案 1）。
-     *
-     * 删除异常必须在 VM 内捕获：dispatch 为即发即忘（viewModelScope.launch），DAO 抛出的
-     * 异常回传不到 Composable 的 try/catch，未捕获会经 UncaughtExceptionHandler 崩进程。
-     * 同理「已删除 N 条」的 Toast 只能由本回调在删除真正完成后触发，不能紧跟 dispatch 弹出。
+     * 删除结果一次性回调：Composable 注册/注销（一次性事件不进 UiState，避免重组重放）。
+     * ⚠️ 反直觉设计：删除异常必须在 VM 内捕获（dispatch 为即发即忘，DAO 异常回传不到 Composable 的 try/catch，未捕获会崩进程）。
+     * Toast 只能在删除真正完成后触发，不能紧跟 dispatch 弹出。
      */
     @Volatile
     var deleteResultListener: ((HistoryDeleteResult) -> Unit)? = null
@@ -84,7 +81,7 @@ class HistoryViewModel @Inject constructor(
             repository.deleteSessionsByIds(ids)
             HistoryDeleteResult.Deleted(count)
         } catch (e: CancellationException) {
-            throw e // 取消必须重抛，禁止并入普通 Exception 分支吞掉（契约 6）
+            throw e // ⚠️ 反直觉设计：取消必须重抛，禁止并入普通 Exception 分支吞掉
         } catch (e: Exception) {
             HistoryDeleteResult.Failed(e.message ?: e.javaClass.simpleName)
         }

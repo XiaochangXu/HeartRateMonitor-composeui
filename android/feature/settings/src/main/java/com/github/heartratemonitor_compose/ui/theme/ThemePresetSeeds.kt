@@ -43,7 +43,7 @@ import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 import javax.inject.Singleton
 
-/** 预设种子色动态配色方案缓存：避免色卡预览重复计算（Hilt 单例，Phase 2 起替代 AppContainer 持有） */
+/** 预设种子色动态配色方案缓存：避免色卡预览重复计算（Hilt 单例） */
 @Singleton
 class ThemePreviewCache @Inject constructor() {
     private val cache = ConcurrentHashMap<Pair<Int, PaletteStyle>, ColorScheme>()

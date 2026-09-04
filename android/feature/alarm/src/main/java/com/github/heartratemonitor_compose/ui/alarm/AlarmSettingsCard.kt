@@ -56,7 +56,6 @@ internal fun AlarmSettingsCard(
     val iconContainerColor = MaterialTheme.colorScheme.primaryContainer
     val iconTint = MaterialTheme.colorScheme.onPrimaryContainer
 
-    // 重复报警开关行底部圆角动画
     val repeatSwitchBottomCorner by animateDpAsState(
         targetValue = if (repeatEnabled) 0.dp else 28.dp,
         animationSpec = tween(250, easing = FastOutSlowInEasing),
@@ -128,7 +127,7 @@ internal fun AlarmSettingsCard(
                     )
                 }
 
-                // 重复报警开关行：使用动画驱动 shape 替代静态 isLast
+                // 动画驱动 shape 替代静态 isLast
                 SettingsItem(shape = repeatSwitchShape) {
                     SettingsSwitch(
                         checked = repeatEnabled,
@@ -140,7 +139,6 @@ internal fun AlarmSettingsCard(
                     )
                 }
 
-                // 报警间隔滑块：AnimatedVisibility + sharedBounds 平滑展开
                 AnimatedVisibility(
                     visible = repeatEnabled,
                     enter = expandVertically(

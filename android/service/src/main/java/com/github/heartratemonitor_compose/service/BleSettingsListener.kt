@@ -9,9 +9,7 @@ import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.launch
 
 /**
- * 将设置项变更响应逻辑从 [BleService] 中剥离。
- * 通过 SettingsRepository.observe 返回的 StateFlow 感知设置变化，
- * 各流 drop(1) 跳过订阅时的初始发射，保持原 listener「仅响应注册后变化」的语义。
+ * 设置项变更响应器：各流 drop(1) 跳过初始发射，「仅响应注册后变化」。
  */
 class BleSettingsListener(
     private val settingsRepository: SettingsRepository,
@@ -43,8 +41,6 @@ class BleSettingsListener(
                 settingsRepository.observe(SettingsKeys.HISTORY_RECORDING_ENABLED)
                     .drop(1)
                     .collect { enabled ->
-                        // 关闭历史记录开关时，立即结束当前 session，
-                        // 避免 endTime 一直为 NULL 导致 UI 显示「进行中」直到下次启动。
                         if (!enabled) {
                             onHistoryRecordingDisabled()
                             onChartCacheClear()

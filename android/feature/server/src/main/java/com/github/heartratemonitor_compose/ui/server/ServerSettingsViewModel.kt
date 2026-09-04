@@ -23,7 +23,7 @@ import javax.inject.Inject
  * - 开关与端口提交事件经 [ServerSettingsIntent] dispatch 上行写入
  *   [SettingsRepository]（事件上行）。
  *
- * IP 地址来源由构造注入的 [IpAddressProvider] 提供（原经 ServerDependencies EntryPoint 取用）。
+ * IP 地址来源由构造注入的 [IpAddressProvider] 提供。
  *
  * 服务器实际运行状态（端口冲突等导致启动失败）经 [LanTransferSharedState.serverRuntimeStatus]
  * 下行，UI 据此区分「设置已启用」与「服务器实际在运行」。
@@ -39,13 +39,9 @@ class ServerSettingsViewModel @Inject constructor(
 ) {
 
     init {
-        // SettingsRepository 构造期已预热快照，observe 首发射即真值；
-        // 每次变化原子归约进 UiState，禁止本地双写（§3.5）
-        //
-        // combine collector 只管 enabled/port 四元组，完全不碰 httpRunning/wsRunning。
-        // 运行状态由 serverRuntimeStatus collector 独家负责，
-        // 避免 combine 与 serverRuntimeStatus 两个 collector 交错 setState 时
-        // 互相覆盖 httpRunning/wsRunning（曾导致服务器已启动但 UI 卡在 false/null）。
+        // SettingsRepository 构造期已预热快照，observe 首发射即真值；每次变化原子归约进 UiState。
+        // ⚠️ 反直觉设计：combine collector 只管 enabled/port 四元组，运行状态由 serverRuntimeStatus collector 独家负责，
+        // 避免两个 collector 交错 setState 时互相覆盖 httpRunning/wsRunning（曾导致服务器已启动但 UI 卡在 false/null）。
         viewModelScope.launch {
             combine(
                 settings.observe(SettingsKeys.HTTP_SERVER_ENABLED),
@@ -55,8 +51,7 @@ class ServerSettingsViewModel @Inject constructor(
             ) { httpEnabled, httpPort, wsEnabled, wsPort ->
                 ServerUiState(httpEnabled, httpPort, wsEnabled, wsPort)
             }.collect { snapshot ->
-                // 保留 ipAddress 与 running 状态：combine 产出的 snapshot 不含这些字段，
-                // 需从当前状态继承，否则初始 IP 会被 null 覆盖导致显示"未连接网络"
+                // ⚠️ 反直觉设计：combine 产出的 snapshot 不含 ipAddress/running 字段，需从当前状态继承，否则初始 IP 会被 null 覆盖。
                 setState {
                     it.copy(
                         httpEnabled = snapshot.httpEnabled,
@@ -67,7 +62,6 @@ class ServerSettingsViewModel @Inject constructor(
                 }
             }
         }
-        // 服务器实际运行状态（端口冲突等导致启动失败时与设置开关不同步）
         viewModelScope.launch {
             lanTransferSharedState.serverRuntimeStatus.collect { runtime ->
                 setState {
@@ -84,13 +78,9 @@ class ServerSettingsViewModel @Inject constructor(
         when (intent) {
             is ServerSettingsIntent.SetHttpEnabled -> {
                 if (intent.enabled) {
-                    // 在写入设置前立即将 httpRunning 重置为 null（启动中），
-                    // 避免 ServerHost 更新状态回流前 UI 带着旧值 false（上次失败/关闭遗留）
-                    // 闪现红色"启动失败"文字。
-                    // 此处只改 httpRunning，不碰 httpEnabled——httpEnabled 由 combine 回流写入，
-                    // 避免与 combine collector 双写竞争。
+                    // ⚠️ 反直觉设计：写入设置前立即将 httpRunning 重置为 null（启动中），避免 UI 带着旧值 false 闪现"启动失败"。
+                    // 此处只改 httpRunning 不碰 httpEnabled——httpEnabled 由 combine 回流写入，避免双写竞争。
                     setState { it.copy(httpRunning = null) }
-                    // 开启服务器即采用默认端口（保持旧页面"开关打开时默认端口立即落盘"语义）
                     settings.set(
                         SettingsKeys.HTTP_SERVER_PORT,
                         AppSettings.defaultFor(SettingsKeys.HTTP_SERVER_PORT)
@@ -116,7 +106,7 @@ class ServerSettingsViewModel @Inject constructor(
     }
 
     /**
-     * 提交端口草稿。仅持久化合法端口值，非法输入（空/超范围）保持上次有效值——
+     * 提交端口草稿。仅持久化合法端口值，非法输入保持上次有效值——
      * 逐字符写入会让 BleSettingsListener 在输入中途反复重启服务器，故提交时机归 UI 层控制。
      */
     private fun commitPort(key: Preferences.Key<Int>, text: String) {

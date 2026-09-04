@@ -22,10 +22,7 @@ import javax.inject.Singleton
  * - [ACTION_TRIM]：系统内存紧张时通知应用主动释放非关键内存
  * - [ACTION_KILL]：系统即将查杀应用，通知应用保存状态并释放资源
  *
- * 支持多监听器注册表，统一向 BleService、各 ViewModel 等分发内存压力事件。
- * 所有监听器调用包裹 try-catch，防止单个监听器异常导致系统回调超时。
- *
- * Hilt 单例（Phase 2 起由 Hilt 装配，替代 AppContainer，通知器经构造注入）。
+ * 多监听器注册表统一分发内存压力事件；监听器调用包裹 try-catch 防系统回调超时。
  */
 @Singleton
 class FairMemoryReceiver @Inject constructor(
@@ -34,9 +31,8 @@ class FairMemoryReceiver @Inject constructor(
 ) : IBinder.DeathRecipient {
 
     /**
-     * 使用 [WeakReference] 持有，避免泄漏。
-     * 调用线程：[FairMemoryReceiver] 的 HandlerThread，实现方如需操作 UI 线程
-     * 数据应自行切换线程。
+     * 使用 [WeakReference] 持有避免泄漏。
+     * 调用线程：HandlerThread，实现方如需操作 UI 数据应自行切换。
      */
     interface MemoryListener {
         fun onTrimMemory(notifyType: Int)
@@ -51,31 +47,25 @@ class FairMemoryReceiver @Inject constructor(
         const val ACTION_TRIM = "itgsa.intent.action.TRIM"
         const val ACTION_KILL = "itgsa.intent.action.KILL"
 
-        /** Binder 回调 transaction code */
         private const val TRANSACTION_EXCEPTION_REPLY = IBinder.FIRST_CALL_TRANSACTION
 
-        /** Intent extras keys */
         private const val BUNDLE_KEY_COMMON = "common"
         private const val BUNDLE_KEY_EXTRA = "extra"
 
-        /** common bundle keys */
         private const val KEY_NOTIFY_TYPE = "notifyType"
         private const val KEY_NOTIFY_ID = "notifyId"
         private const val KEY_REASON = "reason"
         private const val KEY_ACTION = "action"
         private const val KEY_CALLBACK = "callback"
 
-        /** extra bundle keys */
         private const val KEY_HEAP_ALLOC = "heapAlloc"
         private const val KEY_HEAP_CAPACITY = "heapCapacity"
         private const val KEY_PSS = "pss"
         private const val KEY_PSS_LIMIT = "pssLimit"
 
-        /** 异常通知类型 */
         const val NOTIFY_TYPE_PSS = 1000   // 物理内存异常
         const val NOTIFY_TYPE_HEAP = 2000  // Java 堆内存异常
 
-        /** 回调结果 */
         const val RESULT_SUCCESS = 0
         const val RESULT_FAILURE = 1
     }
@@ -189,7 +179,7 @@ class FairMemoryReceiver @Inject constructor(
     }
 
     /**
-     * 注册内存压力监听器。使用 [WeakReference] 持有，避免泄漏。
+     * 注册内存压力监听器。使用 [WeakReference] 持有避免泄漏。
      * 可在 ViewModel 的 [androidx.lifecycle.ViewModel.onCleared] 或服务销毁时调用 [removeMemoryListener]。
      */
     fun addMemoryListener(listener: MemoryListener) {
@@ -210,7 +200,6 @@ class FairMemoryReceiver @Inject constructor(
         }
     }
 
-    /** 通知所有监听器执行 TRIM 释放（在 HandlerThread 上同步调用）。 */
     private fun notifyTrim(notifyType: Int) {
         val listeners = synchronized(listenerLock) {
             listenerRefs.removeAll { it.get() == null }
@@ -225,7 +214,6 @@ class FairMemoryReceiver @Inject constructor(
         }
     }
 
-    /** 通知所有监听器执行 KILL 保存（在 HandlerThread 上同步调用）。 */
     private fun notifyKill() {
         val listeners = synchronized(listenerLock) {
             listenerRefs.removeAll { it.get() == null }
@@ -240,16 +228,12 @@ class FairMemoryReceiver @Inject constructor(
         }
     }
 
-    /**
-     * 处理收到的广播：释放内存 / 保存数据，然后回调系统。
-     */
     private fun handleReceived(
         action: String,
         notifyType: Int,
         notifyId: Int,
         callback: IBinder
     ) {
-        // 确保 binder 关联了 DeathRecipient（每次都更新为当前 callback）
         if (!checkRemote(callback)) {
             Log.w(TAG, "无法关联 callback IBinder")
             return
@@ -258,9 +242,7 @@ class FairMemoryReceiver @Inject constructor(
         when (action) {
             ACTION_TRIM -> {
                 Log.i(TAG, "TRIM: 正在释放非关键内存… (notifyType=$notifyType)")
-                // 通知所有已注册组件按 notifyType 差异化释放内存
                 notifyTrim(notifyType)
-                // 在前台且达到查杀条件时，向用户推送差异化提示
                 appContext?.let { ctx ->
                     when (notifyType) {
                         NOTIFY_TYPE_HEAP -> notifier.showHeapMemoryNotification(ctx)
@@ -270,12 +252,11 @@ class FairMemoryReceiver @Inject constructor(
             }
             ACTION_KILL -> {
                 Log.i(TAG, "KILL: 正在保存应用状态…")
-                // 通知所有已注册组件保存关键状态
                 notifyKill()
             }
         }
 
-        // 回调系统，通知处理完成（使用当前广播的 callback，而非缓存值）
+        // ⚠️ 反直觉设计：必须使用当前广播的 callback（非缓存值），确保回调指向正确对象
         val extra = Bundle().apply {
             putString("reply", "HeartRateMonitor: $action processed")
         }
@@ -288,19 +269,16 @@ class FairMemoryReceiver @Inject constructor(
      */
     private fun checkRemote(callback: IBinder): Boolean {
         synchronized(this) {
-            // 已关联且是同一个 binder，直接复用
             if (remoteBinder === callback) return true
 
-            // 先解除旧的死亡监听
             remoteBinder?.let { old ->
                 try {
                     old.unlinkToDeath(this, 0)
                 } catch (_: Exception) {
-                    // 旧 binder 可能已死亡，忽略
+                    // 旧 binder 已死亡，忽略
                 }
             }
 
-            // 关联新的 binder
             return try {
                 callback.linkToDeath(this, 0)
                 remoteBinder = callback
@@ -313,8 +291,7 @@ class FairMemoryReceiver @Inject constructor(
     }
 
     /**
-     * 通过 Binder 回调系统，返回处理结果。
-     * 必须在收到广播后 3 秒内完成。
+     * 通过 Binder 回调系统，返回处理结果。必须在收到广播后 3 秒内完成。
      */
     private fun reply(callback: IBinder, notifyType: Int, notifyId: Int, result: Int, extra: Bundle?) {
         synchronized(this) {
@@ -324,7 +301,7 @@ class FairMemoryReceiver @Inject constructor(
                 data.writeInt(notifyId)
                 data.writeInt(result)
                 data.writeBundle(extra ?: Bundle())
-                // FLAG_ONEWAY：单向调用，无需读取返回值；移除原 readException()（ONEWAY 下 reply 为空）
+                // ⚠️ 反直觉设计：FLAG_ONEWAY 单向调用无需返回值；移除原 readException()（ONEWAY 下 reply 为空）
                 callback.transact(TRANSACTION_EXCEPTION_REPLY, data, null, IBinder.FLAG_ONEWAY)
                 Log.i(TAG, "已回调系统: result=$result")
             } catch (e: Exception) {
@@ -335,9 +312,6 @@ class FairMemoryReceiver @Inject constructor(
         }
     }
 
-    /**
-     * 系统 Binder 死亡时的回调。
-     */
     override fun binderDied() {
         synchronized(this) {
             val remote = remoteBinder

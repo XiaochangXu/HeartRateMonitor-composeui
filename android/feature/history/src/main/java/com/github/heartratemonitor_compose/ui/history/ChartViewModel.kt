@@ -13,7 +13,7 @@ import kotlinx.collections.immutable.toImmutableList
 /**
  * 会话心率记录归约进单一 UiState，
  * UI 层仅订阅记录状态并经 Intent 触发加载。
- * 依赖由 Hilt 构造注入（Phase 3 起）。
+ * 依赖由 Hilt 构造注入。
  */
 @HiltViewModel
 class ChartViewModel @Inject constructor(

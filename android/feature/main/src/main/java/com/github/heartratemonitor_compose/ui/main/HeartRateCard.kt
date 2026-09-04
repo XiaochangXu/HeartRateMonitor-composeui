@@ -73,8 +73,7 @@ internal fun HeartRateCard(
     ringMaxHr: Int,
     onRingMaxChange: (Int) -> Unit
 ) {
-    // appStatus（枚举）和 heartRate（Int）都是 stable 参数，直接赋值即可：
-    // HeartRateCard 只在参数变化时重组，isConnected / hasData 会随参数正确更新。
+    // appStatus / heartRate 为 stable 参数，直接赋值无需 derivedStateOf。
     val isConnected = appStatus == AppStatus.CONNECTED
     val hasData = isConnected && heartRate > 0
 

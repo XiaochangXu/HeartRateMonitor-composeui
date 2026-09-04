@@ -16,16 +16,15 @@ import kotlinx.coroutines.launch
  *
  * 持久化设置页注意：[uiState] 是 SettingsRepository 真源的派生投影，
  * 写路径必须 Intent → settings.set() → Flow 回流经 [setState] 刷新，
- * 禁止在归约内本地改写再写设置的"双写"（见迁移方案 §3.5 / §6.2-7）。
+ * 禁止在归约内本地改写再写设置的"双写"。
  */
 abstract class MviViewModel<S, I : Any>(initialState: S) : ViewModel() {
 
     private val _uiState = MutableStateFlow(initialState)
 
-    /** UI 用 collectAsStateWithLifecycle 收集。 */
     val uiState: StateFlow<S> = _uiState.asStateFlow()
 
-    /** VM 内部读取，禁止 UI 层直接使用。 */
+    // VM 内部读取，禁止 UI 层直接使用。
     protected val currentState: S get() = _uiState.value
 
     fun dispatch(intent: I) {
@@ -34,7 +33,7 @@ abstract class MviViewModel<S, I : Any>(initialState: S) : ViewModel() {
 
     protected abstract suspend fun handleIntent(intent: I)
 
-    /** 状态归约：CAS 更新，保证多线程写安全（契约 8）。 */
+    // CAS 更新，保证多线程写安全。
     protected fun setState(reducer: (S) -> S) {
         _uiState.update(reducer)
     }

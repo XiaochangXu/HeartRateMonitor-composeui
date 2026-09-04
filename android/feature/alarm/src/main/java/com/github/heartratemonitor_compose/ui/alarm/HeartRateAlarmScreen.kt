@@ -87,8 +87,7 @@ fun HeartRateAlarmScreen(
 
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
 
-    // 首次组合时不播放 AnimatedVisibility 展开动画，避免与页面转场动画叠加导致掉帧。
-    // 首帧渲染后切换到带动画的分支，后续用户手动切换开关时正常播放展开/收起。
+    // 首次组合无展开动画（避免与转场叠加掉帧），首帧后切换开关才播放动画。
     var hasAnimated by remember { mutableStateOf(false) }
     val postureSectionVisible = !excludePostureDetection
 
@@ -132,8 +131,7 @@ fun HeartRateAlarmScreen(
             ) {
                 Spacer(Modifier.height(padding.calculateTopPadding() + 16.dp))
 
-            // 首次组合时跳过进入动画（EnterTransition.None），避免与页面转场叠加导致掉帧；
-            // 首帧渲染后恢复带动画的分支，后续用户切换开关时正常播放展开/收起。
+            // 首次组合跳过进入动画（EnterTransition.None），避免与转场叠加掉帧。
             val enterTrans = if (hasAnimated) {
                 expandVertically(
                     animationSpec = tween(250, easing = FastOutSlowInEasing),
@@ -176,10 +174,8 @@ fun HeartRateAlarmScreen(
                     Spacer(Modifier.height(24.dp))
                 }
             }
-            // 首帧渲染完成后标记，后续切换开关走带动画的分支
-            LaunchedEffect(Unit) {
-                if (!hasAnimated) hasAnimated = true
-            }
+            // 首帧后标记，后续切换走动画分支
+            LaunchedEffect(Unit) { hasAnimated = true }
 
             AlarmSettingsCard(
                 alarmEnabled = alarmEnabled,
@@ -211,7 +207,6 @@ fun HeartRateAlarmScreen(
                     viewModel.dispatch(HeartRateAlarmIntent.SetRepeatInterval(it))
                 }
             )
-            // 底部留出系统导航栏空间，避免内容被手势条遮挡
             Spacer(Modifier.height(40.dp))
             }
             StatusBarScrim()

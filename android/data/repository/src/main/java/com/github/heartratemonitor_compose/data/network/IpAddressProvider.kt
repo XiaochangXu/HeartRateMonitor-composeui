@@ -50,17 +50,12 @@ class IpAddressProvider @Inject constructor(@ApplicationContext context: Context
         }
     }
 
-    /**
-     * 遍历所有网络，对满足 [filter] 条件的网络提取首个 Inet4 地址。
-     */
-    @Suppress("DEPRECATION") // allNetworks 无替代 API，是获取全部网络的唯一途径
+    @Suppress("DEPRECATION")
+    // ⚠️ 反直觉设计：allNetworks 无替代 API，是获取全部网络的唯一方式。
     private fun scanAllNetworksForIp(
         cm: ConnectivityManager,
         filter: (Network) -> Boolean
     ): String? {
-        // allNetworks 在 API 23+ 可用（项目 minSdk 满足）
-        // 该方法被 Java 标记为 deprecated，但实际上没有替代 API，
-        // 是 ConnectivityManager 获取所有网络的唯一方式。
         for (network in cm.allNetworks) {
             if (!filter(network)) continue
             val lp = cm.getLinkProperties(network) ?: continue

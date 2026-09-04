@@ -50,24 +50,19 @@ import com.github.heartratemonitor_compose.ui.widgets.ExpressiveButtonStyle
 /**
  * 当前姿态展示卡片：姿态图标弹跳动画 + 三姿态指示器。
  *
- * popAnim：姿态变化时图标从 0.7 缩放到 1.0 的弹跳效果。
- * bounceOffset：运动姿态时图标上下弹跳的无限动画，仅在 EXERCISE 时运行。
+ * popAnim：姿态变化时图标弹跳（0.7→1.0）。bounceOffset：仅 EXERCISE 时图标上下无限弹跳。
  */
 @Composable
 internal fun PostureCard(
     posture: PostureType
 ) {
-    // popAnim：姿态变化时弹跳，由 LaunchedEffect(posture) 驱动
-    // Animatable 内部用 mutableStateOf 持有值，在 graphicsLayer 的 draw-phase lambda
-    // 中读取 popAnim.value，值变化只触发重绘（draw），不触发重组（recomposition），
-    // 避免弹跳动画每帧都跑一遍 Icon 的组合代码。
+    // ⚠️ 反直觉设计：Animatable + graphicsLayer 使弹跳动画只触发 draw-phase 重绘，不触发重组。
     val popAnim = remember { Animatable(0.7f) }
     LaunchedEffect(posture) {
         popAnim.snapTo(0.7f)
         popAnim.animateTo(1f, animationSpec = tween(200, easing = FastOutSlowInEasing))
     }
 
-    // bounceOffset：仅运动姿态时才创建无限弹跳动画
     val isExercise = posture == PostureType.EXERCISE
     val bounceOffset: Float
     if (isExercise) {
@@ -154,9 +149,7 @@ private fun PostureIndicator(label: String, iconRes: Int, isActive: Boolean) {
 /**
  * 姿态校准卡片：校准中显示波浪进度，空闲时显示校准按钮与状态。
  *
- * 进度条用 [Animatable] 平滑追赶服务端每秒递增的 calibrationProgress，
- * 替代原 16ms 手搓轮询：服务端 setState 频率从 60fps 降到 1fps，
- * 动画由 Compose 自动插值，无额外状态写入。
+ * ⚠️ 反直觉设计：进度条用 [Animatable] 平滑追赶服务端每秒递增的进度，替代 16ms 轮询——服务端 setState 频率从 60fps 降到 1fps。
  */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -170,7 +163,7 @@ internal fun CalibrationCard(
     onClearCalibration: () -> Unit
 ) {
     val context = LocalContext.current
-    // 数量以 String 传入（%1$s），规避小语种 locale 整数格式化输出本地数字
+    // ⚠️ 反直觉设计：数量以 String 传入（%1$s），规避小语种 locale 整数格式化输出本地数字
     val sitStatus = if (calibration?.sittingSamples?.isNotEmpty() == true)
         context.getString(R.string.calibrated_samples, calibration.sittingSamples.size.toString()) else context.getString(R.string.not_calibrated)
     val standStatus = if (calibration?.standingSamples?.isNotEmpty() == true)
@@ -190,7 +183,7 @@ internal fun CalibrationCard(
                         style = MaterialTheme.typography.bodyMedium
                     )
                     Spacer(Modifier.height(8.dp))
-                    // 平滑进度：服务端每秒 +1，Animatable 用 1 秒 tween 追赶
+                    // ⚠️ 反直觉设计：服务端每秒 +1，Animatable 用 1 秒 tween 追赶
                     val smoothProgress = remember { Animatable(0f) }
                     val target = calibrationProgress / HeartRateAlarmViewModel.CALIBRATION_DURATION_SECONDS.toFloat()
                     LaunchedEffect(calibrationProgress) {

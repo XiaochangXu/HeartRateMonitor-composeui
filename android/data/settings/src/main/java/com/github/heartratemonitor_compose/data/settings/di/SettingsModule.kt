@@ -13,14 +13,6 @@ import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.CoroutineScope
 import javax.inject.Singleton
 
-/**
- * Hilt 设置装配模块（Phase 2 迁入）。
- *
- * - [DataStore] 仍经 [settingsDataStore] 顶层委托（全进程唯一实例），
- *   KillStateSaver / ServiceBootInitializer 两个契约 2 例外的直连不受影响。
- * - [SettingsRepository] 的协程作用域参数使用 [AppScope] Qualifier，
- *   绑定由 :app 的 AppModule 提供（SupervisorJob + Dispatchers.Default）。
- */
 @Module
 @InstallIn(SingletonComponent::class)
 object SettingsModule {

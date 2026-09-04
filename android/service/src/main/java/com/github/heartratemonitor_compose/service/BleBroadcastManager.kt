@@ -6,8 +6,7 @@ import kotlinx.coroutines.flow.StateFlow
 import org.json.JSONObject
 
 /**
- * 将 JSON 构造与 200ms 节流逻辑从 [BleService] 中剥离，
- * 注入函数便于单元测试捕获广播内容。
+ * 将 JSON 构造与 200ms 节流从 [BleService] 剥离，注入函数便于单测捕获广播内容。
  */
 class BleBroadcastManager(
     private val emitState: (String) -> Unit,
@@ -26,9 +25,8 @@ class BleBroadcastManager(
     private val broadcastMinIntervalMs = 200L
 
     /**
-     * 200ms 节流仅针对高频心率包（~1Hz）；连接/断开、状态文案变化、心率清零等
-     * 终态/迁移事件不节流——否则断开广播落在节流窗口内会被直接丢弃，
-     * WS 客户端将永久停留在 connected=true 的陈旧状态。
+     * ⚠️ 反直觉设计：200ms 节流仅针对高频心率包，连接/断开/状态变化等终态不节流——
+     * 否则断开广播落在窗口内被丢弃，WS 客户端将永久停留 connected=true。
      */
     fun broadcast() {
         val now = System.currentTimeMillis()

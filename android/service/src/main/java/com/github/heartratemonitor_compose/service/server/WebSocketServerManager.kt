@@ -21,9 +21,7 @@ class WebSocketServerManager(
     private var server: AppWebSocketServer? = null
 
     /**
-     * 启动 WebSocket 服务器。
-     * @return true 表示启动成功；false 表示端口被占用或其它错误导致启动失败。
-     *         调用方（ServerHost）据此向 UI 传递实际运行状态，避免「设置已启用但服务器未运行」。
+     * @return true 表示启动成功；false 表示端口被占用等错误，调用方据此向 UI 传递实际运行状态。
      */
     fun start(): Boolean {
         if (server != null) return true
@@ -48,8 +46,7 @@ class WebSocketServerManager(
     }
 
     /**
-     * 主动断开所有已连接的 WebSocket 客户端（PC）。
-     * 用于局域网传输页面「断开连接」按钮。
+     * 主动断开所有已连接的 WebSocket 客户端（PC），用于「断开连接」按钮。
      */
     fun disconnectAllClients() {
         server?.disconnectAllClients()
@@ -59,8 +56,7 @@ class WebSocketServerManager(
     private var cachedObsTemplate: String? = null
 
     /**
-     * 读取 assets/obs_heartrate.html 并注入 WebSocket 连接信息。
-     * WS 服务器返回的页面，其 wsUrl 直接指向自身（同端口），不需要额外配置 WS 地址。
+     * 读取 assets/obs_heartrate.html 注入 WS 连接信息；WS 服务器自身提供 WS 服务，wsUrl 直接指向同端口。
      */
     private fun getObsHtml(host: String): String {
         val template = cachedObsTemplate ?: run {
@@ -73,20 +69,15 @@ class WebSocketServerManager(
             cachedObsTemplate = html
             html
         }
-        // WS 服务器自身就提供 WebSocket 服务，wsUrl 直接指向同端口
+        // ⚠️ 反直觉设计：escape 防 XSS（host 来自客户端可控）
         val wsUrl = if (host.isNotEmpty()) "ws://$host:$port" else ""
-        // 转义注入值中的 </script> 和双引号/反斜杠，防止 XSS（host 来自客户端可控的 HTTP Host 头）
         val safeWsUrl = escapeForJs(wsUrl)
         val safeToken = escapeForJs(authToken)
-        // 版本戳：每次请求都不同，用于打破 OBS 浏览器源缓存。
-        // 页面加载时若 URL 无 _v 参数，则保留原有 query 参数（如 token）并追加 _v=时间戳后跳转，
-        // URL 变化后浏览器无法使用缓存，确保每次连接都拉取最新 HTML。
         val versionStamp = System.currentTimeMillis()
         val injection = "<script>window.__WS_CONFIG__={wsUrl:\"$safeWsUrl\",token:\"$safeToken\"};" +
             "if(!new URLSearchParams(location.search).has('_v')){var p=new URLSearchParams(location.search);p.set('_v','$versionStamp');" +
             "location.replace(location.pathname+(p.toString()?'?'+p.toString():''));}" +
             "</script>"
-        // 使用 split + join 避免 replaceFirst 的 replacement 中 $ 和 \ 被解释为特殊字符
         val parts = template.split("<script>", limit = 2)
         return if (parts.size == 2) {
             parts[0] + injection + "\n<script>" + parts[1]
@@ -95,11 +86,6 @@ class WebSocketServerManager(
         }
     }
 
-    /**
-     * 转义注入到 JS 字符串字面量中的值，防止 XSS。
-     * - 替换 </script> 序列，防止提前关闭 <script> 标签
-     * - 转义反斜杠、双引号、单引号
-     */
     private fun escapeForJs(value: String): String {
         return value
             .replace("</", "<\\/")
@@ -110,20 +96,12 @@ class WebSocketServerManager(
 
     private inner class AppWebSocketServer : NanoWSD(port) {
 
-        // 跟踪所有活跃连接的 scope，确保 stop() 时全部取消，防止泄漏
         private val activeScopes = java.util.Collections.synchronizedSet(mutableSetOf<CoroutineScope>())
-        // 跟踪所有活跃连接的 WebSocket 实例，用于主动断开
         private val activeSockets = java.util.Collections.synchronizedSet(mutableSetOf<AppWebSocket>())
 
         /**
-         * 重写 serve() 拦截所有请求做鉴权，再委托给 NanoWSD.serve()。
-         *
-         * NanoWSD.serve() 的逻辑：
-         * - WebSocket 升级请求 → 调用 openWebSocket() 握手（不经过 serveHttp）
-         * - 普通 HTTP 请求 → 调用 serveHttp()
-         *
-         * 若只重写 serveHttp()，则 WebSocket 升级请求会绕过 token 鉴权。
-         * 因此在 serve() 入口处统一拦截，鉴权通过后再 super.serve() 让 NanoWSD 分流。
+         * ⚠️ 反直觉设计：重写 serve()（非 serveHttp）统一拦截鉴权——
+         * NanoWSD.serve() 中 WebSocket 升级走 openWebSocket() 不经 serveHttp()，若只重写 serveHttp 将绕过 token。
          */
         override fun serve(session: IHTTPSession?): Response {
             if (!isAuthorized(session)) {
@@ -133,13 +111,10 @@ class WebSocketServerManager(
         }
 
         override fun serveHttp(session: IHTTPSession?): Response {
-            // 普通 HTTP GET 请求：根路径 / 返回 OBS 用的 HTML 页面
-            // 浏览器源填 http://<IP>:<WS端口>/ 即可直接使用
             if (session?.method == Method.GET && (session.uri == "/" || session.uri == "/obs" || session.uri == "/obs_heartrate")) {
                 val hostHeader = session.headers?.get("host")
                 val host = extractHost(hostHeader) ?: session.remoteIpAddress ?: ""
                 val resp = newFixedLengthResponse(Response.Status.OK, "text/html; charset=utf-8", getObsHtml(host))
-                // 禁止 OBS 浏览器源缓存 HTML 页面，确保每次连接都拉取最新内容
                 resp.addHeader("Cache-Control", "no-cache, no-store, must-revalidate")
                 resp.addHeader("Pragma", "no-cache")
                 resp.addHeader("Expires", "0")
@@ -149,9 +124,7 @@ class WebSocketServerManager(
         }
 
         /**
-         * 鉴权：若配置了 token，则校验 ?token= 查询参数。
-         * 使用 MessageDigest.isEqual 进行恒定时间比较，防止时序攻击。
-         * 与 HttpServerManager 保持一致。
+         * ⚠️ 反直觉设计：MessageDigest.isEqual 恒定时间比较防时序攻击，与 HttpServerManager 一致。
          */
         private fun isAuthorized(session: IHTTPSession?): Boolean {
             if (authToken.isEmpty()) return true
@@ -160,19 +133,12 @@ class WebSocketServerManager(
                 java.security.MessageDigest.isEqual(queryToken.toByteArray(), authToken.toByteArray())
         }
 
-        /**
-         * 从 Host 头提取主机名/IP，去掉端口部分。
-         * Host 头格式 "192.168.1.100:8000" → "192.168.1.100"
-         * IPv6 格式 "[::1]:8000" → "::1"（去掉方括号和端口）
-         */
         private fun extractHost(hostHeader: String?): String? {
             if (hostHeader.isNullOrEmpty()) return null
             return if (hostHeader.startsWith("[")) {
-                // IPv6: [::1]:8000 → ::1
                 hostHeader.substringBeforeLast("]:").removeSurrounding("[", "")
                     .ifEmpty { null }
             } else {
-                // IPv4: 192.168.1.100:8000 → 192.168.1.100
                 hostHeader.substringBeforeLast(":")
             }
         }
@@ -194,7 +160,6 @@ class WebSocketServerManager(
         }
 
         override fun stop() {
-            // 先取消所有活跃连接的 scope，再停止服务器
             synchronized(activeScopes) {
                 activeScopes.forEach { it.cancel() }
                 activeScopes.clear()
@@ -208,10 +173,6 @@ class WebSocketServerManager(
             updateConnectedClientInfo()
         }
 
-        /**
-         * 从活跃连接中取第一个客户端的 OS 名称 + IP 写入 [connectedClientInfoFlow]。
-         * 无连接时置 null。UI 据此展示「已连接设备」卡片。
-         */
         private fun updateConnectedClientInfo() {
             val socket = synchronized(activeSockets) { activeSockets.firstOrNull() }
             if (socket == null) {
@@ -226,11 +187,6 @@ class WebSocketServerManager(
             }
         }
 
-        /**
-         * 从 User-Agent 字符串中粗略解析操作系统名称。
-         * 常见 PC 客户端（C# WebView2 / Edge / Chrome）UA 含 "Windows NT"、"Macintosh" 等。
-         * 解析失败回退为 "PC"。
-         */
         private fun parseOsNameFromUserAgent(ua: String?): String {
             if (ua.isNullOrBlank()) return "PC"
             val lower = ua.lowercase()
@@ -249,8 +205,7 @@ class WebSocketServerManager(
                 activeScopes.add(it)
             }
 
-            // 标记正在关闭中：send/ping 失败后调用 close()（异步），
-            // 在 onClose 回调触发前 collect 可能再次执行 send()，此标志防止重复 send 与冗余日志
+            // ⚠️ 反直觉设计：send/ping 失败后 close() 异步，onClose 回调触发前 collect 可能再次 send()，此标志防重复
             @Volatile
             private var isClosing = false
 
@@ -262,7 +217,6 @@ class WebSocketServerManager(
                 updateClientCount()
                 Log.d("AppWebSocket", "WebSocket opened for: ${handshakeRequest.remoteIpAddress}")
 
-                // Coroutine for handling heartbeats (Ping/Pong)
                 webSocketScope.launch {
                     try {
                         while (isOpen && !isClosing) {
@@ -270,7 +224,7 @@ class WebSocketServerManager(
                             ping(byteArrayOf())
                         }
                     } catch (e: CancellationException) {
-                        // This is expected when the scope is cancelled
+                        // expected
                     } catch (e: IOException) {
                         if (!isClosing) {
                             isClosing = true
@@ -280,7 +234,6 @@ class WebSocketServerManager(
                     }
                 }
 
-                // Coroutine for listening to state updates and sending them to the client
                 webSocketScope.launch {
                     stateFlow.collect { stateJson ->
                         if (isClosing) return@collect

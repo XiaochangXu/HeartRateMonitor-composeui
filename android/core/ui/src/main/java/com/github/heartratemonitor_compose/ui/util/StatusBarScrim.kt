@@ -15,9 +15,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 
-/**
- * 使接近顶栏的内容平滑淡出、保证顶栏标题与状态栏图标可读。
- */
 @Composable
 fun StatusBarScrim(
     modifier: Modifier = Modifier,

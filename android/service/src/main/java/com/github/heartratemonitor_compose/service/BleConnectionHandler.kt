@@ -45,12 +45,9 @@ import kotlin.math.abs
 import kotlin.time.Duration.Companion.seconds
 
 /**
- * 驱动 [BleConnectionManager] 的连接状态机，[BleService] 仅做只读暴露。
+ * 驱动 [BleConnectionManager] 的连接状态机。
  * 纪元机制（connectEpoch）防止退避中的旧自动重连误取消用户刚发起的新连接。
- *
- * Phase 1（HeartRateRepository 迁移）：状态流宿主已移至进程级 [HeartRateRepository]
- * （SSOT），本类通过 set 系列方法写入、override 属性只读转发；
- * speed 流宿主同在 Repository（[SpeedProvider] 经 updateSpeed 写入）。
+ * 状态流宿主为进程级 [HeartRateRepository]（SSOT），本类通过 set 系列方法写入。
  */
 class BleConnectionHandler(
     private val context: Context,
@@ -62,9 +59,8 @@ class BleConnectionHandler(
     private val broadcast: () -> Unit,
     private val freshnessTracker: HeartRateFreshnessTracker,
     private val scope: CoroutineScope,
-    /** 进程级状态流 SSOT（Phase 1 迁移，见类注释）。 */
+    /** 进程级状态流 SSOT。 */
     private val repository: HeartRateRepository,
-    /** 注入 fake 便于单元测试驱动连接状态机。 */
     private val peripheralFactory: (String, PeripheralBuilder.() -> Unit) -> Peripheral =
         { identifier, builder -> Peripheral(identifier, builder) }
 ) : BleConnectionManager {
@@ -81,8 +77,6 @@ class BleConnectionHandler(
 
     override val connectedDevice: StateFlow<ConnectedDevice?> get() = repository.connectedDevice
 
-    // 服务层会话图表追踪器：进程级 HeartRateRepository 内聚，StateFlow 重放实现「重进即恢复」
-    // 历史记录开关关闭期间仅跟踪极值、不统计图表点，开启后从零开始绘制
     override val chartDataSnapshot: StateFlow<ChartDataSnapshot?> get() = repository.chartDataSnapshot
     override val sessionMaxHr: StateFlow<Int> get() = repository.sessionMaxHr
     override val sessionMinHr: StateFlow<Int> get() = repository.sessionMinHr
@@ -108,20 +102,15 @@ class BleConnectionHandler(
         }
     }
 
-    /** 是否已注册蓝牙状态广播接收器，防止重复注册/注销。 */
     private var bluetoothReceiverRegistered = false
     private val isScanning = AtomicBoolean(false)
-    /** 上次成功连接的设备 id：仅在连接成功（State.Connected）时写入，失败/超时的首连不触发自动重连。
-     *  IO 线程 stateMonitor 写入、checkAutoReconnect（IO 线程）读取，补 @Volatile 保证可见性。 */
+    // ⚠️ 反直觉设计：仅连接成功时写入（失败/超时首连不触发自动重连）；@Volatile 保证 IO 线程间可见
     @Volatile private var lastConnectedDeviceId: String? = null
     @Volatile private var lastConnectedDeviceName: String = "Unknown Device"
-    // 连接/扫描纪元：用户每次发起新的 BLE 活动（扫描/连接）时自增。
-    // 被取消的旧连接任务的 finally 用其启动时捕获的纪元做校验，
-    // 避免退避中的旧自动重连误取消用户刚发起的新连接。
+    // ⚠️ 反直觉设计：纪元机制防止旧任务 finally 覆盖新连接状态
     private val connectEpoch = AtomicLong(0L)
 
-    // 手动连接（可能来自主线程或 IO 线程的自动扫描收尾）复位、连接成功与重试（IO 线程）递增。
-    // 补 @Volatile 保证可见性；非原子递增的偶发计数偏差由重试上限语义容忍。
+    // ⚠️ 反直觉设计：@Volatile 保证跨线程可见；非原子递增的计数偏差由重试上限语义容忍
     @Volatile private var autoReconnectAttempt = 0
 
     companion object {
@@ -139,32 +128,15 @@ class BleConnectionHandler(
         lastConnectedDeviceName = name
     }
 
-    /**
-     * 清空图表缓存（历史记录开关关闭时由 BleSettingsListener 调用）。
-     * SessionChartTracker 方法 @Synchronized 线程安全。
-     */
     fun clearChartCache() {
         repository.clearChart()
     }
 
-    /**
-     * TRIM 内存预警时释放图表缓存（由 [BleService] 的 FairMemoryReceiver 回调触发）。
-     * 逻辑见 [SessionChartTracker.releaseOnTrim]。
-     */
     fun releaseChartOnTrim(notifyType: Int) {
         repository.releaseChartOnTrim(notifyType)
     }
 
-    /**
-     * 注册蓝牙适配器状态广播监听。由 [BleService.onCreate] 调用。
-     *
-     * Kable 的 [BluetoothDeviceAndroidPeripheral] 内部虽也监听 [BluetoothAdapter.ACTION_STATE_CHANGED]
-     * 并调用 disconnect()，但蓝牙关闭时 GATT 回调可能不触发，导致 peripheral.state
-     * 无法发出带 status 的 Disconnected 事件——被 stateMonitor 的 filter 过滤后，
-     * handlePeripheralState 永远不执行 Disconnected 分支，状态卡在 Connected。
-     *
-     * 此处监听系统广播作为补充：蓝牙关闭时主动设置 BluetoothDisabled 并清理连接状态。
-     */
+    // ⚠️ 反直觉设计：蓝牙关闭时 GATT 回调可能不触发，导致状态卡死——监听系统广播作为补充
     fun registerBluetoothStateReceiver() {
         if (bluetoothReceiverRegistered) return
         val filter = IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED)
@@ -177,7 +149,6 @@ class BleConnectionHandler(
         bluetoothReceiverRegistered = true
     }
 
-    /** 注销蓝牙状态广播监听。由 [BleService.onDestroy] 调用。 */
     fun unregisterBluetoothStateReceiver() {
         if (!bluetoothReceiverRegistered) return
         context.unregisterReceiver(bluetoothStateReceiver)
@@ -258,20 +229,13 @@ class BleConnectionHandler(
 
     override fun isDeviceConnected(): Boolean = connectedPeripheral?.state?.value is State.Connected
 
-    /**
-     * 蓝牙适配器状态前置检查：扫描前同步读取 [BluetoothAdapter.state]，
-     * 未开启时直接 fail-fast，避免先设 Scanning/AutoConnecting 再被 UnmetRequirementException 覆盖，
-     * 消除 UI 加载指示器瞬态闪烁。与 catch UnmetRequirementException 语义一致但更早拦截。
-     */
+    // fail-fast：避免先设 Scanning/AutoConnecting 再被 UnmetRequirementException 覆盖（消除 UI 瞬态闪烁）
     private fun isBluetoothEnabled(): Boolean {
         val manager = context.getSystemService(Context.BLUETOOTH_SERVICE) as? BluetoothManager
         return manager?.adapter?.isEnabled == true
     }
 
-    /**
-     * 二级超时（STALE）联动清零：心率清零 + 清空测量源并广播。
-     * 下游 UI（rate <= 0 显示 --）、预警服务（rate <= 0 过滤）、局域网广播自动降级。
-     */
+    /** 二级超时（STALE）联动清零：心率 + 测量源 + 广播，下游统一降级为 -- */
     fun clearHeartRateOnStale() {
         if (repository.heartRate.value > 0) {
             Log.w(TAG, "心率数据长时间未更新，判定测量失败并清零")
@@ -281,7 +245,6 @@ class BleConnectionHandler(
         }
     }
 
-    /** 非扫描中清空扫描缓存，释放 Advertisement 对象占用的内存。 */
     fun trimScanCacheIfIdle() {
         if (!isScanning.get()) {
             repository.setScanResults(emptyList())

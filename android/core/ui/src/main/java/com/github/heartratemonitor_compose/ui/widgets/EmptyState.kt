@@ -21,16 +21,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
-/**
- * 通用的空状态展示组件：居中显示一个图标（SVG）与下方提示文字。
- *
- * @param icon 图标 Painter（通常来自 drawable 资源）
- * @param message 提示文字
- * @param modifier 外部布局修饰
- * @param iconSize 图标尺寸
- * @param iconTint 图标着色
- * @param spacerHeight 图标与文字之间的间距
- */
+// 居中图标（Painter）+ 提示文字
 @Composable
 fun EmptyState(
     icon: Painter,
@@ -66,7 +57,6 @@ fun EmptyState(
     }
 }
 
-/** [ImageVector] 重载。 */
 @Composable
 fun EmptyState(
     icon: ImageVector,

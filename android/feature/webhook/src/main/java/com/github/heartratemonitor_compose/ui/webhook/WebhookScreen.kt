@@ -94,7 +94,6 @@ fun WebhookScreen(
     ) { padding ->
         Box(modifier = Modifier.fillMaxSize()) {
             if (webhooks.isEmpty()) {
-                // 空状态：整页（扣除顶栏高度）垂直水平居中
                 EmptyState(
                     icon = painterResource(com.github.heartratemonitor_compose.ui.widgets.R.drawable.ic_empty_state),
                     message = stringResource(R.string.no_webhooks),
@@ -117,7 +116,6 @@ fun WebhookScreen(
                             onDelete = { viewModel.dispatch(WebhookIntent.Delete(index)) }
                         )
                     }
-                    // 底部留出系统导航栏空间，避免内容被手势条遮挡
                     Spacer(Modifier.height(16.dp))
                 }
             }

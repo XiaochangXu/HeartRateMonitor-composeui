@@ -14,12 +14,6 @@ import dagger.hilt.android.HiltAndroidApp
 import kotlinx.coroutines.CoroutineScope
 import javax.inject.Inject
 
-/**
- * onCreate 显式触发顺序保持迁移前不变
- * themeState → liquidGlassState → fairMemoryReceiver.initialize →
- * fairMemoryNotifier.initialize → memoryDiagnostics.initialize →
- * themePreviewCache.preload(appScope)。
- */
 @HiltAndroidApp
 class HeartRateApp : Application(), Configuration.Provider {
 
@@ -43,13 +37,13 @@ class HeartRateApp : Application(), Configuration.Provider {
 
     override fun onCreate() {
         super.onCreate()
-        // 显式触发：保证主题 / 液态玻璃配置在任何 Composable 读取前就绪（等价旧 init 时序）
+        // 显式触发：保证主题/液态玻璃配置在任何 Composable 读取前就绪。
         themeState
         liquidGlassState
         fairMemoryReceiver.initialize()
         fairMemoryNotifier.initialize()
         memoryDiagnostics.initialize()
-        // 后台预计算主题设置页所有预览色卡，避免首帧卡顿
+        // 后台预计算主题设置页所有预览色卡，避免首帧卡顿。
         themePreviewCache.preload(appScope)
     }
 }

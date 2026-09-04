@@ -68,10 +68,11 @@ import kotlin.math.ceil
 import kotlin.math.floor
 import kotlin.math.roundToInt
 
-/** 降采样后图表最多显示的数据点数 */
 private const val MAX_POINTS = 300
 
-/** 图表实际绘制用的数据点：时间戳 + 平滑后的心率值 */
+/**
+ * 图表实际绘制用的数据点：时间戳 + 平滑后的心率值
+ */
 private data class DisplayPoint(val timestamp: Long, val y: Double)
 
 /** 心率历史详情图表（Vico）：逐拍心率折线 + 时间轴 + 触摸标记 */
@@ -85,9 +86,7 @@ internal fun HeartRateChart(
     val context = LocalContext.current
     val modelProducer = remember { CartesianChartModelProducer() }
 
-    // 5 点滑动平均平滑逐拍心率：相邻心拍间的 ±3~5 bpm 波动是测量噪声，
-    // 直接绘制会呈现密集锯齿；平滑后保留真实趋势、抑制抖动。
-    // 端点不足 5 点时收缩窗口，保证首尾值不被拉偏
+    // 5 点滑动平均平滑逐拍心率（端点收缩窗口），抑制测量噪声锯齿。
     val smoothedY = remember(records) {
         val raw = records.map { it.heartRate.toDouble() }
         when {
@@ -100,9 +99,7 @@ internal fun HeartRateChart(
         }
     }
 
-    // 均匀降采样：逐拍心率点数多（长会话可达数千点），全量绘制图表横向过长、
-    // 需要滚动很久。平滑后均匀抽取最多 MAX_POINTS 个点（保留首尾），
-    // 既缩短图表长度又已由平滑保证趋势不失真
+    // 均匀降采样：逐拍心率点数多（长会话可达数千点），平滑后抽取最多 MAX_POINTS 个点保留首尾。
     val displayPoints = remember(records, smoothedY) {
         if (smoothedY.size <= MAX_POINTS) {
             smoothedY.mapIndexed { i, y -> DisplayPoint(records[i].timestamp, y) }
@@ -152,20 +149,14 @@ internal fun HeartRateChart(
             } else {
                 ""
             }
-            // 数值以 String 传入（%1$s），规避小语种 locale 整数格式化输出本地数字
+            // ⚠️ 反直觉设计：数值以 String 传入（%1$s），规避小语种 locale 整数格式化输出本地数字
             context.getString(R.string.marker_heart_rate, entry.y.toInt().toString(), timeString)
         }
     }
 
     val marker = rememberMarker(valueFormatter = markerFormatter)
 
-    // Y 轴范围：最低值为心率最小值 - 20，最高值为心率最大值 + 20，
-    // 曲线上下都留出空间，不顶着图表顶/底部；
-    // 整体跨度不足 40 bpm 时（心率变化很小）以最低值为基准向上补足，
-    // 避免微小波动被放大成剧烈起伏；
-    // 上界向上对齐到 20bpm 刻度网格：Vico 的 step 刻度从 rangeMinY 起每 20 一格，
-    // 仅当 (maxY - minY) 是 20 的整数倍时顶边才恰好落在网格线上，
-    // 否则顶部会留出无网格线、无刻度的空带，观感如“绘制不完整”
+    // ⚠️ 反直觉设计：Y 轴 min=hrMin-20, max=hrMax+20（不足 40 时补足），上界对齐 20bpm 刻度网格——否则顶部无刻度观感如"绘制不完整"。
     val rangeMinY = remember(records) {
         if (records.isEmpty()) 0.0 else records.minOf { it.heartRate }.toDouble() - 20.0
     }
@@ -177,9 +168,6 @@ internal fun HeartRateChart(
         }
     }
 
-    // 圆角卡片容器包裹图表：普通圆角（主题 extraLarge = RoundedCornerShape 28dp）+ surfaceBright，
-    // 与 SessionStatsCard 及首页 RealtimeChart 卡片风格完全一致；
-    // G2 连续曲率目前仅用于底部导航栏（ContinuousCapsule），卡片不使用
     Surface(
         modifier = modifier,
         shape = MaterialTheme.shapes.extraLarge,
@@ -188,7 +176,6 @@ internal fun HeartRateChart(
         Column(
             modifier = Modifier.fillMaxSize()
         ) {
-            // 卡片头部：圆形背景图标 + 标题，与首页 RealtimeChart 卡片头部风格一致
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -212,7 +199,6 @@ internal fun HeartRateChart(
             CartesianChartHost(
                 chart = rememberCartesianChart(
                     rememberLineCartesianLayer(
-                        // 三次贝塞尔插值：曲线圆滑过渡，与首页实时图表风格一致
                         lineProvider = LineCartesianLayer.LineProvider.series(
                             LineCartesianLayer.rememberLine(
                                 interpolator = LineCartesianLayer.Interpolator.cubic()
@@ -231,19 +217,13 @@ internal fun HeartRateChart(
                         }
                     ),
                     startAxis = VerticalAxis.rememberStart(
-                        // Y 轴每 20 bpm 一格，刻度自最低值起：min、min+20、min+40…
+                        // ⚠️ 反直觉设计：显式 Int.toString() 输出 ASCII 数字，规避 Vico 默认 DecimalValueFormatter 走 Locale 渲染本地数字。
                         itemPlacer = VerticalAxis.ItemPlacer.step({ 20.0 }),
-                        // Y 轴心率值为整数：显式 Int.toString() 输出 ASCII 数字，
-                        // 规避 Vico 默认 DecimalValueFormatter 走 Locale.getDefault()
-                        // 在小语种（ne/bn/ar）下渲染本地数字（如 ७०）
                         valueFormatter = CartesianValueFormatter { _, value, _ -> value.toInt().toString() }
                     ),
                     bottomAxis = HorizontalAxis.rememberBottom(
+                        // ⚠️ 反直觉设计：首尾端点必出刻度（默认 aligned 跳过端点，数据非间距倍数时观感如"绘制不完整"）。
                         valueFormatter = bottomAxisFormatter,
-                        // 首尾端点必出刻度：会话开始/结束时间总有竖网格线和时间标签，
-                        // 中间刻度按“相邻标签不重叠”的最大密度等分。
-                        // 默认 aligned 的刻度只落在等差网格上且跳过端点，
-                        // 数据点数非间距整数倍时最后一段数据无竖线无时间，观感如“绘制不完整”
                         itemPlacer = remember { EndpointsAlignedItemPlacer() }
                     ),
                     marker = marker

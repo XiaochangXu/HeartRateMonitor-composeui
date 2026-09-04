@@ -15,26 +15,15 @@ import java.util.Locale
  * [SettingsRepository][com.github.heartratemonitor_compose.data.repository.SettingsRepository]，
  * 此处直连全进程唯一 [settingsDataStore] 同步读取语言设置（契约 2 例外，
  * 与 `ServiceBootInitializer` 同模式）。
- *
- * 语言存储为 BCP 47 语言 Tag 字符串（如 `"zh-CN"`、`"en"`、`"de"`），
- * `null` 或空字符串表示自动跟随系统语言。
  */
 internal object LocaleHelper {
 
-    /**
-     * 读取持久化的语言 Tag，返回应用了该语言的 [Context]。
-     *
-     * @param base 原始 base Context
-     * @return 应用了语言配置的 wrapper Context（语言为 null/空时原样返回）
-     */
     fun wrap(base: Context): Context {
         val languageTag = getSavedLanguageTag(base) ?: return base
         if (languageTag.isBlank()) return base
 
-        // 印尼语兼容：BCP 47 标准代码为 "id"，但 Java Locale 内部将其映射为
-        // 已废弃的旧代码 "in"（getLanguage() 返回 "in"），Android 资源系统按
-        // getLanguage() 匹配 values-xx 目录，故资源目录为 values-in。
-        // 若用户旧版本存储了 "id"，此处规范化为 "in" 以保证一致。
+        // ⚠️ 反直觉设计：印尼语 BCP 47 代码 "id" 被 Java Locale 映射为已废弃的 "in"（getLanguage() 返回 "in"），
+        // 资源系统按 getLanguage() 匹配 values-xx 目录，故需规范化为 "in"。
         val normalizedTag = if (languageTag == "id") "in" else languageTag
 
         val localeList = LocaleList.forLanguageTags(normalizedTag)
@@ -44,10 +33,6 @@ internal object LocaleHelper {
         return base.createConfigurationContext(config)
     }
 
-    /**
-     * 直连 DataStore 同步读取语言设置 Tag。
-     * 首次读取会触发 SharedPreferences → DataStore 迁移（与 SettingsRepository 预热同源）。
-     */
     private fun getSavedLanguageTag(context: Context): String? {
         return try {
             val prefs = runBlocking { context.settingsDataStore.data.first() }

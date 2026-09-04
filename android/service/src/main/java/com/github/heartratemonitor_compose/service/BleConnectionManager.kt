@@ -7,8 +7,7 @@ import com.github.heartratemonitor_compose.data.model.ScannedDevice
 import kotlinx.coroutines.flow.StateFlow
 
 /**
- * 原为 [BleService] 嵌套类，提升为顶层类型，
- * 使消费方不再依赖具体 Service 类。
+ * 连接设备信息（设备 id + 名称）。
  */
 data class ConnectedDevice(val id: String, val name: String)
 

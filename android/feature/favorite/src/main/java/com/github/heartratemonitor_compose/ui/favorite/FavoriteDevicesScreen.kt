@@ -39,7 +39,6 @@ fun FavoriteDevicesScreen(
     isActive: Boolean = true
 ) {
     val viewModel: FavoriteDevicesViewModel = hiltViewModel()
-    // 非前台时暂停订阅：ViewModel 内 Room 流常驻维护状态，UI 不随数据变化重组
     val uiState by viewModel.uiState.collectWhenActive(isActive)
     val devices = uiState.devices
     var showDeleteDialog by remember { mutableStateOf(false) }
@@ -62,7 +61,6 @@ fun FavoriteDevicesScreen(
                 ),
                 title = { Text(stringResource(R.string.favorite_devices), style = MaterialTheme.typography.headlineSmall) },
                 navigationIcon = {
-                    // Tab 模式下不显示返回按钮
                     if (!isInTab) {
                         IconButton(onClick = onNavigateBack) {
                             Surface(
@@ -104,7 +102,6 @@ fun FavoriteDevicesScreen(
     ) { padding ->
         Box(modifier = Modifier.fillMaxSize()) {
             if (uiState.isLoading) {
-                // 数据加载中：不渲染任何内容，避免空状态 icon 闪烁
             } else if (devices.isEmpty()) {
                 EmptyState(
                     icon = painterResource(com.github.heartratemonitor_compose.ui.widgets.R.drawable.ic_empty_state),
@@ -210,7 +207,7 @@ fun FavoriteDevicesScreen(
                     modifier = Modifier.padding(bottom = 12.dp)
                 )
                 Text(
-                    // 数量以 String 传入（%1$s），规避小语种（ne/bn/ar）locale 整数格式化输出本地数字
+                    // ⚠️ 反直觉设计：数量以 String 传入（%1$s），规避小语种 locale 整数格式化输出本地数字
                 text = stringResource(R.string.clear_all_favorites_confirm, devices.size.toString()),
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.padding(bottom = 16.dp)

@@ -85,17 +85,7 @@ private val ExpressDarkColorScheme = darkColorScheme(
     outlineVariant = ExpressOutlineVariantDark
 )
 
-/**
- * M3 Expressive Shapes
- *
- * Material Design 3 Expressive 使用不对称圆角：
- * - 大圆角 (28dp) 用于卡片/容器
- * - 小圆角 (4dp) 用于按钮/输入框
- * - 创建动态的"有机感"外观
- *
- * 使用普通 RoundedCornerShape（标准圆弧），
- * 底部导航栏仍使用 ContinuousCapsule（G2 连续曲率），不受此处影响。
- */
+// M3 Expressive Shapes：标准圆弧 RoundedCornerShape；底部导航栏仍用 ContinuousCapsule。
 val ExpressShapes = Shapes(
     extraSmall = RoundedCornerShape(4.dp),
     small = RoundedCornerShape(8.dp),
@@ -104,21 +94,7 @@ val ExpressShapes = Shapes(
     extraLarge = RoundedCornerShape(28.dp)
 )
 
-/**
- * HeartRateMonitorMobile M3 Expressive 主题（无状态版本，:core:designsystem）。
- *
- * 主题决策由调用方（:app 组合根侧的 AppTheme 薄包装）提供：
- * - **config**（[ThemeConfig]）：色彩来源 / 明暗模式 / 自定义 seed 色与 MaterialKolor variant；
- * - **customSchemeCache**：进程级 ColorScheme 缓存，同 seed/明暗/style 只算一次 HCT 转换。
- *
- * 计算规则（与迁移前逐字等价）：
- * - source == CUSTOM：经 customSchemeCache 从 seed 生成 ColorScheme（切断系统壁纸联动）；
- * - Android 12+：跟随系统 `dynamicLight/DarkColorScheme` 取壁纸色；
- * - 低版本：回退到预设的 Expressive 静态方案。
- *
- * Activity 与 Services（FloatingWindowService / StatusBarResidentService）共用同一
- * ThemeState 实例（同进程），任一调用方修改主题后全 App 即时重配色。
- */
+// 无状态 M3 Expressive 主题：config 由调用方提供，按 source 走 CUSTOM/动态/静态三路径。
 @Composable
 fun HeartRateMonitorMobileTheme(
     config: ThemeConfig,
@@ -134,9 +110,7 @@ fun HeartRateMonitorMobileTheme(
 
     val context = LocalContext.current
 
-    // 自定义配色同步计算 + 进程级缓存：同 seed/明暗/style 只算一次 HCT 转换（数毫秒），
-    // 冷启动首帧即得自定义色。旧实现用 produceState 异步计算，空窗期回退到蓝色 Express
-    // 方案，造成"先进页面闪一下蓝色再变自定义色"的观感。
+    // 同步计算 + 进程级缓存（同 seed/明暗/style 仅一次 HCT 转换），避免旧实现蓝色闪屏。
     val colorScheme = when {
         config.source == ThemeSource.CUSTOM -> remember(config.seedArgb, darkTheme, config.style) {
             customSchemeCache.get(config.seedArgb, darkTheme, config.style)
@@ -148,15 +122,14 @@ fun HeartRateMonitorMobileTheme(
         else -> ExpressLightColorScheme
     }
 
-    // 仅 Activity 上下文可操作 Window；Service 内托管的 ComposeView 上下文为 Service，跳过
+    // ⚠️ 反直觉设计：仅 Activity 可操作 Window；Service context 返回 null → 跳过 Window 装饰。
     val view = LocalView.current
     if (!view.isInEditMode) {
         SideEffect {
             val activity = view.context.findActivity()
             if (activity != null) {
                 val window = activity.window
-                // statusBarColor/navigationBarColor 在 API 35 被弃用（edge-to-edge 默认强制），
-                // 但旧版本仍需设置透明色实现沉浸式效果
+                // ⚠️ 反直觉设计：API 35 弃用 statusBarColor/navigationBarColor，但旧版本仍需透明色实现沉浸式。
                 @Suppress("DEPRECATION")
                 window.statusBarColor = android.graphics.Color.TRANSPARENT
                 @Suppress("DEPRECATION")
@@ -170,9 +143,7 @@ fun HeartRateMonitorMobileTheme(
         }
     }
 
-    // 波纹反馈：透明度为 M3 官方默认的 2 倍
-    // （pressed 20% / hovered 16% / focused 20% / dragged 32%），按压感更明显。
-    // M3 ripple 节点自动读取 LocalRippleConfiguration，全局生效。
+    // 波纹透明度为 M3 默认 2x（pressed 20% / hovered 16% / focused 20% / dragged 32%），全局生效。
     val rippleAlpha = RippleAlpha(
         hoveredAlpha = 2f * 0.08f,
         focusedAlpha = 2f * 0.10f,
@@ -180,10 +151,7 @@ fun HeartRateMonitorMobileTheme(
         draggedAlpha = 2f * 0.16f
     )
 
-    // RippleConfiguration(color, rippleAlpha) 在 material3 1.5.0-alpha23 被标记为 @Deprecated，
-    // 但主构造函数 RippleConfiguration(color, focus, rippleAlpha) 是 internal 的，模块外不可访问。
-    // 官方推荐迁移到 RippleThemeConfiguration，但该 API 目前仅覆盖 focus 字段，
-    // rippleAlpha 仍只能通过此 deprecated 构造函数传入，暂无替代方案。
+    // ⚠️ 反直觉设计：RippleConfiguration deprecated 但无替代——internal 构造函数 + RippleThemeConfiguration 未覆盖 rippleAlpha。
     @Suppress("DEPRECATION")
     val rippleConfig = RippleConfiguration(rippleAlpha = rippleAlpha)
 
@@ -199,14 +167,6 @@ fun HeartRateMonitorMobileTheme(
     }
 }
 
-/**
- * 自定义 ColorScheme 进程级缓存。
- *
- * 以 (seed, 明暗, style) 为键缓存 MaterialKolor 生成结果：Activity、悬浮窗、
- * 状态栏服务同进程共享，同配置只算一次 HCT 转换，切换主题后再切回也零开销。
- *
- * Hilt 单例（Phase 2 起由 Hilt 装配，替代 AppContainer）。
- */
 @Singleton
 class CustomSchemeCache @Inject constructor() {
     private val cache = ConcurrentHashMap<Triple<Int, Boolean, PaletteStyle>, ColorScheme>()
@@ -221,7 +181,6 @@ class CustomSchemeCache @Inject constructor() {
         }
 }
 
-/** 计算颜色的感知亮度 (relative luminance approximation) */
 private fun androidx.compose.ui.graphics.Color.brightness(): Double {
     val r = red.toDouble()
     val g = green.toDouble()
@@ -229,10 +188,7 @@ private fun androidx.compose.ui.graphics.Color.brightness(): Double {
     return (0.299 * r + 0.587 * g + 0.114 * b)
 }
 
-/**
- * 沿 ContextWrapper 链向上查找真正的 Activity。
- * Service 内托管的 ComposeView，context 为 Service，返回 null → 跳过 Window 装饰。
- */
+// 沿 ContextWrapper 链找 Activity；Service context 返回 null，跳过 Window 装饰。
 tailrec fun Context.findActivity(): Activity? = when (this) {
     is Activity -> this
     is ContextWrapper -> baseContext.findActivity()

@@ -76,8 +76,8 @@ class StatusBarResidentService : Service() {
     private val heartbeatAnimator = HeartbeatAnimator()
 
     private val serviceScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
-    // Phase 4：心率数据已改由 HeartRateRepository 读取；保留绑定仅为确保 BleService
-    // 前台服务存在（BIND_AUTO_CREATE 拉起副作用），并兼容其重建时重新触发订阅
+    // ⚠️ 反直觉设计：仅 bind 不 start，既确保 BleService 前台服务存活，又规避冷重启后台启动限制；
+    // 数据面由 HeartRateRepository（SSOT）直读，onServiceConnected 仅触发/重置订阅
     private var isServiceBound = false
     /** 当前生效的心率订阅（Repository 直出），重新订阅前先取消，避免 onServiceConnected 重入叠加 */
     private var bleDataJob: Job? = null
@@ -88,8 +88,6 @@ class StatusBarResidentService : Service() {
 
     private val serviceConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
-            // Phase 4 后数据面走 HeartRateRepository，无需持有 Service 实例；
-            // 绑定本身保留（前台服务锚点），回调仅触发/重置订阅
             isServiceBound = true
             observeBleData()
         }
@@ -116,7 +114,7 @@ class StatusBarResidentService : Service() {
             when (intent?.action) {
                 Intent.ACTION_SCREEN_OFF -> hideOverlay()
                 Intent.ACTION_SCREEN_ON -> {
-                    // 屏幕亮起：仅在已解锁时恢复 overlay，避免在锁屏界面之上显示
+                    // 仅在已解锁时恢复 overlay，避免在锁屏界面之上显示
                     val keyguardManager = getSystemService(KeyguardManager::class.java)
                     if (!keyguardManager.isKeyguardLocked) {
                         showOverlay()
@@ -127,14 +125,10 @@ class StatusBarResidentService : Service() {
         }
     }
 
-    // specialUse 前台服务防止系统在锁屏/内存压力下杀死服务，保证 overlay 持续可用。
+    // specialUse 前台服务防止系统在锁屏/内存压力下杀死服务
     private var isResidentForeground = false
     private val safetyHandler = Handler(Looper.getMainLooper())
 
-    /**
-     * 替代原 SharedPreferences.OnSharedPreferenceChangeListener。
-     * 各流 drop(1) 跳过初始发射，保持原 listener「仅响应注册后变化」的语义。
-     */
     private fun observeSettingsChanges() {
         settingsJobs = listOf(
             serviceScope.launch {
@@ -179,7 +173,7 @@ class StatusBarResidentService : Service() {
     }
 
     /**
-     * 兜底处理广播遗漏、服务被杀后 START_STICKY 重启等场景，确保锁屏解锁后 overlay 自动恢复。
+     * 兜底：处理广播遗漏、START_STICKY 重启等场景，确保锁屏解锁后 overlay 自动恢复。
      */
     private val overlaySafetyCheck = object : Runnable {
         override fun run() {
@@ -220,11 +214,8 @@ class StatusBarResidentService : Service() {
 
         initLayoutParams()
         applyAppearance()
-        // 初值同步：observeSettingsChanges 用 drop(1) 跳过首次发射，
-        // 此处补读当前值，确保首次显示时心跳动画开关与设置一致
+        // ⚠️ 反直觉设计：observeSettingsChanges drop(1) 跳过初值，此处补读确保首次显示与设置一致
         isAnimationEnabled = settingsRepository.get(SettingsKeys.HEARTBEAT_ANIMATION_ENABLED)
-        // 绑定 BleService 仅为确保前台服务存在（Phase 4 后心率数据从 HeartRateRepository 读取；
-        // 仅 bind 不 start，避免冷重启后台启动限制）
         Intent(this, BleService::class.java).also { intent ->
             bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE)
         }
@@ -245,7 +236,7 @@ class StatusBarResidentService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         if (!Settings.canDrawOverlays(this)) {
-            // 防御性：无悬浮窗权限则不显示
+            // ⚠️ 反直觉设计：无悬浮窗权限不显示，避免系统异常
             stopSelf()
             return START_STICKY
         }
@@ -255,9 +246,8 @@ class StatusBarResidentService : Service() {
     }
 
     /**
-     * 首次由 MainActivity（前台）启动时：startForeground 成功，持续保活。
-     * START_STICKY 重启时若 app 在后台：startForeground 可能抛
-     * ForegroundServiceStartNotAllowedException，捕获后降级为普通服务。
+     * ⚠️ 反直觉设计：START_STICKY 重启若 app 在后台，startForeground 可能抛
+     * ForegroundServiceStartNotAllowedException，必须捕获降级为普通服务。
      */
     private fun ensureResidentForeground() {
         if (isResidentForeground) return
@@ -274,14 +264,10 @@ class StatusBarResidentService : Service() {
             }
             isResidentForeground = true
         } catch (_: Exception) {
-            // 后台 START_STICKY 重启时可能被拒绝，降级为普通服务
             isResidentForeground = false
         }
     }
 
-    /**
-     * Android 13+ 前台服务通知默认延迟显示，对状态栏 overlay 无干扰。
-     */
     private fun createResidentNotification(): Notification {
         val notificationManager = getSystemService(NotificationManager::class.java)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -295,9 +281,8 @@ class StatusBarResidentService : Service() {
             }
             notificationManager.createNotificationChannel(channel)
         }
-        // 用 NotificationCompat.Builder 而非 Notification.Builder(Context, String)：
-        // 后者是 API 26+ 构造器，minSdk=24 的 Android 7.x 上会抛 NoSuchMethodError
-        //（Error 不会被下方 catch (Exception) 捕获，直接导致进程崩溃）。
+        // ⚠️ 反直觉设计：必须 NotificationCompat.Builder；
+        // Notification.Builder(Context, String) 是 API 26+ 构造器，minSdk=24 上 crash
         return NotificationCompat.Builder(this, RESIDENT_CHANNEL_ID)
             .setContentTitle(getString(R.string.status_bar_notification_title))
             .setContentText(getString(R.string.status_bar_notification_text))
@@ -338,13 +323,12 @@ class StatusBarResidentService : Service() {
 
     private fun showOverlay() {
         if (isOverlayShown && composeView.isAttachedToWindow) return
-        // 状态不一致修正：标记显示但窗口已被系统移除（锁屏/内存压力），重置标记
         isOverlayShown = false
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !Settings.canDrawOverlays(this)) return
         try {
             applySize()
             applyTextStyle()
-            // 防御性：如果窗口仍 attached（理论不该发生），先移除避免重复添加异常
+            // ⚠️ 反直觉设计：若窗口仍 attached（理论不该发生），先移除避免重复添加异常
             if (composeView.isAttachedToWindow) {
                 windowManager.removeView(composeView)
             }
@@ -365,12 +349,9 @@ class StatusBarResidentService : Service() {
     }
 
     private fun observeBleData() {
-        // 取消旧订阅：BleService 重建后重新 onServiceConnected 会再次调用本方法，
-        // 旧协程会持有已销毁服务实例的 StateFlow，必须避免叠加重复收集。
+        // 取消旧订阅：BleService 重建后重新 onServiceConnected 再次调用本方法，
+        // 旧协程持有已销毁服务实例的 StateFlow，必须避免叠加重复收集
         bleDataJob?.cancel()
-        // Phase 4（HeartRateRepository 迁移）：数据源由 Binder 拿到的 BleService 实例
-        // 改为进程级 HeartRateRepository（SSOT），不再随 BleService 重建而换流；
-        // 上方 cancel 保留，防止 onServiceConnected 多次回调叠加订阅。
         bleDataJob = serviceScope.launch {
             heartRateRepository.heartRate.collectLatest { rate ->
                 updateHeartRateText(rate)
@@ -380,8 +361,7 @@ class StatusBarResidentService : Service() {
 
     private fun updateHeartRateText(rate: Int) {
         heartRateText = if (rate > 0) "$rate" else "--"
-        // isConnected 随心率更新同步：断开后心率会归零，确保动画立即停止。
-        // Phase 4 后连接标志由 Repository 的 bleState 推导（与流同源，不依赖 Binder）
+        // ⚠️ 反直觉设计：断开心率归零，连接标志由 bleState 推导同步（不依赖 Binder）
         isConnected = heartRateRepository.bleState.value is BleState.Connected
         heartbeatAnimator.update(rate, isAnimationEnabled, isConnected)
     }
@@ -392,8 +372,8 @@ class StatusBarResidentService : Service() {
     }
 
     /**
-     * appearance 字段单位为 px，需把原 XML 的 sp（文字）与 dp（图标/间距）按 density 转为 px，
-     * 与原 TextView.setTextSize(COMPLEX_UNIT_SP) / ImageView.layoutParams(dpToPx) 的视觉效果完全一致。
+     * appearance 单位为 px，需把原 XML 的 sp（文字）与 dp（图标/间距）按 density 转为 px，
+     * 与原 TextView.setTextSize(COMPLEX_UNIT_SP) / ImageView.layoutParams(dpToPx) 视觉效果一致。
      */
     private fun applySize() {
         val sizePercent = settingsRepository.get(SettingsKeys.STATUS_BAR_SIZE)
@@ -411,7 +391,6 @@ class StatusBarResidentService : Service() {
 
     /**
      * status_bar_text_thickness：0-100，在原有 bold 基础上叠加 stroke 宽度实现可调加粗。
-     * 实际 FILL_AND_STROKE 描边由 StatusBarOverlayContent 内的 Paint 完成。
      */
     private fun applyTextStyle() {
         val textEnabled = settingsRepository.get(SettingsKeys.STATUS_BAR_BPM_TEXT_ENABLED)

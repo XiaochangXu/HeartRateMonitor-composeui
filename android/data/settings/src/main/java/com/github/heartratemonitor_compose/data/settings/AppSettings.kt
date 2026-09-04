@@ -3,16 +3,7 @@ package com.github.heartratemonitor_compose.data.settings
 import android.graphics.Color
 import androidx.datastore.preferences.core.Preferences
 
-/**
- * 由 SettingsRepository 以 StateFlow 暴露，与底层 Preferences 内存快照同步更新
- *
- * 默认值约定：
- * - [DEFAULTS] 是全部设置项默认值的唯一来源。
- * - 存在三处历史默认值分歧，统一为实际渲染生效值：
- *   悬浮窗圆角（渲染 100 / 旧设置页滑块 50）、悬浮窗背景透明度（渲染 10 / 旧滑块 80）
- *   统一取渲染值；全屏心率文字色默认 RED 仅属全屏页面，
- *   该调用点保留显式默认值参数，不纳入本快照语义。
- */
+// 与底层 Preferences 内存快照同步更新；默认值唯一来源为 DEFAULTS。
 data class AppSettings(
     val historyRecordingEnabled: Boolean,
     val heartbeatAnimationEnabled: Boolean,
@@ -84,20 +75,16 @@ data class AppSettings(
 
     companion object {
 
-        /** 避免 data 层反向依赖 ui 层常量。 */
         const val DEFAULT_THEME_SOURCE = 0
 
         const val DEFAULT_THEME_MODE = 0
 
-        /** 与 M3 规范默认 seed 一致。 */
         const val DEFAULT_THEME_CUSTOM_SEED = 0xFF6750A4.toInt()
 
         const val DEFAULT_THEME_PALETTE_STYLE = "TonalSpot"
 
-        /** 液态玻璃模糊半径默认值。 */
         const val DEFAULT_LIQUID_GLASS_BLUR_DP = 5f
 
-        /** 液态玻璃扭曲强度默认值。 */
         const val DEFAULT_LIQUID_GLASS_DISTORTION_DP = 30f
 
         val DEFAULTS: Map<Preferences.Key<*>, Any?> = buildMap {
@@ -239,7 +226,7 @@ data class AppSettings(
             put(SettingsKeys.WEBHOOKS_JSON, null)
         }
 
-        /** 键未登记时抛异常（快速失败，防止漏登记）。 */
+        // 键未登记时抛异常（快速失败，防止漏登记）。
         @Suppress("UNCHECKED_CAST")
         fun <T> defaultFor(key: Preferences.Key<T>): T = DEFAULTS.getValue(key) as T
 

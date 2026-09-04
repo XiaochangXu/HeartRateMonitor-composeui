@@ -13,10 +13,7 @@ import com.github.heartratemonitor_compose.data.settings.SettingsKeys
 import com.github.heartratemonitor_compose.data.repository.SettingsRepository
 
 /**
- * 将位置监听器的注册/注销、速度单位转换从 [BleService] 中剥离。
- *
- * Phase 2（HeartRateRepository 迁移）：速度值写入进程级 [HeartRateRepository]（SSOT），
- * 本类仅保留 GPS 监听与单位转换逻辑，不再自持状态流。
+ * GPS 监听与单位转换，速度值写入进程级 [HeartRateRepository]（SSOT），不再自持状态流。
  */
 class SpeedProvider(
     private val context: Context,
@@ -61,9 +58,6 @@ class SpeedProvider(
         }
     }
 
-    /**
-     * 服务销毁时彻底释放位置监听。
-     */
     fun stop() {
         stopLocationUpdates()
     }

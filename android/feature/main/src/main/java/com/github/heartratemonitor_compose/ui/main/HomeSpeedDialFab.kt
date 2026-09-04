@@ -50,13 +50,11 @@ internal fun HomeSpeedDialFab(
     onDisconnect: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    // Speed Dial FAB 展开状态
     var speedDialExpanded by rememberSaveable { mutableStateOf(false) }
-    // 断开连接时自动收起
     LaunchedEffect(isConnected) {
         if (!isConnected) speedDialExpanded = false
     }
-    // 展开/收起时图标旋转 45°（原弹簧挤压缩放动画已按需求移除）
+    // 展开/收起时图标旋转 45°（弹簧动画已移除）
     val iconRotation by animateFloatAsState(
         targetValue = if (speedDialExpanded) 45f else 0f,
         animationSpec = tween(durationMillis = 250, easing = FastOutSlowInEasing),

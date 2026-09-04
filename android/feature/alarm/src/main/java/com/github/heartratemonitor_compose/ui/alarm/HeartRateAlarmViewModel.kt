@@ -171,8 +171,8 @@ class HeartRateAlarmViewModel @Inject constructor(
             HeartRateAlarmIntent.ClearCalibration -> {
                 alarmService?.clearCalibration()
             }
-            HeartRateAlarmIntent.StartPostureDetection -> { /* 姿态检测由服务管理，无需 VM 启停 */ }
-            HeartRateAlarmIntent.StopPostureDetection -> { /* 姿态检测由服务管理，无需 VM 启停 */ }
+            HeartRateAlarmIntent.StartPostureDetection -> { /* ⚠️ 反直觉设计：姿态检测由服务管理，VM 仅透传 */ }
+            HeartRateAlarmIntent.StopPostureDetection -> { /* ⚠️ 反直觉设计：姿态检测由服务管理，VM 仅透传 */ }
         }
     }
 

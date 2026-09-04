@@ -20,11 +20,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.TextUnit
 
-/**
- * 轻量级 Markdown 渲染组件。
- * 采用逐行解析 + AnnotatedString 处理行内格式，
- * 不引入第三方依赖，适合渲染 Release Notes 等短文本。
- */
+// 轻量级 Markdown 渲染：逐行解析 + AnnotatedString，零第三方依赖。
 @Composable
 fun MarkdownText(
     markdown: String,

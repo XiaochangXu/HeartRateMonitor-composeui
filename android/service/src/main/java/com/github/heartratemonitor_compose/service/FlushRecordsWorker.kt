@@ -16,11 +16,8 @@ import dagger.assisted.AssistedInject
 import java.util.concurrent.TimeUnit
 
 /**
- * 由 [BleService.onDestroy] / [BleService.onKillMemory] 通过 [enqueue] 入队，
- * 替代原先在主线程 runBlocking 同步落盘的做法，彻底消除 ANR 风险。
- * WorkManager 持久化工作请求——进程被杀后下次启动自动补执行，保证数据不丢失。
- *
- * Phase 6 起为 @HiltWorker：HeartRateDao 由 Hilt 注入。
+ * @HiltWorker：[BleService.onDestroy]/[BleService.onKillMemory] 入队，
+ * WorkManager 持久化——进程被杀后下次启动自动补执行，不丢数据。
  */
 @HiltWorker
 class FlushRecordsWorker @AssistedInject constructor(
@@ -36,15 +33,12 @@ class FlushRecordsWorker @AssistedInject constructor(
         private const val KEY_HEART_RATES = "heartRates"
 
         /**
-         * WorkManager 的 Data 序列化上限为 10KB（Data.MAX_DATA_BYTES = 10240），每条记录
-         * 序列化后占 20 字节（long sessionId + long timestamp + int heartRate）。DB 持续故障时
-         * 缓冲可能累积大量记录（上限见 HeartRateRecorder.MAX_PENDING_RECORDS），一次性打包
-         * 会超限抛 IllegalStateException——且调用点在主线程 onDestroy/onKillMemory 中，
-         * 将直接导致进程崩溃。故按固定条数分片入队，250 条约 5KB，为键名与类型头留足余量。
+         * ⚠️ 反直觉设计：WorkManager Data 上限 10KB，DB 故障时缓冲可能大量累积，
+         * 按 250 条/片分片入队（~5KB），避免打包超限抛 IllegalStateException 导致进程崩溃。
          */
         private const val MAX_RECORDS_PER_REQUEST = 250
 
-        /** 调用不阻塞——仅做内存拷贝与入队操作（微秒级）。 */
+        /** 调用不阻塞——仅做内存拷贝与入队（微秒级）。 */
         fun enqueue(context: Context, records: List<HeartRateRecord>) {
             if (records.isEmpty()) return
             val chunks = records.chunked(MAX_RECORDS_PER_REQUEST)
@@ -84,11 +78,9 @@ class FlushRecordsWorker @AssistedInject constructor(
             Log.i(TAG, "落盘完成：${records.size} 条心率记录")
             Result.success()
         } catch (_: SQLiteConstraintException) {
-            // 外键约束失败（如会话已被删除），重试无意义，丢弃此批数据
             Log.w(TAG, "外键约束失败，丢弃 ${records.size} 条记录（会话已不存在）")
             Result.success()
         } catch (e: Exception) {
-            // 其他异常（磁盘 I/O 错误、数据库锁竞争等）可能为瞬时故障，请求重试
             Log.e(TAG, "落盘失败：${records.size} 条心率记录，将重试", e)
             Result.retry()
         }

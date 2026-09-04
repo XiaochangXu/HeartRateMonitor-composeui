@@ -20,11 +20,7 @@ data class ChangelogNotice(
     val versionName: String
 )
 
-/**
- * 纯 UDF 收敛：设置读写归本 Hilt 单例（契约 10），UI 只读收集 [notice]、
- * 经 [dismiss] 事件关闭；替代旧 rememberChangelogState 在 Composable
- * LaunchedEffect 内直读直写 SettingsRepository 的反模式。
- */
+// 设置读写归本 Hilt 单例；UI 只读收集 notice、经 dismiss 事件关闭。
 @Singleton
 class ChangelogNotifier @Inject constructor(
     private val settings: SettingsRepository,

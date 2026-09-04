@@ -9,10 +9,6 @@ import com.github.heartratemonitor_compose.data.model.HeartRateRecordInfo
 import com.github.heartratemonitor_compose.data.model.HeartRateSessionInfo
 import com.github.heartratemonitor_compose.data.model.SessionStatsInfo
 
-/**
- * 依据契约 1（映射在 Repository 层完成）与多模块化 Phase 1（C7）：
- * 映射函数从 data.model 迁出，使 :core:model 模块不再依赖 data.db。
- */
 fun FavoriteDeviceEntity.toInfo(): FavoriteDeviceInfo =
     FavoriteDeviceInfo(
         id = id,

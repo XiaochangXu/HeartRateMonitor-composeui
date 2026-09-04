@@ -32,14 +32,11 @@ import javax.inject.Inject
 import kotlinx.collections.immutable.persistentListOf
 
 /**
- * MVI 架构，Phase 5。仅 BLE 状态订阅 + 组件编排 + 对外单一 [uiState]；
- * 图表数据管道归服务层 [SessionChartTracker]（内聚于 HeartRateRepository，
- * Phase 2 后数据面由构造注入的 Repository 直出，控制命令经 Binder 注入的
- * BleConnectionManager 弱引用下发），BLE 数据管道订阅与状态机归约见 MainBleStreams.kt。
+ * MVI 架构。仅 BLE 状态订阅 + 组件编排 + 对外单一 [uiState]；
+ * BLE 数据管道订阅与状态机归约见 MainBleStreams.kt。
  *
- * 契约 6 红线原样保留：manualConnectionPending 防竞态、
- * bleToastListener 回调（§3.4 方案 1）、toggleFloatingWindow(): Boolean 返回值语义。
- *
+ * ⚠️ 反直觉设计：manualConnectionPending 防竞态、bleToastListener 回调、
+ * toggleFloatingWindow() 返回值语义——这些一次性行为需保留原有回调形态。
  * Activity 生命周期编排方法非 UI 用户意图，保持公开方法形态由 MainActivity 调用。
  */
 @HiltViewModel
@@ -68,12 +65,8 @@ class MainViewModel @Inject constructor(
     internal var previousBleState: BleState? = null
 
     /**
-     * 设备页专用精简状态流：从 [uiState] map 出设备页需要的字段 + distinctUntilChanged 去重。
-     *
-     * 避免设备页全量订阅 [uiState]：heartRate / speed / chartDataSnapshot 等高频字段每秒更新，
-     * 设备页完全不需要，但会导致整个 DevicesScreen 无效重组。此流只在设备页相关字段
-     * （appStatus / scanResults / connectingDeviceId / connectedDevice / favoriteDeviceId /
-     * scanFilterEnabled / searchTipShown）真正变化时才发射新值。
+     * 设备页专用精简状态流：从 [uiState] map 出设备页需要的字段 + distinctUntilChanged 去重，
+     * 避免设备页全量订阅导致高频字段（heartRate/speed/chartDataSnapshot 等）变化时整个 DevicesScreen 无效重组。
      */
     val devicesUiState: StateFlow<DevicesUiState> = uiState
         .map { state: MainUiState -> state.toDevicesUiState() }
@@ -84,14 +77,11 @@ class MainViewModel @Inject constructor(
             initialValue = uiState.value.toDevicesUiState()
         )
 
-    /**
-     * BLE 状态转换触发的一次性 Toast 回调：Activity 注册/注销，
-     * 避免一次性事件进 StateFlow 产生重放（§3.4 方案 1 之 VM 回调）。
-     */
+    /** BLE 状态转换触发的一次性 Toast 回调：避免一次性事件进 StateFlow 产生重放。 */
     @Volatile
     var bleToastListener: ((BleToastEvent) -> Unit)? = null
 
-    /** 构造期解析旧开关迁移结果（initialMainUiState 已执行过一次，幂等仅读）。 */
+    /** 构造期解析旧开关转换结果（initialMainUiState 已执行过一次，幂等仅读）。 */
     private val resolveSoundModeFallback: String = currentState.fullscreenSoundMode
 
     init {
@@ -102,19 +92,14 @@ class MainViewModel @Inject constructor(
             }
         }
 
-        // 纯状态投影订阅合并为 combine 单流：任一设置变化只触发一次 setState，
-        // 避免多个独立 collector 各自 setState 的交错与冗余归约。
-        // settings.settings 是 AppSettings 聚合快照 StateFlow，覆盖
-        // speedDisplayEnabled / scanFilterEnabled / heartRateRingMax /
-        // floatingWindowEnabled / hideFromRecentsEnabled / searchTipShown /
-        // heartbeatAnimationEnabled / favoriteDeviceId / fullscreenSoundMode 九字段；
+        // 纯状态投影订阅合并为 combine 单流：任一设置变化只触发一次 setState，避免多个独立 collector 各自 setState 的交错与冗余归约。
         // FLOATING_TEXT_COLOR 因全屏页默认 RED（历史分歧点）单独 observe 后并入 combine。
         viewModelScope.launch {
             combine(
                 settings.settings,
                 settings.observe(SettingsKeys.FLOATING_TEXT_COLOR, android.graphics.Color.RED)
             ) { s, textColor ->
-                // fullscreenSoundMode：键缺失时回退构造期解析的旧开关迁移结果（幂等）
+                // fullscreenSoundMode：键缺失时回退构造期解析的旧开关转换结果（幂等）。
                 SettingsSnapshot(
                     isSpeedEnabled = s.speedDisplayEnabled,
                     scanFilterEnabled = s.scanFilterEnabled,
@@ -149,17 +134,14 @@ class MainViewModel @Inject constructor(
 
         viewModelScope.launch { favoriteDeviceRepository.migrateLegacyFavoritesIfNeeded() }
 
-        // Phase 2（HeartRateRepository 迁移）：数据面订阅在构造期启动，
-        // 不再依赖 Activity 绑定服务的时序；Repository 为进程级 SSOT，
-        // 心率/速度/已连接设备/图表等值流经 StateFlow 重放自动恢复。
+        // 数据面订阅在构造期启动，不再依赖 Activity 绑定服务的时序；
+        // Repository 为进程级 SSOT，心率/速度/已连接设备/图表等值流经 StateFlow 重放自动恢复。
         serviceDataJob = bindRepositoryStreams(heartRateRepository)
 
-        // 状态恢复（原 setConnectionManager 补丁，Phase 2 迁移时误删后回归）：
-        // bleState 订阅的 drop(1) 会跳过当前值的首帧重放（避免图表 reset / Toast），
-        // 因此 appStatus 无法随值流重放恢复——「退出应用隐藏后台」后重进等 VM
-        // 重建场景中，首页会显示未连接而设备实际仍连接着。此处按 Repository
-        // 当前值仅同步 appStatus 与状态文案，不调用 handleBleState
-        // （不触发图表 reset、不触发 Toast）。
+        // 状态恢复：bleState 订阅的 drop(1) 跳过当前值首帧重放（避免图表 reset/Toast），
+        // 因此 appStatus 无法随值流重放恢复——「退出应用隐藏后台」后重进等 VM 重建场景，
+        // 首页会显示未连接而设备实际仍连接着。此处按 Repository 当前值仅同步 appStatus
+        // 与状态文案，不调用 handleBleState（不触发图表 reset、不触发 Toast）。
         val restoredBleState = heartRateRepository.bleState.value
         val restoredStatus = when (restoredBleState) {
             is BleState.Scanning -> AppStatus.SCANNING
@@ -194,19 +176,15 @@ class MainViewModel @Inject constructor(
     }
 
     /**
-     * 恢复用户上次启用但被系统回收的服务（原 MainActivity.recoverServices）。
-     *
-     * 修复点：原 SettingsActivity 仅在用户打开设置页时才恢复服务，导致用户重启应用后
-     * StatusBarResidentService / HeartRateAlarmService 不会自动恢复。改为在 MainActivity
-     * onCreate 时经本 VM 调用，确保应用启动即恢复。
+     * 恢复用户上次启用但被系统回收的服务。
+     * 修复点：原仅打开设置页时才恢复服务，导致重启应用后服务不会自动恢复。
+     * 改为在 MainActivity onCreate 时经本 VM 调用，确保应用启动即恢复。
      */
     fun recoverServices() {
         val residentEnabled = settings.get(SettingsKeys.STATUS_BAR_RESIDENT_ENABLED)
         if (residentEnabled && overlayPermissionProvider.canDrawOverlays()) {
             serviceLauncher.startStatusBarResidentService()
         }
-
-        // 恢复心率预警服务
         val alarmEnabled = settings.get(SettingsKeys.HEART_RATE_ALARM_ENABLED)
         if (alarmEnabled) {
             serviceLauncher.startHeartRateAlarmService()
@@ -215,14 +193,8 @@ class MainViewModel @Inject constructor(
 
     /**
      * 自动连接判定与触发（原 MainActivity.checkAndStartAutoConnectScan）。
-     *
-     * 触发点为 MainActivity 绑定服务成功（onServiceConnected），每次 Activity 重建重绑定
-     * 都会再执行——「退出应用隐藏后台」后重进即命中此路径，而 BleService 作为前台服务
-     * 仍在后台运行，GATT 连接往往完好。必须先检查连接态再发起：否则
-     * startAutoConnectScan 的 stopAllBleActivities 会取消现有 connectionJob，
-     * cleanupConnection 无条件 disconnect()/close() 旧 peripheral，把完好连接物理断开
-     * 再重连（历史会话断裂、图表清零重画、UI 闪现「正在尝试连接收藏的设备...」）。
-     *
+     * 必须先检查连接态再发起：否则 startAutoConnectScan 的 stopAllBleActivities 会取消现有 connectionJob，
+     * 把完好 GATT 连接物理断开再重连（历史会话断裂、图表清零、UI 闪现「正在尝试连接收藏的设备...」）。
      * 已连接/连接进行中一律跳过；未连接时照常触发，保留「离开期间真断开后的兜底重连」语义。
      */
     fun checkAndStartAutoConnectScan() {
@@ -247,10 +219,7 @@ class MainViewModel @Inject constructor(
         bleServiceRef?.get()?.startAutoConnectScan(identifier)
     }
 
-    /**
-     * 一次性行为的返回值机制保留（§3.4 方案 1）：需 Activity 上下文跳转权限页时
-     * 由 Activity 同步取得判定结果。
-     */
+    /** 一次性行为的返回值机制保留：需 Activity 上下文跳转权限页时由 Activity 同步取得判定结果。 */
     fun toggleFloatingWindow(): Boolean {
         val shouldBeEnabled = !settings.get(SettingsKeys.FLOATING_WINDOW_ENABLED)
         if (shouldBeEnabled && !overlayPermissionProvider.canDrawOverlays()) {
@@ -263,11 +232,7 @@ class MainViewModel @Inject constructor(
     /**
      * 控制面注入：仍由 MainActivity 通过 Binder 绑定 BleService 后注入实例，
      * WeakReference 持有避免 ViewModel 泄漏 Service。
-     *
-     * Phase 2（HeartRateRepository 迁移）：原 setConnectionManager 的数据面订阅与
-     * 状态恢复补丁已删除——数据订阅在 init 构造期从 Repository 直出，
-     * Activity 重建时 StateFlow 重放自动恢复（appStatus/图表/Toast 语义由
-     * bindRepositoryStreams 的 drop(1) 与既有归约逻辑保证），本方法仅注入控制命令通道。
+     * 数据订阅在 init 构造期从 Repository 直出，本方法仅注入控制命令通道。
      */
     fun setControlPlane(manager: BleConnectionManager) {
         this.bleServiceRef = WeakReference(manager)
@@ -302,7 +267,7 @@ class MainViewModel @Inject constructor(
         }
     }
 
-    // TRIM/KILL 回调顺序不得调整（契约 6）
+    // TRIM/KILL 回调顺序不得调整（并发安全约束）
 
     /**
      * 图表缓存释放已由服务层 SessionChartTracker 管理，本方法仅负责清空扫描结果缓存。
@@ -317,9 +282,8 @@ class MainViewModel @Inject constructor(
     }
 
     override fun onTrimMemory(notifyType: Int) {
-        // FairMemoryReceiver 的回调运行在其 HandlerThread 上，需切到主线程释放 UI 缓存。
-        // 图表缓存释放已由服务层 SessionChartTracker 管理，此处仅清空扫描结果缓存。
-        // 使用 viewModelScope.launch 随 VM 销毁自动取消，避免 Handler Runnable 泄漏。
+        // FairMemoryReceiver 回调运行在 HandlerThread 上，需切到主线程释放 UI 缓存（仅清空扫描结果缓存）。
+        // 使用 launch 随 VM 销毁自动取消，避免 Handler Runnable 泄漏。
         viewModelScope.launch(Dispatchers.Main.immediate) {
             releaseNonCriticalMemory(notifyType)
         }

@@ -12,15 +12,10 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * 当 [FairMemoryReceiver] 收到 ACTION_KILL 时，系统留给应用的时间窗口很短，
- * 必须立即把当前关键 UI 状态写入 DataStore，以便下次启动时恢复体验。
+ * ACTION_KILL 时系统时间窗口极短，必须立即将关键 UI 状态写入 DataStore。
  *
- * 写入路径直连 [settingsDataStore] 而非 SettingsRepository 的即发即忘 setter：
- * KILL 场景进程随时被杀，异步 launch 可能来不及落盘，必须 runBlocking 同步等待写完。
- *
- * Hilt 单例（Phase 2 起由 Hilt 装配，替代 AppContainer）。
- * 必须保持 [Singleton]：AppRoot（MainActivity 注入）写入 currentSnapshot，
- * MainViewModel 调用 save() 持久化——若两者拿到不同实例，save() 会持久化空快照，KILL 现场恢复失效。
+ * ⚠️ 反直觉设计：必须 runBlocking 同步写 DataStore——异步 launch 可能来不及落盘；
+ * 必须保持 @Singleton，否则 save() 持久化空快照导致 KILL 现场恢复失效。
  */
 @Singleton
 class KillStateSaver @Inject constructor(
@@ -71,7 +66,7 @@ class KillStateSaver @Inject constructor(
         }
     }
 
-    /** null 值不能写入 DataStore，等价旧 putString(key, null) → remove(key) 语义。 */
+    // ⚠️ 反直觉设计：null 不能写入 DataStore，等价旧 putString(key, null) → remove(key)
     private fun androidx.datastore.preferences.core.MutablePreferences.putOrRemove(
         key: androidx.datastore.preferences.core.Preferences.Key<String>,
         value: String?

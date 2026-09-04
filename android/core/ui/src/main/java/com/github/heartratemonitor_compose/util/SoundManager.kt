@@ -56,7 +56,6 @@ class SoundManager(context: Context, languageMode: String) {
         }
     }
 
-    /** 失败时回退 1000ms。 */
     private fun measureDurationMs(context: Context, resId: Int): Long {
         return try {
             val mp = MediaPlayer.create(context, resId)
@@ -70,7 +69,7 @@ class SoundManager(context: Context, languageMode: String) {
 
     fun getDurationMs(type: SoundType): Long = durationsMs[type] ?: 1000L
 
-    /** 个别样本加载失败不会导致永久挂起，[play] 自动跳过未成功加载的样本。 */
+    // 个别样本加载失败不会导致永久挂起，play 自动跳过未成功加载的样本。
     suspend fun awaitLoaded() = loadDeferred.await()
 
     fun play(type: SoundType, volume: Float = 1f) {

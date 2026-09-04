@@ -90,8 +90,7 @@ private fun ChartCardHeader() {
 
 /**
  * 图表占位卡片：未连接设备 / 已连接但未开启历史记录时显示。
- * 与 RealtimeChart 等高（200dp）+ surfaceContainerHigh 背景，保持视觉一致性。
- * 居中文字使用 alpha 0.45 含蓄提示，不抢视觉焦点。
+ * 与 RealtimeChart 等高（200dp），居中文字 alpha 0.45 含蓄提示。
  */
 @Composable
 internal fun ChartPlaceholder(
@@ -125,8 +124,7 @@ internal fun ChartPlaceholder(
 
 /**
  * 图表加载占位：已连接且历史已开启、但尚未测出心率数据时显示。
- * 与 ChartPlaceholder / RealtimeChart 等高同容器，居中显示 ContainedLoadingIndicator，
- * 首个心率数据到达后由 HomeScreen 切换为 RealtimeChart。
+ * 等高同容器，首个数据到达后由 HomeScreen 切换为 RealtimeChart。
  */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -155,18 +153,8 @@ internal fun ChartLoadingIndicator(
 }
 
 /**
- * 实时心率图表（Vico CartesianChartHost）。
- *
- * 数据源:
- * - [MainViewModel.uiState] 中的 chartDataSnapshot (ChartDataSnapshot?)，由服务层 SessionChartTracker 维护
- *
- * 渲染特点（向心电图风格靠拢）:
- * - 逐拍数据:RR-Interval 累加时间戳 + 瞬时心率,分辨率高于 1Hz 平均 bpm
- * - 三次贝塞尔插值 (cubic) + 心率红渐变填充,曲线平滑有节律感
- * - 动态 Y 轴范围（数据 min/max ±10，取整到 10 的倍数），配合每 10 bpm 网格线
- * - 最高/最低极值 HorizontalLine 标注（Max/Min + 数值）
- *
- * 可视窗口:最近 60 秒（scroll 到末尾实现自动跟随）
+ * 实时心率图表（Vico CartesianChartHost）。ECG 风格：逐拍 RR-Interval 时间戳 + cubic 插值 + 红色渐变填充。
+ * 数据源为 chartDataSnapshot（SessionChartTracker 维护），可视窗口最近 60 秒。
  */
 @Composable
 internal fun RealtimeChart(
@@ -176,8 +164,7 @@ internal fun RealtimeChart(
 ) {
     val modelProducer = remember { CartesianChartModelProducer() }
 
-    // 直接使用 MainViewModel 维护的已格式化坐标快照，UI 层不再每拍全量转换/拷贝。
-    // 快照列表在 ViewModel 中已转为 ImmutableList，避免 runTransaction 挂起期间被并发修改。
+    // 直接使用 VM 维护的快照，UI 层不再每拍全量转换。ImmutableList 避免 runTransaction 挂起期间被并发修改。
     LaunchedEffect(chartDataSnapshot) {
         val snapshot = chartDataSnapshot ?: return@LaunchedEffect
         if (appStatus != AppStatus.CONNECTED || snapshot.xValues.isEmpty()) return@LaunchedEffect

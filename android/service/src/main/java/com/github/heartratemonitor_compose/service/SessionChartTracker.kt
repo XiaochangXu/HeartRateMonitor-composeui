@@ -16,23 +16,10 @@ import kotlinx.coroutines.launch
 import kotlinx.collections.immutable.toImmutableList
 
 /**
- * 服务层会话图表状态追踪器：RR-Interval → HeartRatePoint → 滑动窗口管理 → ChartDataSnapshot 发布，
- * 以及本次连接的心率极值跟踪。
+ * 服务层会话图表追踪器：RR → HeartRatePoint → 滑动窗口 → ChartDataSnapshot。
  *
- * 与原 [ChartDataManager]（:feature/main）的核心区别：
- * - 生命周期归属 BLE 连接（由 [BleConnectionHandler] 持有），而非 Activity/ViewModel。
- * - StateFlow 重放天然实现「重进即恢复」——退出应用再重进后，UI 订阅服务层图表流
- *   立即获得当前会话的完整图表缓存，不再归零。
- * - 历史记录开关关闭期间不统计图表点、不发布快照（时间基准保持零），开启后从零
- *   开始绘制；但 MAX/MIN 极值不受开关影响，始终跟踪当次连接全程。
- *   连接/断开由 [reset] / [clear] 显式控制；历史开关联动由 [BleSettingsListener] 接管。
- *
- * 所有可变状态通过 @Synchronized 保证线程安全——心率包到达在 IO 线程调用，
- * 历史开关联动在主线程调用，两者不会交错。
- *
- * @param scope 连接协程作用域（connectionJob 的子协程），断开连接时随 connectionJob 取消。
- * @param historyEnabled 历史记录开关读取器（SettingsRepository.get 走内存快照，零 IO，
- * 每个心率包调用一次成本可忽略）。返回 false 时仅跟踪极值，跳过图表统计与发布。
+ * ⚠️ 反直觉设计：生命周期归属 BLE 连接（非 Activity），StateFlow 重放天然实现「重进即恢复」。
+ * 历史开关关闭期间仅跟踪极值不统计图表点；MAX/MIN 不受开关影响，始终跟踪当次连接全程。
  */
 class SessionChartTracker(
     private val scope: CoroutineScope,
@@ -48,34 +35,25 @@ class SessionChartTracker(
     private val _sessionMinHr = MutableStateFlow(0)
     val sessionMinHr: StateFlow<Int> = _sessionMinHr.asStateFlow()
 
-    // --- 内部管道状态 ---
     private var chartStartTime = 0L
     private val chartDataPoints = ArrayDeque<HeartRatePoint>()
     private val chartXValues = ArrayDeque<Double>()
     private val chartYValues = ArrayDeque<Double>()
 
-    // RR-Interval 累加时间戳:逐拍数据按 RR 秒数累加,得到每个心跳的相对时间 (秒)
+    // RR-Interval 累加时间戳：逐拍数据按 RR 秒数累加得到心跳相对时间（秒）
     private var lastChartTimeSec = 0f
 
     private companion object {
         const val TAG = "SessionChartTracker"
         const val MAX_CHART_POINTS = 10000
 
-        /**
-         * 快照发布节流间隔：心率包 ~1Hz，500ms 节流将 UI 重组 + Vico 重建频率减半，
-         * 最大延迟 500ms 对用户不可感知（心率数字不受节流，仍即时更新）。
-         */
+        /** 500ms 节流将 UI 重组 + Vico 重建频率减半，最大延迟 500ms 对用户不可感知。 */
         const val SNAPSHOT_THROTTLE_MS = 500L
 
-        /**
-         * 首页实时图表只保留最近 N 秒的数据，避免长时间连接后内存和渲染开销线性增长。
-         */
+        /** 实时图表只保留最近 N 秒数据，避免长时间连接后内存和渲染开销线性增长。 */
         const val MAX_CHART_WINDOW_SECONDS = 60f
 
-        /**
-         * TRIM 内存预警时图表降采样后保留的最近点数。
-         * 心率原始数据已持久化到 Room，内存中的图表缓存可安全降采样。
-         */
+        /** TRIM 内存预警时图表降采样后保留的最近点数；原始数据已 Room 持久化，可安全降采样。 */
         const val TRIM_KEEP_POINTS = 500
     }
 
@@ -84,13 +62,11 @@ class SessionChartTracker(
 
     /**
      * 处理一次完整心率测量：跟踪 MAX/MIN，把 RR/bpm 转为图表点。
-     * 由 [BleConnectionHandler.observeHeartRateData] 在心率包到达时调用。
-     * @Synchronized 保证线程安全。
+     * @Synchronized 由 Tracker 保证线程安全。
      */
     @Synchronized
     fun onMeasurement(measurement: HeartRateMeasurement) {
-        // MAX/MIN 跟踪当次连接的心率极值——与历史记录开关无关，
-        // 关闭期间仍持续跟踪，中途开启后无需重新积累。
+        // ⚠️ 反直觉设计：MAX/MIN 与历史记录开关无关，关闭期间仍跟踪，中途开启后无需重新积累
         val bpm = measurement.bpm
         if (bpm > 0) {
             if (_sessionMaxHr.value == 0 || bpm > _sessionMaxHr.value) {
@@ -101,11 +77,8 @@ class SessionChartTracker(
             }
         }
 
-        // 未开启历史记录：不统计图表点、不发布快照。
-        // 同时清零 chartStartTime——连接时 reset() 会把它定格为连接时刻的墙钟，
-        // 若不清零，无 RR 设备的中途开启回退路径会用「现在 - 连接时刻」作首个 x 值，
-        // 导致图表从等待时长处（如 02:00）开始而非从零开始。
-        // 置零后首个开启的数据包会走到下方惰性初始化，时间基准归零重新起算。
+        // 未开启历史记录时不统计图表点，同时清零 chartStartTime——
+        // 否则无 RR 设备中途开启会用「现在 - 连接时刻」作首个 x 值，导致时间基准错位
         if (!historyEnabled()) {
             chartStartTime = 0L
             return
@@ -123,10 +96,8 @@ class SessionChartTracker(
                 appended = true
             }
         } else if (measurement.bpm > 0) {
-            // 设备不支持 RR:回退到 bpm + 墙钟时间戳,同步 lastChartTimeSec。
-            // 无效值（传感器接触丢失时 bpm 被置零、RR 已清空）不绘制，
-            // 避免曲线出现下探到 0 的尖刺。
-            // chartStartTime 在首个有效点处惰性初始化，保证时间基准锚定首个绘制点。
+            // ⚠️ 反直觉设计：无 RR 设备回退到 bpm + 墙钟时间；无效值（传感器接触丢失）不绘制，避免曲线尖刺
+            // chartStartTime 在首个有效点处惰性初始化，时间基准锚定首个绘制点
             if (chartStartTime == 0L) {
                 chartStartTime = System.currentTimeMillis()
             }
@@ -186,8 +157,7 @@ class SessionChartTracker(
     }
 
     /**
-     * 新会话开始：重置时间基准与全部缓存，并清零 MAX/MIN。
-     * 在连接建立（[BleConnectionHandler] State.Connected）处调用，与 startSession 同位置。
+     * 新会话开始：重置时间基准与全部缓存，并清零 MAX/MIN。在连接建立处调用。
      * @Synchronized 保证线程安全。
      */
     @Synchronized
@@ -204,7 +174,7 @@ class SessionChartTracker(
     }
 
     /**
-     * 清零本次连接的心率极值。断开连接时调用，使 UI 立即回落为 "--"。
+     * 清零本次连接的心率极值，使 UI 立即回落为 "--"。
      * @Synchronized 保证线程安全。
      */
     @Synchronized
@@ -214,9 +184,8 @@ class SessionChartTracker(
     }
 
     /**
-     * 清空当前会话的图表缓存。
-     * 用于断开连接（[BleConnectionHandler.cleanupConnection]）或关闭历史记录时立即重置首页图表。
-     * 不重置 MAX/MIN（MAX/MIN 由 [reset] 在新会话开始时独立清零）。
+     * 清空图表缓存（断开连接或关闭历史记录时立即重置首页图表）。
+     * 不重置 MAX/MIN（由 [reset] 在新会话开始时独立清零）。
      * @Synchronized 保证线程安全。
      */
     @Synchronized
@@ -249,22 +218,15 @@ class SessionChartTracker(
     }
 
     /**
-     * TRIM 内存预警时释放图表缓存（由 [BleService] 的 FairMemoryReceiver 回调触发）。
+     * TRIM 内存预警时释放图表缓存。
      *
-     * - [FairMemoryReceiver.NOTIFY_TYPE_PSS]（物理内存异常）：文档指出"先查杀再通知"，
-     *   紧急度最高，清空整个图表缓存（数据已 Room 持久化，可恢复）。
-     * - [FairMemoryReceiver.NOTIFY_TYPE_HEAP]（Java 堆异常）：降采样到 [TRIM_KEEP_POINTS]
-     *   保留最近图表数据以维持当前会话体验；无论缓存是否为空都在后台线程触发 GC
-     *   （GC 对堆异常直接有效）。
-     *
-     * 数据操作部分通过 @Synchronized 保证线程安全；
-     * GC 启动在锁外执行，避免在持锁状态下做协程调度。
+     * ⚠️ 反直觉设计：PSS（先查杀再通知）紧急度最高，清空整个图表缓存；
+     * HEAP 仅降采样保留最近点，锁外触发 GC 避免阻塞数据操作。
      */
     fun releaseOnTrim(notifyType: Int) {
         val isPss = notifyType == FairMemoryReceiver.NOTIFY_TYPE_PSS
         trimData(isPss)
-        // HEAP 异常时在后台线程触发 GC，避免 System.gc() 暂停主线程。
-        // 在锁外启动：锁只保护数据操作，不护送协程调度。
+        // HEAP 异常时锁外触发 GC，避免暂停主线程
         if (!isPss) {
             scope.launch(Dispatchers.Default) { System.gc() }
         }
@@ -272,19 +234,17 @@ class SessionChartTracker(
 
     @Synchronized
     private fun trimData(isPss: Boolean) {
-        // PSS 异常时取消待发布的节流定时器，防止清空后定时器又发布陈旧快照
+        // ⚠️ 反直觉设计：PSS 异常时取消待发布定时器，防止清空后定时器又发布陈旧快照
         if (isPss) cancelSnapshotJob()
         if (chartDataPoints.isNotEmpty()) {
             val originalSize = chartDataPoints.size
             if (isPss) {
-                // 物理内存异常：清空整个图表缓存（数据已 Room 持久化，可恢复）
                 chartDataPoints.clear()
                 chartXValues.clear()
                 chartYValues.clear()
                 _chartDataSnapshot.value = null
                 Log.i(TAG, "TRIM(PSS): 清空图表缓存 $originalSize 点")
             } else if (originalSize > TRIM_KEEP_POINTS) {
-                // Java 堆异常：降采样保留最近 N 点，gc 对堆直接有效
                 val kept = chartDataPoints.takeLast(TRIM_KEEP_POINTS)
                 chartDataPoints.clear()
                 chartDataPoints.addAll(kept)

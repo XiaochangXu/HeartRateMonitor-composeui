@@ -107,9 +107,8 @@ internal fun ColorPickerDialog(
             )
             Spacer(Modifier.height(12.dp))
 
-            // 亮度滑块（V 通道，0-100）
             val brightnessPercent = (hsv[2] * 100f).toInt()
-            // 亮度以 String 传入（%1$s），规避小语种（ne/bn/ar）locale 整数格式化输出本地数字
+            // ⚠️ 反直觉设计：亮度以 String 传入（%1$s），规避小语种（ne/bn/ar）locale 整数格式化输出本地数字
             Text(
                 text = stringResource(R.string.brightness, brightnessPercent.toString()),
                 style = MaterialTheme.typography.bodySmall,
@@ -197,10 +196,7 @@ private fun HueSatWheelPicker(
         modifier = modifier
             .size(wheelSize)
             .pointerInput(Unit) {
-                // 用 awaitEachGesture 替代 detectDragGestures：
-                // detectDragGestures 的 onDragStart 只在手指移动超过 touch slop 后才触发，
-                // 纯点击（tap）不会更新 hsv——用户"点色轮选位置"完全无反应。
-                // awaitEachGesture 在 down 时立即调用 updateHsvFromTouch，tap 和 drag 都能选色。
+                // ⚠️ 反直觉设计：用 awaitEachGesture 替代 detectDragGestures——后者只在超过 touch slop 后触发，纯点击不更新 hsv。
                 awaitEachGesture {
                     val down = awaitFirstDown()
                     updateHsvFromTouch(down.position, radiusPx, hsv, onHsvChanged)
@@ -212,11 +208,7 @@ private fun HueSatWheelPicker(
             }
     ) {
         val center = Offset(radiusPx, radiusPx)
-        // 色相圆盘：sweepGradient 一次性绘制 360° 色相。
-        // 原实现用 360 个 drawArc(useCenter=false) 拼接，useCenter=false 画的是弓形（弧+弦）
-        // 而非扇形，1 度弓形填充区域趋近于零 → 拼起来圆盘内部空白，只有边缘一圈有色。
-        // sweepGradient 沿角度方向渐变，与 HSV 色相环一致（0°红→60°黄→...→360°红）。
-        // 起点在 3 点钟方向（0°），与下方 atan2 的角度起点对齐。
+        // 色相圆盘：sweepGradient 一次性绘制 360° 色相（起点 3 点钟方向，与 atan2 角度起点对齐）。
         drawCircle(
             brush = Brush.sweepGradient(
                 colors = listOf(
@@ -258,15 +250,8 @@ private fun HueSatWheelPicker(
 }
 
 /**
- * 将触摸坐标转换为 HSV 并更新。
- * - 距圆心距离 → S（0-1，超过半径截断为 1）
- * - 角度 → H（0-360）
- *
- * V 通道处理：
- * 默认颜色是 BLACK（HSV 中 V=0），若直接保留 V=0，无论 H/S 怎么变，
- * HSVToColor 出来都是黑色——用户在色轮上点来点去永远是黑。
- * 色轮本身画的是 V=1 的色相，故此处当 V=0 时自动提升到 1f：
- * 用户首次点色轮立即看到真实颜色，之后 V 由亮度滑块控制（不会被重置）。
+ * 将触摸坐标转换为 HSV 并更新（距圆心距离 → S，角度 → H）。
+ * ⚠️ 反直觉设计：默认 BLACK（V=0）时自动提升到 V=1，让用户首次点色轮立即看到真实颜色。
  */
 private fun updateHsvFromTouch(
     offset: Offset,

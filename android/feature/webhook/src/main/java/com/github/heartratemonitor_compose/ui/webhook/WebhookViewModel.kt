@@ -14,11 +14,11 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 
 /**
- * Webhook 配置页面的 ViewModel（MVI 架构，Phase 2）。
+ * Webhook 配置页面的 ViewModel（MVI 架构）。
  *
- * Webhook 列表归约进单一 [WebhookUiState]；读写仍经 [WebhookRepository]
- * （触发链路保持契约 5：triggerWebhooks 节流不受本迁移影响）。
- * [WebhookRepository] 由 Hilt 构造注入（Phase 3 起，替代 `application as WebhookDependencies`）。
+ * Webhook 列表归约进单一 [WebhookUiState]；读写经 [WebhookRepository]
+ * （触发链路保持节流不受影响）。
+ * [WebhookRepository] 由 Hilt 构造注入。
  */
 @HiltViewModel
 class WebhookViewModel @Inject constructor(
@@ -45,7 +45,7 @@ class WebhookViewModel @Inject constructor(
                 setState { it.copy(webhooks = webhookRepository.getWebhooks().toImmutableList()) }
             }
             is WebhookIntent.Test -> {
-                // 结果经回调回传（§3.4 方案 1）：测试响应由 UI 瞬时态 testResponse 展示
+                // 结果经回调回传：测试响应由 UI 瞬时态 testResponse 展示。
                 viewModelScope.launch(Dispatchers.IO) {
                     webhookRepository.testWebhook(intent.webhook, intent.onResult)
                 }

@@ -12,9 +12,7 @@ import java.net.URL
 import javax.inject.Inject
 import javax.inject.Singleton
 
-/**
- * 版本更新检查器（Hilt 单例，Phase 2 起替代 AppContainer 持有）。
- */
+/** 版本更新检查器（Hilt 单例）。 */
 @Singleton
 class UpdateChecker @Inject constructor() {
 

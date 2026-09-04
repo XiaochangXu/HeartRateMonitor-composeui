@@ -14,16 +14,10 @@ import androidx.savedstate.SavedStateRegistryOwner
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 
 /**
- * Service 本身不是 LifecycleOwner，而 ComposeView 必须从 ViewTree 读取这三类 owner 才能驱动组合。
- * 本工具类在 [attachToView] 时将自身注入 ViewTree 并手工驱动生命周期：
+ * Service 非 LifecycleOwner，ComposeView 却需从 ViewTree 读取三类 owner 才能驱动组合。
  *
- * - ON_CREATE：[attachToView] 中 `performRestore(null)` 后立即派发
- * - ON_START / ON_RESUME：view attached to window 时派发
- * - ON_PAUSE / ON_STOP：view detached from window 时派发
- * - ON_DESTROY：由 Service.onDestroy 显式调用 [handleLifecycleEvent]
- *
- * 注意：SavedStateRegistry 契约要求 `performRestore` 必须在 Lifecycle 进入 STARTED 之前完成，
- * 故在 ON_CREATE 之前调用。此处不持久化任何状态（覆盖层无 UI 状态需要恢复）。
+ * ⚠️ 反直觉设计：SavedStateRegistry 契约要求 performRestore 必须在 STARTED 之前完成；
+ * 手动驱动 ON_CREATE→attach→START/RESUME→detach→PAUSE/STOP→ON_DESTROY。
  */
 class ServiceViewTreeOwners : LifecycleOwner, SavedStateRegistryOwner, ViewModelStoreOwner {
 
@@ -41,11 +35,9 @@ class ServiceViewTreeOwners : LifecycleOwner, SavedStateRegistryOwner, ViewModel
     private var attached = false
 
     /**
-     * 将本 owners 注入 [view] 的 ViewTree，并驱动 ON_CREATE。
-     * 注册 attach/detach 监听以自动派发 START/RESUME/PAUSE/STOP。
+     * 注入 ViewTree 并驱动 ON_CREATE；注册 attach/detach 监听自动派发 START/RESUME/PAUSE/STOP。
      *
-     * 必须在 [view] 被 [WindowManager.addView] 之前调用（本工具类监听 attach 事件派发 START/RESUME）；
-     * 若调用时 view 已 attached，则立即派发 START/RESUME 兜底。
+     * ⚠️ 反直觉设计：必须在 WindowManager.addView 之前调用；若调用时已 attached 则立即兜底派发。
      */
     fun attachToView(view: View) {
         if (attached) return
@@ -66,7 +58,6 @@ class ServiceViewTreeOwners : LifecycleOwner, SavedStateRegistryOwner, ViewModel
                 lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_STOP)
             }
         })
-        // 调用时已 attached 的兜底：监听器不会触发，需手工派发
         if (view.isAttachedToWindow) {
             lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_START)
             lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_RESUME)
@@ -74,11 +65,7 @@ class ServiceViewTreeOwners : LifecycleOwner, SavedStateRegistryOwner, ViewModel
     }
 
     /**
-     * 显式派发生命周期事件。Service.onDestroy 应调用
-     * `handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)` 释放组合。
-     *
-     * ON_DESTROY 时额外调用 [ViewModelStore.clear]，触发所有 ViewModel 的 [androidx.lifecycle.ViewModel.onCleared]
-     * 释放资源，与 [androidx.activity.ComponentActivity] / [androidx.fragment.app.Fragment] 的生命周期契约保持一致。
+     * 显式派发生命周期事件。ON_DESTORY 时额外 clear ViewModelStore，与 ComponentActivity 生命周期契约一致。
      */
     fun handleLifecycleEvent(event: Lifecycle.Event) {
         lifecycleRegistry.handleLifecycleEvent(event)

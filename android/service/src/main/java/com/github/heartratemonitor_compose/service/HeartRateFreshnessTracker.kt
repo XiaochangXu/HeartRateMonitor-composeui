@@ -11,9 +11,9 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 /**
- * 手表测量失败（屏幕显示 --）时大多只是停止推送通知，BLE 连接仍保持，
- * App 侧若无过期机制会一直停留在失败前的旧值。本跟踪器按“包到达时间”
- * 判定新鲜度（与数值是否变化无关：静坐时心率恒定但包持续到达，不会误判）。
+ * 按"包到达时间"判定新鲜度，与数值是否变化无关：静坐时心率恒定但包持续到达，不会误判。
+ *
+ * ⚠️ 反直觉设计：手表测量失败大多只停推通知，BLE 连接仍保持——无过期机制将停留旧值。
  */
 enum class HeartRateFreshness {
     FRESH,
@@ -26,12 +26,9 @@ enum class HeartRateFreshness {
 }
 
 /**
- * 用 EWMA 平滑估算包到达间隔，超时阈值随设备实际推送频率自适应：
- * - 一级（SUSPECT）：max(EWMA × [STAGE1_MULTIPLIER], 5s)，上限 30s。
- * - 二级（STALE）：一级阈值 × [STAGE2_MULTIPLIER]，确认失败后清零降级。
+ * EWMA 平滑估算包到达间隔，超时阈值随设备实际推送频率自适应。
  *
- * 分级目的：少数低端设备固件存在“值不变就不发包”的省电行为，
- * 一级只暂停预警判定而不清零显示，避免此类设备被误判后数字消失。
+ * ⚠️ 反直觉设计：少数低端设备"值不变就不发包"，一级只暂停预警不清零显示，避免误判后数字消失。
  */
 class HeartRateFreshnessTracker(
     private val scope: CoroutineScope,
@@ -44,16 +41,13 @@ class HeartRateFreshnessTracker(
     @Volatile
     private var lastPacketRealtimeMs = 0L
 
-    // onPacket（IO 线程池 collect 循环）与 reset（cleanupConnection 所在线程）可能跨线程
-    // 读写以下字段，@Volatile 保证可见性
     @Volatile
     private var intervalEwmaMs = INITIAL_INTERVAL_MS
     @Volatile
     private var watchdogJob: Job? = null
 
     /**
-     * 每收到一包心率通知时调用：刷新间隔估算、恢复 FRESH 并重启看门狗。
-     * 从后台挂起恢复后的首包间隔可能异常大，clamp 后再进 EWMA 防止估算被单次毛刺污染。
+     * ⚠️ 反直觉设计：后台挂起恢复后首包间隔异常大，clamp 后再进 EWMA 防止单次毛刺污染估算。
      */
     fun onPacket() {
         val now = clock()
@@ -67,7 +61,6 @@ class HeartRateFreshnessTracker(
         restartWatchdog()
     }
 
-    /** 断开连接时调用：取消看门狗，状态回到 FRESH 等待下次连接 */
     fun reset() {
         watchdogJob?.cancel()
         watchdogJob = null
@@ -87,7 +80,6 @@ class HeartRateFreshnessTracker(
         }
     }
 
-    /** 一级超时 = EWMA 间隔 × 5，clamp 到 [5s, 30s] */
     @VisibleForTesting
     internal fun stage1TimeoutMs(): Long =
         (intervalEwmaMs * STAGE1_MULTIPLIER).toLong().coerceIn(STAGE1_MIN_MS, STAGE1_MAX_MS)

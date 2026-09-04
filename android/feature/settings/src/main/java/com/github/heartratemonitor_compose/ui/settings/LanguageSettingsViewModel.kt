@@ -11,16 +11,8 @@ import javax.inject.Inject
 /**
  * 语言设置页面的 ViewModel（MVI 架构）。
  *
- * 职责：
- * - 从 [SettingsRepository] 派生当前语言选择（nullable String，null = 自动跟随系统）。
- *   UiState 是设置真源的派生投影，Flow 回流经 [setState] 归约（状态下行）。
- * - 选择语言事件经 [LanguageSettingsIntent.SelectLanguage] dispatch 上行，
- *   handler 写入 [SettingsRepository]（写后立读语义由乐观快照回流保证）。
- *   语言切换需重启应用才能生效（[LocaleHelper] 在 attachBaseContext 时读取），
- *   故选择后只持久化、不在此处即时切换 UI 语言。
- *
- * 「确认重启」属一次性事件（§3.4 方案 1），经 [confirmRestart] 回调返回值上报，
- * 不进 UiState / SharedFlow。
+ * - 语言选择（nullable，null = 自动跟随系统）从快照投影进 UiState。
+ * - 语言切换需重启应用才能生效（[LocaleHelper] 在 attachBaseContext 时读取），选择后只持久化不即时切换。
  */
 @HiltViewModel
 class LanguageSettingsViewModel @Inject constructor(

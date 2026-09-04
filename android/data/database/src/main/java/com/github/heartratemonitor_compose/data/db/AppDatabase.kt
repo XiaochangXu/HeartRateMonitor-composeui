@@ -31,8 +31,7 @@ abstract class AppDatabase : RoomDatabase() {
             }
         }
 
-        // v3 -> v4: schema 结构无变化，空操作迁移仅为对齐已存在的 4.json 存档，
-        // 避免历史 v4 用户在版本号回退场景下触发 Room 降级崩溃。
+        // ⚠️ 反直觉设计：v3 -> v4 schema 无变化，空迁移仅为对齐已存在的 4.json 存档，避免 v4 用户版本回退时 Room 降级崩溃。
         private val MIGRATION_3_4 = object : Migration(3, 4) {
             override suspend fun migrate(connection: SQLiteConnection) {
             }

@@ -18,11 +18,7 @@ fun String.toKableUuid() = kotlin.uuid.Uuid.parse(this)
 
 class BleManager {
 
-    /**
-     * 扫描 BLE 设备。
-     * @param useServiceFilter 为 true 时仅扫描广播中包含心率服务 (0x180D) 的设备，
-     *                         系统级过滤更省电；为 false 时扫描所有 BLE 设备。
-     */
+    /** 扫描 BLE 设备。useServiceFilter=true 时仅扫描含心率服务 (0x180D) 的设备 */
     @OptIn(kotlin.uuid.ExperimentalUuidApi::class)
     fun scan(useServiceFilter: Boolean = false): Flow<Advertisement> {
         val scanner = if (useServiceFilter) {
@@ -38,7 +34,7 @@ class BleManager {
         }
         return scanner.advertisements
             .catch { cause ->
-                // 蓝牙未开启等前置条件不满足时，重新抛出供上层区分处理
+                // ⚠️ 反直觉设计：前置条件不满足时重新抛出，供上层区分处理（非普通扫描错误）
                 if (cause is UnmetRequirementException) throw cause
                 Log.e("BleManager", "扫描过程中发生错误", cause)
             }
@@ -64,20 +60,10 @@ class BleManager {
     }
 
     /**
-     * 解析标准心率测量特征值 (0x2A37) 的完整数据。
+     * 解析标准心率测量特征值 (0x2A37)。
      *
-     * 蓝牙 GATT HR Profile 规范:
-     * - 字节0: flags
-     *   - bit 0:    心率值格式 (0=UINT8, 1=UINT16)
-     *   - bit 1-2:  传感器接触状态 (00/01=不支持, 10=未接触, 11=已接触)
-     *   - bit 3:    是否包含累计能耗 (Energy Expended)
-     *   - bit 4:    是否包含 RR-Interval
-     * - 心率值: UINT8 或 UINT16
-     * - (可选) 累计能耗: UINT16, 单位千卡
-     * - (可选) RR-Interval: UINT16 序列, 单位 1/1024 秒 (相邻 R 波峰的时间间隔)
-     *
-     * RR-Interval 是逐拍 (beat-to-beat) 数据,可据此计算瞬时心率与 HRV,
-     * 比设备上报的平均 bpm 分辨率更高。早期实现仅解析 bpm,丢失了 RR 数据。
+     * RR-Interval 是逐拍数据，可据此计算瞬时心率与 HRV（比设备上报的平均 bpm 分辨率更高）。
+     * 完整字段布局见 Bluetooth GATT HR Profile 规范。
      */
     internal fun parseHeartRateMeasurement(data: ByteArray): HeartRateMeasurement {
         if (data.isEmpty()) return HeartRateMeasurement.EMPTY

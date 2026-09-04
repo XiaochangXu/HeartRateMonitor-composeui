@@ -9,17 +9,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
 import javax.inject.Singleton
 
-/**
- * 全局主题状态（Hilt 单例，Phase 2 起由 Hilt 装配，替代 AppContainer）。
- *
- * **必须保持 [Singleton] 作用域**：MainActivity（AppTheme 消费）、设置页
- * （EntryPoint 写入）、FloatingWindowService / StatusBarResidentService 共享同一实例，
- * 任一调用方修改后全 App 即时重配色。若去掉 @Singleton，Hilt 会在每个注入点各建一个实例，
- * 设置页改的是自己的副本，UI 侧收不到更新——即「主题设置失效」。
- *
- * 构造时经 SettingsRepository 预热快照同步加载持久化配置，
- * 由 HeartRateApp.onCreate 显式触发注入字段，保证在任何 Composable 读取前就绪。
- */
+// ⚠️ 反直觉设计：必须 Singleton 作用域——Activity/设置页/Services 共享同一实例；去 Singleton 会导致「主题设置失效」。
 @Singleton
 class ThemeState @Inject constructor(private val settings: SettingsRepository) {
 

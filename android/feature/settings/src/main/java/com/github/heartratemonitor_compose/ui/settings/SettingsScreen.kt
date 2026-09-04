@@ -83,7 +83,6 @@ fun SettingsScreen(
 private fun GeneralSection(
     onNavigate: (String) -> Unit
 ) {
-    // Icon Container
     val containerColor = MaterialTheme.colorScheme.primaryContainer
     val iconTint = MaterialTheme.colorScheme.onPrimaryContainer
 

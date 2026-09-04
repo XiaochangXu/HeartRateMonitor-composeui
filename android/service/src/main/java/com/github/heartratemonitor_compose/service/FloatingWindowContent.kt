@@ -27,14 +27,8 @@ import androidx.compose.ui.unit.sp
 import com.github.heartratemonitor_compose.service.R
 
 /**
- * 复刻原 layout_floating_window.xml 的 MaterialCardView + LinearLayout 样式。
- * 由 [FloatingWindowService.updateWindowAppearance] 从设置读取并计算后赋值，
- * 变更触发 [FloatingWindowContent] 重组。
- *
- * 心跳缩放值 [heartScale] 是一个 `() -> Float` lambda，
- * 在 [graphicsLayer] 的 draw-phase lambda 中调用——
- * Compose 不会在 composition phase 读取它，scale 变化只触发 draw layer 更新，
- * 不触发 recomposition + relayout。
+ * 悬浮窗静态视觉参数。[heartScale] 在 graphicsLayer draw-phase 读取，
+ * scale 变化只触发 draw layer 更新，不触发 recomposition + relayout。
  */
 data class FloatingWindowAppearance(
     val textColor: Color = Color.Black,

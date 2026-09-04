@@ -13,17 +13,14 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 /**
- * 状态栏常驻设置页面的 ViewModel（MVI 架构，Phase 1）。
+ * 状态栏常驻设置页面的 ViewModel（MVI 架构）。
  *
  * 职责：
  * - 从 [SettingsRepository.settings] 全量快照派生状态栏设置：
  *   UiState 是设置真源的派生投影，Flow 回流经 [setState] 归约（状态下行）。
- * - 开关/滑块/颜色事件经 [StatusBarSettingsIntent] dispatch 上行：
- *   滑块 onValueChange 每拍写入（set 为乐观 CAS + 异步落盘，与原直写同路径，
- *   不加节流以免破坏写后立读语义）；颜色确认经 ConfirmColor 回写。
- * - 常驻开关的权限判定与服务启停联动归 SetResident handler（原 UI 层
- *   EntryPoint 直调上提）；无权限时经 Intent 内的 [StatusBarSettingsIntent.SetResident.onRequestPermission]
- *   回调交由 UI 跳转（Activity 上下文，§3.4 方案 1）。
+ * - 开关/滑块/颜色事件经 [StatusBarSettingsIntent] dispatch 上行。
+ * - 常驻开关的权限判定与服务启停联动归 SetResident handler；无权限时经 Intent 内的
+ *   [StatusBarSettingsIntent.SetResident.onRequestPermission] 回调交由 UI 跳转系统权限页。
  */
 @HiltViewModel
 class StatusBarSettingsViewModel @Inject constructor(
@@ -34,7 +31,7 @@ class StatusBarSettingsViewModel @Inject constructor(
 ) : MviViewModel<StatusBarSettingsUiState, StatusBarSettingsIntent>(initialStatusBarSettingsUiState(settings)) {
 
     init {
-        // 设置真源投影：每次快照变化原子归约进 UiState，禁止本地双写（§3.5）
+        // 设置真源投影：每次快照变化原子归约进 UiState，禁止本地双写。
         viewModelScope.launch {
             settings.settings.collect { s ->
                 setState {
@@ -56,9 +53,8 @@ class StatusBarSettingsViewModel @Inject constructor(
         when (intent) {
             is StatusBarSettingsIntent.SetResident -> {
                 if (intent.enabled && !overlayPermissionProvider.canDrawOverlays()) {
-                    // 无悬浮窗权限：不落盘不启服务，经回调交由 UI 跳转系统权限页
-                    //（Activity 上下文）；DEF-02 修复：先回调跳转，UI 侧 startActivity 成功后才
-                    // 置位 suppress——避免 safe-cast 失败或 Intent 不解析时 suppress 泄漏。
+                    // 无悬浮窗权限：不落盘不启服务，经回调交由 UI 跳转系统权限页。
+                    // 先回调跳转，UI 侧 startActivity 成功后才置位 suppress——避免 suppress 泄漏。
                     // setSuppressHideForExternalLaunch 自带 5 秒超时复位兜底。
                     intent.onRequestPermission?.invoke(overlayPermissionProvider.createManageOverlayIntent())
                     suppressHideForExternalLaunch(true)
@@ -90,7 +86,7 @@ class StatusBarSettingsViewModel @Inject constructor(
 sealed interface StatusBarSettingsIntent {
     /**
      * 常驻开关。无悬浮窗权限时经 [onRequestPermission] 回传权限页 Intent，
-     * 由 UI（Activity 上下文）执行跳转（§3.4 方案 1 回调形态）。
+     * 由 UI（Activity 上下文）执行跳转。
      */
     data class SetResident(
         val enabled: Boolean,
@@ -120,8 +116,7 @@ data class StatusBarSettingsUiState(
 
 /**
  * 初始状态：读 [SettingsRepository] 内存快照真实值（app 启动时已预热、零 IO），
- * 消除进入页面时"先默认值后快照覆盖"的闪变；键缺失时 [SettingsRepository.get]
- * 回落 [AppSettings.DEFAULTS]（契约 10.3）。
+ * 消除进入页面时"先默认值后快照覆盖"的闪变。
  */
 internal fun initialStatusBarSettingsUiState(settings: SettingsRepository): StatusBarSettingsUiState = StatusBarSettingsUiState(
     residentEnabled = settings.get(SettingsKeys.STATUS_BAR_RESIDENT_ENABLED),

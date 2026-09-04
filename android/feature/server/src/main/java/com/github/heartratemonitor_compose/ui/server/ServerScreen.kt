@@ -49,21 +49,16 @@ fun ServerScreen(
     val viewModel: ServerSettingsViewModel = hiltViewModel()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    // 端口输入草稿：纯瞬时态保留 UI 层（判定标准 4），提交经 VM 校验后写入；
-    // null 表示未编辑，展示跟随 uiState 的已持久化值
+    // ⚠️ 反直觉设计：端口输入草稿为纯瞬时态（null=未编辑展示持久化值），提交经 VM 校验后写入。
     var httpPortDraft by remember { mutableStateOf<String?>(null) }
     var wsPortDraft by remember { mutableStateOf<String?>(null) }
     val httpPortText = httpPortDraft ?: uiState.httpPort.toString()
     val wsPortText = wsPortDraft ?: uiState.wsPort.toString()
 
     val context = LocalContext.current
-    // 本机 IP 随 uiState 一次性快照下行（进入页面时静态取值，与原语义一致）
     val ipAddress = uiState.ipAddress ?: context.getString(R.string.not_connected_network)
 
-    // 离开页面时兜底提交草稿（覆盖未按 IME Done 直接返回的场景）。
-    // DisposableEffect(Unit) 的 effect 块仅在首次组合执行一次，闭包会捕获首次组合的
-    // httpPortText/wsPortText（即草稿为 null 时的旧端口值），必须经 rememberUpdatedState
-    // 转发最新值，否则编辑后的草稿在返回页面时被静默丢弃。
+    // ⚠️ 反直觉设计：离开页面时兜底提交草稿（覆盖未按 IME Done 直接返回的场景），必须经 rememberUpdatedState 转发最新值。
     val latestHttpPortText by rememberUpdatedState(httpPortText)
     val latestWsPortText by rememberUpdatedState(wsPortText)
     DisposableEffect(Unit) {

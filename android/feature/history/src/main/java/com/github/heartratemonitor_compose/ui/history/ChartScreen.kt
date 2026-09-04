@@ -114,7 +114,6 @@ fun ChartScreen(
                         if (activity != null &&
                             activity.requestedOrientation == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
                         ) {
-                            // 横屏时按返回：先切回竖屏，不退出页面
                             activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
                         } else {
                             onNavigateBack()
@@ -196,9 +195,7 @@ fun ChartScreen(
                         endTime = records.last().timestamp
                     )
                 }
-                // 图表渲染延迟，避免首次初始化与导航转场动画争抢主线程
-                // records 非空后延迟 350ms（SECONDARY_SLIDE_DURATION 二级页面转场时长）再显示图表
-                // 期间显示骨架屏。横竖屏切换不触发（key 不变），chartReady 保持 true
+                // ⚠️ 反直觉设计：records 非空后延迟 350ms 再显示图表，避免初始化与转场动画争抢主线程。横竖屏切换不触发（key 不变）。
                 var chartReady by remember { mutableStateOf(false) }
                 LaunchedEffect(records.isNotEmpty()) {
                     if (records.isNotEmpty()) {

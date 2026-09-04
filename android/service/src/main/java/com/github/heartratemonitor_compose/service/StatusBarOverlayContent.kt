@@ -30,11 +30,9 @@ data class StatusBarOverlayAppearance(
 
 
 /**
- * 状态栏 overlay 内容：直接用原生 [Canvas] + [Paint] 绘制，无 Compose 布局开销。
+ * 状态栏 overlay：原生 Canvas + Paint 绘制，无 Compose 布局开销。
  *
- * 心跳缩放值 [heartScale] 是一个 `() -> Float` lambda，
- * 在 Canvas 的 draw-phase lambda 中调用——值变化只触发 redraw，
- * 不触发 recomposition + relayout。
+ * [heartScale] 在 draw-phase 读取，值变化只触发 redraw 不触发 recomposition。
  */
 @Composable
 fun StatusBarOverlayContent(
@@ -94,7 +92,6 @@ fun StatusBarOverlayContent(
             val centerY = size.height / 2f
             var x = appearance.padding
 
-            // 与原 ImageView.scaleX/Y 一致：以图标中心为锚点缩放
             val icon = heartDrawable
             if (icon != null) {
                 icon.setTint(appearance.textColor)

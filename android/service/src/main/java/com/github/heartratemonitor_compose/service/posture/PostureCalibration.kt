@@ -1,4 +1,4 @@
-﻿package com.github.heartratemonitor_compose.service.posture
+package com.github.heartratemonitor_compose.service.posture
 
 import android.util.Log
 import kotlinx.collections.immutable.ImmutableList
@@ -17,11 +17,7 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.builtins.ListSerializer
 
 /**
- * 单个姿态的校准特征。
- *
- * @param meanX/Y/Z 加速度三轴均值（反映重力方向，即手机朝向）
- * @param stdMagnitude 加速度模长的标准差（反映该姿态的基线噪声）
- * @param sampleCount 采样数
+ * 单个姿态校准特征。meanX/Y/Z 反映重力方向（手机朝向），stdMagnitude 反映基线噪声。
  */
 @Serializable
 data class PostureFeatures(
@@ -33,15 +29,9 @@ data class PostureFeatures(
 )
 
 /**
- * 姿态校准数据。
+ * 姿态校准数据。每种姿态可采集多样本应对不同体位；实时检测取最小欧氏距离参与判定。
  *
- * 每种姿态可采集多个样本（[sittingSamples]/[standingSamples]），以应对不同体位
- * （如手机放口袋、握在手中、置于桌面等不同朝向）。实时检测时取与当前窗口欧氏距离
- * 最小的样本参与判定。
- *
- * 持久化到 DataStore 的 `stringPreferencesKey("posture_calibration_data")`，
- * 值为 kotlinx.serialization 序列化的 JSON 字符串。
- * 新格式使用 `sitting_samples`/`standing_samples` 数组；旧格式（单对象 `sitting`/`standing`）
+ * ⚠️ 反直觉设计：新格式 sitting_samples/standing_samples 数组；旧格式 sitting/standing 单对象
  * 在 [fromJson] 中自动兼容，解析为单元素列表。
  */
 @Serializable
@@ -55,41 +45,33 @@ data class PostureCalibration(
     @SerialName("motion_threshold") val motionThreshold: Float = 1.5f,
     @SerialName("calibrated_at") val calibratedAt: Long = 0L
 ) {
-    /** 兼容旧用法：取首个静坐样本（无则 null） */
     val sitting: PostureFeatures? get() = sittingSamples.firstOrNull()
 
-    /** 兼容旧用法：取首个站立样本（无则 null） */
     val standing: PostureFeatures? get() = standingSamples.firstOrNull()
 
-    /** 静坐和站立均至少有一个样本才算校准完成 */
     fun isComplete(): Boolean = sittingSamples.isNotEmpty() && standingSamples.isNotEmpty()
 
-    /** 序列化为 JSON 字符串（kotlinx.serialization） */
     fun toJson(): String {
         return json.encodeToString(this)
     }
 
     companion object {
-        /** 欧氏距离匹配阈值（m/s²），距离小于此值才判定为对应姿态 */
         const val MATCH_THRESHOLD = 5.0f
 
-        // 包级单例 Json 配置，容忍未知字段（向前兼容旧格式）
         private val json = Json {
             ignoreUnknownKeys = true
             encodeDefaults = true
         }
 
         /**
-         * 从 JSON 字符串反序列化，解析失败返回 null。
-         * 支持旧 org.json 格式（sitting/standing 单对象 → sitting_samples/standing_samples 数组）。
+         * ⚠️ 反直觉设计：先尝试 kotlinx.serialization 新格式；失败则降级到旧 org.json 格式——
+         * 旧单对象字段 sitting/standing 解析为单元素列表。
          */
         fun fromJson(jsonString: String?): PostureCalibration? {
             if (jsonString.isNullOrBlank()) return null
             return try {
-                // 先尝试用 kotlinx.serialization 解析新格式
                 json.decodeFromString<PostureCalibration>(jsonString)
             } catch (_: Exception) {
-                // 解析失败，尝试旧 org.json 格式
                 try {
                     parseLegacyFormat(jsonString)
                 } catch (_: Exception) {
@@ -98,11 +80,6 @@ data class PostureCalibration(
             }
         }
 
-        /**
-         * 解析旧 org.json 格式：
-         * - 旧数组字段 sitting_samples/standing_samples（与新格式 key 相同但由 org.json 序列化）
-         * - 旧单对象字段 sitting/standing
-         */
         private fun parseLegacyFormat(jsonString: String): PostureCalibration? {
             val obj = org.json.JSONObject(jsonString)
             val sitting = parseSamplesLegacy(obj, "sitting_samples", "sitting")
@@ -142,9 +119,7 @@ data class PostureCalibration(
 }
 
 /**
- * ImmutableList<PostureFeatures> 的自定义序列化器：
- * 序列化时输出为普通 JSON 数组，反序列化时还原为 ImmutableList，
- * 保持 Compose 稳定性推断。
+ * ImmutableList<PostureFeatures> 自定义序列化器：JSON 数组 ↔ ImmutableList，保持 Compose 稳定性推断。
  */
 object ImmutablePostureFeaturesListSerializer :
     KSerializer<ImmutableList<PostureFeatures>> {

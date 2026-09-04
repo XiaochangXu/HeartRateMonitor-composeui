@@ -11,12 +11,6 @@ import com.github.heartratemonitor_compose.ui.main.MainViewModel
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 
-/**
- * [killStateSaver] 由 MainActivity 注入后下发（Phase 7 起不再经 AppContainerExt）。
- *
- * 进程恢复逻辑（KillStateSaver.read → pagerState.scrollToPage）已随 pagerState
- * 移入 TabRoot 场景（AppTabHost），此处只负责快照上报。
- */
 @Composable
 fun AppLifecycleEffects(
     mainViewModel: MainViewModel,
@@ -27,8 +21,7 @@ fun AppLifecycleEffects(
     currentTab: Screen,
     currentRoute: String?
 ) {
-    // rememberUpdatedState 确保 LaunchedEffect(Unit) 内的 collect 始终读取最新值，
-    // 避免闭包捕获首次参数值导致快照数据过时
+    // rememberUpdatedState 确保 LaunchedEffect(Unit) 内的 collect 始终读取最新值。
     val currentFullScreen by rememberUpdatedState(isFullScreenMode)
     val currentRouteState by rememberUpdatedState(currentRoute)
     val currentTabState by rememberUpdatedState(currentTab)
@@ -49,7 +42,6 @@ fun AppLifecycleEffects(
         }
     }
 
-    // 从单一 uiState 派生 + distinctUntilChanged，保持原 StateFlow 只在变化时发射的语义
     LaunchedEffect(Unit) {
         mainViewModel.uiState.map { it.connectedDevice }.distinctUntilChanged().collect {
             pushSnapshot(currentRouteState ?: "", currentTabState.route, currentFullScreen)

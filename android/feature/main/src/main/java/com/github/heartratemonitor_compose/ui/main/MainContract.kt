@@ -24,10 +24,7 @@ enum class AppStatus {
  */
 enum class BleToastEvent { CONNECTED, AUTO_RECONNECTING, RECONNECT_FAILED, AUTO_CONNECT_FAILED, BLUETOOTH_DISABLED }
 
-/**
- * 主模块唯一 UI 状态（MVI 架构，Phase 5）。
- * 默认值引用 [AppSettings.DEFAULTS]，全屏文字色默认 RED 为历史分歧点。
- */
+/** 主模块唯一 UI 状态。默认值引用 [AppSettings.DEFAULTS]，全屏文字色默认 RED 为历史分歧点。 */
 data class MainUiState(
     val heartRate: Int = 0,
     val speed: Float = 0f,
@@ -53,11 +50,8 @@ data class MainUiState(
 )
 
 /**
- * 设备页专用精简状态：从 [MainUiState] 投影出设备页需要的字段。
- *
- * 避免设备页全量订阅 [MainUiState]：heartRate / speed / chartDataSnapshot 等高频字段
- * 每秒更新，设备页完全不需要，但会导致整个 DevicesScreen 无效重组。
- * 通过 [MainViewModel.devicesUiState] 的 map + distinctUntilChanged 只在相关字段变化时发射。
+ * 设备页专用精简状态：从 [MainUiState] 投影出设备页需要的字段，
+ * 避免全量订阅导致高频字段（heartRate/speed/chartDataSnapshot）变化时整个 DevicesScreen 无效重组。
  */
 data class DevicesUiState(
     val appStatus: AppStatus = AppStatus.DISCONNECTED,
@@ -92,7 +86,7 @@ sealed interface MainIntent {
 
 /**
  * 初始状态：设置字段取预热快照真值（构造期零 IO），
- * 声音模式经 [resolveSoundMode] 完成旧开关一次性迁移（幂等）。
+ * 声音模式经 [resolveSoundMode] 完成旧开关状态到新模式的初次转换（幂等）。
  */
 internal fun initialMainUiState(settings: SettingsRepository, context: Context): MainUiState {
     val s = settings.settings.value

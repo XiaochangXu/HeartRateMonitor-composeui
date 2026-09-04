@@ -17,11 +17,8 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * 注册 [ProfilingManager] 的 [TRIGGER_TYPE_ANOMALY] 触发器，
- * 系统检测到内存异常时自动收集堆转储 / 系统跟踪，便于线下分析。
- * 应用启动时读取 [ApplicationExitInfo]，识别是否因 Android 17 MemoryLimiter 被终止。
- *
- * Hilt 单例（Phase 2 起由 Hilt 装配，替代 AppContainer）。
+ * 注册 ProfilingManager TRIGGER_TYPE_ANOOMALY（API 36+），系统异常时自动抓取堆转储；
+ * 应用启动时读取 ApplicationExitInfo，识别 Android 17 MemoryLimiter 终止（API 30+）。
  */
 @Singleton
 class MemoryDiagnostics @Inject constructor(
@@ -37,8 +34,7 @@ class MemoryDiagnostics @Inject constructor(
     }
 
     /**
-     * 注册系统异常触发器（API 36+）。
-     * 当系统检测到异常（包括内存使用过高）时，自动抓取性能数据。
+     * ⚠️ 反直觉设计：全局 results 监听是系统触发（addProfilingTriggers）结果的唯一接收通道。
      */
     private fun registerAnomalyTrigger(context: Context) {
         if (Build.VERSION.SDK_INT < 36) {
@@ -50,7 +46,6 @@ class MemoryDiagnostics @Inject constructor(
             val profilingManager = context.getSystemService(Context.PROFILING_SERVICE) as? ProfilingManager
                 ?: return
 
-            // 全局结果监听：系统触发（addProfilingTriggers）的结果只能通过此回调接收
             profilingManager.registerForAllProfilingResults(
                 profilingExecutor,
                 Consumer { result: ProfilingResult ->
@@ -75,8 +70,8 @@ class MemoryDiagnostics @Inject constructor(
     }
 
     /**
-     * 检查最近一次退出原因，识别 Android 17 MemoryLimiter 导致的终止。
-     * ApplicationExitInfo 需 API 30+。
+     * ⚠️ 反直觉设计：ApplicationExitInfo 仅记录最近若干次终止，且每次冷启动后读取——
+     * 必须持久化 lastChecked timestamp 避免漏检。
      */
     private fun checkRecentExitReasons(context: Context) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {

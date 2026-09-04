@@ -24,17 +24,15 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 
 /**
- * 局域网传输页面的 ViewModel（MVI 架构，Phase 3）。
+ * 局域网传输页面的 ViewModel（MVI 架构）。
  *
- * 职责（D1 迁移：业务逻辑出 UI 层）：
- * - NSD 扫描生命周期（StartScan/StopScan）与发现列表；
- * - 配对流程与结果状态机（pairingPc / pairResult / pairError），
- *   scanJob/pairJob 由 [viewModelScope] 管理，页面退出自动取消；
- * - WebSocket 连接数经 [LanTransferSharedState]（Hilt 单例，保持原样）下行，
- *   连接建立时停止扫描、断开时清空发现列表（与原页面 LaunchedEffect(isConnected) 语义一致）。
- * - pairResult/pairError 采用迁移方案 §3.4 方案 2：状态内可空字段 + ConsumePairResult Intent。
+ * 职责：
+ * - NSD 扫描生命周期与发现列表；
+ * - 配对流程与结果状态机，scanJob/pairJob 由 [viewModelScope] 管理，页面退出自动取消；
+ * - WebSocket 连接数经 [LanTransferSharedState] 下行，连接建立时停止扫描、断开时清空发现列表。
+ * - pairResult/pairError：状态内可空字段 + ConsumePairResult Intent。
  *
- * 设置读写仍统一走 [SettingsRepository]（契约 2）。
+ * 设置读写统一走 [SettingsRepository]。
  */
 @HiltViewModel
 class LanTransferViewModel @Inject constructor(
@@ -61,8 +59,7 @@ class LanTransferViewModel @Inject constructor(
                 setState { it.copy(wsEnabled = enabled) }
             }
         }
-        // 连接状态联动（等价原页面 LaunchedEffect(isConnected)）：
-        // 建立连接停扫描；断开连接额外清空发现列表
+        // 连接状态联动：建立连接停扫描；断开连接额外清空发现列表。
         viewModelScope.launch {
             lanTransferSharedState.webSocketClientCount.collectLatest { count ->
                 val connected = count > 0
@@ -73,7 +70,7 @@ class LanTransferViewModel @Inject constructor(
                 }
             }
         }
-        // 已连接客户端信息（OS 名称 + IP）下行至 UI，供「已连接设备」卡片展示
+        // 已连接客户端信息下行至 UI。
         viewModelScope.launch {
             lanTransferSharedState.connectedClientInfo.collectLatest { info ->
                 setState {
@@ -186,7 +183,7 @@ sealed interface LanTransferIntent {
     data object StopScan : LanTransferIntent
     data class StartPairing(val pc: NsdDiscoverer.DiscoveredPc) : LanTransferIntent
 
-    /** 关闭结果弹窗后消费结果/错误（弹窗显隐为 UI 瞬时态，结果数据归 VM，§3.4 方案 2）。 */
+    /** 关闭结果弹窗后消费结果/错误（弹窗显隐为 UI 瞬时态，结果数据归 VM）。 */
     data object ConsumePairResult : LanTransferIntent
 
     data object Disconnect : LanTransferIntent

@@ -6,12 +6,7 @@ import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 
-/**
- * 键名字符串与 SharedPreferences / 旧 PrefsKeys 时代完全一致，
- * 保证 SharedPreferencesMigration 迁入的老数据无缝对应，禁止改动任何键名。
- * 读写一律经 SettingsRepository 的类型化 API，禁止字符串键名直接操作。
- * 默认值唯一来源是 [AppSettings.DEFAULTS]。
- */
+// 键名与旧 PrefsKeys 完全一致，禁止改动；读写经 SettingsRepository 类型化 API。
 object SettingsKeys {
 
     val HISTORY_RECORDING_ENABLED = booleanPreferencesKey("history_recording_enabled")
@@ -47,7 +42,7 @@ object SettingsKeys {
     val STATUS_BAR_Y_OFFSET = intPreferencesKey("status_bar_y_offset")
     val STATUS_BAR_SIZE = intPreferencesKey("status_bar_size")
     val STATUS_BAR_TEXT_THICKNESS = intPreferencesKey("status_bar_text_thickness")
-    // 历史遗留键，当前无调用点；保留以承接存量设备数据
+    // 历史遗留键，无调用点；保留以承接存量设备数据
     val STATUS_BAR_WHITE_TEXT = booleanPreferencesKey("status_bar_white_text")
     val STATUS_BAR_TEXT_COLOR = intPreferencesKey("status_bar_text_color")
 
@@ -79,8 +74,8 @@ object SettingsKeys {
     val THEME_PALETTE_STYLE = stringPreferencesKey("theme_palette_style")
 
     val LIQUID_GLASS_ENABLED = booleanPreferencesKey("liquid_glass_enabled")
-    val LIQUID_GLASS_BLUR = floatPreferencesKey("liquid_glass_blur")                    // dp
-    val LIQUID_GLASS_DISTORTION = floatPreferencesKey("liquid_glass_distortion")        // dp
+    val LIQUID_GLASS_BLUR = floatPreferencesKey("liquid_glass_blur")
+    val LIQUID_GLASS_DISTORTION = floatPreferencesKey("liquid_glass_distortion")
 
     val KILL_STATE_SAVED = booleanPreferencesKey("kill_state_saved")
     val KILL_STATE_ROUTE = stringPreferencesKey("kill_state_route")

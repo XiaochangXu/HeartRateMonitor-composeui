@@ -19,22 +19,11 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import java.util.concurrent.ConcurrentHashMap
 
-/**
- * 存储层为全局唯一 DataStore（[settingsDataStore]），老用户的 SharedPreferences 数据
- * 由 SharedPreferencesMigration 在首次读取时无损迁入。
- * 键一率为 [SettingsKeys] 类型化键，默认值唯一来源为 [AppSettings.DEFAULTS]。
- * 构造时同步预热内存快照 [prefsState]（同时触发迁移），此后所有同步读走内存、零 IO。
- * 写操作异步落盘，同时乐观同步更新内存快照，保持「写后立读」语义。
- * 已知瞬态限制：DataStore edit 串行化排队，极端时序下旧快照发射可能短暂回退乐观值。
- */
+// 构造时同步预热内存快照，此后同步读零 IO；写异步落盘 + 乐观同步快照保持「写后立读」。
 class SettingsRepository(context: Context, private val scope: CoroutineScope) {
 
     private val dataStore = context.applicationContext.settingsDataStore
 
-    /**
-     * 构造时 runBlocking 读取一次（成本与旧 getSharedPreferences 首次同步磁盘读取相当），
-     * 此后由 DataStore 变更发射驱动更新，写操作额外做乐观同步更新。
-     */
     private val prefsState = MutableStateFlow(runBlocking { dataStore.data.first() })
 
     private val _settings = MutableStateFlow(AppSettings.from(prefsState.value))
@@ -66,11 +55,7 @@ class SettingsRepository(context: Context, private val scope: CoroutineScope) {
         }
     }
 
-    /**
-     * 使用 [MutableStateFlow.update] 的 CAS 循环保证原子性：setter 存在多线程调用方
-     *（UI 主线程 / Service 线程 / MemoryDiagnostics 后台线程），非原子的读改写
-     * 会让并发写不同 key 时基于旧快照生成副本，导致先写者的键丢失。
-     */
+    // CAS 循环保证原子性：多线程（UI / Service / MemoryDiagnostics）并发写不同 key 时非原子读改写会丢先写者的键。
     private inline fun updateCache(transform: (MutablePreferences) -> Unit) {
         prefsState.update { current ->
             current.toMutablePreferences().also(transform)
@@ -80,16 +65,13 @@ class SettingsRepository(context: Context, private val scope: CoroutineScope) {
 
     fun <T> get(key: Preferences.Key<T>): T = get(key, AppSettings.defaultFor(key))
 
-    /**
-     * 仅限历史默认值分歧点使用，新增调用点一律使用无默认值参数的 [get]。
-     */
+    // 仅限历史默认值分歧点使用，新增调用点一律使用无默认值参数的 get。
     fun <T> get(key: Preferences.Key<T>, default: T): T =
         prefsState.value[key] ?: default
 
     fun <T> set(key: Preferences.Key<T>, value: T) {
         updateCache { it[key] = value }
         flows[key]?.value = value
-        // 已登记 nullable 观察者的 key 必为字符串键，存在性即类型保证
         nullableStringFlows[key]?.let {
             @Suppress("UNCHECKED_CAST")
             it.value = value as String?
@@ -100,8 +82,7 @@ class SettingsRepository(context: Context, private val scope: CoroutineScope) {
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                // 磁盘写失败（磁盘满/锁竞争/文件损坏）不得炸进程：
-                // 内存快照已乐观更新，此处记录日志；磁盘值保持旧值，重启后回退。
+                // ⚠️ 反直觉设计：磁盘写失败不得炸进程；内存已乐观更新，磁盘旧值重启后回退。
                 Log.e(TAG, "设置落盘失败: $key", e)
             }
         }
@@ -110,15 +91,11 @@ class SettingsRepository(context: Context, private val scope: CoroutineScope) {
     fun <T> observe(key: Preferences.Key<T>): StateFlow<T> =
         observe(key, AppSettings.defaultFor(key))
 
-    /** 使用限制同 [get] 重载。 */
     @Suppress("UNCHECKED_CAST")
     fun <T> observe(key: Preferences.Key<T>, default: T): StateFlow<T> =
         flows.computeIfAbsent(key) { MutableStateFlow(get(key, default)) } as StateFlow<T>
 
-    /**
-     * 用于 [SettingsKeys.FAVORITE_DEVICE_ID] 等允许缺失的 key，
-     * key 缺失即返回 null。
-     */
+    // 允许缺失的 key 缺失时返回 null。
     fun getNullable(key: Preferences.Key<String>): String? = prefsState.value[key]
 
     fun observeNullable(key: Preferences.Key<String>): StateFlow<String?> {
@@ -132,10 +109,7 @@ class SettingsRepository(context: Context, private val scope: CoroutineScope) {
         }
     }
 
-    /**
-     * 类型化键时代写入类型唯一，只需删除该键自身
-     *（SharedPreferences 时代的异类型同名键问题已随迁移终结）。
-     */
+    // 类型化键写入类型唯一，删除自身即可。
     fun remove(key: Preferences.Key<*>) {
         updateCache { it.remove(key) }
         nullableStringFlows[key]?.value = null

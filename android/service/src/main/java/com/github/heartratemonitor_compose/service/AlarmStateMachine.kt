@@ -2,9 +2,6 @@ package com.github.heartratemonitor_compose.service
 
 import com.github.heartratemonitor_compose.service.posture.PostureType
 
-/**
- * 原为 [HeartRateAlarmService] 的内部类，提取为顶层类以降低耦合，便于单元测试。
- */
 class AlarmStateMachine(
     var highThreshold: Int,
     var lowThreshold: Int,

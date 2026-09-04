@@ -14,9 +14,9 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 
 /**
- * MVI 架构，Phase 2。收藏设备列表与当前收藏 ID 归约进单一 UiState，
+ * MVI 架构。收藏设备列表与当前收藏 ID 归约进单一 UiState，
  * UI 层仅订阅状态并经 Intent 触发增删。
- * 依赖由 Hilt 构造注入（Phase 3 起）。
+ * 依赖由 Hilt 构造注入。
  */
 @HiltViewModel
 class FavoriteDevicesViewModel @Inject constructor(
@@ -44,8 +44,7 @@ class FavoriteDevicesViewModel @Inject constructor(
     override suspend fun handleIntent(intent: FavoriteDevicesIntent) {
         when (intent) {
             is FavoriteDevicesIntent.RemoveFavorite -> {
-                // 如果删除的是当前收藏设备，删除后从剩余收藏中恢复最近的一个，
-                // 与 MainViewModel.toggleFavoriteDevice 行为一致；否则仅删除记录。
+                // 删除当前收藏设备后从剩余收藏中恢复最近的一个，与 MainViewModel.toggleFavoriteDevice 行为一致；否则仅删除记录。
                 if (currentState.favoriteDeviceId == intent.id) {
                     favoriteDeviceRepository.deleteAndRestoreLatest(intent.id)
                 } else {

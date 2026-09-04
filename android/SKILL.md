@@ -18,9 +18,7 @@ description: 项目架构契约、编码规范、验证基线与踩坑指南
 4. 可维护性优先于开发速度
 5. 简洁性优先于不必要的复杂设计
 
-
 如果这些规则与最新官方稳定指导冲突，请遵循官方指导。
-
 
 禁止编造：
 
@@ -30,13 +28,10 @@ description: 项目架构契约、编码规范、验证基线与踩坑指南
 - 性能数据
 - 项目事实
 
-
 如果不确定 API、版本或推荐实践：
 
 - 首先查阅官方文档
 - 如果仍然无法确认，明确说明无法确认该信息
-
-
 
 ---
 
@@ -50,14 +45,11 @@ description: 项目架构契约、编码规范、验证基线与踩坑指南
 - 不要重复已有实现
 - 除非明确要求，否则不要改变项目架构
 
-
-
 ---
 
 # 分层职责
 
 保持清晰的职责分离。
-
 
 ## UI 层
 
@@ -66,7 +58,6 @@ description: 项目架构契约、编码规范、验证基线与踩坑指南
 - UI 渲染
 - 用户交互
 
-
 ## 业务层
 
 负责：
@@ -74,7 +65,6 @@ description: 项目架构契约、编码规范、验证基线与踩坑指南
 - 业务逻辑
 - 状态管理
 - 工作流程协调
-
 
 ## 数据层
 
@@ -85,10 +75,7 @@ description: 项目架构契约、编码规范、验证基线与踩坑指南
 - 数据库
 - 缓存
 
-
 禁止绕过分层结构。
-
-
 
 ---
 
@@ -104,7 +91,6 @@ description: 项目架构契约、编码规范、验证基线与踩坑指南
 - 单一职责原则
 - 统一为新写法
 
-
 避免：
 
 - 超长方法
@@ -115,10 +101,7 @@ description: 项目架构契约、编码规范、验证基线与踩坑指南
 - 不必要的全局状态
 - 新旧写法混用
 
-
 新增代码必须保持与现有项目风格一致。
-
-
 
 ---
 
@@ -128,8 +111,6 @@ description: 项目架构契约、编码规范、验证基线与踩坑指南
 - 保持状态集中管理
 - UI 必须由状态驱动
 - 避免维护重复状态
-
-
 
 ---
 
@@ -141,8 +122,6 @@ description: 项目架构契约、编码规范、验证基线与踩坑指南
 - 明确处理异常
 - 禁止静默忽略错误
 
-
-
 ---
 
 # 并发处理
@@ -151,8 +130,6 @@ description: 项目架构契约、编码规范、验证基线与踩坑指南
 - 永远不要阻塞主线程
 - 避免共享可变状态
 - 确保线程安全
-
-
 
 ---
 
@@ -164,10 +141,7 @@ description: 项目架构契约、编码规范、验证基线与踩坑指南
 - 版本号
 - 配置参数
 
-
 在适用情况下支持多环境配置。
-
-
 
 ---
 
@@ -181,10 +155,8 @@ description: 项目架构契约、编码规范、验证基线与踩坑指南
 - 性能考虑
 - 安全考虑
 
-
+尽量将注释内容压缩，
 不要添加仅仅描述代码表面行为的注释。
-
-
 
 ---
 
@@ -194,14 +166,12 @@ description: 项目架构契约、编码规范、验证基线与踩坑指南
 
 > 最小化修改原则
 
-
 禁止：
 
 - 修改无关文件
 - 修改无关代码
 - 进行不必要的重构
 - 未经请求改变架构
-
 
 只有以下情况才建议重构：
 
@@ -210,8 +180,6 @@ description: 项目架构契约、编码规范、验证基线与踩坑指南
 - 性能受到明显影响
 - 用户明确要求重构
 
-
-
 ---
 
 # 技术决策
@@ -219,17 +187,13 @@ description: 项目架构契约、编码规范、验证基线与踩坑指南
 - 优先使用项目已有技术
 - 没有充分理由不要引入新框架
 
-
 当存在多个方案时，需要说明：
 
 - 优点
 - 缺点
 - 对当前项目的影响
 
-
 不要将某一个方案描述为唯一正确方案。
-
-
 
 ---
 
@@ -243,12 +207,9 @@ description: 项目架构契约、编码规范、验证基线与踩坑指南
 - 在适用情况下保持向后兼容
 - 尽可能具备可测试性
 
-
 优先：
 
 > 渐进式改进，而不是大规模重写。
-
-
 
 ---
 
@@ -260,15 +221,12 @@ description: 项目架构契约、编码规范、验证基线与踩坑指南
 - 核心业务逻辑
 - 项目架构
 
-
 必须说明：
 
 - 为什么进行该修改
 - 修改带来的收益
 - 可能的缺点
 - 是否需要同步修改相关组件
-
-
 
 ---
 
@@ -278,7 +236,7 @@ description: 项目架构契约、编码规范、验证基线与踩坑指南
 
 ## 1. Room Entity 不得泄漏到 UI/ViewModel 层
 
-- `data/db/` 下的 Entity（HeartRateSession / HeartRateRecord / FavoriteDeviceEntity 等）只允许出现在 `data/db`、`data/repository`、`service` 落盘组件与 DAO 测试中。
+- `data/db/` 下的 Entity（HeartRateSession / HeartRateRecord / FavoriteDeviceEntity 等）只允许出现在 `data/db`、`data/repository`、`:service` 的 `FlushRecordsWorker`（Worker 排队落盘路径，2026-09 落盘缓冲迁入 `:data:repository` 后 `:service` 仅此一处）与 DAO 测试中。
 - UI/ViewModel 一律使用 `data/model/` 的 Domain Model（HeartRateSessionInfo / HeartRateRecordInfo / FavoriteDeviceInfo / SessionStatsInfo），映射函数 `toInfo()` / `toEntity()` 在 Repository 层完成。
 - 新增表/字段时：先加 Entity，再在 `data/model/` 补对应 Info 类与映射，Repository 对外只返回 Info 类型。
 
@@ -330,19 +288,23 @@ description: 项目架构契约、编码规范、验证基线与踩坑指南
 
   ```
   gradlew :app:assembleDebug
-  gradlew :app:testDebugUnitTest :service:testDebugUnitTest :data:database:testDebugUnitTest :data:settings:testDebugUnitTest :data:repository:testDebugUnitTest :core:designsystem:testDebugUnitTest :core:ui:testDebugUnitTest :core:model:testDebugUnitTest :feature:alarm:testDebugUnitTest :feature:server:testDebugUnitTest :feature:settings:testDebugUnitTest
+  gradlew --max-workers=1 :app:testDebugUnitTest :service:testDebugUnitTest :data:database:testDebugUnitTest :data:settings:testDebugUnitTest :data:repository:testDebugUnitTest :core:designsystem:testDebugUnitTest :core:ui:testDebugUnitTest :core:model:testDebugUnitTest :feature:alarm:testDebugUnitTest :feature:server:testDebugUnitTest :feature:settings:testDebugUnitTest
   ```
 
   （新增模块或新增含单测的模块后，验证命令须含各模块自身的 `:X:testDebugUnitTest`。）
-- 当前单测基线：**全部通过（221 用例，0 失败）**；其中 29 个为纯 UDF 迁移（2026-08）新增的设置页 ViewModel 往返一致性/配对状态机用例；MVI 迁移（2026-08）完成后新增 MviViewModel 基类测试 ×2 与阈值 clamp 纯归约测试 ×2，验收存档见 `baseline/mvi-baseline.md`。历史基线问题（AppDatabaseTest / HeartRateRecorderTest 的 Room 3→4 迁移缺失导致的 28 个预存失败）已于 2026-08 修复——测试改用 Room 默认驱动（RoomOpenHelper 自行建表与版本管理），不再手工提供 SupportSQLiteOpenHelper + 空 onCreate Callback；出现新失败必须修复。2026-08 i18n 数字系统整改（159 文件，规范见第 12 章）验证时补录 `:core:model` 的 WebhookTest ×8（213→221，基线命令此前遗漏该模块）。2026-09 HeartRateRepository 迁移（spec 见 `docs/spec-heart-rate-repository-migration.md`）基线复核：修复预存失败 `FunctionSettingsViewModelTest`（cb2629e 改 NAV_ANIMATION_DISABLED 默认值时漏同步测试，以 DEFAULTS 为准修正）；新增已知 flaky：`BleConnectionHandlerTest` 的 `successful connect then link loss triggers auto reconnect`（真实时间轮询 + Robolectric 蓝牙 shadow 状态，重跑即过，非回归）；`HeartRateRecorderTest` 已随组件迁至 `:data:repository` 验证通过。
-- **已知 flaky（非回归，勿按新失败处理）**：SettingsRepositoryTest 的 `int negative values` 与 `observe int emits current value and updates` 在全量并行跑时偶发「Int 写入后立读返回默认值 0」——属 SettingsRepository KDoc 已声明的「瞬态回退窗口」（DataStore 落盘发射与 Unconfined 乐观缓存的对账时序竞态，测试内 `awaitDiskReconciled` 无法完全消除）。处置：单独 `--rerun-tasks` 重跑该模块，通过即视为环境性失败，无需改代码。
+- **单测必须串行执行（`--max-workers=1`）**：并行跑时多模块 Robolectric 测试共用同一 app 数据目录的 `settingsDataStore` 文件，会随机在不同模块产出环境性假失败（每次挂的用例都不一样），掩盖真实回归。串行全量跑（可加 `--continue` 保证跑完所有模块）才是可信基线。
+- 当前单测基线：**全部通过（229 用例，0 失败）**；其中 29 个为纯 UDF 迁移（2026-08）新增的设置页 ViewModel 往返一致性/配对状态机用例；MVI 迁移（2026-08）完成后新增 MviViewModel 基类测试 ×2 与阈值 clamp 纯归约测试 ×2，验收存档见 `baseline/mvi-baseline.md`。历史基线问题（AppDatabaseTest / HeartRateRecorderTest 的 Room 3→4 迁移缺失导致的 28 个预存失败）已于 2026-08 修复——测试改用 Room 默认驱动（RoomOpenHelper 自行建表与版本管理），不再手工提供 SupportSQLiteOpenHelper + 空 onCreate Callback；出现新失败必须修复。2026-08 i18n 数字系统整改（159 文件，规范见契约 12）验证时补录 `:core:model` 的 WebhookTest ×8（213→221，基线命令此前遗漏该模块）。2026-09 HeartRateRepository 迁移（spec 见 `docs/spec-heart-rate-repository-migration.md`）基线复核：修复预存失败 `FunctionSettingsViewModelTest`（cb2629e 改 NAV_ANIMATION_DISABLED 默认值时漏同步测试，以 DEFAULTS 为准修正）；新增已知 flaky：`BleConnectionHandlerTest` 的 `successful connect then link loss triggers auto reconnect`（真实时间轮询 + Robolectric 蓝牙 shadow 状态，重跑即过，非回归，已并入下条 flaky 清单）；`HeartRateRecorderTest` 已随组件迁至 `:data:repository` 验证通过。
+  2026-09 基线复核（221→229，+8）：差额来自 221 基线之后数个提交对 `SessionChartTrackerTest`、`BleSettingsListenerTest`、`HeartRateRecorderTest`、`BleConnectionHandlerTest`、`FunctionSettingsViewModelTest`、`HeartRateRepositoryTest` 的用例增删；逐模块分布为 service 107、data:settings 26、data:repository 22、data:database 20、feature:settings 17、feature:server 13、core:designsystem 11、core:model 8、feature:alarm 3、core:ui 2（`:app` 无单测，共 28 个测试类）。用例数变化时须同步本行数字与分布。
+- **已知 flaky（非回归，勿按新失败处理）**：SettingsRepositoryTest 的 `int negative values` 与 `observe int emits current value and updates` 在全量并行跑时偶发「Int 写入后立读返回默认值 0」——属 SettingsRepository KDoc 已声明的「瞬态回退窗口」（DataStore 落盘发射与 Unconfined 乐观缓存的对账时序竞态，测试内 `awaitDiskReconciled` 无法完全消除）。
+  同一根因在各模块共用 `settingsDataStore`（Robolectric app 数据目录）时还会外溢，实测另有以下偶发失败：`SettingsRepositoryTest` 的 `nullable string set and get`（写入后立读返回 null）、`LiquidGlassStateTest` 的 `setBlur and setDistortion update state flow and persist`、`FloatingWindowSettingsViewModelTest` 的 `icon switches write and flow back`（`awaitUiState` 5s 未收敛）、`BleConnectionHandlerTest` 的 `successful connect then link loss triggers auto reconnect`（真实时间轮询 + Robolectric 蓝牙 shadow 状态）。特征：每次失败的模块/用例不固定，串行或单模块 `--rerun-tasks` 重跑必过。
+  处置：全量验证加 `--max-workers=1` 串行跑；若仍偶发失败，单独 `--rerun-tasks` 重跑该模块，通过即视为环境性失败，无需改代码。
 - 涉及 BLE 连接/断开/重连、设置热更新的改动需提示用户真机回归。
 
 ## 8. 全局单例容器化（禁止新增全局可变单例）
 
 - 进程级共享组件一律由 **Hilt 单例组件（SingletonComponent）** 管理：可构造注入的类加 `@Inject constructor`，需要装配的用模块内 `@Module @InstallIn(SingletonComponent::class)` `@Provides`；进程级单例语义由 `@Singleton` 保证（迁移依据《Hilt渐进式迁移方案.md》Phase 1~7 已完成，`AppContainer`/`AppContainerExt`/`XxxDependencies` cast 链已删除）。
 - **`@Inject constructor` 的进程级共享状态类必须标注 `@Singleton`**：Hilt 对无作用域绑定会在每个注入点各建一个新实例。2026-08 曾系统性漏注 18 个类（ThemeState / LiquidGlassState / KillStateSaver / LanTransferSharedState / FairMemoryReceiver / CustomSchemeCache 等），症状是「设置页修改不生效、开关无响应」（写的是设置页自己那份实例的 StateFlow，UI 收集的是另一份）。凡 KDoc 声称「Hilt 单例」的类，注解必须真实存在；`@Binds` 抽象方法的作用域写在实现类上。
-- 禁止新增持有可变状态的顶层 `object`；禁止新增 `getInstance()` / DCL / `INSTANCE` 手写单例（存量 `AppDatabase.getDatabase()` DCL 作为 DatabaseModule 的构建函数保留，运行时唯一实例由 Hilt 管理）。
+- 禁止新增持有可变状态的顶层 `object`；禁止新增 `getInstance()` / DCL / `INSTANCE` 手写单例。仅有的两处存量例外（不得新增）：`AppDatabase.getDatabase()` DCL（作为 DatabaseModule 的构建函数保留，运行时唯一实例由 Hilt 管理）、`Context.settingsDataStore` 顶层属性委托（DataStore 官方硬性要求全进程单实例，访问面见契约 2）。
 - 仅允许无状态常量对象：`SettingsKeys`、`BleConstants`、`LanTransferProtocol`、`ThemeSource`、`ThemeMode`。
 - 对外可变状态一律 `MutableStateFlow` 私有 + `asStateFlow()` 暴露；多线程写的 setter 保持原子更新（CAS）语义。
 - 需早初始化的组件（FairMemory 链、主题/液态玻璃配置）由 `HeartRateApp.onCreate` **显式触发**注入字段（顺序：themeState → liquidGlassState → fairMemoryReceiver.initialize → fairMemoryNotifier.initialize → memoryDiagnostics.initialize → themePreviewCache.preload(appScope)），保证 Composable 读取前就绪，**初始化顺序不得随意调整**（契约 6 红线）。
@@ -358,9 +320,10 @@ description: 项目架构契约、编码规范、验证基线与踩坑指南
                    MainActivity / AppRoot / AppNavHost / AppTabPager /
                    AppBottomNavBar / AppLifecycleEffects / AppChangelogState / NavGuard /
                    AppTheme / AppModule（@AppScope 作用域、() -> Intent 等 :app 专属绑定）/ Manifest / 签名 / 混淆
-:core:model        领域模型（data.model、data.Webhook/WebhookTrigger），零依赖
+:core:model        领域模型（data.model、data.Webhook/WebhookTrigger），零模块依赖
+                  （禁止依赖任何项目内模块；允许外部库，如 immutable / serialization）
 :core:designsystem 主题视觉（Color/Type/ThemeConfig/ThemeState/LiquidGlassState/CustomSchemeCache/
-                   无状态主题函数/ThemePresetSeeds 之外），唯一依赖 :data:settings（3.3.3 特例）
+                   无状态主题函数/ThemePresetSeeds 之外），唯一依赖 :data:settings
 :core:ui           通用 UI（widgets/animation/util/Screen 路由/SettingsComponents/SoundManager/
                    通用字符串与图标）
 :data:settings     DataStore 存储 + SettingsRepository + settingsDataStore 单例（契约 2 例外）
@@ -376,7 +339,7 @@ description: 项目架构契约、编码规范、验证基线与踩坑指南
 ### 9.2 依赖方向（编译期强制）
 
 - 自上而下：`app → feature → (core | data | service)`；`service → (core | data)`；`data → core`。
-- `:core:designsystem → :data:settings` 是唯一 core→data 特例（3.3.3）。
+- `:core:designsystem → :data:settings` 是唯一 core→data 特例。
 - **禁止**：任何模块依赖 `:app`；feature 之间互依；data 依赖 UI/service；core 依赖 feature/service。
 - 新增依赖前先核对目标模块是否在允许方向内；跨 feature 共享代码一律下沉 `:core:ui`/`:core:designsystem`。
 
@@ -438,8 +401,10 @@ description: 项目架构契约、编码规范、验证基线与踩坑指南
 ### 10.0 MVI 三元组（feature 页面 ViewModel 强制）
 
 1. **单一 UiState**：所有 feature ViewModel 继承 `:core:ui` 的 `MviViewModel<S, I>`，
-   状态经唯一 `uiState: StateFlow<XxxUiState>` 下行；UI 收集只允许一行
+   状态经唯一 `uiState: StateFlow<XxxUiState>` 下行；UI 对每个状态只允许一行
    `collectAsStateWithLifecycle()`（后台页配 `collectWhenActive()`）。
+   豁免：UI 直订 Hilt 单例 Repository 暴露的只读流（契约 4/13 的 `HeartRateRepository`
+   实时心率与图表快照）不受"单一收集源"限制，但仍禁止在 UI 层持有其镜像副本。
 2. **sealed Intent**：用户意图封装为 `sealed interface XxxIntent`，经唯一
    `dispatch(intent)` 上行；禁止 VM 再新增公开业务 setter 方法，禁止万能
    Intent（`Update(field, value)`）绕过类型系统。
@@ -521,9 +486,9 @@ Tab 页面底部导航栏下方的系统手势条区域出现一块与页面背�
 而二级页面（非 Tab）没有 `AppRoot` 底部渐变层覆盖，且自身 `LazyColumn` 的
 `windowInsetsPadding` 留白与系统手势条沉浸区域视觉一致，所以"看起来没问题"。
 
-### 正确做法：contentPadding 方式（本项目强制）
+### 正确做法：contentPadding 方式（Tab 页面强制，二级页面建议）
 
-`LazyColumn` / `Column` 等可滚动容器避让系统手势条时，**必须用 `contentPadding`
+`LazyColumn` / `Column`（含 `verticalScroll`）等可滚动容器避让系统手势条时，**Tab 页面必须用 `contentPadding`
 的 `bottom` 消化 inset，不得在 `modifier` 上加 `windowInsetsPadding`**：
 
 ```kotlin

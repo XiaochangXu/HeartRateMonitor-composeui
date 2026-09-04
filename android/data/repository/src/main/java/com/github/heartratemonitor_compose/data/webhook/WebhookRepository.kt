@@ -28,12 +28,7 @@ import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 import javax.inject.Singleton
 
-/**
- * 从原 `ui.webhook.WebhookManager` 下沉到数据层，避免 UI 包直接持有网络管理类。
- *
- * 持久化由 DataStore（经 [SettingsRepository]）承载，值为 kotlinx.serialization
- * 序列化的 JSON 字符串。旧版 `config_webhook.json` 文件在首次启动时一次性迁移。
- */
+// WebhookManager 下沉到数据层；DataStore 持久化 + 旧版 JSON 一次性迁移。
 @Singleton
 class WebhookRepository @Inject constructor(
     application: Application,
@@ -44,19 +39,16 @@ class WebhookRepository @Inject constructor(
     private val legacyWebhookFile = File(application.filesDir, "config_webhook.json")
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
-    // 用于解析用户输入的 headers JSON 字符串（非持久化，运行时 HTTP 请求设置请求头）
+    // 仅运行时解析 headers，非持久化。
     private val json = Json { ignoreUnknownKeys = true }
 
-    // 内存缓存：避免每次 triggerWebhooks（每个心率包）都读盘
     @Volatile
     private var webhooksCache: List<Webhook> = emptyList()
     private val cacheLock = Any()
 
-    // Webhook 节流：记录每个 webhook（以 name|url 为标识）的上次发送时间戳，
-    // 时间窗口内不重复发送，避免高频心率包触发大量 HTTP 请求导致网络拥塞。
+    // 节流：name|url 作标识，窗口内不重复发送，避免高频心率包导致网络拥塞。
     private val lastSentAtMs = ConcurrentHashMap<String, Long>()
 
-    // 标记旧文件是否已迁移
     @Volatile
     private var migrated = false
 
@@ -64,16 +56,11 @@ class WebhookRepository @Inject constructor(
         refreshCache()
     }
 
-    /**
-     * 首次启动时迁移旧 `config_webhook.json` 文件到 DataStore。
-     * 旧文件的 JSON 格式与新格式键名一致，直接用 [Webhook.listFromJson] 解析即可。
-     * 迁移完成后删除旧文件，后续启动跳过。
-     */
+    // 首次启动时迁移旧 config_webhook.json 到 DataStore，完成后删除旧文件。
     private fun migrateLegacyFileIfNeeded() {
         if (migrated) return
         val data = settingsRepository.getNullable(SettingsKeys.WEBHOOKS_JSON)
         if (data != null) {
-            // DataStore 已有数据，无需迁移
             migrated = true
             return
         }
@@ -89,7 +76,7 @@ class WebhookRepository @Inject constructor(
         } catch (e: Exception) {
             Log.e("WebhookRepository", "迁移旧 webhook 文件失败", e)
         } finally {
-            // 无论成功与否都删除旧文件，避免反复尝试失败的迁移
+            // ⚠️ 反直觉设计：无论成功与否都删除旧文件，避免反复尝试失败的迁移。
             legacyWebhookFile.delete()
             migrated = true
         }
@@ -118,11 +105,7 @@ class WebhookRepository @Inject constructor(
         }
     }
 
-    /**
-     * 以 name|url 作为 webhook 标识：body/headers 等字段变更不影响节流判定，
-     * 用户修改 url 重命名后立即生效。
-     * 手动测试（[testWebhook]）不经过本方法，不受节流影响。
-     */
+    // ⚠️ 反直觉设计：以 name|url 作节流标识（body/headers 变更不影响）；testWebhook 不经过此方法，不受节流。
     private fun tryAcquireThrottle(webhook: Webhook): Boolean {
         val now = System.currentTimeMillis()
         var acquired = false
@@ -154,8 +137,7 @@ class WebhookRepository @Inject constructor(
         isTest: Boolean = false
     ): String = withContext(Dispatchers.IO) {
         val bpm = heartRate.toString()
-        // 修复：指定 Locale.US 以防止隐式使用默认 Locale 导致的格式问题
-        val speedStr = String.format(Locale.US, "%.1f", speed)
+        val speedStr = String.format(Locale.US, "%.1f", speed) // Locale.US 防止默认 Locale 格式问题
 
         val shouldReplacePlaceholders = trigger == WebhookTrigger.HEART_RATE_UPDATED
                 || trigger == WebhookTrigger.DISCONNECTED
@@ -256,15 +238,12 @@ class WebhookRepository @Inject constructor(
         }
     }
 
-    /**
-     * 应用进程结束时调用；Service 不应调用，否则会影响配置页等其它持有者。
-     */
+    // ⚠️ 反直觉设计：仅进程结束时调用；Service 不应调用，否则影响配置页等持有者。
     fun shutdown() {
         scope.cancel()
     }
 
     companion object {
-        /** 节流时间窗口（毫秒） */
         private const val THROTTLE_WINDOW_MS = 5_000L
     }
 }

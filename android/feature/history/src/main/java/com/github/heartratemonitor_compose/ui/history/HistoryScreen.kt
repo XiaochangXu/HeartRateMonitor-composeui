@@ -63,9 +63,7 @@ fun HistoryScreen(
 ) {
     val context = LocalContext.current
     val viewModel: HistoryViewModel = hiltViewModel()
-    // 非前台（Tab 被遮挡 / 二级页面打开）时暂停 uiState 订阅：ViewModel 内的
-    // Room 流仍常驻维护状态（正确性不变），但 UI 不再每秒随心率记录重组重绘，
-    // 避免触发底层 pager 层（layerBackdrop 整屏录制）每秒重录
+    // 非前台时暂停 UI 订阅（VM 内 Room 流常驻），避免底层 pager 层每秒重录。
     val uiState by viewModel.uiState.collectWhenActive(isActive)
     val sessions = uiState.sessions
     val previewDataMap = uiState.previewDataMap
@@ -127,7 +125,6 @@ fun HistoryScreen(
     ) { padding ->
         Box(modifier = Modifier.fillMaxSize()) {
             if (uiState.isLoading) {
-                // 数据加载中：不渲染任何内容，避免空状态 icon 闪烁
             } else if (sessions.isEmpty()) {
                 EmptyState(
                     icon = painterResource(com.github.heartratemonitor_compose.ui.widgets.R.drawable.ic_empty_state),
@@ -392,7 +389,7 @@ private fun SessionCard(
                 if (previewData != null && !isMultiSelectMode) {
                     Spacer(Modifier.height(4.dp))
                     Text(
-                        // 数值以 String 传入（%1$s），规避小语种 locale 整数格式化输出本地数字
+                        // ⚠️ 反直觉设计：数值以 String 传入（%1$s），规避小语种 locale 整数格式化输出本地数字
                         text = stringResource(R.string.stats_format, previewData.avgHeartRate.toInt().toString(), previewData.minHeartRate.toString(), previewData.maxHeartRate.toString(), previewData.recordCount.toString()),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
@@ -476,7 +473,6 @@ private fun MiniChart(
         val path = Path()
         samples.forEachIndexed { index, value ->
             val x = index * stepX
-            // 翻转Y轴：最大值在底部，最小值在顶部
             val y = canvasHeight - ((value - chartData.minVal) / chartData.range) * (canvasHeight - 4f) - 2f
             if (index == 0) {
                 path.moveTo(x, y)

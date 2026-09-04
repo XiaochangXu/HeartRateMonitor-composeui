@@ -6,7 +6,6 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 sealed interface AppNavKey : NavKey {
-    /** 栈底占位：Tab 页（AppTabPager）由 NavDisplay 渲染，栈大小 1 表示在 Tab 页 */
     @Serializable
     data object TabRoot : AppNavKey
     @Serializable
@@ -45,7 +44,6 @@ sealed interface AppNavKey : NavKey {
     data object FloatingWindowSettings : AppNavKey
 }
 
-/** feature 层字符串路由 → [AppNavKey] 映射（navigation3 版的 String.toScreenRoute） */
 fun appNavKeyOf(route: String): AppNavKey = when (route) {
     Screen.Devices.route -> AppNavKey.Devices
     Screen.Alarm.route -> AppNavKey.Alarm

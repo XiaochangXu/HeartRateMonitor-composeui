@@ -20,12 +20,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * 当应用在前台收到 TRIM 广播且达到查杀条件时，向用户推送差异化通知：
- * - Java 堆内存异常：提示用户手动关闭应用。
- * - 物理内存异常：提示应用即将/已被系统关闭，提供“重新打开”操作。
- *
- * “重新打开应用” Intent 由 :app 组合根 Hilt 绑定注入（本模块不再 import MainActivity）。
- * Hilt 单例（Phase 2 起由 Hilt 装配，替代 AppContainer）。
+ * TRIM 广播且达查杀条件时向前台推送差异化通知；提供"重新打开应用" Intent。
  */
 @Singleton
 class FairMemoryNotifier @Inject constructor(
@@ -110,8 +105,7 @@ class FairMemoryNotifier @Inject constructor(
     }
 
     /**
-     * 显示 Java 堆内存异常通知。
-     * 仅在应用处于前台时推送，避免后台打扰用户。
+     * 显示 Java 堆内存异常通知。仅在应用处于前台时推送，避免后台打扰。
      */
     fun showHeapMemoryNotification(context: Context) {
         if (!isAppInForeground()) return
@@ -150,8 +144,7 @@ class FairMemoryNotifier @Inject constructor(
     }
 
     /**
-     * 显示物理内存异常通知。
-     * 仅在应用处于前台时推送；通知会保留在通知栏，即使系统随后查杀应用，用户仍可点击重新打开。
+     * 显示物理内存异常通知。仅在应用处于前台时推送；通知保留，用户仍可点击重新打开。
      */
     fun showPssMemoryNotification(context: Context) {
         if (!isAppInForeground()) return

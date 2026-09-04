@@ -10,15 +10,12 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 /**
- * 悬浮窗设置页面的 ViewModel（MVI 架构，Phase 1）。
+ * 悬浮窗设置页面的 ViewModel（MVI 架构）。
  *
  * 职责：
  * - 从 [SettingsRepository.settings] 全量快照派生悬浮窗设置：
- *   UiState 是设置真源的派生投影，Flow 回流经 [setState] 归约（状态下行），
- *   预览色等展示值直接取快照字段，不在 UI 计算。
- * - 开关/滑块/颜色事件经 [FloatingWindowSettingsIntent] dispatch 上行：
- *   滑块 onValueChange 每拍写入（不加节流，语义同 StatusBarSettingsViewModel）；
- *   颜色选择器确认经 ConfirmColor 回写，选择哪个键属 UI 瞬时态。
+ *   UiState 是设置真源的派生投影，Flow 回流经 [setState] 归约（状态下行）。
+ * - 开关/滑块/颜色事件经 [FloatingWindowSettingsIntent] dispatch 上行。
  */
 @HiltViewModel
 class FloatingWindowSettingsViewModel @Inject constructor(
@@ -28,7 +25,7 @@ class FloatingWindowSettingsViewModel @Inject constructor(
 ) {
 
     init {
-        // 设置真源投影：每次快照变化原子归约进 UiState，禁止本地双写（§3.5）
+        // 设置真源投影：每次快照变化原子归约进 UiState，禁止本地双写。
         viewModelScope.launch {
             settings.settings.collect { s ->
                 setState {

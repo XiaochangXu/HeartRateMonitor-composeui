@@ -63,7 +63,7 @@ import com.github.heartratemonitor_compose.ui.widgets.IconContainer
  *
  * 内部实时图表用 Vico [CartesianChartHost]。
  *
- * 状态下行只收集 [MainViewModel.uiState]（MVI，Phase 5）；
+ * 状态下行只收集 [MainViewModel.uiState]（MVI）；
  * 设置派生字段由 VM 投影，首页不再直读 SettingsRepository。
  *
  * @param onToggleFloatingWindow 切换悬浮窗（顶部按钮，原历史入口位置）
@@ -81,11 +81,8 @@ fun HomeScreen(
     // 不在前台 Tab 时暂停高频状态订阅，避免二级页面转场期间后台 Home 页持续重组抢主线程
     val uiState = viewModel.uiState.collectWhenActive(isActive)
 
-    // ── 重组隔离策略 ──
-    // uiState (State<MainUiState>) 中 heartRate / chartDataSnapshot 等高频字段每秒更新，
-    // 若在函数体顶层直接读 uiState.value.xxx，则任一高频字段变化都会触发整个 HomeScreen
-    // （含 Scaffold / TopAppBar）重组。用 derivedStateOf 包裹各字段后，只有当该字段的值
-    // 真正改变时，读取该 derived State 的位置才重组——TopAppBar 等低频区域不再随心跳无效重组。
+    // 重组隔离：uiState 高频字段每秒更新，derivedStateOf 包裹后只有读该字段的位置才重组。
+    // 若直接在顶层读 uiState.value.xxx，TopAppBar 等低频区域会随心跳无效重组。
 
     val appStatus by remember { derivedStateOf { uiState.value.appStatus } }
     val speed by remember { derivedStateOf { uiState.value.speed } }
@@ -124,9 +121,7 @@ fun HomeScreen(
                     )
                 },
                 actions = {
-                    // TopAppBar actions 区域：speed/isSpeedEnabled/floatingWindowEnabled/isConnected
-                    // 均为低频字段（speed 随 BLE 间歇更新，其余只在设置变更时变）。
-                    // derivedStateOf 保证这些值不变时 actions lambda 不重组。
+                    // TopAppBar actions 读低频字段：derivedStateOf 保证不变时 actions lambda 不重组。
                     SpeedPill(
                         speed = speed,
                         isActive = isSpeedEnabled && isConnected
@@ -158,10 +153,7 @@ fun HomeScreen(
         }
     ) { padding ->
         Box(modifier = Modifier.fillMaxSize()) {
-            // 拆分为独立字段传入 + derivedStateOf 隔离：
-            // heartRate 每秒更新时只触发 HeartRateCard 重组，不影响 SessionStatsRow / RealtimeChart 等。
-            // derivedStateOf 保证 uiState.value.xxx 的读取只在该字段真变化时驱动重组，
-            // 而不是整个 MainUiState 对象变化就全量重组 HomeScreen 函数体。
+            // derivedStateOf 隔离：heartRate 每秒更新只触发 HeartRateCard 重组，不全量重组 HomeScreen。
             HomeContent(
                 modifier = Modifier
                     .fillMaxSize()
@@ -214,10 +206,8 @@ private fun HomeContent(
     // HomeContent 只在参数变化时重组，isConnected 会随 appStatus 正确更新。
     val isConnected = appStatus == AppStatus.CONNECTED
 
-    // 入场动画总闸：只在 App 首次进入时播放一次，绝不重播。
-    // entrancePlayed 标记一旦设为 true 永不重置。
-    // 首次组合后立即标记（不等动画播完），这样即使用户在动画播放中途进入
-    // 二级页面再返回，rememberSaveable 恢复的也是 true，不会重播。
+    // 入场动画仅在首次组合时播放一次：entrancePlayed 立即标记为 true（不等动画），
+    // 二级页面返回时 rememberSaveable 恢复 true 不重播。
     var entrancePlayed by rememberSaveable { mutableStateOf(false) }
     val playEntrance = !entrancePlayed
     LaunchedEffect(Unit) {

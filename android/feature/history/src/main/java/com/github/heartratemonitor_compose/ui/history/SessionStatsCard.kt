@@ -57,7 +57,6 @@ internal fun SessionStatsCard(
                 .fillMaxWidth()
                 .padding(16.dp)
         ) {
-            // 卡片头部：圆形背景图标 + 标题，与图表卡片/首页卡片头部风格一致
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
@@ -99,7 +98,7 @@ internal fun SessionStatsCard(
             ) {
                 StatCell(
                     label = stringResource(R.string.stat_avg),
-                    // 数值以 String 传入（%1$s），规避小语种 locale 整数格式化输出本地数字
+                    // ⚠️ 反直觉设计：数值以 String 传入（%1$s），规避小语种 locale 整数格式化输出本地数字
                     value = stringResource(R.string.stat_bpm_value, stats.avg.toString()),
                     modifier = Modifier.weight(1f)
                 )

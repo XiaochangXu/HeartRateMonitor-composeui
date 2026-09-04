@@ -14,16 +14,9 @@ import kotlinx.coroutines.supervisorScope
 import kotlinx.collections.immutable.toImmutableList
 
 /**
- * Phase 5 按域拆分，契约 4。自原 MainViewModel.initializeDataStreams 逐行迁出，
- * 敏感语义原样保留：
- * supervisorScope 隔离各订阅异常；CancellationException 重throw；
- * manualConnectionPending 防竞态；图表数据管道已迁至服务层 SessionChartTracker，
- * 断开时的图表清空由 cleanupConnection 处理，本文件不再操作图表缓存；
- * BLE 状态 → 一次性 Toast 经 bleToastListener 回调（§3.4 方案 1）。
- *
- * Phase 2（HeartRateRepository 迁移）：数据源由 Binder 注入的 BleConnectionManager
- * 改为构造注入的进程级 HeartRateRepository（SSOT），VM 构造期即订阅，
- * 不再依赖 Activity 绑定时序；drop(1) 语义保留（防 StateFlow 首次重放）。
+ * 按域拆分 MainViewModel 的 BLE 数据管道订阅。敏感语义保留：
+ * supervisorScope 隔离各订阅异常；CancellationException 重 throw；
+ * manualConnectionPending 防竞态；drop(1) 防 StateFlow 首次重放。
  */
 internal fun MainViewModel.bindRepositoryStreams(repository: HeartRateRepository): Job {
     return viewModelScope.launch {
@@ -72,7 +65,7 @@ internal fun MainViewModel.bindRepositoryStreams(repository: HeartRateRepository
                 }
             }
 
-            // 订阅服务层图表流（SessionChartTracker）：StateFlow 重放实现「重进即恢复」
+            // 图表流：StateFlow 重放实现「重进即恢复」
             launch {
                 try {
                     combine(
@@ -94,10 +87,7 @@ internal fun MainViewModel.bindRepositoryStreams(repository: HeartRateRepository
 
             launch {
                 try {
-                    // drop(1) 跳过 StateFlow 首次重放：应用重进时 bleState 的当前值
-                    // （如 Connected）会被新订阅者立即收到，但这是状态恢复而非新事件，
-                    // 不应触发图表 reset 或「已连接」Toast。与项目中 BleSettingsListener /
-                    // StatusBarResidentService 等的 drop(1) 模式一致。
+                    // drop(1) 跳过 StateFlow 首次重放：避免应用重进时 bleState 当前值（状态恢复而非新事件）触发图表 reset 或 Toast。
                     repository.bleState.drop(1).collectLatest { state -> handleBleState(state) }
                 } catch (e: CancellationException) {
                     throw e

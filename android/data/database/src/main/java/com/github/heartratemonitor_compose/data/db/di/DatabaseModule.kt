@@ -11,12 +11,6 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
-/**
- * Hilt 数据库装配模块（Phase 2 迁入）。
- *
- * 内部仍调用 [AppDatabase.getDatabase] 作为构建函数（既有 DCL 单例，非新增；
- * 运行时唯一实例实际由 Hilt @Singleton 管理，语义等价）。
- */
 @Module
 @InstallIn(SingletonComponent::class)
 object DatabaseModule {

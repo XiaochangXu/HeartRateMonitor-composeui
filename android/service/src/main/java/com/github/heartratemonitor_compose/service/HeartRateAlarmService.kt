@@ -54,7 +54,7 @@ import kotlinx.collections.immutable.toImmutableList
  * 冷启动经 ServiceBootInitializer（ContentProvider）自动恢复。
  * 用户主动冷启动时进程处于前台，startService 不会被后台启动限制拒绝；
  * 极端情况下后台 startService 可能被拒，try-catch 降级为普通服务；
- * 用户进入应用时 recoverServices 兗底恢复。
+ * 用户进入应用时 recoverServices 兜底恢复。
  */
 @AndroidEntryPoint
 class HeartRateAlarmService : Service() {

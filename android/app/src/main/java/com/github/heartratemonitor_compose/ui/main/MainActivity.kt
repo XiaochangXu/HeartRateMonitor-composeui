@@ -49,10 +49,7 @@ class MainActivity : FragmentActivity() {
             }
         }
 
-        /**
-         * 置位外部启动抑制标志并启动超时自动复位。
-         * 超时确保即使用户从外链页面直接按 HOME，抑制窗口也不会无限泄漏。
-         */
+        // 置位外部启动抑制标志并启动超时自动复位（防止抑制窗口无限泄漏）。
         @JvmStatic
         fun setSuppressHideForExternalLaunch(value: Boolean) {
             suppressResetHandler.removeCallbacks(suppressResetRunnable)
@@ -62,7 +59,6 @@ class MainActivity : FragmentActivity() {
             }
         }
 
-        /** 仅供 [onStart] / [onStop] 读取，不对外暴露 setter。 */
         @JvmStatic
         fun isSuppressHideForExternalLaunch(): Boolean = suppressHideForExternalLaunch
     }
@@ -75,8 +71,7 @@ class MainActivity : FragmentActivity() {
     @Inject lateinit var liquidGlassState: LiquidGlassState
     @Inject lateinit var killStateSaver: KillStateSaver
 
-    // 业务决策与设置写入归 MainViewModel（D2 收敛），Activity 仅保留
-    // Service 绑定机制、权限跳转与 suppressHideForExternalLaunch
+    // Activity 仅保留 Service 绑定机制、权限跳转与 suppressHideForExternalLaunch。
     private val mainViewModel: MainViewModel by lazy {
         androidx.lifecycle.ViewModelProvider(this)[MainViewModel::class.java]
     }
@@ -93,8 +88,7 @@ class MainActivity : FragmentActivity() {
             val binder = service as BleService.LocalBinder
             bleService = binder.getService()
             isBleServiceBound = true
-            // Binder 仅注入控制命令通道（Phase 2 后数据面由 VM 构造期从 HeartRateRepository 订阅）；
-            // 自动连接判定仍在此处触发（服务就绪后）
+            // Binder 仅注入控制命令通道；数据面由 VM 构造期从 HeartRateRepository 订阅。
             mainViewModel.setControlPlane(bleService!!)
             mainViewModel.checkAndStartAutoConnectScan()
         }
@@ -124,7 +118,7 @@ class MainActivity : FragmentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-    
+
         enableEdgeToEdge(
             statusBarStyle = SystemBarStyle.auto(
                 android.graphics.Color.TRANSPARENT,
@@ -135,7 +129,7 @@ class MainActivity : FragmentActivity() {
                 android.graphics.Color.TRANSPARENT
             )
         )
-        
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             window.isNavigationBarContrastEnforced = false
         }
@@ -144,7 +138,6 @@ class MainActivity : FragmentActivity() {
         startAndBindServices()
         requestPermissions()
 
-        // BLE 状态 → Toast 一次性回调：Activity 存活期注册，onDestroy 注销避免泄漏
         mainViewModel.bleToastListener = { event ->
             showToast(
                 getString(
@@ -167,7 +160,6 @@ class MainActivity : FragmentActivity() {
                     killStateSaver = killStateSaver,
                     onToggleFloatingWindow = { toggleFloatingWindow() },
                     onOpenExternal = { intent ->
-                        // DEF-02 修复：跳转成功后才置位，失败时 suppress 不会泄漏
                         try {
                             startActivity(intent)
                             setSuppressHideForExternalLaunch(true)
@@ -185,7 +177,6 @@ class MainActivity : FragmentActivity() {
 
     override fun onStart() {
         super.onStart()
-        // 复位 suppress：取消超时回调并清除标志
         setSuppressHideForExternalLaunch(false)
         setExcludeFromRecentsFlag(false)
     }
@@ -214,7 +205,6 @@ class MainActivity : FragmentActivity() {
         }
     }
 
-    /** 服务恢复经 MainViewModel（业务决策归 VM）；僵尸会话清理已移至 BleService.onCreate。 */
     private fun cleanupAndRecover() {
         mainViewModel.recoverServices()
     }
@@ -222,8 +212,7 @@ class MainActivity : FragmentActivity() {
     private fun startAndBindServices() {
         Intent(this, BleService::class.java).also { intent ->
             serviceLauncher.startBleService()
-            // bindService 前置位标志：避免 bind→onServiceConnected 窗口内 Activity 被销毁时
-            // onDestroy 认为"未绑定"而跳过 unbindService，导致连接泄漏、服务滞留
+            // ⚠️ 反直觉设计：bindService 前置位标志，避免 bind→onServiceConnected 窗口内 Activity 被销毁时 onDestroy 认为"未绑定"跳过 unbindService 导致连接泄漏。
             isBleServiceBound = true
             bindService(intent, bleServiceConnection, Context.BIND_AUTO_CREATE)
         }
@@ -234,9 +223,7 @@ class MainActivity : FragmentActivity() {
     }
 
     private fun toggleFloatingWindow() {
-        // 业务判定与设置写入归 VM；权限跳转依赖 Activity 上下文，留在此处
         if (mainViewModel.toggleFloatingWindow()) {
-            // DEF-02 修复：跳转成功后才置位 suppress
             try {
                 startActivity(overlayPermissionProvider.createManageOverlayIntent())
                 setSuppressHideForExternalLaunch(true)
@@ -299,8 +286,6 @@ class MainActivity : FragmentActivity() {
     private fun setExcludeFromRecentsFlag(exclude: Boolean) {
         try {
             val am = getSystemService(Context.ACTIVITY_SERVICE) as android.app.ActivityManager
-            // 用 baseIntent 包名匹配代替 taskInfo.taskId，兼容 Android 7+ 全版本
-            // (TaskInfo.taskId 字段从 API 29 起才存在，低版本访问会抛 NoSuchFieldError)
             var matched = false
             for (task in am.appTasks) {
                 if (task.taskInfo?.baseIntent?.component?.packageName == packageName) {

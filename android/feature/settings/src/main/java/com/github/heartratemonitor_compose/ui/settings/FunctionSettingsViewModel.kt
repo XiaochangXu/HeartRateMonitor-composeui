@@ -9,16 +9,14 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 /**
- * 功能设置页面的 ViewModel（MVI 架构试点，Phase 0）。
+ * 功能设置页面的 ViewModel（MVI 架构）。
  *
  * 职责：
  * - 从 [SettingsRepository.settings] 全量快照派生页面所需 7 个开关状态：
  *   UiState 是设置真源的派生投影，Flow 回流经 [setState] 归约（状态下行）。
- * - 开关事件经 [FunctionSettingsIntent] dispatch 上行，handler 写入
- *   [SettingsRepository]，写后立读语义由乐观快照回流保证（契约 6 / §3.5）。
+ * - 开关事件经 [FunctionSettingsIntent] dispatch 上行，handler 写入 [SettingsRepository]。
  *
- * 「开启历史记录/速度显示需确认弹窗」的弹窗显隐属纯瞬时态保留 UI 层，
- * 确认后 dispatch 对应 Intent（业务分支语义原样保留）。
+ * 「开启历史记录/速度显示需确认弹窗」的弹窗显隐属纯瞬时态保留 UI 层。
  */
 @HiltViewModel
 class FunctionSettingsViewModel @Inject constructor(
@@ -28,7 +26,7 @@ class FunctionSettingsViewModel @Inject constructor(
 ) {
 
     init {
-        // 设置真源投影：每次快照变化原子归约进 UiState，禁止本地双写（§3.5）
+        // 设置真源投影：每次快照变化原子归约进 UiState，禁止本地双写。
         viewModelScope.launch {
             settings.settings.collect { s ->
                 setState {

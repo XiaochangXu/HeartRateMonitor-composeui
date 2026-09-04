@@ -14,10 +14,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import javax.inject.Singleton
 
-/**
- * `() -> Intent` 引用 MainActivity，由 :app 提供，:service 的 FairMemoryNotifier 不再 import MainActivity。
- * `(Boolean) -> Unit` 由 StatusBarSettingsViewModel 构造注入（无悬浮窗权限跳系统权限页前外部启动抑制）。
- */
+// ()->Intent 由 :app 提供，使 :service 的 FairMemoryNotifier 不再 import MainActivity。
 @Module
 @InstallIn(SingletonComponent::class)
 object AppModule {

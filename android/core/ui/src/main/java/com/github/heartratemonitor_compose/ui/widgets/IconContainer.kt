@@ -15,9 +15,6 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
-/**
- * 将图标包裹在圆形彩色背景中，提升视觉层级和功能区分度。
- */
 @Composable
 fun IconContainer(
     icon: Painter,
@@ -43,7 +40,6 @@ fun IconContainer(
     }
 }
 
-/** [ImageVector] 重载。 */
 @Composable
 fun IconContainer(
     icon: ImageVector,

@@ -130,16 +130,9 @@ fun FullScreenHeartRate(
     // 心率值变化不重启 beep 循环，循环内动态读取最新值
     val currentHeartRate by rememberUpdatedState(heartRate)
 
-    // 心率更新驱动语音播放（单一收集协程，key 为 soundManager 而非 heartRate）：
-    // - hrState == null 且 heartRate > 0：首次心率到达，播放初始状态语音
-    // - hrState != null 且跨阈值：播放状态切换语音
-    // 旧实现用 LaunchedEffect(heartRate) 作 key：心率每秒更新都会取消进行中的语音等待，
-    // finally 提前放开 beepPaused → 语音与 beep 重叠；初始语音的 delay(500) 也会被反复打断。
-    // snapshotFlow 合流心率更新：语音播放期间的 delay 不再被下一次心率更新取消；
-    // 语音期间发生的跨阈值变化在语音结束后以最新心率重新判定，避免重复播放。
-    // 必须经 rememberUpdatedState 的 currentHeartRate 读取：LaunchedEffect 闭包捕获的是
-    // 首次组合时的值类型局部变量，重组不重启协程，直接读 heartRate 会永远停在进入全屏时的值，
-    // 导致心率 0→首次数据、跨阈值切换等全部语音更新失效（与 beep 循环同一陷阱）。
+    // 语音播放协程以 soundManager 为 key（非 heartRate），避免心率每秒更新取消进行中的语音等待导致重叠。
+    // snapshotFlow 合流心率更新：语音期间的 delay 不再被打断，跨阈值变化在语音结束后以最新心率重新判定。
+    // ⚠️ 反直觉设计：必须经 rememberUpdatedState 读取心率——LaunchedEffect 闭包捕获首次组合时的值，直接读 heartRate 会永远停在进入全屏时的值。
     LaunchedEffect(soundManager) {
         val sm = soundManager ?: return@LaunchedEffect
         snapshotFlow { currentHeartRate }.collect { rate ->
@@ -173,10 +166,8 @@ fun FullScreenHeartRate(
         }
     }
 
-    // 循环 beep：按 60_000/bpm 间隔重复播放，节奏跟心跳
-    // HIGH→high_beep, LOW→low_beep
-    // 依赖 hrState + beepPaused：首次状态语音播完后（hrState 被设置）才启动；
-    // 心率值不作为 key，循环内动态读取 currentHeartRate，避免每次心率更新取消重启导致节奏紊乱
+    // 循环 beep：以 60_000/bpm 间隔播放，节奏跟心跳。
+    // 依赖 hrState + beepPaused 为 key（非 heartRate）：首次语音播完后才启动，避免每次心率更新取消重启导致节奏紊乱。
     LaunchedEffect(hrState, beepPaused) {
         val sm = soundManager ?: return@LaunchedEffect
         if (beepPaused) return@LaunchedEffect
@@ -196,27 +187,19 @@ fun FullScreenHeartRate(
         }
     }
 
-    // ECG 滚动动画：ecgPhase 在 0..1 之间循环，每个周期 = 一个心动周期（60_000/bpm ms）
-    // 与 beep 循环保持一致的最佳实践：LaunchedEffect key 为动画开关而非心率值，
-    // 循环内动态读取 currentEffectiveBpm 计算帧步长，心率变化只改变下一帧步长，
-    // 不取消重启协程，不 snapTo(0f)，无视觉跳变。
-    // 不用 animateTo + infiniteRepeatable：该组合被取消后 initialValue 变为当前值，
-    // Restart 只在 [当前值..1f] 间循环，永远到不了 0→当前值 段的 P-QRS-T 波形。
+    // ECG 滚动动画：ecgPhase 在 0..1 循环，每周期 = 一个心动周期（60_000/bpm ms）。
+    // ⚠️ 反直觉设计：不用 animateTo + infiniteRepeatable——取消后 initialValue 变当前值，永远到不了 0→当前值 段的 P-QRS-T 波形。
     val effectiveBpm = if (isAnimationEnabled && heartRate > 30) heartRate else 0
     val currentEffectiveBpm by rememberUpdatedState(effectiveBpm)
     val ecgPhase = remember { Animatable(0f) }
     LaunchedEffect(isAnimationEnabled) {
         if (!isAnimationEnabled) return@LaunchedEffect
-        // 使用 withFrameNanos 挂接到 Choreographer Vsync 信号：
-        // 每帧在屏幕刷新的精确时间点执行，帧间隔稳定且无抖动。
-        // 以 frameTimeNanos 计算实际经过时间，保证相位推进精确匹配心率，
-        // 同时避免 delay(16) 不与 Vsync 同步导致的帧间隔 16~32ms 波动和丢帧。
-        // 心率无效时回退到 delay(100) 轮询等待有效值（此时不绘制波形，无性能影响）。
+        // withFrameNanos 挂接 Vsync 信号，保证相位推进精确匹配心率，避免 delay(16) 的帧间隔波动。心率无效时回退到 delay(100) 轮询。
         var lastNanos = 0L
         while (isActive) {
             val bpm = currentEffectiveBpm
             if (bpm <= 0) {
-                // 心率暂时无效（≤30 或未连接）：暂停推进，重置时间基准等待有效值
+                // 心率无效（≤30 或未连接）：暂停推进，重置时间基准等待
                 lastNanos = 0L
                 delay(100)
                 continue
@@ -227,8 +210,7 @@ fun FullScreenHeartRate(
                 lastNanos = frameNanos
                 continue
             }
-            // 浮点除法避免整型截断：高刷新率（120/144Hz）下帧间隔不足 1ms，整除会损失精度，
-            // 导致相位推进慢于真实心率（60Hz 约慢 4%，144Hz 约慢 13%）。
+            // ⚠️ 反直觉设计：浮点除法避免整型截断——高刷新率下帧间隔不足 1ms，整除会损失精度导致相位推进慢于真实心率。
             val elapsedMs = (frameNanos - lastNanos) / NANOS_PER_MS.toFloat()
             lastNanos = frameNanos
             if (elapsedMs > 0) {
@@ -240,7 +222,7 @@ fun FullScreenHeartRate(
         }
     }
 
-    // 全屏沉浸模式：隐藏状态栏/导航栏 + 保持屏幕常亮，退出时恢复
+    // 全屏沉浸模式：隐藏系统栏 + 保持屏幕常亮
     val fullscreenView = LocalView.current
     DisposableEffect(fullscreenView) {
         val window = (fullscreenView.context as? Activity)?.window
@@ -263,9 +245,7 @@ fun FullScreenHeartRate(
             .fillMaxSize()
             .background(ComposeColor.Black)
             .drawBehind {
-                // 动画关闭（心率动画开关关闭，或未连接/心率 ≤30）时不画网格与波形线：
-                // 纯黑背景 + 静态爱心与心率数字，避免"静止红平线"的观感歧义。
-                // 动画开启时绘制行为与之前完全一致。
+                // ⚠️ 反直觉设计：effectiveBpm=0 时不画网格与波形线，避免"静止红平线"的观感歧义。
                 if (effectiveBpm > 0) {
                     val canvasW = size.width
                     val canvasH = size.height
