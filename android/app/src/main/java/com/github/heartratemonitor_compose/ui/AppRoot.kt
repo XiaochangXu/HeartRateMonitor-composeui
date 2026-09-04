@@ -16,10 +16,12 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -37,6 +39,12 @@ import com.github.heartratemonitor_compose.ui.main.FullScreenHeartRate
 import com.github.heartratemonitor_compose.ui.main.MainViewModel
 import com.github.heartratemonitor_compose.ui.settings.ChangelogBottomSheet
 import com.github.heartratemonitor_compose.ui.theme.LiquidGlassState
+import kotlinx.coroutines.delay
+
+// 首帧绘制后再等窗口/启动转场稳定，保证更新日志 BottomSheet 的展开动画有帧可跑
+private const val CHANGELOG_UI_SETTLE_MS = 300L
+// 权限流程超时兜底（自 UI 就绪起算），防止回调丢失导致更新日志永不展示
+private const val CHANGELOG_PERMISSION_TIMEOUT_MS = 3000L
 
 @Composable
 fun AppRoot(
@@ -87,6 +95,15 @@ fun AppRoot(
     )
 
     val changelogNotice by changelogNotifier.notice.collectAsStateWithLifecycle()
+
+    // 更新日志放行编排：首帧真实绘制 + 窗口稳定后放行；权限回调迟迟不来则超时强制放行。
+    LaunchedEffect(Unit) {
+        withFrameNanos { }
+        delay(CHANGELOG_UI_SETTLE_MS)
+        changelogNotifier.markUiReady()
+        delay(CHANGELOG_PERMISSION_TIMEOUT_MS)
+        changelogNotifier.markPermissionsSettled()
+    }
 
     val reducedMotion = rememberSystemReducedMotion()
 

@@ -280,6 +280,8 @@ class MainActivity : FragmentActivity() {
                 } else {
                     serviceLauncher.startBleService()
                 }
+                // 用户处理完权限对话框后再放行更新日志
+                changelogNotifier.markPermissionsSettled()
             }
     }
 
