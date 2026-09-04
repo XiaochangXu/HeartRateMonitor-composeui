@@ -24,6 +24,7 @@ import android.os.Vibrator
 import android.os.VibratorManager
 import androidx.core.app.NotificationCompat
 import com.github.heartratemonitor_compose.service.R
+import com.github.heartratemonitor_compose.service.di.AlarmPageIntents
 import com.github.heartratemonitor_compose.data.settings.SettingsKeys
 import com.github.heartratemonitor_compose.data.repository.SettingsRepository
 import com.github.heartratemonitor_compose.service.posture.PostureCalibration
@@ -88,6 +89,8 @@ class HeartRateAlarmService : Service() {
 
     @Inject lateinit var settingsRepository: SettingsRepository
     @Inject lateinit var reopenAppIntent: @JvmSuppressWildcards () -> Intent
+    @AlarmPageIntents
+    @Inject lateinit var alarmPageIntents: @JvmSuppressWildcards () -> Array<Intent>
     private lateinit var sensorManager: SensorManager
     private lateinit var postureDetector: PostureDetector
     private var bleService: BleService? = null
@@ -397,6 +400,14 @@ class HeartRateAlarmService : Service() {
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setCategory(NotificationCompat.CATEGORY_ALARM)
             .setAutoCancel(true)
+            // ⚠️ 反直觉设计：此前缺失 setContentIntent，通知点击无反应；
+            // TaskStackBuilder 垫 MainActivity，直达报警页后返回键回主界面而非桌面
+            .setContentIntent(
+                PendingIntent.getActivities(
+                    this, 0, alarmPageIntents(),
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                )
+            )
             .build()
 
         notificationManager.notify(ALARM_NOTIFICATION_ID, notification)

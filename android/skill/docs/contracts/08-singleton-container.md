@@ -42,7 +42,7 @@ Hilt 对无作用域绑定会在每个注入点各建一个新实例。2026-08 �
 需早初始化的组件（FairMemory 链、主题/液态玻璃配置）由 `HeartRateApp.onCreate` **显式触发**注入字段，顺序：
 
 ```
-themeState → liquidGlassState → fairMemoryReceiver.initialize → fairMemoryNotifier.initialize → memoryDiagnostics.initialize → themePreviewCache.preload(appScope)
+themeState → liquidGlassState → fairMemoryReceiver.initialize → fairMemoryNotifier.initialize → memoryDiagnostics.initialize → themePreviewCache.preload(appScope) → appForegroundMonitor.observe()
 ```
 
 保证 Composable 读取前就绪。**初始化顺序不得随意调整**（契约 6 红线）。

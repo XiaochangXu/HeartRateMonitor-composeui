@@ -49,6 +49,115 @@
             </intent-filter>
         </activity>
 
+        <activity
+            android:name=".ui.page.LicenseActivity"
+            android:exported="false"
+            android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize"
+            android:theme="@style/Theme.HeartRateMonitorMobile" />
+
+        <activity
+            android:name=".ui.page.DevicesActivity"
+            android:exported="false"
+            android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize"
+            android:theme="@style/Theme.HeartRateMonitorMobile" />
+
+        <activity
+            android:name=".ui.page.ChartActivity"
+            android:exported="false"
+            android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize"
+            android:theme="@style/Theme.HeartRateMonitorMobile" />
+
+        <activity
+            android:name=".ui.page.AlarmActivity"
+            android:exported="false"
+            android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize"
+            android:theme="@style/Theme.HeartRateMonitorMobile" />
+
+        <activity
+            android:name=".ui.page.FullscreenActivity"
+            android:exported="false"
+            android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize|keyboardHidden"
+            android:screenOrientation="landscape"
+            android:theme="@style/Theme.HeartRateMonitorMobile.Fullscreen" />
+
+        <activity
+            android:name=".ui.page.FunctionSettingsActivity"
+            android:exported="false"
+            android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize"
+            android:theme="@style/Theme.HeartRateMonitorMobile" />
+
+        <activity
+            android:name=".ui.page.ThemeSettingsActivity"
+            android:exported="false"
+            android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize"
+            android:theme="@style/Theme.HeartRateMonitorMobile" />
+
+        <activity
+            android:name=".ui.page.LanguageSettingsActivity"
+            android:exported="false"
+            android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize"
+            android:theme="@style/Theme.HeartRateMonitorMobile" />
+
+        <activity
+            android:name=".ui.page.NavStyleActivity"
+            android:exported="false"
+            android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize"
+            android:theme="@style/Theme.HeartRateMonitorMobile" />
+
+        <activity
+            android:name=".ui.page.FullscreenSoundActivity"
+            android:exported="false"
+            android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize"
+            android:theme="@style/Theme.HeartRateMonitorMobile" />
+
+        <activity
+            android:name=".ui.page.ServerActivity"
+            android:exported="false"
+            android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize"
+            android:theme="@style/Theme.HeartRateMonitorMobile" />
+
+        <activity
+            android:name=".ui.page.WebhookActivity"
+            android:exported="false"
+            android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize"
+            android:theme="@style/Theme.HeartRateMonitorMobile" />
+
+        <activity
+            android:name=".ui.page.LanTransferActivity"
+            android:exported="false"
+            android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize"
+            android:theme="@style/Theme.HeartRateMonitorMobile" />
+
+        <activity
+            android:name=".ui.page.StatusBarSettingsActivity"
+            android:exported="false"
+            android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize"
+            android:theme="@style/Theme.HeartRateMonitorMobile" />
+
+        <activity
+            android:name=".ui.page.FloatingWindowSettingsActivity"
+            android:exported="false"
+            android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize"
+            android:theme="@style/Theme.HeartRateMonitorMobile" />
+
+        <activity
+            android:name=".ui.page.AboutDetailsActivity"
+            android:exported="false"
+            android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize"
+            android:theme="@style/Theme.HeartRateMonitorMobile" />
+
+        <activity
+            android:name=".ui.page.PrivacyActivity"
+            android:exported="false"
+            android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize"
+            android:theme="@style/Theme.HeartRateMonitorMobile" />
+
+        <activity
+            android:name=".ui.page.FairMemoryActivity"
+            android:exported="false"
+            android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize"
+            android:theme="@style/Theme.HeartRateMonitorMobile" />
+
         <!-- HeartRateApp 实现 Configuration.Provider（HiltWorkerFactory），
              按 WorkManager 按需初始化官方要求移除默认 WorkManagerInitializer，
              否则 lint RemoveWorkManagerInitializer 报 Error 且 WorkManager 在启动期

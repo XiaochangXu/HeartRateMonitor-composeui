@@ -13,8 +13,6 @@ materialIcons = "1.7.8"
 material3 = "1.5.0-alpha23"
 vico = "3.3.0"
 room = "3.0.2"
-navigation3 = "1.1.6"
-navigationevent = "1.2.0-alpha04"
 savedstate = "1.5.0"
 fragmentKtx = "1.9.0"
 kable = "0.44.3"
@@ -67,10 +65,6 @@ androidx-room-runtime = { group = "androidx.room3", name = "room3-runtime", vers
 androidx-room-compiler = { group = "androidx.room3", name = "room3-compiler", version.ref = "room" }
 androidx-room-testing = { group = "androidx.room3", name = "room3-testing", version.ref = "roomTesting" }
 androidx-sqlite-bundled = { group = "androidx.sqlite", name = "sqlite-bundled", version.ref = "androidxSqlite" }
-androidx-navigation3-ui = { group = "androidx.navigation3", name = "navigation3-ui", version.ref = "navigation3" }
-androidx-navigationevent = { group = "androidx.navigationevent", name = "navigationevent", version.ref = "navigationevent" }
-androidx-navigationevent-compose = { group = "androidx.navigationevent", name = "navigationevent-compose", version.ref = "navigationevent" }
-androidx-lifecycle-viewmodel-navigation3 = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-navigation3", version.ref = "lifecycle" }
 androidx-lifecycle-service = { group = "androidx.lifecycle", name = "lifecycle-service", version.ref = "lifecycle" }
 androidx-lifecycle-runtime-compose = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "lifecycle" }
 androidx-lifecycle-viewmodel-ktx = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-ktx", version.ref = "lifecycle" }

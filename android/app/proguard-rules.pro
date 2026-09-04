@@ -201,25 +201,6 @@
 # ----------------------------------------------------------------------------
 
 # ----------------------------------------------------------------------------
-# 18. kotlinx.serialization（navigation3 返回栈持久化：AppNavKey 为 @Serializable）
-#     AppNavKey 及其 18 个子类型被 navigation3 rememberNavBackStack 用于持久化
-#     返回栈，运行时通过编译器生成的 $$serializer 反射序列化/反序列化。
-#
-#     kotlinx.serialization 自带的 consumer-rules（rules/common.pro）已覆盖：
-#     - @Serializable 类的 Companion / INSTANCE / serializer() 方法
-#     - $$serializer 的 descriptor 字段
-#     - RuntimeVisibleAnnotations / AnnotationDefault 属性
-#
-#     此处仅补充项目特定的 AppNavKey sealed 接口及其全部嵌套子类型，
-#     确保多态序列化的类名（type discriminator）不被混淆——
-#     官方规则保留 Companion 和 $$serializer，但不保留类名本身，
-#     而密封类的序列化输出以 "companion_qualified_name" 作为子类型标签。
-# ----------------------------------------------------------------------------
--keep,includedescriptorclasses class com.github.heartratemonitor_compose.ui.AppNavKey { *; }
--keep,includedescriptorclasses class com.github.heartratemonitor_compose.ui.AppNavKey$* { *; }
--keep,includedescriptorclasses class com.github.heartratemonitor_compose.ui.AppNavKey$*$* { *; }
-
-# ----------------------------------------------------------------------------
 # 19. Coil 3（图片加载，自带 consumer-rules，仅 dontwarn 兜底）
 #     用于关于页维护者头像加载，Coil 3 内部依赖 OkHttp，其自带 consumer-rules
 #     已覆盖 OkHttp 与 Okio 核心类，此处仅防止传递依赖警告。

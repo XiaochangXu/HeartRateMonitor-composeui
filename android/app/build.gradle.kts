@@ -1,7 +1,6 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
-    alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt)
     alias(libs.plugins.androidx.baselineprofile)
@@ -167,12 +166,6 @@ dependencies {
     implementation(libs.androidx.profileinstaller)
 
     implementation(libs.vico.compose.m3)
-
-    implementation(libs.androidx.navigation3.ui)
-    implementation(libs.androidx.navigationevent)
-    implementation(libs.androidx.navigationevent.compose)
-    implementation(libs.androidx.lifecycle.viewmodel.navigation3)
-    implementation(libs.kotlinx.serialization.core)
 
     implementation(libs.androidx.lifecycle.service)
 

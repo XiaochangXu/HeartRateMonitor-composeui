@@ -16,6 +16,7 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ProcessLifecycleOwner
 import com.github.heartratemonitor_compose.service.R
+import com.github.heartratemonitor_compose.service.di.FairMemoryPageIntents
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -25,7 +26,8 @@ import javax.inject.Singleton
 @Singleton
 class FairMemoryNotifier @Inject constructor(
     private val application: Application,
-    private val reopenAppIntent: @JvmSuppressWildcards () -> Intent
+    private val reopenAppIntent: @JvmSuppressWildcards () -> Intent,
+    @FairMemoryPageIntents private val fairMemoryPageIntents: @JvmSuppressWildcards () -> Array<Intent>
 ) {
 
     @Volatile
@@ -151,10 +153,11 @@ class FairMemoryNotifier @Inject constructor(
 
         val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
-        val reopenIntent = PendingIntent.getActivity(
+        // TaskStackBuilder 垫 MainActivity：直达 FairMemory 页后返回键回主界面而非桌面
+        val pageIntents = PendingIntent.getActivities(
             context,
             0,
-            reopenAppIntent(),
+            fairMemoryPageIntents(),
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
@@ -167,8 +170,8 @@ class FairMemoryNotifier @Inject constructor(
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setCategory(NotificationCompat.CATEGORY_SYSTEM)
             .setAutoCancel(true)
-            .setContentIntent(reopenIntent)
-            .addAction(0, context.getString(R.string.fair_memory_reopen_app), reopenIntent)
+            .setContentIntent(pageIntents)
+            .addAction(0, context.getString(R.string.fair_memory_reopen_app), pageIntents)
             .build()
 
         manager.notify(PSS_NOTIFICATION_ID, notification)

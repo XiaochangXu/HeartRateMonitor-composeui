@@ -17,8 +17,16 @@
 ## 例外
 
 Activity/Service 通过 Binder 绑定具体 Service 属绑定机制，允许保留具体类型：
-- `MainViewModel.setControlPlane` 注入控制命令通道
+- `MainActivity` 绑定 `BleService` 后将实例注册进 `BleControlPlaneRegistry`
 - StatusBarResidentService / FloatingWindowService 绑定仅为确保前台服务存在，数据已从 Repository 直订
+
+## 控制面获取（BleControlPlaneRegistry，2026-09 多 Activity 迁移新增）
+
+`@Singleton BleControlPlaneRegistry` 进程级持有活服务引用（`StateFlow<BleConnectionManager?>`）：
+
+- `BleService.onCreate` 必须 `register(this)`、`onDestroy` 必须 `unregister(this)`，**不得移除**——多 Activity 下各 `MainViewModel` 实例经此获取控制面，注册缺失 = 扫描/连接/断开静默失效
+- ViewModel/UI 侧经 `registry.manager.value` 取 `BleConnectionManager`，仍禁止依赖具体 `BleService` 类
+- `MainViewModel.setControlPlane` 弱引用注入**已删除**（多 Activity 下双实例各自持弱引用，命令会发往死实例）
 
 ## BleService 职责
 

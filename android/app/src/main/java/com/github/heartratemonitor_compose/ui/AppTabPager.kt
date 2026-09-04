@@ -32,17 +32,14 @@ import kotlinx.coroutines.launch
 @Composable
 fun AppTabHost(
     viewModel: MainViewModel,
-    isOnTab: Boolean,
     onToggleFloatingWindow: () -> Unit,
-    onEnterFullScreen: () -> Unit,
-    safeNavigate: (AppNavKey) -> Unit,
     onOpenExternal: (android.content.Intent) -> Unit,
     liquidGlassConfig: LiquidGlassConfig,
-    isFullScreenMode: Boolean,
     onCurrentTabChange: (Screen) -> Unit,
     killStateSaver: KillStateSaver,
     navAnimationDisabled: Boolean
 ) {
+    val context = LocalContext.current
     // pagerState 随场景生灭：rememberSaveable 恢复页签
     val pagerState = rememberPagerState(initialPage = 0) { 4 }
     val currentTab = tabScreenAt(pagerState.currentPage)
@@ -62,11 +59,11 @@ fun AppTabHost(
         }
         pagerState.scrollToPage(restoreIndex)
         if (saved.isFullScreen && viewModel.uiState.value.appStatus == AppStatus.CONNECTED) {
-            onEnterFullScreen()
+            context.launchDestination(Destination.Fullscreen)
         }
     }
 
-    // 切 Tab：点击已由 AppBottomNavBar 的 isOnTab 门控，二级页面时导航条已随场景销毁
+    // 切 Tab：二级页面已独立成 Activity，导航条只在 Tab 宿主渲染，恒可交互
     val scope = rememberCoroutineScope()
     val onTabSelected: (Int) -> Unit = { pageIndex ->
         if (tabScreenAt(pageIndex) != currentTab) {
@@ -106,10 +103,7 @@ fun AppTabHost(
             AppTabPager(
                 viewModel = viewModel,
                 pagerState = pagerState,
-                isOnTab = isOnTab,
                 onToggleFloatingWindow = onToggleFloatingWindow,
-                onEnterFullScreen = onEnterFullScreen,
-                safeNavigate = safeNavigate,
                 onOpenExternal = onOpenExternal
             )
         }
@@ -118,8 +112,6 @@ fun AppTabHost(
             liquidGlassEnabled = liquidGlassEnabled,
             liquidBackdrop = liquidBackdrop,
             liquidGlassConfig = liquidGlassConfig,
-            isFullScreenMode = isFullScreenMode,
-            isOnTab = isOnTab,
             selectedPage = selectedPage,
             onTabSelected = onTabSelected,
             isTabSwitching = isTabSwitching,
@@ -133,10 +125,7 @@ fun AppTabPager(
     modifier: Modifier = Modifier,
     viewModel: MainViewModel,
     pagerState: PagerState,
-    isOnTab: Boolean,
     onToggleFloatingWindow: () -> Unit,
-    onEnterFullScreen: () -> Unit,
-    safeNavigate: (AppNavKey) -> Unit,
     onOpenExternal: (android.content.Intent) -> Unit
 ) {
     val context = LocalContext.current
@@ -144,12 +133,10 @@ fun AppTabPager(
     HorizontalPager(
         state = pagerState,
         modifier = modifier.fillMaxSize(),
-        // 4 个 Tab 页全部预组合（beyondViewportPageCount = 3 覆盖全部剩余页），
-        // 保持 Tab 页常驻；进入二级页面后 Pager 仍随场景销毁
-        beyondViewportPageCount = 3,
-        userScrollEnabled = isOnTab
+        // 4 个 Tab 页全部预组合（beyondViewportPageCount = 3 覆盖全部剩余页），保持 Tab 页常驻
+        beyondViewportPageCount = 3
     ) { page ->
-        val isActive = isOnTab && pagerState.currentPage == page
+        val isActive = pagerState.currentPage == page
         // 页面级 LifecycleOwner：非活跃页降至 STARTED，
         // collectAsStateWithLifecycle 自动暂停；collectWhenActive 不受影响（独立于生命周期）
         val pageLifecycleOwner = rememberPageLifecycleOwner(isActive)
@@ -157,18 +144,18 @@ fun AppTabPager(
             when (page) {
                 0 -> {
                     val onToggleFloatingWindowStable = remember(onToggleFloatingWindow) { onToggleFloatingWindow }
-                    val onNavigateToDevices = remember(safeNavigate) { { safeNavigate(AppNavKey.Devices) } }
-                    val onEnterFullScreenStable = remember { onEnterFullScreen }
+                    val onNavigateToDevices = remember(context) { { context.launchDestination(Destination.Devices) } }
+                    val onEnterFullScreen = remember(context) { { context.launchDestination(Destination.Fullscreen) } }
                     HomeScreen(
                         viewModel = viewModel,
                         isActive = isActive,
                         onToggleFloatingWindow = onToggleFloatingWindowStable,
                         onNavigateToDevices = onNavigateToDevices,
-                        onEnterFullScreen = onEnterFullScreenStable
+                        onEnterFullScreen = onEnterFullScreen
                     )
                 }
                 1 -> {
-                    val onChart = remember(safeNavigate) { { sessionId: Long -> safeNavigate(AppNavKey.Chart(sessionId)) } }
+                    val onChart = remember(context) { { sessionId: Long -> context.launchDestination(Destination.Chart(sessionId)) } }
                     HistoryScreen(
                         onNavigateBack = {},
                         onNavigateToChart = onChart,
@@ -184,7 +171,12 @@ fun AppTabPager(
                     )
                 }
                 3 -> {
-                    val onSettingsNavigate = remember(safeNavigate) { { route: String -> safeNavigate(appNavKeyOf(route.toScreenRoute())) } }
+                    val onSettingsNavigate = remember(context) {
+                        { route: String ->
+                            val destination = Destination.of(route)
+                            if (destination != null) context.launchDestination(destination)
+                        }
+                    }
                     val showToast = remember(context) { { message: String -> Toast.makeText(context, message, Toast.LENGTH_SHORT).show() } }
                     SettingsScreen(
                         isActive = isActive,

@@ -28,7 +28,6 @@ class KillStateSaver @Inject constructor(
         private set
 
     data class Snapshot(
-        val route: String = "",
         val tab: String = "",
         val isFullScreen: Boolean = false,
         val connectedDeviceId: String? = null,
@@ -45,7 +44,6 @@ class KillStateSaver @Inject constructor(
             runBlocking(Dispatchers.IO) {
                 application.settingsDataStore.edit { prefs ->
                     prefs[SettingsKeys.KILL_STATE_SAVED] = true
-                    prefs[SettingsKeys.KILL_STATE_ROUTE] = snapshot.route
                     prefs[SettingsKeys.KILL_STATE_TAB] = snapshot.tab
                     prefs[SettingsKeys.KILL_STATE_FULLSCREEN] = snapshot.isFullScreen
                     prefs.putOrRemove(
@@ -59,7 +57,7 @@ class KillStateSaver @Inject constructor(
                     prefs[SettingsKeys.KILL_STATE_TIMESTAMP] = System.currentTimeMillis()
                 }
             }
-            Log.i(TAG, "KILL 现场已保存: route=${snapshot.route}, tab=${snapshot.tab}, " +
+            Log.i(TAG, "KILL 现场已保存: tab=${snapshot.tab}, " +
                     "fullscreen=${snapshot.isFullScreen}, device=${snapshot.connectedDeviceId}")
         } catch (e: Exception) {
             Log.e(TAG, "保存 KILL 现场失败", e)
@@ -85,7 +83,6 @@ class KillStateSaver @Inject constructor(
         }
 
         return Snapshot(
-            route = settings.get(SettingsKeys.KILL_STATE_ROUTE),
             tab = settings.get(SettingsKeys.KILL_STATE_TAB),
             isFullScreen = settings.get(SettingsKeys.KILL_STATE_FULLSCREEN),
             connectedDeviceId = settings.getNullable(SettingsKeys.KILL_STATE_CONNECTED_DEVICE_ID),
@@ -99,6 +96,7 @@ class KillStateSaver @Inject constructor(
     fun clear() {
         try {
             settings.set(SettingsKeys.KILL_STATE_SAVED, false)
+            // KILL_STATE_ROUTE 已随多 Activity 迁移废弃，此处 remove 清理旧版本升级残留
             settings.remove(SettingsKeys.KILL_STATE_ROUTE)
             settings.remove(SettingsKeys.KILL_STATE_TAB)
             settings.remove(SettingsKeys.KILL_STATE_FULLSCREEN)

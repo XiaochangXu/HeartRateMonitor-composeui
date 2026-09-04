@@ -76,17 +76,13 @@ fun AppBottomNavBar(
     liquidGlassEnabled: Boolean,
     liquidBackdrop: Backdrop,
     liquidGlassConfig: LiquidGlassConfig,
-    isFullScreenMode: Boolean,
-    isOnTab: Boolean,
     selectedPage: () -> Int,
     onTabSelected: (Int) -> Unit,
     isTabSwitching: () -> Boolean = { false },
     modifier: Modifier = Modifier
 ) {
-    val interactive = { isOnTab && !isFullScreenMode }
-    val gatedTabSelected = remember(isOnTab, onTabSelected) {
-        { index: Int -> if (isOnTab) onTabSelected(index) }
-    }
+    // 二级页已独立成 Activity，导航条只在 Tab 宿主渲染，恒可交互
+    val interactive = { true }
     Box(modifier = modifier) {
         // 底部渐变背景由 AppRoot 统一提供（windowInsetsBottomHeight 渐变层），
         // 导航条自身不再重复绘制背景渐变——否则两层叠加会导致底部区域
@@ -119,7 +115,7 @@ fun AppBottomNavBar(
                 FloatingBottomBar(
                     backdrop = liquidBackdrop,
                     selectedTabIndex = selectedPage,
-                    onTabSelected = gatedTabSelected,
+                    onTabSelected = onTabSelected,
                     tabs = glassTabs,
                     config = liquidGlassConfig,
                     interactive = interactive,
@@ -129,7 +125,7 @@ fun AppBottomNavBar(
                 // 简单回退：普通 Surface + 常驻 label，复用液态玻璃同款拖拽指示器手势
                 SurfaceFallbackNav(
                     selectedPage = selectedPage,
-                    onTabSelected = gatedTabSelected,
+                    onTabSelected = onTabSelected,
                     interactive = interactive
                 )
             }
@@ -171,8 +167,7 @@ private fun SurfaceFallbackNav(
 
         var currentIndex by remember(selectedPage) { mutableIntStateOf(selectedPage()) }
         val currentOnTabSelected by rememberUpdatedState(onTabSelected)
-        // DampedDragAnimation 被 remember 缓存，需用 rememberUpdatedState 避免 enabled 闭包
-        // 捕获过时的 isFullScreenMode（全屏隐藏时手势应禁用）
+        // DampedDragAnimation 被 remember 缓存，需用 rememberUpdatedState 避免 enabled 闭包捕获过时的 interactive
         val currentInteractive by rememberUpdatedState(interactive)
 
         val dampedDragAnimation = remember(animationScope, density) {

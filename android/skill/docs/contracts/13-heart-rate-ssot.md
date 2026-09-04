@@ -43,4 +43,6 @@
 
    服务被杀重启后若不清零，UI 将展示幽灵连接：首页图表显示未连接、设备页显示已连接、断开命令因新 Handler 无活动任务而静默落空。
 
-2. `MainViewModel` 构造期必须按 `Repository.bleState.value` 恢复 appStatus（bleState 订阅 drop(1) 跳过首帧重放，值流重放无法恢复它）。
+2. `BleService.onCreate` 必须调用 `bleControlPlaneRegistry.register(this)`、`onDestroy` 调用 `unregister(this)`（控制面引用随服务重建更新，见契约 3）。
+
+3. `MainViewModel` 构造期必须按 `Repository.bleState.value` 恢复 appStatus（bleState 订阅 drop(1) 跳过首帧重放，值流重放无法恢复它）。

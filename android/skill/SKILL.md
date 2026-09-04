@@ -16,6 +16,15 @@ description: Android 心率监测项目开发规范。当新增或修改 Kotlin/
 - 禁止未经用户允许就将代码提交到远程仓库
 - 禁止排除 android 目录下的 .key 文件夹（用户要求密钥入库）
 
+# 架构速览（2026-09 多 Activity 迁移后）
+
+- 导航：`MainActivity` 只承载 4 Tab；其余页面各自独立 Activity（`:app` `ui/page/`，18 个）；navigation3 已整体删除
+- 路由：`Destination` + `Context.launchDestination`（300ms 同路由防抖）；feature 层用 `Screen.route` 字符串，禁止 import `:app` 的 Activity
+- 宿主：二级页 Activity 继承 `BaseComposeActivity`（主题/语言/edge-to-edge/openExternal 统一）
+- 转场：100% 系统默认，禁止自定义动画资源（决策 D5）
+- 控制面：`BleControlPlaneRegistry` 进程级注册活服务（契约 3）；数据面 `HeartRateRepository`（契约 13）
+- 迁移决策与全记录：`docs/spec-multi-activity-migration.md`；导航架构契约见契约 9.7
+
 # 通用原则
 
 - 优先官方文档 > 官方最佳实践 > 稳定版本文档；与官方指导冲突时以官方为准

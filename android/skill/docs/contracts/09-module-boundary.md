@@ -6,9 +6,10 @@
 
 ```
 :app               应用壳：HeartRateApp（@HiltAndroidApp + Configuration.Provider）/
-                   MainActivity / AppRoot / AppNavHost / AppTabPager /
-                   AppBottomNavBar / AppLifecycleEffects / AppChangelogState / NavGuard /
-                   AppTheme / AppModule（@AppScope 作用域、() -> Intent 等 :app 专属绑定）/ Manifest / 签名 / 混淆
+                   MainActivity / AppRoot / AppTabHost / AppTabPager / AppBottomNavBar /
+                   AppLifecycleEffects / AppTheme / Destination（路由映射 + 300ms 防抖）/ AppForegroundMonitor /
+                   ui/base/BaseComposeActivity（二级页宿主基类）/ ui/page/*Activity（18 个二级页，2026-09 多 Activity 迁移）/
+                   AppModule（@AppScope 作用域、通知直达 Intent 工厂）/ Manifest / 签名 / 混淆
 :core:model        领域模型（data.model、data.Webhook/WebhookTrigger），零模块依赖
                   （禁止依赖任何项目内模块；允许外部库，如 immutable / serialization）
 :core:designsystem 主题视觉（Color/Type/ThemeConfig/ThemeState/LiquidGlassState/CustomSchemeCache/
@@ -20,7 +21,8 @@
 :data:repository   仓储层 + webhook/network/sensor/system 封装 + ModelMappers（契约 1 映射归口）+
                    HeartRateRecorder 落盘缓冲（2026-09 迁入，包名不变）
 :service           BLE/常驻/悬浮窗/预警/局域网服务 + ble + init + LanTransferSharedState +
-                   HeartRateRepository（实时数据流 SSOT，契约 3/13）+ ServiceModule（ServiceLauncher @Binds）
+                   HeartRateRepository（实时数据流 SSOT，契约 3/13）+ BleControlPlaneRegistry（控制面注册表，契约 3）+
+                   ServiceModule（ServiceLauncher @Binds）+ di/PageIntents（通知直达 qualifier）
 :feature:*         main/settings/history/alarm/server/webhook/favorite 页面
 :baselineprofile   现有模块，不动
 ```
@@ -150,3 +152,21 @@
 ### 模块移动注意
 
 敏感机制（契约 6）与映射归口（契约 1）在模块移动后保持原样，禁止借模块化重构业务逻辑。
+
+## 9.7 导航与 Activity 架构（2026-09 多 Activity 迁移，禁止回退）
+
+单 Activity + navigation3 已整体删除（含依赖、`AppNavHost`/`AppNavKey`/`NavGuard`、自实现转场）。现行架构与决策记录见 `docs/spec-multi-activity-migration.md`：
+
+- `MainActivity` 只承载 4 个 Tab（HorizontalPager + AppBottomNavBar），**无导航库**
+- 其余页面一律独立 Activity（`:app` `ui/page/`，18 个）；全屏心率页独立横屏 Activity
+- 路由：`Destination`（`:app` internal）+ `Context.launchDestination`（300ms 同路由防抖，单调时钟）；feature 层仍用 `Screen.route` 字符串经 `Destination.of` 映射，**禁止 feature import `:app` 的 Activity**
+- 宿主：二级页 Activity 继承 `BaseComposeActivity`（主题/语言/edge-to-edge/openExternal 统一），基类与子类须同时 `@AndroidEntryPoint`
+- 转场：**100% 系统默认**，禁止自定义 anim 资源 / ActivityOptions / 覆写 finish（决策 D5）
+- 通知直达二级页必须 TaskStackBuilder 垫 `MainActivity`（返回键不得落桌面）；`hideFromRecents` 走 `AppForegroundMonitor` Activity 计数（禁止改回宿主 onStop 或 ProcessLifecycleOwner——后者 ON_STOP 有 ~700ms 防抖延迟）
+
+### 新增二级页面流程
+
+1. `:app` `ui/page/` 新建 Activity 继承 `BaseComposeActivity`，`setPageContent { XxxScreen(onNavigateBack = { finish() }) }`
+2. `Destination` 增加目标 + `toIntent`；走字符串路由入口的补 `of()` 分支
+3. manifest 注册：`exported=false` + `configChanges="orientation|screenSize|screenLayout|smallestScreenSize"` + `Theme.HeartRateMonitorMobile`
+4. 不加任何转场动画资源（决策 D5）

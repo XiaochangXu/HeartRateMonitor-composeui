@@ -29,6 +29,7 @@ class HeartRateApp : Application(), Configuration.Provider {
     @Inject
     @AppScope
     lateinit var appScope: CoroutineScope
+    @Inject lateinit var appForegroundMonitor: AppForegroundMonitor
 
     override val workManagerConfiguration: Configuration
         get() = Configuration.Builder()
@@ -43,6 +44,8 @@ class HeartRateApp : Application(), Configuration.Provider {
         fairMemoryReceiver.initialize()
         fairMemoryNotifier.initialize()
         memoryDiagnostics.initialize()
+        // 前台 Activity 计数：接管「退出应用隐藏后台」（最后一个页面停止即触发，零延迟）
+        appForegroundMonitor.observe(this)
         // 后台预计算主题设置页所有预览色卡，避免首帧卡顿。
         themePreviewCache.preload(appScope)
     }

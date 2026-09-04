@@ -47,6 +47,7 @@ class BleService : Service(), FairMemoryReceiver.MemoryListener, BleConnectionMa
     @Inject lateinit var settingsRepository: SettingsRepository
     @Inject lateinit var heartRateDao: HeartRateDao
     @Inject lateinit var heartRateRepository: HeartRateRepository
+    @Inject lateinit var bleControlPlaneRegistry: BleControlPlaneRegistry
     @Inject lateinit var sessionRepository: SessionRepository
     @Inject lateinit var fairMemoryReceiver: FairMemoryReceiver
     @Inject lateinit var lanTransferSharedState: LanTransferSharedState
@@ -108,6 +109,9 @@ class BleService : Service(), FairMemoryReceiver.MemoryListener, BleConnectionMa
 
         // 注册断开 WebSocket 客户端的回调，供局域网传输页面「断开连接」按钮调用
         lanTransferSharedState.disconnectWebSocketClients = { serverHost.disconnectAllWebSocketClients() }
+
+        // 注册进程级控制面：多 Activity 下各 MainViewModel 实例经此获取活服务
+        bleControlPlaneRegistry.register(this)
 
         notificationManager.startForeground()
         settingsListener.register()
@@ -227,6 +231,7 @@ class BleService : Service(), FairMemoryReceiver.MemoryListener, BleConnectionMa
         lanTransferSharedState.webSocketClientCount.value = 0
         lanTransferSharedState.connectedClientInfo.value = null
         fairMemoryReceiver.removeMemoryListener(this)
+        bleControlPlaneRegistry.unregister(this)
         // 从缓冲区取出待写入记录并交给 WorkManager 异步落盘。
         // 不在主线程阻塞等待 I/O，消除 ANR 风险；
         // WorkManager 持久化工作请求——即使进程被杀也会在下次启动时补执行，保证数据不丢失。

@@ -49,14 +49,12 @@ class KillStateSaverTest {
     @Test
     fun `updateSnapshot updates current snapshot`() {
         val snapshot = KillStateSaver.Snapshot(
-            route = "home",
             tab = "main",
             isFullScreen = false,
             connectedDeviceId = "AA:BB:CC:DD:EE:FF",
             connectedDeviceName = "Heart Rate Monitor"
         )
         saver.updateSnapshot(snapshot)
-        assertThat(saver.currentSnapshot.route).isEqualTo("home")
         assertThat(saver.currentSnapshot.tab).isEqualTo("main")
         assertThat(saver.currentSnapshot.connectedDeviceName).isEqualTo("Heart Rate Monitor")
     }
@@ -74,7 +72,6 @@ class KillStateSaverTest {
     @Test
     fun `save and read round trip restores all fields`() {
         val snapshot = KillStateSaver.Snapshot(
-            route = "alarm",
             tab = "settings",
             isFullScreen = true,
             connectedDeviceId = "11:22:33:44:55:66",
@@ -85,8 +82,7 @@ class KillStateSaverTest {
 
         val restored = saver.read()
         assertThat(restored).isNotNull()
-        assertThat(restored!!.route).isEqualTo("alarm")
-        assertThat(restored.tab).isEqualTo("settings")
+        assertThat(restored!!.tab).isEqualTo("settings")
         assertThat(restored.isFullScreen).isTrue()
         assertThat(restored.connectedDeviceId).isEqualTo("11:22:33:44:55:66")
         assertThat(restored.connectedDeviceName).isEqualTo("Polar H10")
@@ -99,8 +95,7 @@ class KillStateSaverTest {
 
         val restored = saver.read()
         assertThat(restored).isNotNull()
-        assertThat(restored!!.route).isEmpty()
-        assertThat(restored.tab).isEmpty()
+        assertThat(restored!!.tab).isEmpty()
         assertThat(restored.isFullScreen).isFalse()
         assertThat(restored.connectedDeviceId).isNull()
         assertThat(restored.connectedDeviceName).isNull()
@@ -109,7 +104,6 @@ class KillStateSaverTest {
     @Test
     fun `save with null device info restores nulls`() {
         val snapshot = KillStateSaver.Snapshot(
-            route = "home",
             tab = "main",
             isFullScreen = false,
             connectedDeviceId = null,
@@ -129,7 +123,7 @@ class KillStateSaverTest {
     @Test
     fun `clear makes read return null`() {
         saver.updateSnapshot(
-            KillStateSaver.Snapshot(route = "home", tab = "main")
+            KillStateSaver.Snapshot(tab = "main")
         )
         saver.save()
         assertThat(saver.read()).isNotNull()
@@ -149,19 +143,18 @@ class KillStateSaverTest {
     @Test
     fun `second save overwrites first`() {
         saver.updateSnapshot(
-            KillStateSaver.Snapshot(route = "first", tab = "tab1")
+            KillStateSaver.Snapshot(tab = "tab1")
         )
         saver.save()
 
         saver.updateSnapshot(
-            KillStateSaver.Snapshot(route = "second", tab = "tab2")
+            KillStateSaver.Snapshot(tab = "tab2")
         )
         saver.save()
 
         val restored = saver.read()
         assertThat(restored).isNotNull()
-        assertThat(restored!!.route).isEqualTo("second")
-        assertThat(restored.tab).isEqualTo("tab2")
+        assertThat(restored!!.tab).isEqualTo("tab2")
     }
 
     // ── Snapshot data class ──
@@ -169,7 +162,6 @@ class KillStateSaverTest {
     @Test
     fun `Snapshot default values`() {
         val snapshot = KillStateSaver.Snapshot()
-        assertThat(snapshot.route).isEmpty()
         assertThat(snapshot.tab).isEmpty()
         assertThat(snapshot.isFullScreen).isFalse()
         assertThat(snapshot.connectedDeviceId).isNull()
@@ -178,9 +170,9 @@ class KillStateSaverTest {
 
     @Test
     fun `Snapshot equality`() {
-        val s1 = KillStateSaver.Snapshot(route = "home", tab = "main", isFullScreen = true)
-        val s2 = KillStateSaver.Snapshot(route = "home", tab = "main", isFullScreen = true)
-        val s3 = KillStateSaver.Snapshot(route = "home", tab = "main", isFullScreen = false)
+        val s1 = KillStateSaver.Snapshot(tab = "main", isFullScreen = true)
+        val s2 = KillStateSaver.Snapshot(tab = "main", isFullScreen = true)
+        val s3 = KillStateSaver.Snapshot(tab = "main", isFullScreen = false)
         assertThat(s1).isEqualTo(s2)
         assertThat(s1).isNotEqualTo(s3)
     }

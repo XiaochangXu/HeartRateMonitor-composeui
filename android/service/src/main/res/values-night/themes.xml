@@ -12,4 +12,10 @@
         <item name="android:windowLightNavigationBar">false</item>
         <item name="android:windowBackground">@color/window_background_dark</item>
     </style>
+
+    <!-- 全屏心率页：纯黑窗口背景避免转场白闪；系统栏由 FullScreenHeartRate 内部隐藏 -->
+    <style name="Theme.HeartRateMonitorMobile.Fullscreen" parent="Theme.HeartRateMonitorMobile">
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowBackground">@android:color/black</item>
+    </style>
 </resources>

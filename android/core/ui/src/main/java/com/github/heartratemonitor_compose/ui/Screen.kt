@@ -29,29 +29,6 @@ sealed class Screen(val route: String) {
     object FloatingWindowSettings : Screen("floating_window_settings")
 }
 
-fun Screen.isTab(): Boolean =
-    this is Screen.Home || this is Screen.History || this is Screen.Favorite || this is Screen.Settings
-
-fun String.toScreenRoute(): String = when (this) {
-    "alarm" -> Screen.Alarm.route
-    "server" -> Screen.Server.route
-    "webhook" -> Screen.Webhook.route
-    "lan_transfer" -> Screen.LanTransfer.route
-    "fair_memory" -> Screen.FairMemory.route
-    "theme" -> Screen.Theme.route
-    "language" -> Screen.Language.route
-    "nav_style" -> Screen.NavStyle.route
-    "devices" -> Screen.Devices.route
-    "fullscreen_sound" -> Screen.FullscreenSound.route
-    "license" -> Screen.License.route
-    "privacy" -> Screen.Privacy.route
-    "about_details" -> Screen.AboutDetails.route
-    "function_settings" -> Screen.FunctionSettings.route
-    "status_bar_settings" -> Screen.StatusBarSettings.route
-    "floating_window_settings" -> Screen.FloatingWindowSettings.route
-    else -> Screen.Home.route
-}
-
 fun tabScreenAt(index: Int): Screen = when (index) {
     0 -> Screen.Home
     1 -> Screen.History

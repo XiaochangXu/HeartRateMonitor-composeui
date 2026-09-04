@@ -10,6 +10,7 @@ import com.github.heartratemonitor_compose.data.repository.FavoriteDeviceReposit
 import com.github.heartratemonitor_compose.data.repository.SettingsRepository
 import com.github.heartratemonitor_compose.data.system.OverlayPermissionProvider
 import com.github.heartratemonitor_compose.service.BleConnectionManager
+import com.github.heartratemonitor_compose.service.BleControlPlaneRegistry
 import com.github.heartratemonitor_compose.service.HeartRateRepository
 import com.github.heartratemonitor_compose.service.FairMemoryReceiver
 import com.github.heartratemonitor_compose.service.KillStateSaver
@@ -27,7 +28,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import com.github.heartratemonitor_compose.ui.mvi.MviViewModel
-import java.lang.ref.WeakReference
 import javax.inject.Inject
 import kotlinx.collections.immutable.persistentListOf
 
@@ -44,6 +44,7 @@ class MainViewModel @Inject constructor(
     private val settings: SettingsRepository,
     private val favoriteDeviceRepository: FavoriteDeviceRepository,
     private val heartRateRepository: HeartRateRepository,
+    private val bleControlPlaneRegistry: BleControlPlaneRegistry,
     private val fairMemoryReceiver: FairMemoryReceiver,
     private val killStateSaver: KillStateSaver,
     private val serviceLauncher: ServiceLauncher,
@@ -52,8 +53,9 @@ class MainViewModel @Inject constructor(
 ) : MviViewModel<MainUiState, MainIntent>(initialMainUiState(settings, appContext)),
     FairMemoryReceiver.MemoryListener {
 
-    /** 仅控制命令通道（扫描/连接/断开）的弱引用；数据面已由构造注入的 Repository 直出。 */
-    private var bleServiceRef: WeakReference<BleConnectionManager>? = null
+    /** 控制命令通道（扫描/连接/断开）经进程级注册表获取活服务；数据面由构造注入的 Repository 直出。 */
+    private val controlPlane: BleConnectionManager?
+        get() = bleControlPlaneRegistry.manager.value
 
     private var serviceDataJob: Job? = null
 
@@ -159,15 +161,15 @@ class MainViewModel @Inject constructor(
 
     override suspend fun handleIntent(intent: MainIntent) {
         when (intent) {
-            MainIntent.StartScan -> bleServiceRef?.get()?.startScan()
-            MainIntent.StopScan -> bleServiceRef?.get()?.stopScan()
+            MainIntent.StartScan -> controlPlane?.startScan()
+            MainIntent.StopScan -> controlPlane?.stopScan()
             is MainIntent.ConnectToDevice -> {
                 Log.d("MainViewModel", "connectToDevice: ${intent.identifier}, setting manualPending=true")
                 setState { it.copy(connectingDeviceId = intent.identifier) }
                 manualConnectionPending = true
-                bleServiceRef?.get()?.connectToDevice(intent.identifier)
+                controlPlane?.connectToDevice(intent.identifier)
             }
-            MainIntent.DisconnectDevice -> bleServiceRef?.get()?.disconnectDevice()
+            MainIntent.DisconnectDevice -> controlPlane?.disconnectDevice()
             is MainIntent.ToggleFavoriteDevice -> toggleFavoriteDevice(intent.identifier, intent.name)
             MainIntent.MarkSearchTipShown -> settings.set(SettingsKeys.SEARCH_TIP_SHOWN, true)
             is MainIntent.SetHeartRateRingMax ->
@@ -198,7 +200,7 @@ class MainViewModel @Inject constructor(
      * 已连接/连接进行中一律跳过；未连接时照常触发，保留「离开期间真断开后的兜底重连」语义。
      */
     fun checkAndStartAutoConnectScan() {
-        val manager = bleServiceRef?.get()
+        val manager = controlPlane
         if (manager != null) {
             val current = manager.bleState.value
             val busy = manager.isDeviceConnected() ||
@@ -216,7 +218,7 @@ class MainViewModel @Inject constructor(
 
     private fun startAutoConnectScan(identifier: String) {
         setState { it.copy(connectingDeviceId = identifier) }
-        bleServiceRef?.get()?.startAutoConnectScan(identifier)
+        controlPlane?.startAutoConnectScan(identifier)
     }
 
     /** 一次性行为的返回值机制保留：需 Activity 上下文跳转权限页时由 Activity 同步取得判定结果。 */
@@ -227,15 +229,6 @@ class MainViewModel @Inject constructor(
         }
         settings.set(SettingsKeys.FLOATING_WINDOW_ENABLED, shouldBeEnabled)
         return false
-    }
-
-    /**
-     * 控制面注入：仍由 MainActivity 通过 Binder 绑定 BleService 后注入实例，
-     * WeakReference 持有避免 ViewModel 泄漏 Service。
-     * 数据订阅在 init 构造期从 Repository 直出，本方法仅注入控制命令通道。
-     */
-    fun setControlPlane(manager: BleConnectionManager) {
-        this.bleServiceRef = WeakReference(manager)
     }
 
     internal fun reduceState(reducer: (MainUiState) -> MainUiState) {
@@ -297,7 +290,6 @@ class MainViewModel @Inject constructor(
         super.onCleared()
         fairMemoryReceiver.removeMemoryListener(this)
         serviceDataJob?.cancel()
-        bleServiceRef = null
     }
 }
 
