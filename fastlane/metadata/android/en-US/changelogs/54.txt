@@ -1,1 +1,0 @@
-- Fixed new bugs introduced in previous versions

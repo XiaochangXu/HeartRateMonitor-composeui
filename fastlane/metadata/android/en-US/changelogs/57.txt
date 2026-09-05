@@ -1,0 +1,2 @@
+- Fixed notification bar closing touch penetration after floating window disappeared
+- Fixed custom color pop-up not closing with return gesture
