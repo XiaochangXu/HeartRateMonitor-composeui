@@ -41,11 +41,6 @@ jobs:
           ls -l .key/app-release.jks
           file .key/app-release.jks
 
-      # 注意：单元测试不在此流水线执行——项目存在 28 个预存失败
-      #（:service HeartRateRecorderTest 11 + :data:database AppDatabaseTest 17，
-      #  根因测试环境 Room migration 3→4 缺失），执行 testDebugUnitTest 会使
-      #  Gradle 任务失败并阻塞发布；预存失败修复后再加入测试步骤。
-
       - name: Build release
         run: ./gradlew assembleRelease
         env:
