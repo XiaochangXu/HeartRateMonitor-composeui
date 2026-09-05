@@ -66,7 +66,7 @@ class FloatingWindowService : Service() {
 
     /**
      * 处理 startService 调用：
-     * - ACTION_DISABLE_TOUCH_THROUGH：一次性动作，处理完 stopSelf
+     * - ACTION_DISABLE_TOUCH_THROUGH：关闭触摸穿透，窗口显示中不停服（避免悬浮窗被连带移除）
      * - null：showWindow 保活或 START_STICKY 重启自愈，不释放
      * START_STICKY 无 Activity 绑定，需按设置自愈恢复窗口，否则窗口永久丢失
      */
@@ -74,7 +74,9 @@ class FloatingWindowService : Service() {
         when (intent?.action) {
             ACTION_DISABLE_TOUCH_THROUGH -> {
                 disableTouchThrough()
-                stopSelf(startId)
+                // ⚠️ 反直觉设计：退后台（hideFromRecents）后绑定已解除，服务仅靠 started 记录存活，
+                // 窗口显示中 stopSelf 会连带 onDestroy → hideWindow 移除悬浮窗；停服收口在 hideWindow()。
+                if (!isWindowShown) stopSelf(startId)
             }
             null -> {
                 if (!isWindowShown && settingsRepository.get(SettingsKeys.FLOATING_WINDOW_ENABLED)) {
