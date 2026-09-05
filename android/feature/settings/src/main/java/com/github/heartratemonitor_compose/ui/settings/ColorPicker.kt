@@ -75,8 +75,9 @@ internal fun ColorPickerDialog(
     }
     var hsv by remember { mutableStateOf(initialHsv.copyOf()) }
     val currentColor = remember(hsv) { android.graphics.Color.HSVToColor(hsv) }
+    // 排除半展开锚点：M3 1.5 返回手势会先收回半展开，confirmValueChange 否决它会导致侧滑无法关闭。
     val sheetState = rememberExpandedSheetState(
-        confirmValueChange = { it != SheetValue.PartiallyExpanded }
+        enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded)
     )
     val dismissWithAnimation = rememberSheetDismissHandler(sheetState, onDismiss)
     val confirmWithAnimation = rememberSheetDismissHandler(sheetState) { onConfirm(currentColor) }

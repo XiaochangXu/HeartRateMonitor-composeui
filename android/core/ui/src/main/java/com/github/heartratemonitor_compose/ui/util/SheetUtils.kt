@@ -12,13 +12,19 @@ import androidx.compose.runtime.rememberUpdatedState
 import kotlinx.coroutines.launch
 
 // ModalBottomSheet Hidden 初始不自动展开；收敛各页重复的 LaunchedEffect(Unit){ expand() }。
+// enabledValues 排除 PartiallyExpanded 等价 skipPartiallyExpanded=true，返回手势因无半展开锚点直达 hide()。
+// 仅限 ModalBottomSheet：Scaffold 把手分支会调 partialExpand() 抛异常。默认值须与 M3 rememberBottomSheetState 对齐。
+// 两参数均为 rememberSaveable key，confirmValueChange 勿捕获重组可变状态（会重建 SheetState）。
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun rememberExpandedSheetState(
+    enabledValues: Set<SheetValue> =
+        setOf(SheetValue.Hidden, SheetValue.PartiallyExpanded, SheetValue.Expanded),
     confirmValueChange: (SheetValue) -> Boolean = { true }
 ): SheetState {
     val sheetState = rememberBottomSheetState(
         initialValue = SheetValue.Hidden,
+        enabledValues = enabledValues,
         confirmValueChange = confirmValueChange
     )
     LaunchedEffect(Unit) { sheetState.expand() }
