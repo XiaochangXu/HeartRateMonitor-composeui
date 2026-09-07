@@ -16,7 +16,7 @@ jobs:
     name: Auto-merge Dependabot PR
     runs-on: ubuntu-latest
     # 仅处理 Dependabot 提交的 PR
-    if: shturl.cc/mm == 'dependabot[bot]'
+    if: github.actor == 'dependabot[bot]'
     permissions:
       contents: write         # 合并 PR 所需
       pull-requests: write    # 批准 & 合并 PR 所需
